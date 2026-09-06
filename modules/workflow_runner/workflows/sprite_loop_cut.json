@@ -1,0 +1,104 @@
+{
+  "load_video": {
+    "inputs": {"file": "shot.mp4"},
+    "class_type": "LoadVideo",
+    "_meta": {"title": "Load the source shot"}
+  },
+  "components": {
+    "inputs": {"video": ["load_video", 0]},
+    "class_type": "GetVideoComponents",
+    "_meta": {"title": "Decode frames and frame rate"}
+  },
+  "select_loop": {
+    "inputs": {
+      "image": ["components", 0],
+      "source_fps": ["components", 2],
+      "target_count": 24,
+      "min_period_frames": 12,
+      "max_period_frames": 96,
+      "motion_floor": 0.6,
+      "analysis_max_edge": 96,
+      "ui_widget": {}
+    },
+    "class_type": "LF_SelectLoopSegment",
+    "_meta": {"title": "Pick the best self-closing segment"}
+  },
+  "remove_background": {
+    "inputs": {
+      "image": ["select_loop", 0],
+      "model": "RMBG-2.0",
+      "sensitivity": 1.0,
+      "process_res": 1024,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha"
+    },
+    "class_type": "VNCCS_RMBG2",
+    "_meta": {"title": "Cut the subject out"}
+  },
+  "verify_alpha": {
+    "inputs": {"image": ["remove_background", 0], "channel": "alpha"},
+    "class_type": "ImageToMask",
+    "_meta": {"title": "Read the cutout alpha"}
+  },
+  "invert_alpha": {
+    "inputs": {"mask": ["verify_alpha", 0]},
+    "class_type": "InvertMask",
+    "_meta": {"title": "Transparency mask"}
+  },
+  "validated_cutout": {
+    "inputs": {"image": ["remove_background", 0], "alpha": ["invert_alpha", 0]},
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Validated RGBA frames"}
+  },
+  "normalize": {
+    "inputs": {
+      "image": ["validated_cutout", 0],
+      "canvas_width": 256,
+      "canvas_height": 256,
+      "target_reference_alpha_height": 144,
+      "reference_frame_index": 0,
+      "bottom_padding": 20,
+      "ui_widget": {}
+    },
+    "class_type": "LF_NormalizeSpriteBatch",
+    "_meta": {"title": "Register every frame on one canvas"}
+  },
+  "save_frames": {
+    "inputs": {"images": ["normalize", 0], "filename_prefix": "LF_Nodes/SpriteLoopCut/frames"},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save loop frames"}
+  },
+  "sprite_grid": {
+    "inputs": {
+      "image": ["normalize", 0],
+      "cell_width": 256,
+      "cell_height": 256,
+      "gap_px": 0,
+      "background": "transparent",
+      "show_headers": false,
+      "title": "",
+      "dataset": {"columns": [], "nodes": []},
+      "ui_widget": {}
+    },
+    "class_type": "LF_ImageGrid",
+    "_meta": {"title": "Pack the atlas"}
+  },
+  "save_atlas": {
+    "inputs": {"images": ["sprite_grid", 0], "filename_prefix": "LF_Nodes/SpriteLoopCut/atlas"},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the atlas"}
+  },
+  "display_loop_receipt": {
+    "inputs": {"json_input": ["select_loop", 1], "ui_widget": ""},
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Loop receipt"}
+  },
+  "display_normalization_receipt": {
+    "inputs": {"json_input": ["normalize", 1], "ui_widget": ""},
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Normalization receipt"}
+  }
+}

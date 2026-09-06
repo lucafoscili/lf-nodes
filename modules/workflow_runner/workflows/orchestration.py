@@ -20,8 +20,10 @@ from ..services.registry import (
     WorkflowSequenceStage,
 )
 from .cardinal_turnaround import WORKFLOW as assemble_cardinal_turnaround
-from .krea2 import character_restage, identity_edit
-from .minimax_h3 import directed_view
+from .iso_ground_tiles import WORKFLOW as iso_ground_tiles
+from .krea2 import character_restage, generate as krea2_generate, identity_edit
+from .minimax_h3 import directed_view, reference_restage
+from .sprite_loop_cut import WORKFLOW as sprite_loop_cut
 
 
 _IDENTITY_CLEANUP_DEFAULT = (
@@ -392,5 +394,235 @@ character_turnaround_orchestra = WorkflowOrchestraNode(
 )
 
 
-WORKFLOWS = (identity_cleanup_restage, character_turnaround_orchestra)
+_SPRITE_LOOP_DIRECTION_DEFAULT = (
+    "A classic 2D game sprite shot of the subject performing one continuous, evenly "
+    "timed action cycle in place: stroke after stroke with no pause and no resting "
+    "pose, full body, strict side view facing the viewer's right, centered, whole body "
+    "and every extremity inside the frame with a clear margin on every side. Torso "
+    "stays level, no root translation, no drift. Clean flat colors and crisp outlines, "
+    "same design and palette as the reference. Flat, uniform, solid light grey studio "
+    "background with no gradient, props or shadow. Locked camera, no pan, zoom, cut, "
+    "turn or text."
+)
+_SPRITE_LOOP_DIRECTION_HELPER = (
+    "Describe the one action to loop (swim, walk, idle sway, wing beat). Ask for a "
+    "continuous cycle with no resting pose, a locked camera, a plain background, "
+    "and margin around the whole body; the loop cut needs motion everywhere."
+)
+_SPRITE_LOOP_SOURCE_HELPER = (
+    "Upload one still of the subject in a clean side pose on a plain background. "
+    "The reference card invents the motion from it; the loop cut then keeps the "
+    "best self-closing cycle."
+)
+_GROUND_TEXTURE_PROMPT_DEFAULT = (
+    "Seamless top-down painterly ground texture, straight-down orthographic view, "
+    "even soft daylight with no directional shadows, no horizon, no objects, no text, "
+    "uniform fine detail across the whole image, natural mottled variation, hand-painted "
+    "game-art finish. Subject: short meadow grass with small clover patches."
+)
+_GROUND_TEXTURE_PROMPT_HELPER = (
+    "Describe the ground seen straight from above with even light and no objects; "
+    "swap the last sentence for sand, shallow sea, stone or forest floor. The next "
+    "block makes it wrap and cuts the diamonds."
+)
+
+
+def _sprite_loop_source_input() -> WorkflowCell:
+    cell = _renamed_input(
+        reference_restage,
+        "reference_image",
+        public_id="source_image",
+        label="Subject still",
+    )
+    cell.description = _SPRITE_LOOP_SOURCE_HELPER
+    return cell
+
+
+def _sprite_loop_direction_input() -> WorkflowCell:
+    cell = _renamed_input(
+        reference_restage,
+        "direction",
+        public_id="direction",
+        label="Loop action",
+    )
+    cell.description = _SPRITE_LOOP_DIRECTION_HELPER
+    cell.props["lfValue"] = _SPRITE_LOOP_DIRECTION_DEFAULT
+    helper = cell.props.get("lfHelper")
+    if isinstance(helper, dict):
+        helper["value"] = _SPRITE_LOOP_DIRECTION_HELPER
+    return cell
+
+
+def _ground_texture_prompt_input() -> WorkflowCell:
+    cell = _renamed_input(
+        krea2_generate,
+        "prompt",
+        public_id="texture_prompt",
+        label="Ground texture",
+    )
+    cell.description = _GROUND_TEXTURE_PROMPT_HELPER
+    cell.props["lfValue"] = _GROUND_TEXTURE_PROMPT_DEFAULT
+    helper = cell.props.get("lfHelper")
+    if isinstance(helper, dict):
+        helper["value"] = _GROUND_TEXTURE_PROMPT_HELPER
+    return cell
+
+
+sprite_loop_orchestra = WorkflowOrchestraNode(
+    id="sprite_loop_orchestra",
+    value="Sprite Loop from One Still",
+    description=(
+        "Invent one continuous action from a single character still with the H3 "
+        "reference card, then keep its best self-closing cycle, cut it out, register "
+        "it on one transparent canvas and pack a zero-gap atlas with receipts."
+    ),
+    category="Image Processing",
+    inputs=(
+        _sprite_loop_source_input(),
+        _sprite_loop_direction_input(),
+        _input_cell(reference_restage, "aspect_ratio"),
+        _input_cell(reference_restage, "duration_frames"),
+        _input_cell(reference_restage, "seed"),
+        _input_cell(sprite_loop_cut, "frame_count"),
+        _input_cell(sprite_loop_cut, "columns"),
+        _input_cell(sprite_loop_cut, "min_period_frames"),
+        _input_cell(sprite_loop_cut, "max_period_frames"),
+        _input_cell(sprite_loop_cut, "motion_floor"),
+        _input_cell(sprite_loop_cut, "canvas_size"),
+        _input_cell(sprite_loop_cut, "content_height"),
+        _input_cell(sprite_loop_cut, "bottom_padding"),
+    ),
+    stages=(
+        WorkflowSequenceStage(
+            id="restage",
+            workflow_id=reference_restage.id,
+            bindings=(
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="reference_image",
+                    public_input_id="source_image",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="direction",
+                    public_input_id="direction",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="aspect_ratio",
+                    public_input_id="aspect_ratio",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="duration_frames",
+                    public_input_id="duration_frames",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="seed",
+                    public_input_id="seed",
+                ),
+            ),
+        ),
+        WorkflowSequenceStage(
+            id="cut",
+            workflow_id=sprite_loop_cut.id,
+            bindings=(
+                WorkflowSequenceArtifactBinding(
+                    target_input_id="source_video",
+                    output_id="video",
+                ),
+                *(
+                    WorkflowSequencePublicInputBinding(
+                        target_input_id=field_id,
+                        public_input_id=field_id,
+                    )
+                    for field_id in (
+                        "frame_count",
+                        "columns",
+                        "min_period_frames",
+                        "max_period_frames",
+                        "motion_floor",
+                        "canvas_size",
+                        "content_height",
+                        "bottom_padding",
+                    )
+                ),
+            ),
+        ),
+    ),
+    final_output_ids=("frames", "atlas", "loop_receipt", "normalization_receipt"),
+)
+
+
+iso_ground_tiles_orchestra = WorkflowOrchestraNode(
+    id="iso_ground_tiles_orchestra",
+    value="Iso Ground Tiles from a Prompt",
+    description=(
+        "Generate one top-down ground texture from text, make it wrap seamlessly, "
+        "and cut a set of isometric diamond tiles at seeded offsets."
+    ),
+    category="Image Processing",
+    inputs=(
+        _ground_texture_prompt_input(),
+        _input_cell(krea2_generate, "aspect_ratio"),
+        _input_cell(krea2_generate, "seed"),
+        _input_cell(iso_ground_tiles, "blend_fraction"),
+        _input_cell(iso_ground_tiles, "tile_width"),
+        _input_cell(iso_ground_tiles, "tile_height"),
+        _input_cell(iso_ground_tiles, "variants"),
+        _input_cell(iso_ground_tiles, "texture_scale"),
+    ),
+    stages=(
+        WorkflowSequenceStage(
+            id="generate",
+            workflow_id=krea2_generate.id,
+            bindings=(
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="prompt",
+                    public_input_id="texture_prompt",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="aspect_ratio",
+                    public_input_id="aspect_ratio",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="seed",
+                    public_input_id="seed",
+                ),
+            ),
+        ),
+        WorkflowSequenceStage(
+            id="tiles",
+            workflow_id=iso_ground_tiles.id,
+            bindings=(
+                WorkflowSequenceArtifactBinding(
+                    target_input_id="source_texture",
+                    output_id="image",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="seed",
+                    public_input_id="seed",
+                ),
+                *(
+                    WorkflowSequencePublicInputBinding(
+                        target_input_id=field_id,
+                        public_input_id=field_id,
+                    )
+                    for field_id in (
+                        "blend_fraction",
+                        "tile_width",
+                        "tile_height",
+                        "variants",
+                        "texture_scale",
+                    )
+                ),
+            ),
+        ),
+    ),
+    final_output_ids=("tiles", "texture", "receipt"),
+)
+
+
+WORKFLOWS = (
+    identity_cleanup_restage,
+    character_turnaround_orchestra,
+    sprite_loop_orchestra,
+    iso_ground_tiles_orchestra,
+)
 WORKFLOW_BY_ID = {workflow.id: workflow for workflow in WORKFLOWS}

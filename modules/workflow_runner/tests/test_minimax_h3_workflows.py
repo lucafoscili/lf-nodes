@@ -1622,3 +1622,25 @@ def test_serialized_and_native_help_contract_does_not_render_twice() -> None:
             # Workflow Runner recognizes identical native help and suppresses the
             # serialized fallback instead of rendering the same prose twice.
             assert native_help == cell.description
+
+
+def test_reference_cards_export_portably_with_placeholder_sources() -> None:
+    """Sequence stages need a portable configure_download (no upload staging)."""
+
+    workflow = _workflows()["minimax_h3_reference_restage"]
+    defaults = _default_inputs(workflow)
+    defaults.pop("reference_image", None)
+    prompt = workflow.load_prompt()
+
+    assert workflow.configure_download is not None
+    workflow.configure_download(prompt, defaults)
+
+    assert prompt["source_1"]["inputs"]["image"] == "reference_image.png"
+    assert "source_2" not in prompt
+    assert prompt["h3"]["inputs"]["ref_images.ref_image_0"] == ["source_1", 0]
+    assert "ref_images.ref_image_1" not in prompt["h3"]["inputs"]
+    assert prompt["h3"]["inputs"]["prompt"] == ["prompt_join", 0]
+    for spec_workflow in _workflows().values():
+        if spec_workflow.id.startswith("minimax_h3_") and spec_workflow.workflow_path == workflow.workflow_path:
+            assert spec_workflow.configure_download is not None, spec_workflow.id
+

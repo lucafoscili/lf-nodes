@@ -1189,21 +1189,29 @@ def _configure_reference_card(
     inputs: Dict[str, Any],
     *,
     spec: _ReferenceCardSpec,
+    resolve_upload: bool = True,
 ) -> None:
     reference_fields: list[str] = []
-    gap_seen = False
-    for reference in spec.references:
-        present = _has_image(inputs, reference.field_id)
-        if reference.required and not present:
-            raise InputValidationError(reference.field_id)
-        if not present:
-            gap_seen = True
-            continue
-        if gap_seen:
-            raise ValueError("Optional reference images cannot contain a gap.")
-        reference_fields.append(reference.field_id)
-    if not reference_fields:
-        raise InputValidationError(spec.references[0].field_id)
+    if resolve_upload:
+        gap_seen = False
+        for reference in spec.references:
+            present = _has_image(inputs, reference.field_id)
+            if reference.required and not present:
+                raise InputValidationError(reference.field_id)
+            if not present:
+                gap_seen = True
+                continue
+            if gap_seen:
+                raise ValueError("Optional reference images cannot contain a gap.")
+            reference_fields.append(reference.field_id)
+        if not reference_fields:
+            raise InputValidationError(spec.references[0].field_id)
+    else:
+        # Portable export / sequence preflight: keep the template's placeholder
+        # filenames for the required references instead of staging uploads.
+        reference_fields = [
+            reference.field_id for reference in spec.references if reference.required
+        ]
 
     direction = _required_text(inputs, "direction")
     dialogue = _optional_text(inputs, "dialogue", _DEFAULT_DIALOGUE)
@@ -1234,10 +1242,13 @@ def _configure_reference_card(
     compiled_prompt = compose_full_reference_prompt(**fields)
     _validate_reference_tags(compiled_prompt, len(reference_fields))
 
-    resolved_references = [
-        resolve_load_image_reference(inputs, field_id)
-        for field_id in reference_fields
-    ]
+    if resolve_upload:
+        resolved_references = [
+            resolve_load_image_reference(inputs, field_id)
+            for field_id in reference_fields
+        ]
+    else:
+        resolved_references = [f"{field_id}.png" for field_id in reference_fields]
 
     written_prompt = _write_reference_prompt(prompt, fields)
     if written_prompt != compiled_prompt:
@@ -1268,6 +1279,17 @@ def _configure_reference_card(
         output_folder=spec.output_folder,
         reference_count=len(resolved_references),
     )
+
+
+def _configure_reference_card_download(
+    prompt: Dict[str, Any],
+    inputs: Dict[str, Any],
+    *,
+    spec: _ReferenceCardSpec,
+) -> None:
+    """Export the reference graph with placeholder sources (no upload staging)."""
+
+    _configure_reference_card(prompt, inputs, spec=spec, resolve_upload=False)
 
 
 def _restage_prompt_fields(reference_count: int) -> tuple[str, str, str]:
@@ -2248,6 +2270,7 @@ def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
             )
         ],
         configure_prompt=partial(_configure_reference_card, spec=spec),
+        configure_download=partial(_configure_reference_card_download, spec=spec),
         workflow_path=_REFERENCE_GRAPH,
     )
 

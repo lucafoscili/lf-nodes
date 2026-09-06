@@ -1,0 +1,40 @@
+{
+  "load_texture": {
+    "inputs": {"image": "texture.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load the top-down texture"}
+  },
+  "seamless": {
+    "inputs": {"image": ["load_texture", 0], "blend_fraction": 0.25, "ui_widget": {}},
+    "class_type": "LF_SeamlessTile",
+    "_meta": {"title": "Make it wrap"}
+  },
+  "diamonds": {
+    "inputs": {
+      "image": ["seamless", 0],
+      "tile_width": 128,
+      "tile_height": 64,
+      "variants": 4,
+      "seed": 42,
+      "texture_scale": 0.5,
+      "ui_widget": {}
+    },
+    "class_type": "LF_IsoDiamondTiles",
+    "_meta": {"title": "Cut isometric diamonds"}
+  },
+  "save_texture": {
+    "inputs": {"images": ["seamless", 0], "filename_prefix": "LF_Nodes/IsoGroundTiles/texture"},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the seamless texture"}
+  },
+  "save_tiles": {
+    "inputs": {"images": ["diamonds", 1], "filename_prefix": "LF_Nodes/IsoGroundTiles/tiles"},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the tile atlas"}
+  },
+  "display_receipt": {
+    "inputs": {"json_input": ["diamonds", 2], "ui_widget": ""},
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Tile receipt"}
+  }
+}
