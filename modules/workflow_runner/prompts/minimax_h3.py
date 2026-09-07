@@ -241,39 +241,32 @@ def compose_full_reference_prompt(
 ) -> str:
     """Compose an H3 full-reference/R2V prompt in official section order.
 
-    ``detailed_description`` is the required visual description.  Other empty
-    structured sections are omitted.  A supplied ``raw_override`` is returned
-    exactly and bypasses all structured-field validation.
+    All six structured sections are required and must be nonblank.  A supplied
+    ``raw_override`` is returned exactly and bypasses all structured-field
+    validation.
     """
 
     raw = _raw(raw_override)
     if raw is not None:
         return raw
 
-    description = _normalize(detailed_description, "detailed_description")
-    if not description:
-        raise ValueError("detailed_description is required")
-
     values = (
         ("subject_definitions", subject_definitions),
         ("summary", summary),
         ("retention_analysis", retention_analysis),
-        ("detailed_description", description),
+        ("detailed_description", detailed_description),
         ("overall_soundscape", overall_soundscape),
         ("non_diegetic_music", non_diegetic_music),
     )
-
-    sections = []
-    for name, value in values:
-        normalized = (
-            value
-            if name == "detailed_description"
-            else _normalize(value, name)
+    normalized = {name: _normalize(value, name) for name, value in values}
+    missing = [name for name, value in normalized.items() if not value]
+    if missing:
+        raise ValueError(
+            "Structured Ref2VA prompts require all six nonblank sections; "
+            "missing or blank: " + ", ".join(missing)
         )
-        if normalized:
-            sections.append(_labeled(name, normalized))
 
-    return "\n\n".join(sections)
+    return "\n\n".join(_labeled(name, value) for name, value in normalized.items())
 
 
 def _validated_writer_request(
@@ -1079,6 +1072,15 @@ def _plan_text(value: Any, path: str) -> str:
     return normalized
 
 
+def _plan_definition(value: Any, path: str) -> str:
+    definition = _plan_text(value, path)
+    if not any(character.isalnum() for character in definition):
+        raise ValueError(
+            f"Semantic plan {path} must contain at least one letter or number"
+        )
+    return definition
+
+
 def _plan_positive_ordinal(value: Any, path: str, maximum: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"Semantic plan {path} must be an integer")
@@ -1483,7 +1485,7 @@ def _render_semantic_plan(
         ordinal = index + 1
         path = f"subjects[{index}]"
         subject = _plan_object(item, path, _SUBJECT_PLAN_FIELDS)
-        definition = _plan_text(subject["definition"], f"{path}.definition")
+        definition = _plan_definition(subject["definition"], f"{path}.definition")
         sources = _plan_ordinals(
             subject["source_pictures"],
             f"{path}.source_pictures",
@@ -1533,7 +1535,7 @@ def _render_semantic_plan(
                 + ", ".join(_PICTURE_ANCHOR_ROLES)
             )
         anchor_roles.append((picture, role))
-        definition = _plan_text(anchor["definition"], f"{path}.definition")
+        definition = _plan_definition(anchor["definition"], f"{path}.definition")
         uses = _plan_uses(anchor["uses"], f"{path}.uses", len(shots))
         use_shots = [shot for shot, _application in uses]
         if role == "first_frame" and use_shots != [1]:

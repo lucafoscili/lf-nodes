@@ -8,7 +8,6 @@ from typing import Any, Dict
 
 from ..prompts.minimax_h3 import (
     H3_PROMPT_MODES,
-    build_h3_prompt_writer_system,
 )
 from ..services.registry import (
     InputValidationError,
@@ -32,9 +31,8 @@ DEFAULT_INTENT = (
 DEFAULT_DURATION_SECONDS = 6.0
 DEFAULT_MODEL = ""
 DEFAULT_TEMPERATURE = 0.2
-DEFAULT_REASONING = "off"
-DEFAULT_MAX_TOKENS = 8192
-DEFAULT_TIMEOUT_SECONDS = 120
+DEFAULT_REASONING = "vision"
+DEFAULT_REVIEW = True
 
 _MAX_REFERENCE_IMAGES = 9
 _PICTURE_IDS = tuple(
@@ -47,6 +45,12 @@ _FIXED_REFERENCE_COUNTS = {
     "l2va": 1,
 }
 _REASONING_OPTIONS = (
+    (
+        "vision",
+        "Vision only",
+        "Let the visual inventory and image review stages reason, while keeping the schema-heavy "
+        "text stages direct and reliable.",
+    ),
     (
         "off",
         "Off",
@@ -135,23 +139,13 @@ def _text(
     return normalized
 
 
-def _positive_integer(
-    inputs: Dict[str, Any],
-    name: str,
-    default: int,
-) -> int:
+def _boolean(inputs: Dict[str, Any], name: str, default: bool) -> bool:
+    """Accept the native JSON boolean submitted by a Runner toggle."""
+
     value = inputs.get(name, default)
-    if value in (None, ""):
-        value = default
-    if isinstance(value, bool):
+    if not isinstance(value, bool):
         raise InputValidationError(name)
-    try:
-        parsed = int(str(value).strip())
-    except (TypeError, ValueError) as error:
-        raise InputValidationError(name) from error
-    if parsed < 1:
-        raise ValueError(f"{name} must be at least 1.")
-    return parsed
+    return value
 
 
 def _reference_fields(inputs: Dict[str, Any], mode: str) -> tuple[str, ...]:
@@ -200,7 +194,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         DEFAULT_ENDPOINT,
         allow_empty=False,
     )
-    model = _text(inputs, "model", DEFAULT_MODEL, allow_empty=False)
+    model = _text(inputs, "model", DEFAULT_MODEL, allow_empty=True)
     temperature = _bounded_float(
         inputs,
         "temperature",
@@ -214,39 +208,25 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         DEFAULT_REASONING,
         (option[0] for option in _REASONING_OPTIONS),
     )
-    max_tokens = _positive_integer(inputs, "max_tokens", DEFAULT_MAX_TOKENS)
-    timeout = _positive_integer(inputs, "timeout", DEFAULT_TIMEOUT_SECONDS)
+    review = _boolean(inputs, "review", DEFAULT_REVIEW)
     reference_fields = _reference_fields(inputs, mode)
     reference_count = len(reference_fields)
-    system_message = build_h3_prompt_writer_system(
-        mode=mode,
-        duration_seconds=duration_seconds,
-        reference_image_count=reference_count,
-    )
 
     resolved_references = [
         resolve_load_image_reference(inputs, field_id)
         for field_id in reference_fields
     ]
 
-    writer_inputs = prompt["writer"]["inputs"]
-    writer_inputs.update(
+    prompt["h3_prompt_maker"]["inputs"].update(
         {
-            "prompt": intent,
+            "intent": intent,
+            "mode": mode,
+            "duration_seconds": duration_seconds,
             "url": endpoint,
-            "system_message": system_message,
             "model": model,
             "temperature": temperature,
             "reasoning": reasoning,
-            "max_tokens": max_tokens,
-            "timeout": timeout,
-        }
-    )
-    prompt["compiler"]["inputs"].update(
-        {
-            "mode": mode,
-            "duration_seconds": duration_seconds,
-            "reference_image_count": reference_count,
+            "review": review,
         }
     )
 
@@ -264,10 +244,10 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             list_inputs.pop(list_input, None)
 
     if reference_count:
-        writer_inputs["image"] = ["image_list", 0]
+        prompt["h3_prompt_maker"]["inputs"]["image"] = ["image_list", 0]
     else:
         prompt.pop("image_list", None)
-        writer_inputs.pop("image", None)
+        prompt["h3_prompt_maker"]["inputs"].pop("image", None)
 
 
 def _mode_cell() -> WorkflowCell:
@@ -276,7 +256,7 @@ def _mode_cell() -> WorkflowCell:
         "determines how many ordered Picture uploads are valid."
     )
     return WorkflowCell(
-        node_id="compiler",
+        node_id="h3_prompt_maker",
         id="mode",
         value="H3 mode",
         shape="select",
@@ -304,11 +284,11 @@ def _mode_cell() -> WorkflowCell:
 
 def _reasoning_cell() -> WorkflowCell:
     description = (
-        "Per-request LM Studio reasoning mode. Off is recommended for prompt "
-        "compilation because reasoning shares the response token budget."
+        "One reasoning profile for the pipeline. Vision only improves small-model "
+        "pixel recall while reserving the text stages for direct schema output."
     )
     return WorkflowCell(
-        node_id="writer",
+        node_id="h3_prompt_maker",
         id="reasoning",
         value="Reasoning",
         shape="select",
@@ -435,7 +415,7 @@ def _picture_cell(ordinal: int) -> WorkflowCell:
 
 
 input_intent = _text_cell(
-    node_id="writer",
+    node_id="h3_prompt_maker",
     cell_id="intent",
     label="Creative intent",
     default=DEFAULT_INTENT,
@@ -446,7 +426,7 @@ input_intent = _text_cell(
     textarea=True,
 )
 input_duration = _number_cell(
-    node_id="compiler",
+    node_id="h3_prompt_maker",
     cell_id="duration",
     label="Duration (seconds)",
     default="6",
@@ -456,7 +436,7 @@ input_duration = _number_cell(
     description="Exact target duration used to align H3 shot timestamps and frame references.",
 )
 input_endpoint = _text_cell(
-    node_id="writer",
+    node_id="h3_prompt_maker",
     cell_id="endpoint",
     label="LM Studio endpoint",
     default=DEFAULT_ENDPOINT,
@@ -468,51 +448,42 @@ input_endpoint = _text_cell(
     required=False,
 )
 input_model = _text_cell(
-    node_id="writer",
+    node_id="h3_prompt_maker",
     cell_id="model",
     label="Model",
     default=DEFAULT_MODEL,
-    description="Loaded LM Studio model identifier used for prompt writing.",
+    description=(
+        "Optional LM Studio model identifier shared by every stage. Leave empty "
+        "to use the sole LLM already loaded at the endpoint."
+    ),
+    required=False,
 )
 input_temperature = _number_cell(
-    node_id="writer",
+    node_id="h3_prompt_maker",
     cell_id="temperature",
     label="Temperature",
     default="0.2",
     minimum=0.0,
     maximum=1.0,
     step=0.1,
-    description="Sampling randomness for the local prompt-writing model.",
+    description="Sampling randomness applied independently to each pipeline stage.",
     advanced=True,
     required=False,
 )
 input_reasoning = _reasoning_cell()
-input_max_tokens = _number_cell(
-    node_id="writer",
-    cell_id="max_tokens",
-    label="Response token budget",
-    default="8192",
-    minimum=1,
-    maximum=None,
-    step=1,
-    description="Maximum LM Studio output tokens, including any model reasoning.",
-    advanced=True,
+input_review = WorkflowCell(
+    node_id="h3_prompt_maker",
+    id="review",
+    value="Review",
+    shape="toggle",
+    description=(
+        "Independently audit the plan and repair detected issues once. Disable "
+        "to compile the planner's output directly, skipping review calls for "
+        "trusted models."
+    ),
+    props={"lfLabel": "Review", "lfValue": DEFAULT_REVIEW},
     required=False,
 )
-input_timeout = _number_cell(
-    node_id="writer",
-    cell_id="timeout",
-    label="Timeout (seconds)",
-    default="120",
-    minimum=1,
-    maximum=None,
-    step=1,
-    description="Maximum time to wait for the local chat-completions request.",
-    advanced=True,
-    required=False,
-)
-
-
 outputs = [
     WorkflowCell(
         node_id="display_prompt",
@@ -525,7 +496,17 @@ outputs = [
         node_id="display_report",
         id="validation_report",
         shape="code",
-        description="Machine-readable validation report for the compiled H3 prompt.",
+        description="H3 format validation plus independent review findings or skipped status.",
+        props={"lfLanguage": "json"},
+    ),
+    WorkflowCell(
+        node_id="display_inventory",
+        id="visual_inventory",
+        shape="code",
+        description=(
+            "Validated per-Picture atomic visual facts tagged allow, forbid, or "
+            "uncertain. Planning receives only allowed facts; review sees the full ledger."
+        ),
         props={"lfLanguage": "json"},
     ),
 ]
@@ -537,11 +518,12 @@ WORKFLOW = WorkflowNode(
     value="MiniMax H3 / Prompt Maker",
     description=(
         "Turn a plain-language video idea and optional ordered Picture references "
-        "into a copy-ready MiniMax H3 prompt with a local vision-capable language model."
+        "into a copy-ready MiniMax H3 prompt through pixel inventory, explicit "
+        "scope classification, semantic planning, and optional independent review."
     ),
     category="MiniMax H3",
     card=WorkflowCardPresentation(
-        summary="Write strict, copy-ready H3 prompts with your local vision model."
+        summary="Observe, scope, plan, audit, and compile strict H3 prompts locally."
     ),
     inputs=[
         _mode_cell(),
@@ -549,11 +531,10 @@ WORKFLOW = WorkflowNode(
         input_duration,
         *[_picture_cell(ordinal) for ordinal in range(1, 3)],
         input_model,
+        input_review,
         input_endpoint,
         input_temperature,
         input_reasoning,
-        input_max_tokens,
-        input_timeout,
         *[_picture_cell(ordinal) for ordinal in range(3, 10)],
     ],
     outputs=outputs,

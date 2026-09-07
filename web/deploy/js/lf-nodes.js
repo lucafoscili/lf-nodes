@@ -1315,6 +1315,7 @@ var NodeName;
   NodeName2["geminiAPI"] = "LF_GeminiAPI";
   NodeName2["getValueFromJson"] = "LF_GetValueFromJSON";
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
+  NodeName2["h3PromptMaker"] = "LF_H3PromptMaker";
   NodeName2["imageClassifier"] = "LF_ImageClassifier";
   NodeName2["imageGrid"] = "LF_ImageGrid";
   NodeName2["imageList"] = "LF_ImageList";
@@ -1693,6 +1694,7 @@ const NODE_WIDGET_MAP = {
   LF_GeminiAPI: [CustomWidgetName.code],
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
+  LF_H3PromptMaker: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],
   LF_ImageGrid: [CustomWidgetName.masonry],
   LF_ImageHistogram: [CustomWidgetName.tabBarChart],

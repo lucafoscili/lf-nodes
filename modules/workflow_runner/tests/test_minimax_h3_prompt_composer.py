@@ -15,6 +15,16 @@ from modules.workflow_runner.prompts.minimax_h3 import (
 )
 
 
+_REFERENCE_SECTION_NAMES = (
+    "subject_definitions",
+    "summary",
+    "retention_analysis",
+    "detailed_description",
+    "overall_soundscape",
+    "non_diegetic_music",
+)
+
+
 def test_base_prompt_uses_official_order_and_omits_empty_sections() -> None:
     prompt = compose_base_prompt(
         instruction="  Use <Picture 1> as the first frame.  ",
@@ -67,15 +77,41 @@ def test_full_reference_prompt_uses_official_order() -> None:
     )
 
 
-def test_full_reference_prompt_omits_empty_optional_sections() -> None:
-    assert compose_full_reference_prompt(
-        subject_definitions=" ",
-        summary=None,
-        retention_analysis="\n",
-        detailed_description="A reference-guided camera move.",
-    ) == (
-        "detailed_description:\n"
-        "A reference-guided camera move."
+@pytest.mark.parametrize("field_name", _REFERENCE_SECTION_NAMES)
+@pytest.mark.parametrize("value", [None, "", " \t\r\n "])
+def test_full_reference_prompt_rejects_every_blank_section(
+    field_name: str, value: str | None
+) -> None:
+    fields = json.loads(_reference_response())
+    fields[field_name] = value
+
+    with pytest.raises(ValueError) as error:
+        compose_full_reference_prompt(**fields)
+
+    assert str(error.value) == (
+        "Structured Ref2VA prompts require all six nonblank sections; "
+        f"missing or blank: {field_name}"
+    )
+
+
+@pytest.mark.parametrize("field_name", _REFERENCE_SECTION_NAMES)
+def test_full_reference_prompt_rejects_every_absent_section(
+    field_name: str,
+) -> None:
+    fields = json.loads(_reference_response())
+    del fields[field_name]
+
+    with pytest.raises(ValueError, match=f"missing or blank: {field_name}$"):
+        compose_full_reference_prompt(**fields)
+
+
+def test_full_reference_prompt_reports_all_missing_sections() -> None:
+    with pytest.raises(ValueError) as error:
+        compose_full_reference_prompt()
+
+    assert str(error.value) == (
+        "Structured Ref2VA prompts require all six nonblank sections; "
+        "missing or blank: " + ", ".join(_REFERENCE_SECTION_NAMES)
     )
 
 
@@ -97,9 +133,15 @@ def test_structured_prompt_requires_a_visual_description(
     "composer",
     [compose_base_prompt, compose_full_reference_prompt],
 )
-def test_raw_override_is_exact_and_bypasses_structured_validation(composer) -> None:
-    raw = "  custom:\r\nverbatim prompt\n  "
-    assert composer(raw_override=raw) == raw
+@pytest.mark.parametrize("raw", ["", "  custom:\r\nverbatim prompt\n  "])
+def test_raw_override_is_exact_and_bypasses_structured_validation(
+    composer, raw: str
+) -> None:
+    assert composer(
+        raw_override=raw,
+        overall_soundscape=" \r\n ",
+        non_diegetic_music=123,
+    ) == raw
 
 
 def test_structured_sections_normalize_line_endings() -> None:
@@ -573,6 +615,64 @@ def test_compile_semantic_ref2va_plan_renders_references_and_retention() -> None
     assert report["subjectOrdinals"] == [1]
     assert report["shotCount"] == 2
     assert report["shotTimestamps"] == ["00:03.250"]
+
+
+@pytest.mark.parametrize("collection", ["subjects", "picture_anchors"])
+@pytest.mark.parametrize("definition", [".", "...", " \t—…!?\r\n ", "。"])
+def test_semantic_ref2va_rejects_punctuation_only_definitions(
+    collection: str, definition: str
+) -> None:
+    values = json.loads(_reference_plan())
+    values[collection][0]["definition"] = definition
+
+    with pytest.raises(ValueError) as error:
+        compile_h3_prompt_response(json.dumps(values), "ref2va", 6, 2)
+
+    assert str(error.value) == (
+        f"Semantic plan {collection}[0].definition must contain at least one "
+        "letter or number"
+    )
+
+
+@pytest.mark.parametrize(
+    "definition",
+    ["A teal-haired elf warrior in silver-blue armor", "青い甲冑の戦士"],
+)
+def test_semantic_ref2va_keeps_one_subject_with_multiple_sources(
+    definition: str,
+) -> None:
+    values = json.loads(_reference_plan())
+    values["picture_anchors"] = []
+    values["subjects"][0]["definition"] = definition
+    values["subjects"][0]["source_pictures"] = [1, 2]
+
+    prompt, report = compile_h3_prompt_response(
+        json.dumps(values), "ref2va", 6, 2
+    )
+
+    assert f"<Subject 1> is defined as follows: {definition}." in prompt
+    assert "Source references: <Picture 1>, <Picture 2>." in prompt
+    assert report["subjectOrdinals"] == [1]
+    assert report["pictureOrdinals"] == [1, 2]
+
+
+def test_semantic_ref2va_anchor_only_plan_keeps_all_six_sections() -> None:
+    values = json.loads(_reference_plan())
+    values["subjects"] = []
+    values["picture_anchors"][0]["picture"] = 1
+
+    prompt, report = compile_h3_prompt_response(
+        json.dumps(values), "ref2va", 6, 1
+    )
+
+    assert prompt.startswith(
+        "subject_definitions:\n<Picture 1> is defined as a concrete ending-frame "
+        "target for [Shot 2]: The required closing composition."
+    )
+    assert "<Subject " not in prompt
+    assert report["subjectOrdinals"] == []
+    assert report["pictureOrdinals"] == [1]
+    assert all(f"{name}:\n" in prompt for name in _REFERENCE_SECTION_NAMES)
 
 
 def test_semantic_ref2va_task_is_derived_from_actual_reference_roles() -> None:

@@ -13,6 +13,10 @@ from modules.utils.constants import Input
 chat_module = importlib.import_module(
     "modules.nodes.llm.local_chat_completions"
 )
+api_module = importlib.import_module("modules.utils.helpers.api")
+transport_module = importlib.import_module(
+    "modules.utils.helpers.api.local_chat_completion"
+)
 multimodal_module = importlib.import_module(
     "modules.utils.helpers.api.build_multimodal_content"
 )
@@ -56,6 +60,33 @@ def _native_success(text: str = "A generated prompt.") -> dict:
     }
 
 
+def _native_models(*loaded_llm_ids: str) -> dict:
+    return {
+        "models": [
+            {
+                "type": "embedding",
+                "key": "local-embedding",
+                "loaded_instances": [
+                    {"id": "local-embedding", "config": {}}
+                ],
+            },
+            {
+                "type": "llm",
+                "key": "downloaded-but-unloaded",
+                "loaded_instances": [],
+            },
+            {
+                "type": "llm",
+                "key": "loaded-model",
+                "loaded_instances": [
+                    {"id": instance_id, "config": {}}
+                    for instance_id in loaded_llm_ids
+                ],
+            },
+        ]
+    }
+
+
 def _strip_tooltips(schema: dict) -> dict:
     return {
         group: {
@@ -87,7 +118,7 @@ def _capture_transport(
         calls.append({"url": url, **kwargs})
         return Response(_success() if data is None else data, status_code)
 
-    monkeypatch.setattr(chat_module.requests, "post", post)
+    monkeypatch.setattr(transport_module.requests, "post", post)
     monkeypatch.setattr(
         chat_module,
         "safe_send_sync",
@@ -162,6 +193,38 @@ def test_published_schema_mapping_and_output_contract() -> None:
     assert chat_module.NODE_DISPLAY_NAME_MAPPINGS == {
         "LF_LocalChatCompletions": "Local chat completions",
     }
+
+
+def test_headless_transport_helper_is_exported_without_publishing_node_ui(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response_data = _success("Headless answer.")
+    calls: list[dict] = []
+
+    def post(url, **kwargs):
+        calls.append({"url": url, **kwargs})
+        return Response(response_data)
+
+    monkeypatch.setattr(transport_module.requests, "post", post)
+    monkeypatch.setattr(
+        chat_module,
+        "safe_send_sync",
+        lambda *_args: pytest.fail(
+            "The transport helper must not publish Comfy UI state."
+        ),
+    )
+
+    assert (
+        api_module.request_local_chat_completion
+        is transport_module.request_local_chat_completion
+    )
+    result = transport_module.request_local_chat_completion(
+        "Prompt",
+        "http://localhost.test/v1/chat/completions",
+    )
+
+    assert result == ("Headless answer.", response_data)
+    assert len(calls) == 1
 
 
 def test_text_only_request_normalizes_list_wrapped_scalars_and_persists_output(
@@ -339,6 +402,13 @@ def test_lm_studio_native_request_uses_supported_vision_and_reasoning_contract(
     answer = "  exact native answer\n"
     response_data = _native_success(answer)
     calls, events = _capture_transport(monkeypatch, response_data)
+    monkeypatch.setattr(
+        transport_module.requests,
+        "get",
+        lambda *_args, **_kwargs: pytest.fail(
+            "An explicit native model must skip model discovery."
+        ),
+    )
 
     result = chat_module.LF_LocalChatCompletions().on_exec(
         prompt="Describe the reference.",
@@ -397,6 +467,207 @@ def test_lm_studio_native_request_uses_supported_vision_and_reasoning_contract(
     assert "Private reasoning" not in result["result"][0]
 
 
+def test_blank_native_model_resolves_the_sole_loaded_llm_instance(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    operations: list[dict] = []
+    events: list[tuple] = []
+
+    def get(url, **kwargs):
+        operations.append({"method": "GET", "url": url, **kwargs})
+        return Response(_native_models("qwen-loaded-instance"))
+
+    def post(url, **kwargs):
+        operations.append({"method": "POST", "url": url, **kwargs})
+        return Response(_native_success())
+
+    monkeypatch.setattr(transport_module.requests, "get", get)
+    monkeypatch.setattr(transport_module.requests, "post", post)
+    monkeypatch.setattr(
+        chat_module,
+        "safe_send_sync",
+        lambda *args: events.append(args),
+    )
+
+    result = chat_module.LF_LocalChatCompletions().on_exec(
+        prompt="Prompt",
+        url="http://localhost.test/proxy/api/v1/chat/?token=test",
+        model="  ",
+        timeout=45,
+        node_id="auto-model-node",
+    )
+
+    assert operations == [
+        {
+            "method": "GET",
+            "url": (
+                "http://localhost.test/proxy/api/v1/models?token=test"
+            ),
+            "timeout": 45,
+            "headers": {"Content-Type": "application/json"},
+        },
+        {
+            "method": "POST",
+            "url": (
+                "http://localhost.test/proxy/api/v1/chat/?token=test"
+            ),
+            "json": {
+                "model": "qwen-loaded-instance",
+                "input": [{"type": "text", "content": "Prompt"}],
+                "temperature": 0.2,
+                "max_output_tokens": 4096,
+                "store": False,
+            },
+            "timeout": 45,
+            "headers": {"Content-Type": "application/json"},
+        },
+    ]
+    payload = {"value": "A generated prompt."}
+    assert events == [
+        ("localchatcompletions", payload, "auto-model-node")
+    ]
+    assert result == {
+        "ui": {"lf_output": [payload]},
+        "result": ("A generated prompt.", _native_success()),
+    }
+
+
+@pytest.mark.parametrize(
+    ("models", "message"),
+    (
+        (_native_models(), "reports no loaded LLM instances"),
+        (
+            _native_models("first-instance", "second-instance"),
+            r"reports multiple loaded LLM instances \(2\)",
+        ),
+    ),
+)
+def test_blank_native_model_requires_exactly_one_loaded_llm(
+    monkeypatch: pytest.MonkeyPatch,
+    models: dict,
+    message: str,
+) -> None:
+    posts: list[dict] = []
+    monkeypatch.setattr(
+        transport_module.requests,
+        "get",
+        lambda *_args, **_kwargs: Response(models),
+    )
+    monkeypatch.setattr(
+        transport_module.requests,
+        "post",
+        lambda *args, **kwargs: posts.append({"args": args, **kwargs}),
+    )
+
+    with pytest.raises(ValueError, match=message):
+        chat_module.LF_LocalChatCompletions().on_exec(
+            prompt="Prompt",
+            url="http://localhost.test/api/v1/chat",
+            model="",
+        )
+
+    assert posts == []
+
+
+@pytest.mark.parametrize(
+    ("data", "message"),
+    (
+        (ValueError("not json"), "not valid JSON"),
+        ({"data": []}, "malformed JSON"),
+        (
+            {
+                "models": [
+                    {"type": "llm", "loaded_instances": [{"id": ""}]}
+                ]
+            },
+            "malformed JSON",
+        ),
+    ),
+)
+def test_blank_native_model_rejects_malformed_model_lookup(
+    monkeypatch: pytest.MonkeyPatch,
+    data: object,
+    message: str,
+) -> None:
+    monkeypatch.setattr(
+        transport_module.requests,
+        "get",
+        lambda *_args, **_kwargs: Response(data),
+    )
+    monkeypatch.setattr(
+        transport_module.requests,
+        "post",
+        lambda *_args, **_kwargs: pytest.fail(
+            "Malformed model discovery must prevent chat inference."
+        ),
+    )
+
+    with pytest.raises(ValueError, match=message):
+        chat_module.LF_LocalChatCompletions().on_exec(
+            prompt="Prompt",
+            url="http://localhost.test/api/v1/chat",
+            model="",
+        )
+
+
+def test_blank_native_model_surfaces_model_lookup_http_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        transport_module.requests,
+        "get",
+        lambda *_args, **_kwargs: Response(
+            {"error": {"message": "Model service unavailable."}},
+            status_code=503,
+        ),
+    )
+    monkeypatch.setattr(
+        transport_module.requests,
+        "post",
+        lambda *_args, **_kwargs: pytest.fail(
+            "Failed model discovery must prevent chat inference."
+        ),
+    )
+
+    with pytest.raises(ValueError) as raised:
+        chat_module.LF_LocalChatCompletions().on_exec(
+            prompt="Prompt",
+            url="http://localhost.test/api/v1/chat",
+            model="",
+        )
+
+    assert str(raised.value) == (
+        "LM Studio model lookup failed with HTTP status 503. "
+        "Provider said: Model service unavailable."
+    )
+
+
+def test_blank_native_model_surfaces_model_lookup_transport_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        transport_module.requests,
+        "get",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            requests.ConnectionError("offline")
+        ),
+    )
+    monkeypatch.setattr(
+        transport_module.requests,
+        "post",
+        lambda *_args, **_kwargs: pytest.fail(
+            "Failed model discovery must prevent chat inference."
+        ),
+    )
+
+    with pytest.raises(ValueError, match="model lookup failed"):
+        chat_module.LF_LocalChatCompletions().on_exec(
+            prompt="Prompt",
+            url="http://localhost.test/api/v1/chat",
+            model="",
+        )
+
+
 def test_lm_studio_native_auto_omits_reasoning_override_and_empty_system(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -419,13 +690,6 @@ def test_lm_studio_native_auto_omits_reasoning_override_and_empty_system(
 @pytest.mark.parametrize(
     ("kwargs", "message"),
     (
-        (
-            {
-                "url": "http://localhost.test/api/v1/chat",
-                "model": "",
-            },
-            "model must name a loaded LM Studio model",
-        ),
         (
             {
                 "url": "http://localhost.test/api/v1/chat",
@@ -459,7 +723,7 @@ def test_native_only_controls_fail_before_transport(
     def unexpected_post(*_args, **_kwargs):
         pytest.fail("Invalid native chat input must fail before transport.")
 
-    monkeypatch.setattr(chat_module.requests, "post", unexpected_post)
+    monkeypatch.setattr(transport_module.requests, "post", unexpected_post)
 
     with pytest.raises((TypeError, ValueError), match=message):
         chat_module.LF_LocalChatCompletions().on_exec(
@@ -531,8 +795,12 @@ def test_relative_endpoint_uses_the_resolver_and_proxy_transport_boundary(
             "allow_redirects": False,
         }
 
-    monkeypatch.setattr(chat_module, "resolve_api_url", resolve)
-    monkeypatch.setattr(chat_module, "local_proxy_request_options", options)
+    monkeypatch.setattr(transport_module, "resolve_api_url", resolve)
+    monkeypatch.setattr(
+        transport_module,
+        "local_proxy_request_options",
+        options,
+    )
     calls, _ = _capture_transport(monkeypatch)
 
     result = chat_module.LF_LocalChatCompletions().on_exec(
@@ -583,7 +851,7 @@ def test_invalid_input_fails_before_transport(
     def unexpected_post(*_args, **_kwargs):
         pytest.fail("Invalid input must fail before transport.")
 
-    monkeypatch.setattr(chat_module.requests, "post", unexpected_post)
+    monkeypatch.setattr(transport_module.requests, "post", unexpected_post)
 
     with pytest.raises(ValueError, match=message):
         chat_module.LF_LocalChatCompletions().on_exec(**kwargs)
@@ -661,7 +929,7 @@ def test_numeric_inputs_are_validated_before_transport(
     def unexpected_post(*_args, **_kwargs):
         pytest.fail("Invalid numeric input must fail before transport.")
 
-    monkeypatch.setattr(chat_module.requests, "post", unexpected_post)
+    monkeypatch.setattr(transport_module.requests, "post", unexpected_post)
     kwargs = {
         "prompt": "Prompt",
         "url": "http://localhost.test/v1/chat/completions",
@@ -741,7 +1009,7 @@ def test_openai_error_envelope_is_bounded_and_surfaced(
     assert message.endswith("...")
     assert len(message.removeprefix(
         "Local chat-completions request failed with HTTP status 400. Provider said: "
-    )) == chat_module._MAX_UPSTREAM_ERROR_CHARS
+    )) == transport_module._MAX_UPSTREAM_ERROR_CHARS
     assert events == []
 
 
@@ -848,7 +1116,7 @@ def test_transport_error_is_stable_and_does_not_publish_success(
     def fail(*_args, **_kwargs):
         raise requests.ConnectionError("provider-specific detail")
 
-    monkeypatch.setattr(chat_module.requests, "post", fail)
+    monkeypatch.setattr(transport_module.requests, "post", fail)
     monkeypatch.setattr(
         chat_module,
         "safe_send_sync",

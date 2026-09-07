@@ -9,6 +9,8 @@ from .get_random_parameter import *
 from .get_resource_url import *
 from .get_sha256 import *
 from .handle_response import *
+from .local_chat_completion import *
+from .lm_studio_models import *
 from .mock_responses import *
 from .parse_claude_json_output import *
 from .parse_gemini_image import *

@@ -44,8 +44,6 @@ def _inputs(mode: str, reference_count: int) -> dict[str, Any]:
         "model": " vision-writer ",
         "temperature": "0.3",
         "reasoning": "off",
-        "max_tokens": "5000",
-        "timeout": "180",
     }
 
 
@@ -53,9 +51,8 @@ def _configure(
     monkeypatch: pytest.MonkeyPatch,
     mode: str,
     reference_count: int,
-) -> tuple[dict[str, Any], list[str], list[dict[str, Any]]]:
+) -> tuple[dict[str, Any], list[str]]:
     resolved: list[str] = []
-    systems: list[dict[str, Any]] = []
 
     def resolve(inputs: dict[str, Any], name: str) -> str:
         resolved.append(name)
@@ -64,15 +61,10 @@ def _configure(
         ]
         return f"staged/{name}.png [input]"
 
-    def system(**kwargs: Any) -> str:
-        systems.append(kwargs)
-        return f"system:{kwargs['mode']}:{kwargs['reference_image_count']}"
-
     monkeypatch.setattr(workflow_module, "resolve_load_image_reference", resolve)
-    monkeypatch.setattr(workflow_module, "build_h3_prompt_writer_system", system)
     graph = WORKFLOW.load_prompt()
     WORKFLOW.configure_prompt(graph, _inputs(mode, reference_count))
-    return graph, resolved, systems
+    return graph, resolved
 
 
 def test_card_is_registered_and_exposes_the_small_standalone_contract() -> None:
@@ -88,16 +80,16 @@ def test_card_is_registered_and_exposes_the_small_standalone_contract() -> None:
         "duration",
         *PICTURE_IDS[:2],
         "model",
+        "review",
         "endpoint",
         "temperature",
         "reasoning",
-        "max_tokens",
-        "timeout",
         *PICTURE_IDS[2:],
     ]
     assert [cell.id for cell in WORKFLOW.outputs] == [
         "prompt",
         "validation_report",
+        "visual_inventory",
     ]
 
 
@@ -123,85 +115,115 @@ def test_picture_and_transport_controls_have_the_required_progressive_disclosure
             "endpoint",
             "temperature",
             "reasoning",
-            "max_tokens",
-            "timeout",
         )
     )
-    assert cells["model"].required
+    assert not cells["model"].required
     assert not cells["model"].advanced
+    assert cells["review"].shape == "toggle"
+    assert cells["review"].value == "Review"
+    assert cells["review"].props == {"lfLabel": "Review", "lfValue": True}
+    assert not cells["review"].advanced
     assert all(
         not cells[name].required
         for name in (
+            "model",
+            "review",
             "endpoint",
             "temperature",
             "reasoning",
-            "max_tokens",
-            "timeout",
         )
     )
-    assert cells["max_tokens"].props["lfValue"] == "8192"
     assert cells["endpoint"].props["lfValue"].endswith("/api/v1/chat")
     assert cells["temperature"].props["lfHtmlAttributes"]["max"] == 1.0
-    assert cells["reasoning"].props["lfValue"] == "off"
+    assert cells["reasoning"].props["lfValue"] == "vision"
     assert [
         option["workflowValue"]
         for option in cells["reasoning"].props["lfDataset"]["nodes"]
-    ] == ["off", "auto", "on"]
+    ] == ["vision", "off", "auto", "on"]
     assert [
         option["workflowValue"]
         for option in cells["mode"].props["lfDataset"]["nodes"]
     ] == ["t2va", "i2va", "fl2va", "l2va", "ref2va"]
+    assert all(
+        cells[name].node_id == "h3_prompt_maker"
+        for name in (
+            "mode",
+            "intent",
+            "duration",
+            "model",
+            "review",
+            "endpoint",
+            "temperature",
+            "reasoning",
+        )
+    )
 
 
-def test_graph_uses_public_local_chat_and_private_non_public_compiler() -> None:
+def test_graph_uses_one_public_atomic_h3_prompt_maker() -> None:
     graph = WORKFLOW.load_prompt()
 
-    assert graph["writer"]["class_type"] == "LF_LocalChatCompletions"
-    assert set(graph["writer"]["inputs"]) == {
-        "prompt",
-        "url",
-        "system_message",
-        "image",
-        "model",
-        "temperature",
-        "reasoning",
-        "max_tokens",
-        "timeout",
-        "ui_widget",
-    }
-    assert "seed" not in graph["writer"]["inputs"]
-    assert graph["writer"]["inputs"]["max_tokens"] == 8192
-    assert graph["writer"]["inputs"]["reasoning"] == "off"
-    assert graph["compiler"] == {
+    assert graph["h3_prompt_maker"] == {
         "inputs": {
-            "response": ["writer", 0],
+            "intent": (
+                "Create a cinematic video with clear action, coherent camera "
+                "movement, and synchronized environmental sound."
+            ),
             "mode": "t2va",
             "duration_seconds": 6.0,
-            "reference_image_count": 0,
+            "url": "http://127.0.0.1:1234/api/v1/chat",
+            "image": ["image_list", 0],
+            "model": "",
+            "temperature": 0.2,
+            "reasoning": "vision",
+            "review": True,
+            "ui_widget": "",
         },
-        "class_type": "WorkflowRunnerH3PromptCompiler",
-        "_meta": {"title": "Compile and validate the MiniMax H3 prompt"},
+        "class_type": "LF_H3PromptMaker",
+        "_meta": {"title": "MiniMax H3 prompt maker"},
     }
-    assert graph["display_prompt"]["inputs"]["string"] == ["compiler", 0]
-    assert graph["display_report"]["inputs"]["json_input"] == ["compiler", 1]
+    assert not {
+        "lms_config",
+        "inventory_writer",
+        "scope_context",
+        "scope_writer",
+        "inventory_context",
+        "writer",
+        "review_context",
+        "reviewer",
+        "compiler",
+    }.intersection(graph)
+    assert graph["display_prompt"]["inputs"]["string"] == [
+        "h3_prompt_maker",
+        0,
+    ]
+    assert graph["display_report"]["inputs"]["json_input"] == [
+        "h3_prompt_maker",
+        1,
+    ]
+    assert graph["display_inventory"]["inputs"]["json_input"] == [
+        "h3_prompt_maker",
+        2,
+    ]
 
 
-def test_text_only_configuration_builds_the_real_h3_writer_system() -> None:
+def test_text_only_configuration_removes_the_image_branch() -> None:
     graph = WORKFLOW.load_prompt()
 
     WORKFLOW.configure_prompt(graph, _inputs("t2va", 0))
 
-    system = graph["writer"]["inputs"]["system_message"]
-    assert "Mode: t2va. Target duration: 7.50 seconds." in system
-    assert "No reference images are attached" in system
-    assert '"shots"' in system
-    assert '"start_seconds"' in system
-    assert '"description"' in system
-    assert '"dialogue"' in system
-    assert '"overall_soundscape"' in system
-    assert '"non_diegetic_music"' in system
     assert "image_list" not in graph
-    assert "image" not in graph["writer"]["inputs"]
+    assert "image" not in graph["h3_prompt_maker"]["inputs"]
+    assert graph["h3_prompt_maker"]["inputs"] == {
+        "intent": "A crane crosses a misty harbor while its bell rings once.",
+        "mode": "t2va",
+        "duration_seconds": 7.5,
+        "url": "http://127.0.0.1:1234/api/v1/chat",
+        "model": "vision-writer",
+        "temperature": 0.3,
+        "reasoning": "off",
+        "review": True,
+        "ui_widget": "",
+    }
 
 
 @pytest.mark.parametrize(
@@ -215,49 +237,37 @@ def test_text_only_configuration_builds_the_real_h3_writer_system() -> None:
         ("ref2va", 9),
     ),
 )
-def test_configure_stages_and_keeps_only_the_exact_ordered_image_branch(
+def test_configure_atomic_node_and_keeps_only_the_exact_ordered_image_branch(
     monkeypatch: pytest.MonkeyPatch,
     mode: str,
     reference_count: int,
 ) -> None:
-    graph, resolved, systems = _configure(monkeypatch, mode, reference_count)
+    graph, resolved = _configure(monkeypatch, mode, reference_count)
 
     active_ids = list(PICTURE_IDS[:reference_count])
     assert resolved == active_ids
-    assert systems == [
-        {
-            "mode": mode,
-            "duration_seconds": 7.5,
-            "reference_image_count": reference_count,
-        }
-    ]
     assert [name for name in PICTURE_IDS if name in graph] == active_ids
     for name in active_ids:
         assert graph[name]["inputs"]["image"] == f"staged/{name}.png [input]"
 
-    writer = graph["writer"]["inputs"]
-    assert writer["prompt"] == (
-        "A crane crosses a misty harbor while its bell rings once."
-    )
-    assert writer["url"] == "http://127.0.0.1:1234/api/v1/chat"
-    assert writer["system_message"] == f"system:{mode}:{reference_count}"
-    assert writer["model"] == "vision-writer"
-    assert writer["temperature"] == 0.3
-    assert writer["reasoning"] == "off"
-    assert writer["max_tokens"] == 5000
-    assert writer["timeout"] == 180
-    assert graph["compiler"]["inputs"] == {
-        "response": ["writer", 0],
+    expected_inputs = {
+        "intent": "A crane crosses a misty harbor while its bell rings once.",
         "mode": mode,
         "duration_seconds": 7.5,
-        "reference_image_count": reference_count,
+        "url": "http://127.0.0.1:1234/api/v1/chat",
+        "model": "vision-writer",
+        "temperature": 0.3,
+        "reasoning": "off",
+        "review": True,
+        "ui_widget": "",
     }
 
     if reference_count == 0:
         assert "image_list" not in graph
-        assert "image" not in writer
+        assert graph["h3_prompt_maker"]["inputs"] == expected_inputs
     else:
-        assert writer["image"] == ["image_list", 0]
+        expected_inputs["image"] = ["image_list", 0]
+        assert graph["h3_prompt_maker"]["inputs"] == expected_inputs
         assert graph["image_list"]["inputs"] == {
             f"image_{ordinal}": [f"picture_{ordinal}", 0]
             for ordinal in range(1, reference_count + 1)
@@ -358,13 +368,10 @@ def test_invalid_duration_fails_before_staging_or_graph_mutation(
     ("field", "value"),
     (
         ("endpoint", "  "),
-        ("model", "  "),
         ("model", False),
         ("temperature", "nan"),
         ("temperature", 1.1),
         ("reasoning", "sometimes"),
-        ("max_tokens", 0),
-        ("timeout", 0),
     ),
 )
 def test_invalid_transport_control_fails_before_staging_or_graph_mutation(
@@ -385,4 +392,58 @@ def test_invalid_transport_control_fails_before_staging_or_graph_mutation(
     with pytest.raises((InputValidationError, ValueError)):
         WORKFLOW.configure_prompt(graph, inputs)
 
+    assert graph == original
+
+
+def test_empty_model_is_forwarded_for_loaded_model_discovery(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inputs = _inputs("t2va", 0)
+    inputs["model"] = "  "
+    graph = WORKFLOW.load_prompt()
+
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_: pytest.fail("Text mode must not stage pictures."),
+    )
+    WORKFLOW.configure_prompt(graph, inputs)
+
+    assert graph["h3_prompt_maker"]["inputs"]["model"] == ""
+
+
+@pytest.mark.parametrize(
+    ("review_input", "expected"),
+    (({}, True), ({"review": True}, True), ({"review": False}, False)),
+)
+def test_review_defaults_on_and_preserves_explicit_boolean_choices(
+    review_input: dict[str, Any],
+    expected: bool,
+) -> None:
+    graph = WORKFLOW.load_prompt()
+    graph["h3_prompt_maker"]["inputs"]["review"] = not expected
+
+    WORKFLOW.configure_prompt(graph, {**_inputs("t2va", 0), **review_input})
+
+    assert graph["h3_prompt_maker"]["inputs"]["review"] is expected
+
+
+@pytest.mark.parametrize("review", ("false", "true", "off", "on", "", 0, 1, None, [], {}))
+def test_invalid_review_fails_before_staging_or_graph_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    review: Any,
+) -> None:
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_: pytest.fail("Review must be checked before staging."),
+    )
+    inputs = {**_inputs("i2va", 1), "review": review}
+    graph = WORKFLOW.load_prompt()
+    original = deepcopy(graph)
+
+    with pytest.raises(InputValidationError) as error:
+        WORKFLOW.configure_prompt(graph, inputs)
+
+    assert error.value.input_name == "review"
     assert graph == original

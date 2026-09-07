@@ -59,35 +59,25 @@
     "class_type": "LF_ImageList",
     "_meta": {"title": "Collect ordered H3 Picture references"}
   },
-  "writer": {
+  "h3_prompt_maker": {
     "inputs": {
-      "prompt": "Create a cinematic video with clear action, coherent camera movement, and synchronized environmental sound.",
+      "intent": "Create a cinematic video with clear action, coherent camera movement, and synchronized environmental sound.",
+      "mode": "t2va",
+      "duration_seconds": 6.0,
       "url": "http://127.0.0.1:1234/api/v1/chat",
-      "system_message": "Configured by Workflow Runner for the selected MiniMax H3 mode.",
       "image": ["image_list", 0],
       "model": "",
       "temperature": 0.2,
-      "reasoning": "off",
-      "max_tokens": 8192,
-      "timeout": 120,
+      "reasoning": "vision",
+      "review": true,
       "ui_widget": ""
     },
-    "class_type": "LF_LocalChatCompletions",
-    "_meta": {"title": "Write structured H3 prompt values with a local vision model"}
-  },
-  "compiler": {
-    "inputs": {
-      "response": ["writer", 0],
-      "mode": "t2va",
-      "duration_seconds": 6.0,
-      "reference_image_count": 0
-    },
-    "class_type": "WorkflowRunnerH3PromptCompiler",
-    "_meta": {"title": "Compile and validate the MiniMax H3 prompt"}
+    "class_type": "LF_H3PromptMaker",
+    "_meta": {"title": "MiniMax H3 prompt maker"}
   },
   "display_prompt": {
     "inputs": {
-      "string": ["compiler", 0],
+      "string": ["h3_prompt_maker", 0],
       "ui_widget": ""
     },
     "class_type": "LF_DisplayString",
@@ -95,10 +85,18 @@
   },
   "display_report": {
     "inputs": {
-      "json_input": ["compiler", 1],
+      "json_input": ["h3_prompt_maker", 1],
       "ui_widget": ""
     },
     "class_type": "LF_DisplayJSON",
     "_meta": {"title": "MiniMax H3 prompt validation report"}
+  },
+  "display_inventory": {
+    "inputs": {
+      "json_input": ["h3_prompt_maker", 2],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Validated visual evidence inventory"}
   }
 }

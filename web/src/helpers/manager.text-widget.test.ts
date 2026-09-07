@@ -31,6 +31,10 @@ describe('LLM widget contracts', () => {
   it('renders local chat-completion results with the LF code widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.localChatCompletions]).toEqual([CustomWidgetName.code]);
   });
+
+  it('renders H3 prompt-maker results with the LF code widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.h3PromptMaker]).toEqual([CustomWidgetName.code]);
+  });
 });
 
 describe('Generic output widget contracts', () => {

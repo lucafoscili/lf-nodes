@@ -65,6 +65,7 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/nodes/json/test_set_value_in_json_contract.py",
     "modules/tests/nodes/json/test_string_to_json_contract.py",
     "modules/tests/nodes/llm/test_gemini_node.py",
+    "modules/tests/nodes/llm/test_h3_prompt_maker.py",
     "modules/tests/nodes/llm/test_image_classifier_response_contract.py",
     "modules/tests/nodes/llm/test_local_chat_completions.py",
     "modules/tests/nodes/llm/test_multimodal_payload_contract.py",
@@ -89,7 +90,8 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
 # inert-host process prevents one suite's doubles from leaking into another.
 ISOLATED_BEHAVIOR_TESTS: tuple[tuple[str, ...], ...] = (
     ("modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py",),
-    ("modules/workflow_runner/tests/test_minimax_h3_prompt_compiler_node.py",),
+    ("modules/workflow_runner/tests/test_minimax_h3_pipeline.py",),
+    ("modules/workflow_runner/tests/test_minimax_h3_audit.py",),
     ("modules/workflow_runner/tests/test_minimax_h3_prompt_maker_workflow.py",),
     ("modules/tests/nodes/io/test_save_dds.py",),
     ("modules/tests/nodes/io/test_save_json.py",),

@@ -94,6 +94,7 @@ export enum NodeName {
   geminiAPI = 'LF_GeminiAPI',
   getValueFromJson = 'LF_GetValueFromJSON',
   getRandomKeyFromJson = 'LF_GetRandomKeyFromJSON',
+  h3PromptMaker = 'LF_H3PromptMaker',
   imageClassifier = 'LF_ImageClassifier',
   imageGrid = 'LF_ImageGrid',
   imageList = 'LF_ImageList',
