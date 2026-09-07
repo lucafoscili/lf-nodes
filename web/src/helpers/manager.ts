@@ -57,6 +57,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_GaussianBlur: [CustomWidgetName.compare],
   LF_GeminiAPI: [CustomWidgetName.code],
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
+  LF_GetKeyFromJSONByIndex: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_H3PromptMaker: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],

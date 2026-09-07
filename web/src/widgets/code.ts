@@ -71,6 +71,22 @@ export const codeFactory: CodeFactory = {
 
     STATE.set(wrapper, { code, node, wrapper });
 
+    if (node.comfyClass === NodeName.getKeyFromJsonByIndex) {
+      const outputNode = node as NodeType & {
+        onExecuted?: (output: unknown, ...args: unknown[]) => unknown;
+      };
+      const previous = outputNode.onExecuted;
+      outputNode.onExecuted = function (output, ...args) {
+        const result = previous?.apply(this, [output, ...args]);
+        const entries = (output as { lf_output?: Array<{ value?: unknown }> } | null)?.lf_output;
+        if (Array.isArray(entries)) {
+          const values = entries.filter((entry) => typeof entry?.value === 'string');
+          if (values.length) code.lfValue = values.map((entry) => entry.value).join('\n\n');
+        }
+        return result;
+      };
+    }
+
     return { widget: createDOMWidget(CustomWidgetName.code, wrapper, node, options) };
   },
   //#endregion

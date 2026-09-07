@@ -43,8 +43,13 @@ describe('Titanic publication sanitizer', () => {
 
     expect(sanitized).toEqual(fixture);
     expect(auditSanitizedTitanic(sanitized)).toEqual([]);
-    expect(sanitized.nodes).toHaveLength(355);
-    expect(sanitized.links).toHaveLength(468);
+    expect(sanitized.nodes).toHaveLength(358);
+    expect(sanitized.links).toHaveLength(470);
+    const indexedKey = sanitized.nodes.find((node) => node.id === 596);
+    expect(indexedKey.type).toBe('LF_GetKeyFromJSONByIndex');
+    expect(indexedKey.widgets_values_named.index).toBe(1);
+    expect(sanitized.links).toContainEqual([1208, 595, 0, 596, 0, 'JSON']);
+    expect(sanitized.links).toContainEqual([1209, 596, 0, 597, 0, 'STRING']);
   });
 
   it('removes private selectors, stale sessions, preview caches, and old history', () => {

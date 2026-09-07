@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "80bc7770621202b7dbf9e7d0be5ff7c954a54cb29fef5bdfb0828e8f931ba955",
-    "expectedNodeCount": 355,
-    "expectedLinkCount": 468
+    "expectedSha256": "a4b499cdc73e0ed128a9aae1f587d8167c62fa22d64972ab43639af30f0d5efa",
+    "expectedNodeCount": 358,
+    "expectedLinkCount": 470
   },
   "smokeCases": [
     {
@@ -33,6 +33,14 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.json-key-index",
+      "title": "Insertion-order JSON key selection and preview history",
+      "resourceClass": "cpu",
+      "targets": [595, 597],
+      "timeoutSeconds": 60,
+      "expect": {"597": {"minimumStringLength": 5}}
+    },
     {
       "id": "cpu.headless",
       "title": "Headless CPU and lightweight UI-output nodes",

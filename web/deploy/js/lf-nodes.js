@@ -1315,6 +1315,7 @@ var NodeName;
   NodeName2["geminiAPI"] = "LF_GeminiAPI";
   NodeName2["getValueFromJson"] = "LF_GetValueFromJSON";
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
+  NodeName2["getKeyFromJsonByIndex"] = "LF_GetKeyFromJSONByIndex";
   NodeName2["h3PromptMaker"] = "LF_H3PromptMaker";
   NodeName2["imageClassifier"] = "LF_ImageClassifier";
   NodeName2["imageGrid"] = "LF_ImageGrid";
@@ -1324,6 +1325,7 @@ var NodeName;
   NodeName2["imagesEditingBreakpoint"] = "LF_ImagesEditingBreakpoint";
   NodeName2["imagesSlideshow"] = "LF_ImagesSlideshow";
   NodeName2["imageToSvg"] = "LF_ImageToSVG";
+  NodeName2["isoDiamondTiles"] = "LF_IsoDiamondTiles";
   NodeName2["inpaint"] = "LF_Inpaint";
   NodeName2["inpaintAdvanced"] = "LF_InpaintAdvanced";
   NodeName2["integer"] = "LF_Integer";
@@ -1375,6 +1377,8 @@ var NodeName;
   NodeName2["saveSvg"] = "LF_SaveSVG";
   NodeName2["saveText"] = "LF_SaveText";
   NodeName2["schedulerSelector"] = "LF_SchedulerSelector";
+  NodeName2["seamlessTile"] = "LF_SeamlessTile";
+  NodeName2["selectLoopSegment"] = "LF_SelectLoopSegment";
   NodeName2["selectSettledImageFrame"] = "LF_SelectSettledImageFrame";
   NodeName2["sepia"] = "LF_Sepia";
   NodeName2["sideBySide"] = "LF_SideBySide";
@@ -1693,6 +1697,7 @@ const NODE_WIDGET_MAP = {
   LF_GaussianBlur: [CustomWidgetName.compare],
   LF_GeminiAPI: [CustomWidgetName.code],
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
+  LF_GetKeyFromJSONByIndex: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_H3PromptMaker: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],
@@ -1702,6 +1707,7 @@ const NODE_WIDGET_MAP = {
   LF_ImageListFromJSON: [CustomWidgetName.masonry],
   LF_ImagesEditingBreakpoint: [CustomWidgetName.imageEditor],
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
+  LF_IsoDiamondTiles: [CustomWidgetName.masonry],
   LF_ImageToSVG: [CustomWidgetName.compare],
   LF_Inpaint: [CustomWidgetName.compare],
   LF_InpaintAdvanced: [CustomWidgetName.compare],
@@ -1755,6 +1761,8 @@ const NODE_WIDGET_MAP = {
   LF_SaveSVG: [CustomWidgetName.masonry],
   LF_SaveText: [CustomWidgetName.tree],
   LF_SchedulerSelector: [CustomWidgetName.history],
+  LF_SeamlessTile: [CustomWidgetName.masonry],
+  LF_SelectLoopSegment: [CustomWidgetName.masonry],
   LF_SelectSettledImageFrame: [CustomWidgetName.masonry],
   LF_Sepia: [CustomWidgetName.compare],
   LF_SideBySide: [CustomWidgetName.masonry],
@@ -7660,6 +7668,20 @@ const codeFactory = {
     wrapper.appendChild(content);
     const options = codeFactory.options(wrapper);
     STATE$b.set(wrapper, { code, node, wrapper });
+    if (node.comfyClass === NodeName.getKeyFromJsonByIndex) {
+      const outputNode = node;
+      const previous = outputNode.onExecuted;
+      outputNode.onExecuted = function(output, ...args) {
+        const result = previous == null ? void 0 : previous.apply(this, [output, ...args]);
+        const entries = output == null ? void 0 : output.lf_output;
+        if (Array.isArray(entries)) {
+          const values = entries.filter((entry) => typeof (entry == null ? void 0 : entry.value) === "string");
+          if (values.length)
+            code.lfValue = values.map((entry) => entry.value).join("\n\n");
+        }
+        return result;
+      };
+    }
     return { widget: createDOMWidget(CustomWidgetName.code, wrapper, node, options) };
   },
   //#endregion
