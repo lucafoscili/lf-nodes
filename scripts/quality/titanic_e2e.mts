@@ -29,6 +29,7 @@ import {
   validateCoverage,
   validateExecutionTrace,
   validateEditorClientBinding,
+  validateLifecycleModelFixture,
   validateLoadedModelFixture,
   type ExecutionTrace,
   type GateOutcome,
@@ -577,6 +578,54 @@ const validateCombos = (
   return blockers;
 };
 
+const validateCaseBindings = (
+  prompt: JsonRecord,
+  manifestCase: ManifestCase,
+): string[] => {
+  const blockers: string[] = [];
+  const ancestors = collectAncestors(prompt, manifestCase.targets);
+  const modelNodeIds = manifestCase.bindings?.localModelIdNodeIds ?? [];
+  const nativeChatNodeIds =
+    manifestCase.bindings?.localNativeChatNodeIds ?? [];
+  if (
+    manifestCase.resourceClass === 'local-llm-lifecycle-gpu-write' &&
+    modelNodeIds.length !== 1
+  ) {
+    blockers.push(
+      'local lifecycle case must bind exactly one LF_LMSLoadModel node',
+    );
+  }
+  for (const nodeId of modelNodeIds) {
+    const node = prompt[String(nodeId)];
+    if (node?.class_type !== 'LF_LMSLoadModel') {
+      blockers.push(`local model binding node ${nodeId} is not LF_LMSLoadModel`);
+    }
+    if (!ancestors.has(String(nodeId))) {
+      blockers.push(`local model binding node ${nodeId} is outside the target ancestry`);
+    }
+  }
+  const nativeChatTypes = new Set([
+    'LF_LMSLoadModel',
+    'LF_LocalChatCompletions',
+    'LF_H3PromptMaker',
+    'LF_LMSUnloadModel',
+  ]);
+  for (const nodeId of nativeChatNodeIds) {
+    const node = prompt[String(nodeId)];
+    if (!nativeChatTypes.has(String(node?.class_type ?? ''))) {
+      blockers.push(
+        `local native-chat binding node ${nodeId} has unsupported class ${String(node?.class_type)}`,
+      );
+    }
+    if (!ancestors.has(String(nodeId))) {
+      blockers.push(
+        `local native-chat binding node ${nodeId} is outside the target ancestry`,
+      );
+    }
+  }
+  return blockers;
+};
+
 const queueIsEmpty = async (comfyUrl: string) => {
   const raw = await jsonFetch(`${comfyUrl}/queue`);
   const parsed = parseQueueSnapshot(raw);
@@ -587,8 +636,17 @@ const queueCaseThroughFrontend = async (
   page: Page,
   targets: number[],
   requestedPromptId: string,
+  bindings: ManifestCase['bindings'] | undefined,
+  localModelId: string | undefined,
+  localNativeChatUrl: string,
 ) =>
-  page.evaluate(async ({ targetIds, ownedPromptId }) => {
+  page.evaluate(async ({
+    targetIds,
+    ownedPromptId,
+    caseBindings,
+    boundLocalModelId,
+    boundLocalNativeChatUrl,
+  }) => {
     const comfy = (window as any).comfyAPI;
     const app = comfy.app.app;
     const api = comfy.api.api;
@@ -596,6 +654,11 @@ const queueCaseThroughFrontend = async (
     let submittedPrompt: any = null;
     let submittedPartialExecutionTargets: any = null;
     let promptIdInjected = false;
+    const appliedBindings: Array<{
+      nodeId: string;
+      input: string;
+      value: string;
+    }> = [];
     const original = api.queuePrompt;
     const originalFetchApi = api.fetchApi;
     api.fetchApi = async function (route: string, options?: RequestInit) {
@@ -613,6 +676,36 @@ const queueCaseThroughFrontend = async (
       return originalFetchApi.call(this, route, options);
     };
     api.queuePrompt = async function (...args: any[]) {
+      const output = args[1]?.output;
+      for (const nodeId of caseBindings?.localModelIdNodeIds ?? []) {
+        const node = output?.[String(nodeId)];
+        if (node?.class_type !== 'LF_LMSLoadModel') {
+          throw new Error(
+            `local model binding node ${nodeId} is not LF_LMSLoadModel`,
+          );
+        }
+        if (!boundLocalModelId) {
+          throw new Error('local model binding has no --local-model-id value');
+        }
+        node.inputs.model = boundLocalModelId;
+        appliedBindings.push({
+          nodeId: String(nodeId),
+          input: 'model',
+          value: boundLocalModelId,
+        });
+      }
+      for (const nodeId of caseBindings?.localNativeChatNodeIds ?? []) {
+        const node = output?.[String(nodeId)];
+        if (!node || typeof node.class_type !== 'string') {
+          throw new Error(`local native-chat binding node ${nodeId} is absent`);
+        }
+        node.inputs.url = boundLocalNativeChatUrl;
+        appliedBindings.push({
+          nodeId: String(nodeId),
+          input: 'url',
+          value: boundLocalNativeChatUrl,
+        });
+      }
       submittedPrompt = JSON.parse(JSON.stringify(args[1]?.output ?? null));
       submittedPartialExecutionTargets = JSON.parse(
         JSON.stringify(args[2]?.partialExecutionTargets ?? null),
@@ -641,12 +734,19 @@ const queueCaseThroughFrontend = async (
         submittedPartialExecutionTargets,
         requestedPromptId: ownedPromptId,
         promptIdInjected,
+        appliedBindings,
       };
     } finally {
       api.queuePrompt = original;
       api.fetchApi = originalFetchApi;
     }
-  }, { targetIds: targets, ownedPromptId: requestedPromptId });
+  }, {
+    targetIds: targets,
+    ownedPromptId: requestedPromptId,
+    caseBindings: bindings,
+    boundLocalModelId: localModelId,
+    boundLocalNativeChatUrl: localNativeChatUrl,
+  });
 
 const installExecutionRecorder = async (page: Page): Promise<string> => {
   const token = randomUUID();
@@ -2107,6 +2207,48 @@ const localModelBlockers = async (options: CliOptions): Promise<string[]> => {
   );
 };
 
+const localLifecycleModelBlockers = async (
+  options: CliOptions,
+): Promise<string[]> => {
+  if (!options.localModelId) {
+    return ['--local-model-id is required to bind the exact lifecycle model'];
+  }
+  let response: any;
+  try {
+    response = await jsonFetch(
+      `${options.lmStudioUrl}/api/v1/models`,
+      {},
+      10_000,
+    );
+  } catch (error) {
+    return [`local model endpoint is unavailable: ${String(error)}`];
+  }
+  return validateLifecycleModelFixture(
+    response,
+    options.localModelId,
+    options.localInstanceId,
+  );
+};
+
+const localLifecycleUnloadAssertions = async (
+  options: CliOptions,
+): Promise<string[]> => {
+  if (!options.localModelId) {
+    return ['local lifecycle completion has no bound model id'];
+  }
+  let response: any;
+  try {
+    response = await jsonFetch(
+      `${options.lmStudioUrl}/api/v1/models`,
+      {},
+      10_000,
+    );
+  } catch (error) {
+    return [`post-lifecycle model inventory is unavailable: ${String(error)}`];
+  }
+  return validateLifecycleModelFixture(response, options.localModelId);
+};
+
 const historyPromptIds = async (comfyUrl: string): Promise<Set<string>> => {
   const history = await jsonFetch(`${comfyUrl}/history`);
   return new Set(Object.keys(history ?? {}));
@@ -2335,8 +2477,15 @@ const executeCase = async (
     if (optionRecord[flag] !== true) blockers.push(`requires --${flag.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}`);
   }
   blockers.push(...validateCombos(prompt, objectInfo, manifestCase.targets));
+  blockers.push(...validateCaseBindings(prompt, manifestCase));
   if (manifestCase.resourceClass === 'local-llm-gpu-write' && options.allowLocalLlm) {
     blockers.push(...(await localModelBlockers(options)));
+  }
+  if (
+    manifestCase.resourceClass === 'local-llm-lifecycle-gpu-write' &&
+    options.allowLocalLlm
+  ) {
+    blockers.push(...(await localLifecycleModelBlockers(options)));
   }
   if (blockers.length) {
     return {
@@ -2375,6 +2524,9 @@ const executeCase = async (
       page,
       manifestCase.targets,
       requestedPromptId,
+      manifestCase.bindings,
+      options.localModelId,
+      `${options.lmStudioUrl}/api/v1/chat`,
     );
   } catch (error) {
     submissionError = String(error);
@@ -2472,6 +2624,7 @@ const executeCase = async (
       submittedTargets !== null &&
       expectedTargets !== null &&
       JSON.stringify(submittedTargets) === JSON.stringify(expectedTargets),
+    appliedBindings: queued.appliedBindings ?? [],
   };
 
   let interaction: JsonRecord | undefined;
@@ -2625,6 +2778,9 @@ const executeCase = async (
       ),
     );
   }
+  if (manifestCase.resourceClass === 'local-llm-lifecycle-gpu-write') {
+    assertions.push(...(await localLifecycleUnloadAssertions(options)));
+  }
   assertions.push(
     ...(await validatePreviewAssets(
       options.comfyUrl,
@@ -2632,7 +2788,13 @@ const executeCase = async (
       terminal.entry,
     )),
   );
-  const liveWidgets = await readLiveWidgets(page, manifestCase.targets);
+  const liveWidgetNodeIds = [
+    ...new Set([
+      ...manifestCase.targets,
+      ...Object.keys(manifestCase.expect ?? {}).map(Number),
+    ]),
+  ];
+  const liveWidgets = await readLiveWidgets(page, liveWidgetNodeIds);
   for (const [nodeId, expectation] of Object.entries(manifestCase.expect ?? {}) as Array<
     [
       string,

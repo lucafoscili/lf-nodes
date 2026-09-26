@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "a4b499cdc73e0ed128a9aae1f587d8167c62fa22d64972ab43639af30f0d5efa",
-    "expectedNodeCount": 358,
-    "expectedLinkCount": 470
+    "expectedSha256": "95fe6009cb8a0357d153faab2cec27e3e73fee561452075ca871dc1538ff9d58",
+    "expectedNodeCount": 372,
+    "expectedLinkCount": 490
   },
   "smokeCases": [
     {
@@ -30,6 +30,30 @@
           "previewStorageType": "input"
         }
       }
+    },
+    {
+      "id": "scratch.new-media-toys",
+      "title": "Seamless, isometric, and loop-selection media building blocks",
+      "resourceClass": "cpu",
+      "targets": [610, 611],
+      "timeoutSeconds": 120,
+      "expect": {
+        "598": {
+          "receiptSchema": "lf.seamless_tile.receipt.v1",
+          "minimumPreviewCount": 1,
+          "previewStorageType": "input"
+        },
+        "599": {
+          "receiptSchema": "lf.iso_diamond_tiles.receipt.v1",
+          "minimumPreviewCount": 4,
+          "previewStorageType": "input"
+        },
+        "600": {
+          "receiptSchema": "lf.select_loop_segment.receipt.v1",
+          "minimumPreviewCount": 4,
+          "previewStorageType": "input"
+        }
+      }
     }
   ],
   "coverageCases": [
@@ -40,6 +64,30 @@
       "targets": [595, 597],
       "timeoutSeconds": 60,
       "expect": {"597": {"minimumStringLength": 5}}
+    },
+    {
+      "id": "cpu.new-media-toys",
+      "title": "Seamless, isometric, and loop-selection media building blocks",
+      "resourceClass": "cpu",
+      "targets": [610, 611],
+      "timeoutSeconds": 120,
+      "expect": {
+        "598": {
+          "receiptSchema": "lf.seamless_tile.receipt.v1",
+          "minimumPreviewCount": 1,
+          "previewStorageType": "input"
+        },
+        "599": {
+          "receiptSchema": "lf.iso_diamond_tiles.receipt.v1",
+          "minimumPreviewCount": 4,
+          "previewStorageType": "input"
+        },
+        "600": {
+          "receiptSchema": "lf.select_loop_segment.receipt.v1",
+          "minimumPreviewCount": 4,
+          "previewStorageType": "input"
+        }
+      }
     },
     {
       "id": "cpu.headless",
@@ -61,6 +109,18 @@
       "resourceClass": "durable-write",
       "targets": [106, 242, 246, 426, 554, 572, 573, 588],
       "timeoutSeconds": 300
+    },
+    {
+      "id": "fs.audio-write",
+      "title": "Audio saver and receipt output",
+      "resourceClass": "durable-write",
+      "targets": [602],
+      "timeoutSeconds": 60,
+      "expect": {
+        "602": {
+          "receiptSchema": "lf.audio_file.receipt.v1"
+        }
+      }
     },
     {
       "id": "model.cpu",
@@ -118,6 +178,43 @@
           "forbidTopLevelJsonKeys": ["error"]
         },
         "368": {
+          "minimumStringLength": 1,
+          "forbiddenStringPrefixes": ["Oops!", "Whoops!"]
+        }
+      }
+    },
+    {
+      "id": "llm.local-lifecycle",
+      "title": "Local vision authoring and exact-instance LMS lifecycle",
+      "resourceClass": "local-llm-lifecycle-gpu-write",
+      "targets": [609],
+      "timeoutSeconds": 3600,
+      "bindings": {
+        "localModelIdNodeIds": [603],
+        "localNativeChatNodeIds": [603, 604, 605, 607, 608]
+      },
+      "execution": {
+        "requiredNodeIds": [603, 604, 605, 606, 607, 608, 609],
+        "forbiddenCachedNodeIds": [603, 604, 605, 606, 607, 608, 609]
+      },
+      "expect": {
+        "605": {
+          "requiredNamedValues": {
+            "referenceImageCount": 2,
+            "method": "prose",
+            "enabled": true,
+            "status": "completed"
+          }
+        },
+        "608": {
+          "requiredNamedValues": {
+            "referenceImageCount": 2,
+            "method": "prose",
+            "enabled": false,
+            "status": "skipped"
+          }
+        },
+        "609": {
           "minimumStringLength": 1,
           "forbiddenStringPrefixes": ["Oops!", "Whoops!"]
         }

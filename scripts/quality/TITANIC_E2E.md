@@ -34,7 +34,8 @@ corepack yarn test:titanic
 
 This checks workflow identity, the seven disabled-policy branches, real
 frontend hydration, LF custom-widget DOM mounting, authoritative prompt
-serialization, and exhaustive classification of all 120 active output nodes.
+serialization, exhaustive classification of every active output node, and
+inventory coverage for every currently published LF node type.
 The canonical `E2E.json` bytes are checked again before exit.
 
 ## Bounded CPU experience check
@@ -43,11 +44,12 @@ The canonical `E2E.json` bytes are checked again before exit.
 corepack yarn test:titanic -- --execute-smoke
 ```
 
-This additionally queues the three uniquely titled CPU widget specimens:
-`LF_PeriodicImageBatchSampler`, `LF_NormalizeSpriteBatch`, and
-`LF_SelectSettledImageFrame`. It requires exact terminal history, their
-versioned receipts, generated preview URLs, live widget updates, durable
-`ui.lf_output`, and an unchanged workflow file.
+This additionally queues the three established CPU widget specimens plus the
+new deterministic media slice: `LF_SeamlessTile`, `LF_IsoDiamondTiles`, and
+`LF_SelectLoopSegment`. It requires exact terminal history, their versioned
+receipts, generated preview URLs, live widget updates, durable `ui.lf_output`,
+and an unchanged workflow file. It never calls a provider or changes model
+residency.
 
 ## Full active-workflow gate
 
@@ -120,6 +122,18 @@ with `--local-instance-id`, and it must advertise vision support. The
 OpenAI-compatible `/v1/models` endpoint is deliberately not used because LM
 Studio can list every downloaded model there while JIT loading is enabled. The
 gate does not unload a foreign model or choose one implicitly.
+
+The separate `llm.local-lifecycle` case exercises `LF_LMSLoadModel`,
+`LF_LocalChatCompletions`, both reviewed and review-disabled
+`LF_H3PromptMaker` paths with two unequal-size image references, and
+`LF_LMSUnloadModel`. The checked-in workflow keeps model and endpoint fields
+portable; immediately before the owned frontend submission, the gate binds
+`--local-model-id` and `--lm-studio-url` only to the manifest-declared nodes.
+An unloaded downloaded model may be loaded by the case. Reusing an already
+loaded model additionally requires `--local-instance-id`, making the exact
+instance subject to unload explicit. The graph passes that loader-emitted ID
+to the unload node, and the gate verifies after success that this model has no
+resident instance. No global unload is issued.
 
 ## Outcomes and evidence
 

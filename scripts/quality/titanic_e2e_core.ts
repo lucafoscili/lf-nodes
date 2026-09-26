@@ -27,6 +27,10 @@ export interface ManifestCase {
     committedEditIngressNodeId?: number;
     committedEditOutputNodeId?: number;
   };
+  bindings?: {
+    localModelIdNodeIds?: number[];
+    localNativeChatNodeIds?: number[];
+  };
   expect?: Record<
     string,
     {
@@ -36,6 +40,10 @@ export interface ManifestCase {
       forbidTopLevelJsonKeys?: string[];
       minimumStringLength?: number;
       forbiddenStringPrefixes?: string[];
+      requiredNamedValues?: Record<
+        string,
+        string | number | boolean | null
+      >;
     }
   >;
 }
@@ -643,6 +651,16 @@ export const validateCaseOutputs = (
         }
       }
     }
+    for (const [name, expected] of Object.entries(
+      expectation.requiredNamedValues ?? {},
+    )) {
+      const values = collectNamedValues(output, name);
+      if (!values.some((value) => Object.is(value, expected))) {
+        errors.push(
+          `node ${nodeId} exposed no ${JSON.stringify(name)} value equal to ${JSON.stringify(expected)}`,
+        );
+      }
+    }
   }
   return errors;
 };
@@ -655,6 +673,7 @@ const RESOURCE_CLASS_FLAGS: Readonly<Record<string, readonly string[]>> = Object
   gpu: ['allowGpu', 'allowModels'],
   'gpu-unpinned': ['allowGpu', 'allowModels', 'allowUnpinnedInputs'],
   'local-llm-gpu-write': ['allowGpu', 'allowModels', 'allowWrites', 'allowLocalLlm'],
+  'local-llm-lifecycle-gpu-write': ['allowGpu', 'allowModels', 'allowWrites', 'allowLocalLlm'],
   'model-cpu': ['allowModels'],
   'model-gpu-write': ['allowGpu', 'allowModels', 'allowWrites'],
 });
@@ -718,6 +737,74 @@ export const validateLoadedModelFixture = (
   }
   if (!fixture.vision) {
     errors.push('loaded local model does not advertise vision capability');
+  }
+  return errors;
+};
+
+export const validateLifecycleModelFixture = (
+  value: unknown,
+  expectedModelKey: string,
+  expectedInstanceId?: string,
+): string[] => {
+  const response = asRecord(value);
+  if (!response || !Array.isArray(response.models)) {
+    return ['LM Studio native model response has no models array'];
+  }
+  const matches = response.models
+    .map(asRecord)
+    .filter(
+      (model): model is Record<string, unknown> =>
+        Boolean(model) && model?.key === expectedModelKey,
+    );
+  if (matches.length !== 1) {
+    return [
+      `expected exactly one downloaded local model with key ${JSON.stringify(expectedModelKey)}, found ${matches.length}`,
+    ];
+  }
+  const [model] = matches;
+  if (model.type !== 'llm') {
+    return [
+      `local model ${JSON.stringify(expectedModelKey)} is not an LLM`,
+    ];
+  }
+  if (!Array.isArray(model.loaded_instances)) {
+    return [
+      `local model ${JSON.stringify(expectedModelKey)} has malformed loaded_instances`,
+    ];
+  }
+  const instanceIds: string[] = [];
+  for (const [index, candidate] of model.loaded_instances.entries()) {
+    const instance = asRecord(candidate);
+    if (!instance || typeof instance.id !== 'string' || !instance.id) {
+      return [
+        `local model ${JSON.stringify(expectedModelKey)} loaded instance ${index} has no id`,
+      ];
+    }
+    instanceIds.push(instance.id);
+  }
+  const errors: string[] = [];
+  if (instanceIds.length > 1) {
+    errors.push(
+      `local model ${JSON.stringify(expectedModelKey)} has multiple loaded instances (${instanceIds.length})`,
+    );
+  } else if (instanceIds.length === 1) {
+    if (!expectedInstanceId) {
+      errors.push(
+        'an already-loaded lifecycle model requires --local-instance-id so the exact reusable instance is explicit',
+      );
+    } else if (instanceIds[0] !== expectedInstanceId) {
+      errors.push(
+        `loaded instance ${JSON.stringify(instanceIds[0])} does not match ${JSON.stringify(expectedInstanceId)}`,
+      );
+    }
+  } else if (expectedInstanceId) {
+    errors.push(
+      `local instance ${JSON.stringify(expectedInstanceId)} was required but the lifecycle model is unloaded`,
+    );
+  }
+  const capabilities = asRecord(model.capabilities);
+  if (capabilities?.vision !== true) {
+    errors.push('local lifecycle model does not advertise vision capability');
   }
   return errors;
 };

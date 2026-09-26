@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,8 +18,38 @@ const imageFixturePath = resolve(
   'titanic-image',
   'titanic-fixture.png',
 );
+const manifestPath = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'titanic_cases.json',
+);
+const nodesRoot = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  'modules',
+  'nodes',
+);
 
 const readFixture = () => JSON.parse(readFileSync(fixturePath, 'utf8'));
+const readManifest = () => JSON.parse(readFileSync(manifestPath, 'utf8'));
+
+const publicNodeTypes = (): string[] => {
+  const files = readdirSync(nodesRoot, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.py'))
+    .map((entry) => resolve(entry.parentPath, entry.name));
+  const names = new Set<string>();
+  for (const path of files) {
+    const source = readFileSync(path, 'utf8');
+    for (const mapping of source.matchAll(/NODE_CLASS_MAPPINGS\s*=\s*\{([\s\S]*?)\}/g)) {
+      for (const key of mapping[1].matchAll(/["'](LF_[A-Za-z0-9_]+)["']\s*:/g)) {
+        names.add(key[1]);
+      }
+    }
+  }
+  return [...names].sort();
+};
 
 describe('Titanic publication sanitizer', () => {
   it('pins a metadata-free generic raster fixture', () => {
@@ -43,13 +73,104 @@ describe('Titanic publication sanitizer', () => {
 
     expect(sanitized).toEqual(fixture);
     expect(auditSanitizedTitanic(sanitized)).toEqual([]);
-    expect(sanitized.nodes).toHaveLength(358);
-    expect(sanitized.links).toHaveLength(470);
+    expect(sanitized.nodes).toHaveLength(372);
+    expect(sanitized.links).toHaveLength(490);
     const indexedKey = sanitized.nodes.find((node) => node.id === 596);
     expect(indexedKey.type).toBe('LF_GetKeyFromJSONByIndex');
     expect(indexedKey.widgets_values_named.index).toBe(1);
     expect(sanitized.links).toContainEqual([1208, 595, 0, 596, 0, 'JSON']);
     expect(sanitized.links).toContainEqual([1209, 596, 0, 597, 0, 'STRING']);
+  });
+
+  it('contains every currently published LF node type', () => {
+    const fixtureTypes = [...new Set(
+      readFixture().nodes
+        .map((node: any) => node.type)
+        .filter((type: unknown) => typeof type === 'string' && type.startsWith('LF_')),
+    )].sort();
+    expect(fixtureTypes).toEqual(publicNodeTypes());
+  });
+
+  it('pins the new media, audio, and exact-instance local-LLM coverage slice', () => {
+    const fixture = readFixture();
+    const manifest = readManifest();
+    const byId = (id: number) => fixture.nodes.find((node: any) => node.id === id);
+    expect(
+      Array.from({ length: 14 }, (_, index) => byId(598 + index).type),
+    ).toEqual([
+      'LF_SeamlessTile',
+      'LF_IsoDiamondTiles',
+      'LF_SelectLoopSegment',
+      'EmptyAudio',
+      'LF_SaveAudio',
+      'LF_LMSLoadModel',
+      'LF_LocalChatCompletions',
+      'LF_H3PromptMaker',
+      'LF_WallOfText',
+      'LF_LMSUnloadModel',
+      'LF_H3PromptMaker',
+      'LF_DisplayString',
+      'LF_ViewImages',
+      'LF_ViewImages',
+    ]);
+    expect(byId(605).widgets_values_named).toMatchObject({
+      intent: 'walking through a medieval town',
+      mode: 'auto',
+      review: true,
+    });
+    expect(byId(608).widgets_values_named.review).toBe(false);
+    expect(byId(555).widgets_values_named).toMatchObject({ width: 512, height: 320 });
+    expect(byId(553).widgets_values_named).toMatchObject({ width: 448, height: 150 });
+    expect(fixture.links).toContainEqual([1221, 556, 0, 605, 4, 'IMAGE']);
+    expect(fixture.links).toContainEqual([1222, 553, 0, 605, 10, 'IMAGE']);
+    expect(fixture.links).toContainEqual([1219, 603, 0, 607, 1, 'STRING']);
+    expect(fixture.links).toContainEqual([1228, 606, 0, 607, 0, 'STRING']);
+
+    const lifecycle = manifest.coverageCases.find(
+      (candidate: any) => candidate.id === 'llm.local-lifecycle',
+    );
+    expect(lifecycle).toMatchObject({
+      resourceClass: 'local-llm-lifecycle-gpu-write',
+      targets: [609],
+      bindings: {
+        localModelIdNodeIds: [603],
+        localNativeChatNodeIds: [603, 604, 605, 607, 608],
+      },
+    });
+    expect(
+      manifest.coverageCases.find((candidate: any) => candidate.id === 'fs.audio-write'),
+    ).toMatchObject({
+      resourceClass: 'durable-write',
+      targets: [602],
+      expect: { '602': { receiptSchema: 'lf.audio_file.receipt.v1' } },
+    });
+  });
+
+  it('tracks the current periodic and normalized batch output schemas', () => {
+    const fixture = readFixture();
+    const byId = (id: number) => fixture.nodes.find((node: any) => node.id === id);
+    const outputContract = (id: number) => byId(id).outputs.map((output: any) => ({
+      name: output.name,
+      type: output.type,
+      shape: output.shape ?? null,
+    }));
+
+    expect(byId(590).widgets_values_named.sampling_basis).toBe('timeline');
+    expect(byId(590).inputs.at(-1)).toMatchObject({
+      name: 'sampling_basis',
+      type: 'COMBO',
+      widget: { name: 'sampling_basis' },
+    });
+    expect(outputContract(590)).toEqual([
+      { name: 'image', type: 'IMAGE', shape: null },
+      { name: 'receipt', type: 'JSON', shape: null },
+      { name: 'image_list', type: 'IMAGE', shape: 6 },
+    ]);
+    expect(outputContract(592)).toEqual([
+      { name: 'image', type: 'IMAGE', shape: null },
+      { name: 'receipt', type: 'JSON', shape: null },
+      { name: 'image_list', type: 'IMAGE', shape: 6 },
+    ]);
   });
 
   it('removes private selectors, stale sessions, preview caches, and old history', () => {

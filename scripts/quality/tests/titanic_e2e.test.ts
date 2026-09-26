@@ -25,6 +25,7 @@ import {
   validateCoverage,
   validateExecutionTrace,
   validateEditorClientBinding,
+  validateLifecycleModelFixture,
   validateLoadedModelFixture,
   type TitanicManifest,
 } from '../titanic_e2e_core.ts';
@@ -392,6 +393,40 @@ describe('Titanic E2E pure contracts', () => {
     ]);
   });
 
+  it('asserts nested authoring state by exact named values', () => {
+    const manifestCase = {
+      id: 'h3',
+      expect: {
+        '10': {
+          requiredNamedValues: {
+            referenceImageCount: 2,
+            method: 'prose',
+            enabled: true,
+            status: 'completed',
+          },
+        },
+      },
+    } as any;
+    const history = {
+      outputs: {
+        '10': {
+          lf_output: [{
+            validation_report: {
+              referenceImageCount: 2,
+              review: { enabled: true, status: 'completed' },
+              authoring: { method: 'prose' },
+            },
+          }],
+        },
+      },
+    };
+    expect(validateCaseOutputs(manifestCase, history)).toEqual([]);
+    history.outputs['10'].lf_output[0].validation_report.review.enabled = false;
+    expect(validateCaseOutputs(manifestCase, history)).toEqual([
+      'node 10 exposed no "enabled" value equal to true',
+    ]);
+  });
+
   it('maps resource classes to explicit authority gates', () => {
     expect(requiredFlagsForResourceClass('cpu')).toEqual([]);
     expect(requiredFlagsForResourceClass('filesystem-unpinned')).toEqual([
@@ -418,6 +453,12 @@ describe('Titanic E2E pure contracts', () => {
       'allowUnpinnedInputs',
     ]);
     expect(requiredFlagsForResourceClass('local-llm-gpu-write')).toEqual([
+      'allowGpu',
+      'allowModels',
+      'allowWrites',
+      'allowLocalLlm',
+    ]);
+    expect(requiredFlagsForResourceClass('local-llm-lifecycle-gpu-write')).toEqual([
       'allowGpu',
       'allowModels',
       'allowWrites',
@@ -469,6 +510,41 @@ describe('Titanic E2E pure contracts', () => {
         'fixture',
       ),
     ).toEqual(['expected exactly one loaded local model instance, found 0']);
+  });
+
+  it('permits a downloaded lifecycle model only when instance ownership is explicit', () => {
+    const unloaded = {
+      models: [{
+        key: 'fixture',
+        type: 'llm',
+        capabilities: { vision: true },
+        loaded_instances: [],
+      }],
+    };
+    expect(validateLifecycleModelFixture(unloaded, 'fixture')).toEqual([]);
+    expect(
+      validateLifecycleModelFixture(unloaded, 'fixture', 'already-loaded'),
+    ).toEqual([
+      'local instance "already-loaded" was required but the lifecycle model is unloaded',
+    ]);
+
+    const loaded = {
+      models: [{
+        ...unloaded.models[0],
+        loaded_instances: [{ id: 'exact-instance' }],
+      }],
+    };
+    expect(validateLifecycleModelFixture(loaded, 'fixture')).toEqual([
+      'an already-loaded lifecycle model requires --local-instance-id so the exact reusable instance is explicit',
+    ]);
+    expect(
+      validateLifecycleModelFixture(loaded, 'fixture', 'exact-instance'),
+    ).toEqual([]);
+    expect(
+      validateLifecycleModelFixture(loaded, 'fixture', 'other-instance'),
+    ).toEqual([
+      'loaded instance "exact-instance" does not match "other-instance"',
+    ]);
   });
 
   it('keeps blocked results distinct from skipped policy branches in JUnit', () => {
