@@ -177,8 +177,17 @@ describe('home catalogue heroes', () => {
     section.render();
     expect(cardCell(masonry, 'broken').lfDataset.nodes[0].cells.hero).toBeUndefined();
     expect(cardCell(masonry, 'healthy').lfDataset.nodes[0].cells.hero).toBeDefined();
+    project(nodes.map((node) => ({ ...node, value: `Updated ${node.id}` })));
+    expect(cardCell(masonry, 'broken').lfDataset.nodes[0].cells.hero).toBeUndefined();
+    expect(cardCell(masonry, 'broken').lfDataset.nodes[0].cells['1'].value).toBe('Updated broken');
     forwardCardEvent(masonry, card, 'click');
     expect(state.mutate.workflow).toHaveBeenCalledExactlyOnceWith('broken');
+
+    section.destroy();
+    section.mount();
+    section.render();
+    expect(cardCell(registry[HOME_CLASSES.blockMasonry], 'broken').lfDataset.nodes[0].cells.hero)
+      .toBeDefined();
   });
 
   it('ignores image load events and stale or unrelated image errors', () => {

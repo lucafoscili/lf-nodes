@@ -491,6 +491,7 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
   //#region Local variables
   const { HOME_DESTROYED, HOME_MOUNTED, HOME_UPDATED } = DEBUG_MESSAGES;
   const failedHeroes = new Set<string>();
+  let renderedWorkflows: string | undefined;
   //#endregion
 
   //#region Destroy
@@ -503,6 +504,7 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
       uiRegistry.remove(element);
     }
     failedHeroes.clear();
+    renderedWorkflows = undefined;
 
     debugLog(HOME_DESTROYED);
   };
@@ -620,7 +622,13 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
       return;
     }
 
-    const clone: WorkflowAPIDataset = JSON.parse(JSON.stringify(state.workflows));
+    // Queue and run updates clone the workflow dataset too. Compare content so
+    // unchanged cards keep their DOM, loaded images, and completed animations.
+    const serializedWorkflows = JSON.stringify(state.workflows);
+    if (serializedWorkflows === renderedWorkflows) {
+      return;
+    }
+    const clone: WorkflowAPIDataset = JSON.parse(serializedWorkflows);
     const nodes = _deduplicateNodes(clone.nodes || []);
     const labels = new Map(nodes.map((node) => [node.id, String(node.value || node.id)]));
     const shippedNodes = nodes.filter(_isShipped);
@@ -635,6 +643,7 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
       _renderCustomCatalogue(store, customCatalogue, customNodes, labels, failedHeroes) === 0;
     _setJump(jumpNavigation, jumpShipped, orchestras.count + blocks.count > 0);
     _setJump(jumpNavigation, jumpCustom, customNodes.length > 0);
+    renderedWorkflows = serializedWorkflows;
 
     debugLog(HOME_UPDATED);
   };
