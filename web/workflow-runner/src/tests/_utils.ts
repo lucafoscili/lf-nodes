@@ -226,6 +226,13 @@ export function createMinimalDocumentMock(): Document {
       if (selector === 'head') return mockHead as unknown as Element;
       return null;
     },
+    createDocumentFragment() {
+      return {
+        append() {
+          /* noop */
+        },
+      } as unknown as DocumentFragment;
+    },
     createElement(tagName: string) {
       return {
         tagName,
@@ -254,6 +261,9 @@ export function createMinimalDocumentMock(): Document {
         },
         querySelector() {
           return null;
+        },
+        querySelectorAll() {
+          return [];
         },
         prepend() {
           /* noop */
