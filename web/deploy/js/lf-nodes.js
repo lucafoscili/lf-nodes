@@ -9953,6 +9953,9 @@ const masonryFactory = {
             selected.index = index;
             selected.name = name || "";
             masonry.setSelectedShape(index);
+          } else if (typeof name === "string") {
+            selected.index = NaN;
+            selected.name = name;
           }
           if (Array.isArray(audio)) {
             setMasonryAudio(state, audio);

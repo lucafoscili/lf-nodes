@@ -62,6 +62,33 @@ beforeEach(() => {
   };
 });
 
+describe('image masonry selection hydration', () => {
+  it('hydrates a name-only selection and clears a stale positional selection', () => {
+    const { widget, state } = render(NodeName.loadImages);
+    state.selected = { index: 7, name: 'previous.png' };
+    widget.options.setValue(JSON.stringify({ name: 'working.png' }));
+    expect(state.selected).toEqual({ index: NaN, name: 'working.png' });
+    const serialized = widget.options.getValue() as MasonryDeserializedValue;
+    expect(serialized.name).toBe('working.png');
+    expect(serialized.index).toBeNaN();
+  });
+
+  it('preserves index-first selection when both fields are supplied', () => {
+    const { widget, state } = render(NodeName.loadImages);
+    state.masonry.setSelectedShape = vi.fn();
+    widget.options.setValue(JSON.stringify({ index: 2, name: 'working.png' }));
+    expect(state.selected).toEqual({ index: 2, name: 'working.png' });
+    expect(state.masonry.setSelectedShape).toHaveBeenCalledWith(2);
+  });
+
+  it('keeps selection when a dataset update contains no selection fields', () => {
+    const { widget, state } = render(NodeName.loadImages);
+    state.selected = { index: 3, name: 'working.png' };
+    widget.options.setValue(JSON.stringify({ dataset: { nodes: [] } }));
+    expect(state.selected).toEqual({ index: 3, name: 'working.png' });
+  });
+});
+
 describe('LF_SaveAudio preview', () => {
   it('registers a one-column LF masonry preview with native controls and readable labels', () => {
     expect(NODE_WIDGET_MAP[NodeName.saveAudio]).toEqual([CustomWidgetName.masonry]);
