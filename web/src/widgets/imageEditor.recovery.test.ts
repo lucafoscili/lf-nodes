@@ -7,6 +7,7 @@ import {
   queueImageEditorHydration,
   resolveImageEditorHydrationDataset,
   resolveImageEditorRecoveryRequest,
+  shouldAutoLoadImageEditorDirectory,
 } from './imageEditor';
 
 const pendingColumns = [
@@ -15,6 +16,25 @@ const pendingColumns = [
 ];
 
 describe('image editor recovery authority', () => {
+  it('keeps empty breakpoints awaiting upstream images while loaders retain directory hydration', () => {
+    for (const dataset of [{}, { nodes: [] }]) {
+      expect(
+        shouldAutoLoadImageEditorDirectory(NodeName.imagesEditingBreakpoint, false, dataset),
+      ).toBe(false);
+      expect(
+        shouldAutoLoadImageEditorDirectory(NodeName.loadAndEditImages, false, dataset),
+      ).toBe(true);
+      expect(
+        shouldAutoLoadImageEditorDirectory(NodeName.loadAndEditImages, true, dataset),
+      ).toBe(false);
+    }
+    expect(
+      shouldAutoLoadImageEditorDirectory(NodeName.loadAndEditImages, false, {
+        nodes: [{ id: 'existing-image' }],
+      }),
+    ).toBe(false);
+  });
+
   it('binds load-and-edit recovery to the serialized root context_id', () => {
     expect(
       resolveImageEditorRecoveryRequest(

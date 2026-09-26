@@ -64,6 +64,15 @@ export const consumeImageEditorHydration = (
   return value;
 };
 
+export const shouldAutoLoadImageEditorDirectory = (
+  nodeName: string,
+  hasAutoDirectoryLoad: boolean,
+  dataset: ImageEditorDataset,
+): boolean =>
+  nodeName === NodeName.loadAndEditImages &&
+  !hasAutoDirectoryLoad &&
+  (!Array.isArray(dataset?.nodes) || dataset.nodes.length === 0);
+
 const isPendingImageEditorDataset = (dataset: unknown): dataset is ImageEditorDataset =>
   Boolean(
     dataset &&
@@ -276,9 +285,11 @@ export const imageEditorFactory: ImageEditorFactory = {
 
           syncNavigationDirectoryControl(state, state.directoryValue);
 
-          const shouldAutoLoad =
-            !state.hasAutoDirectoryLoad &&
-            (!Array.isArray(dataset?.nodes) || dataset.nodes.length === 0);
+          const shouldAutoLoad = shouldAutoLoadImageEditorDirectory(
+            state.node.comfyClass,
+            state.hasAutoDirectoryLoad,
+            dataset,
+          );
 
           if (shouldAutoLoad) {
             state.hasAutoDirectoryLoad = true;

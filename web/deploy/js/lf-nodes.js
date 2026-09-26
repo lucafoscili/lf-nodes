@@ -1278,6 +1278,7 @@ var CustomWidgetName;
 var NodeName;
 (function(NodeName2) {
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
+  NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
   NodeName2["backgroundRemover"] = "LF_BackgroundRemover";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
@@ -1709,6 +1710,7 @@ function installH3References(node) {
 }
 const NODE_WIDGET_MAP = {
   LF_ACEStepRemix: [],
+  LF_ApplyTextureToGLB: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
@@ -6011,6 +6013,7 @@ const consumeImageEditorHydration = (state, fallback) => {
   delete state.pendingHydrationValue;
   return value;
 };
+const shouldAutoLoadImageEditorDirectory = (nodeName, hasAutoDirectoryLoad, dataset) => nodeName === NodeName.loadAndEditImages && !hasAutoDirectoryLoad && (!Array.isArray(dataset == null ? void 0 : dataset.nodes) || dataset.nodes.length === 0);
 const isPendingImageEditorDataset = (dataset) => {
   var _a;
   return Boolean(dataset && typeof dataset === "object" && ((_a = getStatusColumn(dataset)) == null ? void 0 : _a.title) === ImageEditorStatus.Pending);
@@ -6137,7 +6140,7 @@ const imageEditorFactory = {
             }
           }).catch((error) => getLfManager().log("Failed to prepare image editor canvas.", { error }, LogSeverity.Warning));
           syncNavigationDirectoryControl(state, state.directoryValue);
-          const shouldAutoLoad = !state.hasAutoDirectoryLoad && (!Array.isArray(dataset == null ? void 0 : dataset.nodes) || dataset.nodes.length === 0);
+          const shouldAutoLoad = shouldAutoLoadImageEditorDirectory(state.node.comfyClass, state.hasAutoDirectoryLoad, dataset);
           if (shouldAutoLoad) {
             state.hasAutoDirectoryLoad = true;
             (_b = state.refreshDirectory) == null ? void 0 : _b.call(state, normalizeDirectoryRequest(state.directoryValue));
