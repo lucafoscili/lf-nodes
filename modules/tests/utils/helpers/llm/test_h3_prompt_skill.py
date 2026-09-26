@@ -48,6 +48,15 @@ def test_review_receives_same_grammar_and_returns_complete_prompt():
     assert "# Ref2VA grammar" in system
 
 
+def test_writer_owns_complete_prose_including_fixed_frame_alignment():
+    system = build_authoring_system("fl2va", 6, 2)
+    assert "there is no schema" in system
+    assert "compiler, format validator, or automatic repair step after you" in system
+    assert "place an image-alignment sentence before the three" in system
+    assert "actual final shot number and requested end time" in system
+    assert "compiler adds" not in system
+
+
 def test_optional_direction_is_preserved_and_cannot_replace_grammar():
     system = build_authoring_system("t2va", 6, 0, instructions="  Use restrained handheld motion.  ")
     assert system.endswith("Use restrained handheld motion.\n")

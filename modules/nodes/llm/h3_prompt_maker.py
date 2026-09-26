@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import math
 from collections.abc import Callable
 from typing import Any, TypeVar
@@ -16,11 +15,10 @@ from ...utils.helpers.api import (
 )
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image
-from ...workflow_runner.prompts.minimax_h3 import (
+from ...utils.helpers.llm.h3_prompt import (
     H3_PROMPT_MODES,
-    compile_h3_prompt_response,
+    build_authoring_system,
 )
-from ...utils.helpers.llm.h3_prompt import build_authoring_system
 
 
 _T = TypeVar("_T")
@@ -41,8 +39,6 @@ _PROGRESS_MESSAGES = {
     "model": "Resolving the loaded local model...",
     "writer": "Writing the scene from your idea and references...",
     "review": "Reviewing the prompt against your idea and references...",
-    "repair": "Correcting the H3 format...",
-    "compiler": "Validating the MiniMax H3 prompt...",
 }
 
 
@@ -312,8 +308,7 @@ class LF_H3PromptMaker:
                         "default": True,
                         "tooltip": (
                             "Review the completed prompt against your idea and "
-                            "images. Off skips this creative review, not H3 "
-                            "format checks and one bounded format repair."
+                            "images. Off returns the writer's prose directly."
                         ),
                     },
                 ),
@@ -330,7 +325,7 @@ class LF_H3PromptMaker:
                         "default": "",
                         "multiline": True,
                         "advanced": True,
-                        "tooltip": "Optional authoring direction. H3 grammar remains enforced.",
+                        "tooltip": "Optional authoring direction alongside the H3 writing guidance.",
                     },
                 ),
             },
@@ -344,8 +339,8 @@ class LF_H3PromptMaker:
     RETURN_NAMES = ("prompt", "validation_report", "visual_inventory")
     OUTPUT_IS_LIST = (False, False, False)
     OUTPUT_TOOLTIPS = (
-        "Copy-ready MiniMax H3 prompt in the selected official format.",
-        "H3 format validation and review completion or skipped status.",
+        "Prompt prose returned by the writer or optional reviewer, without schema compilation.",
+        "Authoring status on the legacy report socket; no format validation is performed.",
         "Ordered reference receipt; images are read directly without an intermediate facts ledger.",
     )
 
@@ -406,60 +401,27 @@ class LF_H3PromptMaker:
             calls.append(stage)
             return text
 
-        def compile_candidate(candidate: str) -> tuple[str, dict[str, Any]]:
-            return compile_h3_prompt_response(
-                candidate, mode, duration_seconds, reference_image_count,
-            )
-
-        candidate = request("writer", intent)
-        writer_error = None
-        try:
-            compile_candidate(candidate)
-        except (TypeError, ValueError) as error:
-            writer_error = str(error)
-
+        prompt = request("writer", intent)
         if review:
-            candidate = request(
+            prompt = request(
                 "review",
-                json.dumps({
-                    "original_request": intent,
-                    "candidate_prompt": candidate,
-                    "format_error": writer_error,
-                }, ensure_ascii=False),
+                f"Original idea:\n{intent}\n\nDraft prompt:\n{prompt}\n\n"
+                "Review this draft against the original idea, attached images, and "
+                "authoring guidance. Return only the complete prompt prose.",
                 reviewing=True,
             )
 
-        format_repaired = False
-        try:
-            prompt, validation_report = compile_candidate(candidate)
-        except (TypeError, ValueError) as error:
-            candidate = request(
-                "repair",
-                json.dumps({
-                    "original_request": intent,
-                    "candidate_prompt": candidate,
-                    "format_error": str(error),
-                    "task": "Correct this format error while preserving the requested scene. "
-                            "Return the complete H3 prompt, not a patch or explanation.",
-                }, ensure_ascii=False),
-                reviewing=True,
-            )
-            format_repaired = True
-            prompt, validation_report = _run_stage(
-                "H3 format", lambda: compile_candidate(candidate),
-            )
-
-        _publish_progress(node_id, "compiler")
-        validation_report["review"] = {
-            "enabled": review,
-            "status": "completed" if review else "skipped",
-            "repaired_stage": ("review" if review else "writer") if format_repaired else None,
-            "attempts": [],
-        }
-        validation_report["authoring"] = {
-            "method": "direct_vision",
-            "stages": calls,
-            "formatRepaired": format_repaired,
+        # Preserve saved output connections, without claiming prose was validated.
+        validation_report = {
+            "valid": None,
+            "validation": "not_performed",
+            "mode": mode,
+            "referenceImageCount": reference_image_count,
+            "review": {
+                "enabled": review,
+                "status": "completed" if review else "skipped",
+            },
+            "authoring": {"method": "prose", "stages": calls},
         }
         # Keep the published socket and pictures/facts containers. An empty ledger
         # is explicit: no claims were extracted by a separate inventory model.

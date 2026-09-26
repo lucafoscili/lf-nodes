@@ -46,6 +46,14 @@ moves the camera. Add speed and amplitude when meaningful; do not stack labels.
 Apply only the resolved mode. Within ref2va, explicit user frame roles are
 handled by the reference guide, not inferred from the number of attached images.
 
+For i2va, fl2va, and l2va, place an image-alignment sentence before the three
+sections. For final-frame alignment, state the actual final shot number and requested end time,
+not placeholder letters. For i2va, write: `For the target video, at 0.00 seconds into the target
+video, <Picture 1> (from [Shot 1]) is fully referenced.` For fl2va, explain that
+Picture 1 from Shot 1 aligns with 0.00 seconds and Picture 2 from the final shot
+aligns with the requested end time. For l2va, explain that Picture 1 from the final
+shot aligns with the requested end time. Do not add this preamble for t2va or ref2va.
+
 ## Voice and visible text
 
 Add dialogue or singing only when requested. Give actual vocal sources stable

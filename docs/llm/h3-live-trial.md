@@ -1,5 +1,11 @@
 # H3 direct-authoring live trial — 2026-09-26
 
+Historical trial: these runs preceded the user's subsequent prose-only
+simplification. They exercised the then-present compiler and its timestamp
+normalization; the current Prompt Maker has neither. See
+[current behavior](h3-prompt-maker.md). Do not treat these results as live
+acceptance of the later revision.
+
 Decision: **keep** direct authoring as a candidate; **defer** semantic-quality
 acceptance and any claim that review reliably improves the result. No runtime
 instructions or validation rules were changed during this trial.

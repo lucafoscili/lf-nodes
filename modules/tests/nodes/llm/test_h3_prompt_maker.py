@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import importlib
-import json
 import math
 from collections.abc import Iterable
 
@@ -15,24 +14,14 @@ from modules.utils.constants import FUNCTION, Input
 
 h3_module = importlib.import_module("modules.nodes.llm.h3_prompt_maker")
 _OMITTED = object()
-_AUDIT_PASS = json.dumps({"verdict": "pass", "findings": []})
+_BASE_TEXT = """integrated_multimodal_description:
+[Shot 1] A camera glides across the room as rain taps the window.
 
+overall_soundscape:
+Rain taps the glass.
 
-_BASE_PLAN = json.dumps(
-    {
-        "shots": [
-            {
-                "start_seconds": 0,
-                "description": (
-                    "A camera glides across the room as rain taps the window."
-                ),
-                "dialogue": [],
-            }
-        ],
-        "overall_soundscape": "Rain taps the glass.",
-        "non_diegetic_music": "N/A",
-    }
-)
+non_diegetic_music:
+N/A"""
 
 
 def _install_transport(
@@ -305,15 +294,16 @@ def test_short_intent_and_one_image_go_directly_to_writer_and_reviewer(monkeypat
     assert len(calls) == 2
     assert calls[0]["prompt"] == intent
     assert all(torch.equal(call["images"][0], image) for call in calls)
-    review = json.loads(calls[1]["prompt"])
-    assert review["original_request"] == intent
-    assert review["candidate_prompt"] == _REFERENCE_TEXT
+    assert calls[1]["prompt"].startswith(f"Original idea:\n{intent}\n\nDraft prompt:\n")
+    assert _REFERENCE_TEXT in calls[1]["prompt"]
+    assert "format_error" not in calls[1]["prompt"]
     prompt, report, receipt = result["result"]
     assert "<Subject 1> is the character from <Picture 1>." in prompt
     assert "<Subject 2>" not in prompt
     assert "allowed_facts" not in prompt
     assert report["mode"] == "ref2va"
-    assert report["sourceFormat"] == "h3_text"
+    assert report["valid"] is None
+    assert report["validation"] == "not_performed"
     assert report["authoring"]["stages"] == ["writer", "review"]
     assert report["review"]["status"] == "completed"
     assert receipt == {
@@ -324,7 +314,7 @@ def test_short_intent_and_one_image_go_directly_to_writer_and_reviewer(monkeypat
 
 
 def test_auto_without_images_uses_base_sections(monkeypatch):
-    calls, _ = _install_transport(monkeypatch, [_BASE_PLAN, _BASE_PLAN])
+    calls, _ = _install_transport(monkeypatch, [_BASE_TEXT, _BASE_TEXT])
     result = _execute(mode="auto")
     assert result["result"][1]["mode"] == "t2va"
     assert len(calls) == 2
@@ -349,39 +339,54 @@ def test_independent_sockets_and_legacy_lists_preserve_every_image_in_order(monk
 
 @pytest.mark.parametrize("mode,count", [("i2va", 1), ("fl2va", 2), ("l2va", 1)])
 def test_saved_explicit_frame_modes_keep_meaning(monkeypatch, mode, count):
-    calls, _ = _install_transport(monkeypatch, [_BASE_PLAN])
+    calls, _ = _install_transport(monkeypatch, [_BASE_TEXT])
     result = _execute(mode=mode, image=[torch.zeros((1, 2, 3, 3))] * count, review=False)
     assert result["result"][1]["mode"] == mode
     assert len(calls) == 1
     assert len(calls[0]["images"]) == count
+    assert result["result"][0] == _BASE_TEXT  # No application-added alignment preamble.
+    assert "image-alignment sentence" in calls[0]["system_message"]
 
 
-def test_review_off_keeps_validation_and_one_format_repair(monkeypatch):
-    invalid = _REFERENCE_TEXT.replace("[Shot 1] Seen", "[Shot 1] At 00:01.000, Seen")
-    calls, _ = _install_transport(monkeypatch, [invalid, _REFERENCE_TEXT])
+@pytest.mark.parametrize("text", [
+    "A character walks away through a medieval town. Footsteps tap the cobbles.",
+    _REFERENCE_TEXT.replace("[Shot 1] Seen", "[Shot 1] At 00:01.000, Seen"),
+    "  ```text\nAn unfenced answer was requested, but do not postprocess it.\n```  ",
+])
+def test_review_off_returns_exact_prose_without_format_gates_or_repairs(monkeypatch, text):
+    calls, events = _install_transport(monkeypatch, [text])
     result = _execute(mode="auto", image=torch.zeros((1, 2, 3, 3)), review=False)
-    assert len(calls) == 2
-    assert "must not include a timestamp" in json.loads(calls[1]["prompt"])["format_error"]
-    assert result["result"][1]["authoring"]["stages"] == ["writer", "repair"]
+    assert len(calls) == 1
+    assert result["result"][0] == text
+    assert result["ui"]["lf_output"][0]["value"] == text
+    assert result["result"][1]["authoring"] == {"method": "prose", "stages": ["writer"]}
     assert result["result"][1]["review"]["status"] == "skipped"
+    assert result["result"][1]["valid"] is None
+    assert [event[1]["stage"] for event in events] == ["writer", "complete"]
 
 
-def test_reviewer_receives_writer_format_failure_and_can_fix_it(monkeypatch):
-    calls, _ = _install_transport(monkeypatch, ["broken", _BASE_PLAN])
+def test_reviewer_receives_plain_draft_and_returns_exact_replacement(monkeypatch):
+    draft = "The character walks through town."
+    reviewed = "  From behind, follow the character through the medieval town.\n"
+    calls, _ = _install_transport(monkeypatch, [draft, reviewed])
     result = _execute()
-    assert json.loads(calls[1]["prompt"])["format_error"]
-    assert result["result"][1]["valid"] is True
+    assert len(calls) == 2
+    assert f"Draft prompt:\n{draft}" in calls[1]["prompt"]
+    assert result["result"][0] == reviewed
+    assert result["result"][1]["valid"] is None
+    assert result["result"][1]["validation"] == "not_performed"
 
 
-def test_reviewer_failure_gets_one_bounded_repair_and_never_false_success(monkeypatch):
-    calls, _ = _install_transport(monkeypatch, [_BASE_PLAN, "broken", "still broken"])
-    with pytest.raises(ValueError, match="H3 format stage failed"):
-        _execute()
-    assert len(calls) == 3
+def test_reviewer_format_deviations_do_not_trigger_a_third_call(monkeypatch):
+    reviewed = _REFERENCE_TEXT.replace("non_diegetic_music:", "Music:")
+    calls, _ = _install_transport(monkeypatch, [_REFERENCE_TEXT, reviewed])
+    result = _execute(mode="auto", image=torch.zeros((1, 2, 3, 3)))
+    assert len(calls) == 2
+    assert result["result"][0] == reviewed
 
 
 def test_unreviewed_valid_prompt_needs_only_one_call(monkeypatch):
-    calls, _ = _install_transport(monkeypatch, [_BASE_PLAN])
+    calls, _ = _install_transport(monkeypatch, [_BASE_TEXT])
     result = _execute(review=False)
     assert len(calls) == 1
     assert result["result"][1]["review"]["status"] == "skipped"
@@ -405,7 +410,7 @@ def test_image_writer_and_review_use_requested_reasoning(monkeypatch, reasoning,
 def test_blank_native_model_resolves_once_and_reuses_exact_instance(monkeypatch):
     resolved = []
     monkeypatch.setattr(h3_module, "resolve_loaded_lm_studio_llm", lambda *args: resolved.append(args) or "loaded-instance")
-    calls, _ = _install_transport(monkeypatch, [_BASE_PLAN, _BASE_PLAN])
+    calls, _ = _install_transport(monkeypatch, [_BASE_TEXT, _BASE_TEXT])
     _execute(model="")
     assert len(resolved) == 1
     assert [call["model"] for call in calls] == ["loaded-instance", "loaded-instance"]
@@ -419,8 +424,21 @@ def test_provider_error_is_actionable_and_not_retried_as_format_error(monkeypatc
         _execute()
 
 
+def test_review_transport_error_is_reported_without_retry_or_silent_fallback(monkeypatch):
+    calls = []
+    def request(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            return _BASE_TEXT, {}
+        raise ValueError("Model disconnected")
+    monkeypatch.setattr(h3_module, "request_local_chat_completion", request)
+    with pytest.raises(ValueError, match="Review stage failed: Model disconnected"):
+        _execute()
+    assert len(calls) == 2
+
+
 def test_headless_output_and_list_wrapped_controls(monkeypatch):
-    _install_transport(monkeypatch, [_BASE_PLAN])
+    _install_transport(monkeypatch, [_BASE_TEXT])
     result = _execute(
         intent=["Rain on a window"], mode=["auto"], duration_seconds=[6.0],
         url=["http://localhost.test/api/v1/chat"], model=["model"],
@@ -428,4 +446,4 @@ def test_headless_output_and_list_wrapped_controls(monkeypatch):
         instructions=["Use a restrained documentary style."],
     )
     assert result["ui"]["lf_output"][0]["status"] == "complete"
-    assert result["result"][1]["valid"] is True
+    assert result["result"][1]["valid"] is None

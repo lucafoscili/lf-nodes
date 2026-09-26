@@ -12,10 +12,11 @@ to both writer and reviewer. Resolve `auto` in the caller: no images means
 - `__init__.py`: deterministic local builder and runtime constraints.
 - `modules/tests/utils/helpers/llm/test_h3_prompt_skill.py`: focused coverage.
 
-Writer and reviewer return final H3 labeled sections. The existing compiler
-validates them and adds official alignment preambles for base frame modes. This
-bundle performs no provider calls or runtime downloads. It introduces no public
-node schema and does not independently prove live model quality.
+Writer and reviewer return complete H3 prompt prose, including alignment wording
+for fixed-frame modes. The application returns that text unchanged: no generation
+schema, parsing, compilation, validation verdict, or format-repair call. H3's
+format is writing guidance in the system prompt. This bundle performs no provider
+calls or runtime downloads and does not independently prove live model quality.
 
 ## Sources and deliberate local choices
 

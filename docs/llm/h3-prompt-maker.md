@@ -24,13 +24,20 @@ Unspecified environment, action development, camera and sound are creative choic
 - System instructions: `modules/utils/helpers/llm/h3_prompt/` (local Markdown;
   includes adapted H3 grammar, not just links to a skill).
 - Writer sees the original ordered images and user idea directly. Review defaults
-  on and returns a revised or unchanged complete prompt. Review off skips that
-  call. Structural H3 validation remains on, with at most one format-repair call.
-- Compiler: `modules/workflow_runner/prompts/minimax_h3.py`. It accepts labeled
-  H3 text and preserves legacy JSON callers. No intermediate `uses` arrays are
-  required from the new writer. It checks syntax/reference consistency, not
-  visual quality; review completion is not proof of semantic correctness.
+  on and receives the idea and draft as plain text, returning revised or unchanged
+  complete prose. Review off returns the writer's text. There is exactly one
+  provider call without review and two with it; provider errors stop the run.
+- Generation is prose-only: no intermediate JSON, schema parsing, compilation,
+  structural validation, timestamp rewriting, or format-repair loop. H3 labels,
+  reference roles, and fixed-frame alignment wording are supplied as writing
+  guidance in the system prompt. The final model text is returned unchanged.
+  Basic input/cardinality and transport checks remain; review completion does
+  not prove format compliance or semantic correctness.
 - Socket order stays `prompt`, `validation_report`, `visual_inventory`.
+  `validation_report` is a legacy compatibility name for authoring/review status:
+  `valid` is `null`, `validation` is `not_performed`. It no longer contains parsed
+  section/shot counts or schema-validation findings. This is a deliberate report
+  semantics change; consumers must not infer a valid H3 prompt from run success.
   The last socket is retained for saved workflows: `pictures` contains ordered
   ordinals and empty `facts`; `inventoryPerformed: false` explicitly records
   that the exhaustive inventory stage was removed. Consumers needing the old
@@ -38,6 +45,9 @@ Unspecified environment, action development, camera and sound are creative choic
 - Final prompt/report/receipt remain in `ui.lf_output` and the existing code
   widget, so history and cached output retain the result. No source images or
   base64 payloads are added to that history.
+
+The older compiler/composer helpers remain for legacy helper callers and
+separate deterministic H3 workflows. The Prompt Maker no longer imports them.
 
 Compatibility change: newly created nodes default to `auto`; saved explicit
 mode values remain unchanged. Existing input names/defaults otherwise remain;
@@ -49,13 +59,21 @@ endpoint on connected operations. A blank model still uses the sole loaded LLM.
 
 ## Checks and live evidence
 
+Prose-only revision: 63 focused node/instruction/registry/metadata tests and 50
+Runner tests passed, along with syntax compilation and the static node contract
+check. These verify unchanged sockets, ordered image inputs, one/two provider
+calls, verbatim output/history, and honest unvalidated status. No new live model
+run, Comfy hydration, or video render was performed for this revision. Frontend
+code is unchanged, so the earlier frontend build evidence still applies.
+
 Offline checkpoint, 2026-09-26: 257 focused Python contracts and 241 related
 Runner/pipeline contracts passed; the final node-only recheck passed all 38 tests.
 The frontend suite passed 590 tests, with 25 focused socket/widget tests rechecked
 after type-only adjustments. The full frontend build and static node contracts
 passed. At that offline checkpoint, live provider quality and Comfy/Titanic
 hydration were untested. The subsequent [Qwen live trial](h3-live-trial.md)
-exercises the public Python nodes against LMS, without starting Comfy.
+exercised the earlier compiler-backed Python nodes against LMS without starting
+Comfy; it is not live acceptance of this later prose-only revision.
 
 ```powershell
 python -I scripts/quality/run_pytests.py -q modules/tests/nodes/llm/test_h3_prompt_maker.py modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py modules/tests/utils/helpers/llm/test_h3_prompt_skill.py

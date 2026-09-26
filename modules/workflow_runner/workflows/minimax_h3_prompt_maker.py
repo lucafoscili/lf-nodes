@@ -1,4 +1,4 @@
-"""Local vision-LLM prompt maker for MiniMax H3's strict prompt formats."""
+"""Local vision-LLM prose authoring with MiniMax H3 writing guidance."""
 
 from __future__ import annotations
 
@@ -6,9 +6,6 @@ import math
 from pathlib import Path
 from typing import Any, Dict
 
-from ..prompts.minimax_h3 import (
-    H3_PROMPT_MODES,
-)
 from ..services.registry import (
     InputValidationError,
     WorkflowCardPresentation,
@@ -183,7 +180,7 @@ def _reference_fields(inputs: Dict[str, Any], mode: str) -> tuple[str, ...]:
 
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     # Validate scalar controls plus the mode/count/gap contract before staging.
-    mode = choice(inputs, "mode", "auto", ("auto", *H3_PROMPT_MODES))
+    mode = choice(inputs, "mode", "auto", tuple(option[0] for option in _MODE_OPTIONS))
     if mode == "auto":
         mode = (
             "ref2va"
@@ -512,14 +509,14 @@ outputs = [
         node_id="display_prompt",
         id="prompt",
         shape="code",
-        description="Copy-ready MiniMax H3 prompt compiled in the selected official format.",
+        description="MiniMax H3 prompt prose returned by the writer or optional reviewer.",
         props={"lfLanguage": "markdown"},
     ),
     WorkflowCell(
         node_id="display_report",
         id="validation_report",
         shape="code",
-        description="H3 format validation plus independent review findings or skipped status.",
+        description="Authoring and review status; structural validation is not performed.",
         props={"lfLanguage": "json"},
     ),
     WorkflowCell(

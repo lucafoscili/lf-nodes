@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 _ASSETS = Path(__file__).parent
-_MODES = ("t2va", "i2va", "fl2va", "l2va", "ref2va")
+H3_PROMPT_MODES = ("t2va", "i2va", "fl2va", "l2va", "ref2va")
 _FRAME_ROLES = {
     "t2va": "There are no reference images. Build the audiovisual scene from the user's idea.",
     "i2va": "<Picture 1> is the actual opening frame of [Shot 1]. Develop forward from it.",
@@ -43,8 +43,8 @@ def build_authoring_system(
 
     if not isinstance(mode, str):
         raise TypeError("mode must be a string")
-    if mode not in _MODES:
-        raise ValueError("mode must be one of: " + ", ".join(_MODES))
+    if mode not in H3_PROMPT_MODES:
+        raise ValueError("mode must be one of: " + ", ".join(H3_PROMPT_MODES))
     if isinstance(duration_seconds, bool) or not isinstance(duration_seconds, (int, float)):
         raise TypeError("duration_seconds must be a finite number")
     duration = float(duration_seconds)
@@ -86,14 +86,14 @@ def build_authoring_system(
             "drift, ignored negatives, invented reference roles, unnecessary subject splitting, "
             "unrequested dialogue or plot shifts, and H3 grammar errors. Preserve useful "
             "creative elaboration of unspecified action, environment, camera, and sound. "
-            "Return the complete revised H3 labeled sections, or the complete unchanged "
+            "Return the complete revised H3 prompt prose, or the complete unchanged "
             "candidate if it already satisfies the request. Never return an audit ledger, "
             "verdict, patch, explanation, or JSON."
         )
     else:
         parts.append(
             "## Writing task\n\n"
-            "Write the complete final H3 labeled sections directly from the original user "
+            "Write the complete final H3 prompt prose directly from the original user "
             "idea and the attached images. Do not output an intermediate plan."
         )
     if instructions.strip():
@@ -108,4 +108,4 @@ def build_authoring_system(
     return "\n\n".join(parts) + "\n"
 
 
-__all__ = ["build_authoring_system"]
+__all__ = ["H3_PROMPT_MODES", "build_authoring_system"]
