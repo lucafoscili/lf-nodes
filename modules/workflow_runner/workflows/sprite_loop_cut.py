@@ -7,6 +7,7 @@ from typing import Any, Dict
 
 from ..services.registry import (
     InputValidationError,
+    WorkflowCardPresentation,
     WorkflowCell,
     WorkflowModelAsset,
     WorkflowNode,
@@ -277,6 +278,9 @@ WORKFLOW = WorkflowNode(
         "a zero-gap atlas with receipts the runtime can trust."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Find a seamless action loop, cut it out, and pack a registered sprite atlas."
+    ),
     inputs=inputs,
     outputs=outputs,
     configure_prompt=_configure_run,

@@ -486,6 +486,9 @@ sprite_loop_orchestra = WorkflowOrchestraNode(
         "it on one transparent canvas and pack a zero-gap atlas with receipts."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Animate one still, extract the best loop, and pack a transparent sprite atlas."
+    ),
     inputs=(
         _sprite_loop_source_input(),
         _sprite_loop_direction_input(),
@@ -572,6 +575,9 @@ iso_ground_tiles_orchestra = WorkflowOrchestraNode(
         "and cut a set of isometric diamond tiles at seeded offsets."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Generate a ground texture from text, make it seamless, and cut isometric tiles."
+    ),
     inputs=(
         _ground_texture_prompt_input(),
         _input_cell(krea2_generate, "aspect_ratio"),

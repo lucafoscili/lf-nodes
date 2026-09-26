@@ -5,7 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 from .utils import resolve_load_image_reference
 
 
@@ -195,6 +200,9 @@ WORKFLOW = WorkflowNode(
         "squashed 2:1, so every variant tiles with every other."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Turn a top-down texture into seamless isometric diamond tiles."
+    ),
     inputs=inputs,
     outputs=outputs,
     configure_prompt=_configure_run,

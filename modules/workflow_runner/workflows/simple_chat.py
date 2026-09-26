@@ -4,7 +4,12 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 
 # region Workflow Config
 class _ChatInputError(InputValidationError):
@@ -80,6 +85,9 @@ node = WorkflowNode(
     id=id,
     value=value,
     description=description,
+    card=WorkflowCardPresentation(
+        summary="Collect a chat conversation and return its history as JSON."
+    ),
     inputs=[
         input_chat,
     ],

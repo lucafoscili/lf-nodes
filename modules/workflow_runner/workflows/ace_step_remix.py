@@ -3,7 +3,12 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 from .utils import canonical_youtube_url
 
 
@@ -165,6 +170,9 @@ node = WorkflowNode(
     value="YouTube ACE-Step Remix",
     description="Download and cache YouTube audio, then cover or repaint it through a configured ACE-Step API.",
     category="Audio",
+    card=WorkflowCardPresentation(
+        summary="Remix YouTube audio as a cover or repaint through a configured ACE-Step service."
+    ),
     inputs=[
         _youtube_reference,
         _select_cell("mode", "Mode", (("Cover", "cover"), ("Repaint", "repaint")), "cover"),

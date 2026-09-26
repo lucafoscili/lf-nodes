@@ -1906,6 +1906,9 @@ _REFERENCE_CARD_SPECS = (
         ),
         prompt_fields=_swap_prompt_fields,
         default_aspect_ratio="9:16",
+        card=WorkflowCardPresentation(
+            summary="Put a referenced character into another image's scene and performance."
+        ),
     ),
     _ReferenceCardSpec(
         workflow_id="minimax_h3_outfit_transfer",
@@ -1944,6 +1947,9 @@ _REFERENCE_CARD_SPECS = (
         ),
         prompt_fields=_outfit_prompt_fields,
         default_aspect_ratio="9:16",
+        card=WorkflowCardPresentation(
+            summary="Dress a referenced character with outfit cues from a second image."
+        ),
     ),
     _ReferenceCardSpec(
         workflow_id="minimax_h3_scene_sheet",
@@ -1976,6 +1982,9 @@ _REFERENCE_CARD_SPECS = (
         ),
         prompt_fields=_scene_sheet_prompt_fields,
         default_aspect_ratio="16:9",
+        card=WorkflowCardPresentation(
+            summary="Animate a composite character-and-environment sheet as one continuous shot."
+        ),
     ),
 )
 

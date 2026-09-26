@@ -1438,6 +1438,9 @@ _REID_RECIPE_SPECS = (
         ),
         output_description="The generated feature-edit PNG image.",
         output_folder="FeatureEdit",
+        card=WorkflowCardPresentation(
+            summary="Change one visible feature while preserving the character's broader identity."
+        ),
     ),
     _ReIDRecipeSpec(
         id="krea2_character_restyle",

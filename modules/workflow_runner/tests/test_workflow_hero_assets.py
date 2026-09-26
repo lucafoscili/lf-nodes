@@ -77,6 +77,17 @@ def test_shipped_hero_declarations_match_the_manifest_entries(samples, shipped_w
     assert declared_assets == manifest_assets
 
 
+def test_every_shipped_workflow_has_a_concise_catalogue_summary(shipped_workflows) -> None:
+    missing = [
+        workflow.id
+        for workflow in shipped_workflows.values()
+        if workflow.card is None or not workflow.card.summary
+    ]
+
+    assert missing == []
+    assert all(len(workflow.card.summary) <= 180 for workflow in shipped_workflows.values())
+
+
 def test_shipped_heroes_are_small_decodable_and_metadata_free(samples) -> None:
     for hero in samples["heroes"]:
         workflow_id = hero["workflowId"]

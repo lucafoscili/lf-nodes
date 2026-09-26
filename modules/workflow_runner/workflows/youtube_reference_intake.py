@@ -5,7 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 from .utils import canonical_youtube_url
 
 _MEDIA_PROFILES = frozenset({"audio_m4a", "audio_flac", "video_mp4"})
@@ -95,6 +100,9 @@ node = WorkflowNode(
     value="YouTube Reference Intake",
     description="Download one YouTube reference into Comfy input storage, keyed by video ID and media profile.",
     category="Media Intake",
+    card=WorkflowCardPresentation(
+        summary="Cache a YouTube audio or video reference in ComfyUI for downstream workflows."
+    ),
     inputs=[input_youtube_url, input_media_profile],
     outputs=[output_input_reference, output_video_id, output_receipt],
     configure_prompt=_configure,

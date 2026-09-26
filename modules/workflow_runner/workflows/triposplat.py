@@ -5,7 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 from .utils import choice, integer, resolve_load_image_reference
 
 
@@ -312,6 +317,9 @@ WORKFLOW = WorkflowNode(
         "rig-ready, or game-ready mesh."
     ),
     category="TripoSplat",
+    card=WorkflowCardPresentation(
+        summary="Reconstruct one isolated image subject as a Gaussian splat with an orbit preview."
+    ),
     inputs=inputs,
     outputs=outputs,
     configure_prompt=_configure,

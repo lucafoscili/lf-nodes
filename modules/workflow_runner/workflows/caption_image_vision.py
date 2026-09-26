@@ -1,7 +1,12 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 from .utils import resolve_load_image_reference
 
 DEFAULT_ENDPOINT = "/api/lf-nodes/proxy/kobold"
@@ -115,6 +120,9 @@ node = WorkflowNode(
     id=id,
     value=value,
     description=description,
+    card=WorkflowCardPresentation(
+        summary="Caption one image with a vision-capable language model."
+    ),
     inputs=[
         input_upload,
         input_endpoint,

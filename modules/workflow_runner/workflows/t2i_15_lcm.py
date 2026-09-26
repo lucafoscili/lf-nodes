@@ -1,7 +1,12 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowNode,
+)
 
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -89,6 +94,9 @@ node = WorkflowNode(
     id=id,
     value=value,
     description=description,
+    card=WorkflowCardPresentation(
+        summary="Turn an English prompt into a small batch of SD1.5 LCM images."
+    ),
     inputs=[
         input_prompt,
         input_size,
