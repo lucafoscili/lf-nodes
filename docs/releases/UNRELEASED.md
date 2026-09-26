@@ -23,7 +23,8 @@ remaining prerequisites; this draft does not declare a full E2E pass.
   artifact/text handoffs and durable child-run outputs, alongside proxy/auth
   hardening and phone-oriented controls.
 - **Clearer catalogue:** separate LF Nodes and custom collections, quick section
-  links, concise card descriptions, and six new previews from real workflow runs.
+  links, concise card descriptions, and seven new previews from real workflow runs,
+  including a full stereo waveform of the user-accepted hearth sound effect.
   Unrelated queue/run updates now preserve mounted cards instead of restarting
   the custom collections' fade-in animations.
 - **Release coverage:** all 148 current public LF node types have a canonical

@@ -11,6 +11,7 @@ from ..services.registry import (
     WorkflowBlockNode,
     WorkflowCardPresentation,
     WorkflowCell,
+    WorkflowHeroImage,
 )
 from .utils import integer, required_text
 
@@ -89,6 +90,10 @@ WORKFLOW = WorkflowBlockNode(
     description="Turn a sound description into a stereo WAV with Stable Audio 3 Medium.",
     card=WorkflowCardPresentation(
         summary="Describe a sound and generate an editable stereo WAV.",
+        hero=WorkflowHeroImage(
+            asset="audio/hearth.webp",
+            alt="Full stereo waveform of the accepted 10.03-second hearth recording, including its quiet tail.",
+        ),
     ),
     inputs=(
         WorkflowCell(

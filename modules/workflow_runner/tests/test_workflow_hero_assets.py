@@ -168,3 +168,15 @@ def test_orchestra_manifest_stages_use_the_block_source_runs(samples, shipped_wo
     assert heroes[declaration.id]["sources"] == [
         identity_sources[0], restage_sources[-1]
     ]
+
+
+def test_sound_effects_cover_uses_the_user_accepted_hearth(samples) -> None:
+    hero = next(item for item in samples["heroes"] if item["workflowId"] == "stable_audio_3_sfx")
+    assert hero["sources"] == ["sfx-hearth"]
+    source = samples["sources"]["sfx-hearth"]
+    assert source["status"] == "succeeded"
+    assert source["listeningReview"]["acceptedBy"] == "Luca"
+    assert source["listeningReview"]["decision"] == "Hearth only"
+    assert source["channels"] == 2
+    assert source["sampleFrames"] / source["sampleRate"] == pytest.approx(source["durationSeconds"])
+    assert source["artifact"].endswith("sfx-seed-42_1.wav")

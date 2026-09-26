@@ -12,6 +12,33 @@
     "status": "succeeded"
   },
   "sources": {
+    "sfx-hearth": {
+      "workflowId": "stable_audio_3_sfx",
+      "runId": "fa5c8d1e-20ae-4d35-b518-5ab83b6d7c34",
+      "submissionId": "lf-sfx-canary:20260831:hearth:1",
+      "status": "succeeded",
+      "receipt": "output/playwright/sfx-live-hearth.json",
+      "artifact": "output/lf-workflow-runner/stable-audio-3/sfx-seed-42_1.wav",
+      "sha256": "e9e8689c6f5c055b2b7096dd0565026196c43e3eae54d4b830364d9e7e4ad9d3",
+      "bytes": 3539036,
+      "encoding": "pcm_f32le",
+      "sampleRate": 44100,
+      "channels": 2,
+      "sampleFrames": 442368,
+      "durationSeconds": 10.031020408163265,
+      "inputs": {
+        "seed": 42,
+        "duration": 10,
+        "prompt": "Close recording of a steady wood fire in a hearth, soft continuous flames and irregular dry crackles. Only the fire, with no voices, music, footsteps, or other background activity."
+      },
+      "listeningReview": {
+        "acceptedBy": "Luca",
+        "date": "2026-09-26",
+        "decision": "Hearth only",
+        "scope": "Accepted as the Sound Effects showcase sample; axe candidate excluded. No seamless-loop claim."
+      },
+      "role": "Actual untrimmed stereo WAV selected by Luca after listening, not a regenerated or normalized replacement."
+    },
     "iso-orchestra": {
       "workflowId": "iso_ground_tiles_orchestra",
       "runId": "lf-sequence:8db3f31fd34041419e951609bc5c5e72",
@@ -911,6 +938,15 @@
     }
   },
   "heroes": [
+    {
+      "workflowId": "stable_audio_3_sfx",
+      "asset": "audio/hearth.webp",
+      "sources": ["sfx-hearth"],
+      "display": "Two signed min/max PCM envelopes across the full recording, 839 time buckets per channel. Shared fixed [-1,+1] vertical range, unity gain, channel/time labels and measured duration. No trimming, waveform normalization, synthetic illustration, or audio editing.",
+      "qualityScope": "Luca accepted the hearth after listening. Root inspected the plotted waveform cover, not audio quality. The quiet tail is retained; this is not a proven seamless loop. The axe is not used.",
+      "sha256": "10b219ceeb9c4a95aea895c1a28745171d650d12a8f1229b7e794c5535a57773",
+      "bytes": 25412
+    },
     {
       "workflowId": "iso_ground_tiles_orchestra",
       "asset": "orchestra/iso-ground-tiles.webp",

@@ -68,7 +68,7 @@ original outputs are not packaged assets or public download links. A case in
 | `simple_chat` | History normalization and proxy-auth/status contracts checked on CPU; live UI configuration inspected | Blocked: the local proxy requires a secret header that the stock chat does not send; Runner cookies do not replace it. The status endpoint now reports this instead of false readiness. No live assistant reply/export or cover is claimed; browser authentication remains a setup decision. |
 | `svg_generation_gemini` | Blocked on hosted-API authority/configuration | Wiring checks are not an API execution or accepted SVG. |
 | `ace_step_remix` | Blocked on approved source, external-action authority, and backend configuration | A real remix needs listening review; a waveform alone cannot establish audio quality. |
-| `stable_audio_3_sfx` | Live: one hearth and four axe candidates generated; float WAV decode, LF node preview restore, and Runner history/reload playback pass | Listening acceptance is pending. Hearth has a quiet tail, not a proven seamless loop; no accepted showcase cover yet. |
+| `stable_audio_3_sfx` | Live: one hearth and four axe candidates generated; float WAV decode, LF node preview restore, and Runner history/reload playback pass | Luca accepted the hearth on 2026-09-26 after listening; curated full-duration stereo waveform cover. The presented axe was not selected. Hearth retains its quiet tail and is not a proven seamless loop. |
 | `youtube_reference_intake` | Blocked on approved source and external-action authority/configuration | No downloaded-media sample is claimed. |
 | `t2i_15_lcm` | Blocked: declared Dreamshaper8 checkpoint is missing | Do not silently substitute another checkpoint and call it this showcase. |
 | `t2i_illustrious_xl` | Validated execution; `illustrious-a1` | Rejected for prompt non-adherence; unexpected ice cream and requested appearance/outfit drift. No cover promoted. |
@@ -404,3 +404,29 @@ The actual files are in Comfy's `output/lf-workflow-runner/stable-audio-3/`, nam
 `sfx-seed-42_1.wav` and `sfx-seed-46_1.wav`. No audio was regenerated or accepted
 on waveform evidence alone. The previous quiet-tail/possible-double-hit limits
 remain unresolved. Cover totals remain 34 curated and 14 without accepted samples.
+
+### Hearth listening acceptance — 2026-09-26
+
+**Keep — hearth only:** Luca listened to the surfaced pair and selected the
+hearth as the Sound Effects showcase. Run
+`fa5c8d1e-20ae-4d35-b518-5ab83b6d7c34`, seed 42, is now recorded in the manifest
+with the exact original WAV hash and Luca's listening decision. The presented
+axe is excluded; its bytes and earlier evidence are preserved.
+
+The new cover plots both channels over all 442,368 sample frames at 44.1 kHz
+(10.031 seconds), using signed min/max envelopes and the same fixed full-scale
+vertical range. It does not trim the quiet tail, normalize the waveform, edit
+the audio, or substitute a generated fire illustration. Root inspected the
+rendered chart; listening acceptance belongs to Luca. Seamlessness remains
+unproven. The cover manifest contracts passed eight tests. Catalogue coverage
+is now **35 curated covers**, with **13 shipped workflows still awaiting an
+accepted sample**. The WAV remains unchanged and no new generation was needed.
+
+**Live activation blocked:** Luca approved an idle restart, but JOC returned
+`owner-nonzero` / `uncertain`. A read-only invocation of the owner's dependency
+check identified a version mismatch: it expects comfy-kitchen 0.2.31 and
+comfy-aimdo 0.4.15, while the environment has 0.2.35 and 0.5.5. That check runs
+before stopping Comfy. The service remained ready/idle, and its live Sound
+Effects metadata still lacked the new hero. No manual stop, second restart,
+dependency downgrade, or guard change was attempted. The installed dependency
+record needs review before activation; the cover and acceptance are saved.
