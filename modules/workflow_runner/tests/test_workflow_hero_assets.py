@@ -107,6 +107,23 @@ def test_shipped_heroes_are_small_decodable_and_metadata_free(samples) -> None:
             assert not raster.getexif(), workflow_id
 
 
+def test_h3_orchestra_covers_retain_actual_child_relationships(samples, shipped_workflows) -> None:
+    sources = samples["sources"]
+    parent = sources["h3-idea-orchestra"]
+    definition = shipped_workflows[parent["workflowId"]]
+    assert parent["status"] == "succeeded"
+    assert [(stage["id"], stage["workflowId"]) for stage in parent["stages"]] == [
+        (stage.id, stage.workflow_id) for stage in definition.stages
+    ]
+    for stage in parent["stages"]:
+        child = sources[stage["source"]]
+        assert child["workflowId"] == stage["workflowId"]
+        assert child["parentRunId"] == parent["runId"]
+        assert child["runId"] != parent["runId"]
+    prompt = sources["h3-idea-prompt"]
+    assert hashlib.sha256(prompt["excerpt"].encode()).hexdigest() == prompt["excerptSha256"]
+
+
 def test_hero_sources_reference_recorded_runs_without_requiring_original_files(
     samples, shipped_workflows,
 ) -> None:

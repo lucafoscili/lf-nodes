@@ -685,7 +685,13 @@ minimax_h3_video_orchestra = WorkflowOrchestraNode(
         "The same ordered references and duration are used in both stages."
     ),
     category="MiniMax H3",
-    card=WorkflowCardPresentation(summary="A simple idea and optional references in; video with audio out."),
+    card=WorkflowCardPresentation(
+        summary="A simple idea and optional references in; video with audio out.",
+        hero=WorkflowHeroImage(
+            asset="orchestra/h3-idea-to-video.webp",
+            alt="Original explorer reference and a forest-walk video frame from the same successful Idea to Video orchestra.",
+        ),
+    ),
     inputs=_h3_orchestra_inputs(),
     stages=(
         WorkflowSequenceStage(

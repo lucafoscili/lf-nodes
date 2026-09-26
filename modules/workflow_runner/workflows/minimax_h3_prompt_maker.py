@@ -10,6 +10,7 @@ from ..services.registry import (
     InputValidationError,
     WorkflowCardPresentation,
     WorkflowCell,
+    WorkflowHeroImage,
     WorkflowNode,
 )
 from .utils import (
@@ -596,7 +597,11 @@ WORKFLOW = WorkflowNode(
     ),
     category="MiniMax H3",
     card=WorkflowCardPresentation(
-        summary="Write an H3 prompt from your idea and optional reference images."
+        summary="Write an H3 prompt from your idea and optional reference images.",
+        hero=WorkflowHeroImage(
+            asset="minimax-h3/prompt-maker.webp",
+            alt="Generic explorer reference beside an exact excerpt of this run's generated H3 prompt.",
+        ),
     ),
     inputs=[
         _mode_cell(),

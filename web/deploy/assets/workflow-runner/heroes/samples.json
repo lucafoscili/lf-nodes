@@ -12,6 +12,52 @@
     "status": "succeeded"
   },
   "sources": {
+    "h3-idea-orchestra": {
+      "workflowId": "minimax_h3_video_orchestra",
+      "runId": "lf-sequence:3959a6e747c744218e0f7643548fc34a",
+      "submissionId": "lf-catalogue:hero:20260926:h3-orchestra-explorer-a2",
+      "status": "succeeded",
+      "stages": [
+        {"id": "write_prompt", "workflowId": "minimax_h3_prompt_maker", "source": "h3-idea-prompt"},
+        {"id": "render_video", "workflowId": "minimax_h3_prompt_video", "source": "h3-idea-video"}
+      ],
+      "settings": {"reasoning": "off", "review": true, "output_quality": "standard", "seed": 260926},
+      "role": "Successful parent of the two recorded block runs; generic showcase explorer input."
+    },
+    "h3-idea-prompt": {
+      "workflowId": "minimax_h3_prompt_maker",
+      "runId": "b0a3e8da-8bc5-46ac-ae0a-edaa0b58e9d4",
+      "parentRunId": "lf-sequence:3959a6e747c744218e0f7643548fc34a",
+      "receipt": "output/hero-cards/catalogue-20260926/h3-orchestra-explorer-a2.json",
+      "outputPointer": "/status/result/body/payload/history/outputs/display_prompt/lf_output/0/string",
+      "sha256": "f26f3ee20eff81768c9bfe6ae9db1455c97c9c4f8a99a905e70d9304b6a18b15",
+      "excerpt": "subject_definitions:\n<Subject 1> is the woman with short brown hair wearing a mustard-yellow leather jacket, teal trousers, green socks, brown ankle boots, and a blue crossbody bag from <Picture 1>.\n\nsummary:\n[reference generation] <Subject 1> walks slowly along a quiet forest path in one continuous gentle follow shot. The camera tracks behind her at waist height, maintaining a constant distance as she moves forward through the woods.",
+      "excerptSha256": "7b374efe27dfc2b929d25a73b2949150844cde19cde86075db99d66915d5b573",
+      "role": "Exact subject and summary excerpt, verified as a substring of the completed prompt forwarded to rendering."
+    },
+    "h3-idea-video": {
+      "workflowId": "minimax_h3_prompt_video",
+      "runId": "62574be4-2d3f-403b-a8ad-9ef038abb745",
+      "parentRunId": "lf-sequence:3959a6e747c744218e0f7643548fc34a",
+      "artifact": "output/LF_Nodes/MiniMaxH3/PromptVideo/kitchen_quality/seed-260926-refs1-f124_00001_.mp4",
+      "sha256": "63423a52dddb552105143e78575042fbe288b7bfe48b68f5c34f8569ebb5399e",
+      "dimensions": [1344, 768],
+      "decodedFrames": 124,
+      "fps": 24,
+      "visuallyInspectedFrameIndices": [0, 30, 61, 92, 123],
+      "audioListened": false,
+      "role": "Actual successful renderer child video; selected frames decoded unchanged."
+    },
+    "illustrious-portrait": {
+      "workflowId": "t2i_illustrious_xl",
+      "runId": "af767cdd-8488-4628-8dba-021ea4bac7f4",
+      "artifact": "output/lf-workflow-runner/illustrious-xl_2026-09-26_16-57-16_1.png",
+      "sha256": "f395e15d5207f2ce1c6b9824e2e32368ed10d700e7dc674ec7937cd154f2de6f",
+      "dimensions": [832, 1216],
+      "checkpoint": "Genesis v0.10.safetensors",
+      "seed": 260926,
+      "role": "Actual locally generated anime portrait, with no checkpoint substitution."
+    },
     "iso-ground-input": {
       "workflowId": "iso_ground_tiles",
       "runId": "e97ce907-adf5-4abf-bf0b-630f67b6cd7d",
@@ -827,6 +873,42 @@
     }
   },
   "heroes": [
+    {
+      "workflowId": "minimax_h3_prompt_maker",
+      "asset": "minimax-h3/prompt-maker.webp",
+      "sources": ["explorer", "h3-idea-prompt"],
+      "display": "Original generic reference beside exact subject_definitions and summary output text. Browser typesetting, contain-fit, labels, no retouching; explicitly labelled excerpt, not the complete prompt.",
+      "qualityScope": "Successful writer and review with reasoning off. This sample does not establish reliability of reasoning-on mode, which returned no final answer in the preceding trial.",
+      "sha256": "7aa705a0cf00f077fd8c070a501e7bbd70c6d8e8586401a70d4832e5d8a2ffe4",
+      "bytes": 53458
+    },
+    {
+      "workflowId": "minimax_h3_prompt_video",
+      "asset": "minimax-h3/prompt-video.webp",
+      "sources": ["h3-idea-video"],
+      "display": "Actual frame index 61 (2.5417 seconds), contain-fitted with a label. No retouching or substituted pixels.",
+      "qualityScope": "Five sampled frames show a coherent forest follow shot and broad outfit continuity. More realistic than the stylized input; no exact identity/material, unsampled motion, or audio-quality claim.",
+      "sha256": "d33469261123eb7aae69c584330956de2970f395575abe0f605c40ddcb3eccde",
+      "bytes": 56472
+    },
+    {
+      "workflowId": "minimax_h3_video_orchestra",
+      "asset": "orchestra/h3-idea-to-video.webp",
+      "sources": ["explorer", "h3-idea-orchestra", "h3-idea-video"],
+      "display": "This orchestra's actual original reference beside renderer-child frame index 30 (1.25 seconds). Complete images contain-fitted, labelled, and unchanged.",
+      "qualityScope": "Successful two-stage parent and actual child runs. Coherent sampled forest walk, broad outfit continuity; style is more realistic than input. No exact identity/material or audio-quality claim.",
+      "sha256": "2ed4c78a35a9b51314e391b3db6b8d93ed33384c597b4e598dbe58efbe3f2329",
+      "bytes": 48170
+    },
+    {
+      "workflowId": "t2i_illustrious_xl",
+      "asset": "image/illustrious-xl.webp",
+      "sources": ["illustrious-portrait"],
+      "display": "Complete actual portrait contain-fitted with a label. No crop or retouching; embedded source metadata omitted.",
+      "qualityScope": "Root visually accepted this fresh sample: brown hair, green eyes, mustard jacket, white shirt, relaxed smile, and leafy natural light match the brief. The earlier rejected sample remains excluded.",
+      "sha256": "d1c5a85caef90e0d5c3c823f6962add003e1084d2516feadcb06f568d165f5fd",
+      "bytes": 21896
+    },
     {
       "workflowId": "iso_ground_tiles",
       "asset": "image/iso-ground-tiles.webp",

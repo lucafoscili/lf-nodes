@@ -10,6 +10,7 @@ from ..services.registry import (
     InputValidationError,
     WorkflowCardPresentation,
     WorkflowCell,
+    WorkflowHeroImage,
     WorkflowNode,
 )
 from . import minimax_h3 as h3
@@ -127,7 +128,13 @@ WORKFLOW = WorkflowNode(
         "and saves video with the original stereo audio."
     ),
     category="MiniMax H3",
-    card=WorkflowCardPresentation(summary="Render finished H3 prose and retain the exact prompt."),
+    card=WorkflowCardPresentation(
+        summary="Render finished H3 prose and retain the exact prompt.",
+        hero=WorkflowHeroImage(
+            asset="minimax-h3/prompt-video.webp",
+            alt="Actual rendered video frame of the mustard-jacket explorer walking along a forest path.",
+        ),
+    ),
     inputs=[
         h3._textarea_cell(
             node_id="h3", cell_id="prompt", label="Final prompt", default=DEFAULT_PROMPT,

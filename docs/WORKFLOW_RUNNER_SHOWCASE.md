@@ -297,8 +297,29 @@ seamless texture and all four 128×64 diamond variants. The cover shows the inpu
 seamless output, and complete output atlas, with only contain-fit and labels.
 Broad cross-shaped seam-blend softening is still visible on the full texture;
 the cover does not retouch it away. The manifest records the input's generation
-prompt and the real block output hashes. This brings the manifest to **29
-curated covers**. It is not a run of the Krea-powered prompt-to-tiles orchestra.
+prompt and the real block output hashes. It is not a run of the Krea-powered
+prompt-to-tiles orchestra.
+
+**Keep — H3 Prompt Maker, Render H3 Prompt, and Idea to Video:** new parent
+`lf-sequence:3959a6e747c744218e0f7643548fc34a` completed with maker child
+`b0a3e8da-8bc5-46ac-ae0a-edaa0b58e9d4` and renderer child
+`62574be4-2d3f-403b-a8ad-9ef038abb745`. The original generic showcase explorer
+walks along a forest path. All 124 frames decoded; root inspected frames 0, 30,
+61, 92, and 123. Outfit and scene continuity are broadly retained, but rendering
+is more realistic than the original stylized reference. Audio was present, not
+listening-reviewed. Covers use exact output text and decoded frames from these
+same child runs, not personal-reference videos.
+
+The preceding trial with reasoning `vision` failed in the writer with no final
+answer. The successful retry used a simpler idea, reasoning `off`, and review
+still enabled. This is a usable sample, not proof that the reasoning-on failure
+has been fixed; no Prompt Maker implementation/default was changed here.
+
+**Keep — Illustrious XL:** fresh run `af767cdd-8488-4628-8dba-021ea4bac7f4`
+used the declared Genesis v0.10 checkpoint and seed 260926. Root accepted the
+actual brown-haired, green-eyed anime portrait with a mustard jacket, white
+shirt, relaxed smile, and leafy natural light. The earlier rejected output is
+not republished. These additions bring the manifest to **33 curated covers**.
 
 Local receipt and presentation sources are in
 `output/hero-cards/catalogue-20260926/`; the packaged WebP contains no embedded

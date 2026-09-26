@@ -5,6 +5,7 @@ from ..services.registry import (
     InputValidationError,
     WorkflowCardPresentation,
     WorkflowCell,
+    WorkflowHeroImage,
     WorkflowNode,
 )
 
@@ -121,7 +122,11 @@ node = WorkflowNode(
     value=value,
     description=description,
     card=WorkflowCardPresentation(
-        summary="Generate an anime portrait from Danbooru-style tags with an Illustrious XL checkpoint."
+        summary="Generate an anime portrait from Danbooru-style tags with an Illustrious XL checkpoint.",
+        hero=WorkflowHeroImage(
+            asset="image/illustrious-xl.webp",
+            alt="Actual Illustrious XL output: a brown-haired, green-eyed woman in a mustard jacket against leafy greenery.",
+        ),
     ),
     inputs=[
         input_prompt,
