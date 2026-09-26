@@ -120,6 +120,18 @@ describe('Home Element', () => {
         expect.any(Element),
       );
       expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
+        'home-section-jump-navigation',
+        expect.any(Element),
+      );
+      expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
+        'home-section-jump-shipped',
+        expect.any(Element),
+      );
+      expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
+        'home-section-jump-custom',
+        expect.any(Element),
+      );
+      expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
         'home-section-block-masonry',
         expect.any(Element),
       );
@@ -190,6 +202,19 @@ describe('Home Element', () => {
       expect(owners[0].querySelector('h2')?.textContent).toBe('LF Nodes');
       expect(owners[1].getAttribute('data-workflow-origin')).toBe('custom');
       expect(owners[1].querySelector('h2')?.textContent).toBe('Custom workflows');
+    });
+
+    it('creates a compact accessible jump navigation for both ownership sections', () => {
+      createHomeSection(store).mount();
+
+      const navigation = mockMainElement.querySelector('.home-section-jump-navigation');
+      const links = navigation?.querySelectorAll('a');
+      expect(navigation?.getAttribute('aria-label')).toBe('Jump to workflow collection');
+      expect(links).toHaveLength(2);
+      expect(links?.[0].textContent).toBe('LF Nodes');
+      expect(links?.[0].getAttribute('href')).toBe('#workflow-catalogue-lf-nodes');
+      expect(links?.[1].textContent).toBe('Custom workflows');
+      expect(links?.[1].getAttribute('href')).toBe('#workflow-catalogue-custom');
     });
 
     it('creates distinct orchestra and block rails with canonical attributes', () => {
@@ -263,6 +288,11 @@ describe('Home Element', () => {
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-description');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-title-h1');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith(
+        'home-section-jump-navigation',
+      );
+      expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-jump-shipped');
+      expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-jump-custom');
+      expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith(
         'home-section-orchestra-masonry',
       );
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-orchestra-rail');
@@ -290,6 +320,12 @@ describe('Home Element', () => {
       blockCount.dataset.railCount = 'block';
       blockRail.appendChild(blockCount);
       const h1 = document.createElement('h1');
+      const jumpNavigation = document.createElement('nav');
+      const jumpShipped = document.createElement('a');
+      const jumpCustom = document.createElement('a');
+      jumpShipped.dataset.workflowOrigin = 'shipped';
+      jumpCustom.dataset.workflowOrigin = 'custom';
+      jumpNavigation.append(jumpShipped, jumpCustom);
       const description = document.createElement('p');
       const title = document.createElement('div');
       const shipped = document.createElement('section');
@@ -302,6 +338,9 @@ describe('Home Element', () => {
         'home-section-catalogue': catalogue,
         'home-section-custom': custom,
         'home-section-custom-catalogue': customCatalogue,
+        'home-section-jump-custom': jumpCustom,
+        'home-section-jump-navigation': jumpNavigation,
+        'home-section-jump-shipped': jumpShipped,
         'home-section-orchestra-masonry': orchestraMasonry,
         'home-section-orchestra-rail': orchestraRail,
         'home-section-shipped': shipped,
@@ -345,6 +384,9 @@ describe('Home Element', () => {
       expect(masonry.lfDataset.nodes[0].value).toBe('Blocks');
       expect(elements['home-section-block-rail'].hidden).toBe(false);
       expect(elements['home-section-orchestra-rail'].hidden).toBe(true);
+      expect(elements['home-section-jump-navigation'].hidden).toBe(false);
+      expect(elements['home-section-jump-shipped'].hidden).toBe(false);
+      expect(elements['home-section-jump-custom'].hidden).toBe(true);
     });
 
     it('creates dataset with workflow cells', () => {
@@ -579,6 +621,8 @@ describe('Home Element', () => {
       expect(shippedCells.shared).toBeUndefined();
       expect(elements['home-section-shipped'].hidden).toBe(true);
       expect(elements['home-section-custom'].hidden).toBe(false);
+      expect(elements['home-section-jump-shipped'].hidden).toBe(true);
+      expect(elements['home-section-jump-custom'].hidden).toBe(false);
 
       const allCustomCells = groups.flatMap((group: HTMLElement) =>
         Array.from(group.querySelectorAll('lf-masonry')).flatMap((masonry: any) =>
@@ -619,6 +663,9 @@ describe('Home Element', () => {
       }
       expect(elements['home-section-block-rail'].hidden).toBe(true);
       expect(elements['home-section-orchestra-rail'].hidden).toBe(true);
+      expect(elements['home-section-jump-navigation'].hidden).toBe(true);
+      expect(elements['home-section-jump-shipped'].hidden).toBe(true);
+      expect(elements['home-section-jump-custom'].hidden).toBe(true);
     });
 
     it('handles undefined workflows gracefully', () => {

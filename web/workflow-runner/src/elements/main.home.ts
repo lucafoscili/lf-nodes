@@ -30,6 +30,10 @@ export const HOME_CLASSES = {
   customCatalogue: theme.bemClass(ROOT_CLASS, 'custom-catalogue'),
   description: theme.bemClass(ROOT_CLASS, 'description'),
   h1: theme.bemClass(ROOT_CLASS, 'title-h1'),
+  jump: theme.bemClass(ROOT_CLASS, 'jump'),
+  jumpCustom: theme.bemClass(ROOT_CLASS, 'jump-custom'),
+  jumpNavigation: theme.bemClass(ROOT_CLASS, 'jump-navigation'),
+  jumpShipped: theme.bemClass(ROOT_CLASS, 'jump-shipped'),
   orchestraMasonry: theme.bemClass(ROOT_CLASS, 'orchestra-masonry'),
   orchestraRail: theme.bemClass(ROOT_CLASS, 'orchestra-rail'),
   shipped: theme.bemClass(ROOT_CLASS, 'shipped'),
@@ -39,6 +43,12 @@ export const HOME_CLASSES = {
 
 //#region Helpers
 type CatalogueKind = WorkflowAPIKind;
+type CatalogueOwner = 'shipped' | 'custom';
+
+const OWNER_SECTION_IDS: Record<CatalogueOwner, string> = {
+  shipped: 'workflow-catalogue-lf-nodes',
+  custom: 'workflow-catalogue-custom',
+};
 
 const ORCHESTRA_CARD_ACCENT = [
   '.material-layout {',
@@ -261,6 +271,38 @@ const _description = () => {
   return p;
 };
 
+const _jumpNavigation = (targets: Record<CatalogueOwner, HTMLElement>) => {
+  const navigation = document.createElement('nav');
+  const label = document.createElement('span');
+  const links = {} as Record<CatalogueOwner, HTMLAnchorElement>;
+
+  navigation.className = HOME_CLASSES.jumpNavigation;
+  navigation.setAttribute('aria-label', 'Jump to workflow collection');
+  navigation.hidden = true;
+  label.className = theme.bemClass(ROOT_CLASS, 'jump-label');
+  label.textContent = 'Jump to';
+  navigation.append(label);
+
+  (['shipped', 'custom'] as const).forEach((owner) => {
+    const link = document.createElement('a');
+    const target = targets[owner];
+    const text = owner === 'shipped' ? 'LF Nodes' : 'Custom workflows';
+
+    link.className = `${HOME_CLASSES.jump} ${
+      owner === 'shipped' ? HOME_CLASSES.jumpShipped : HOME_CLASSES.jumpCustom
+    }`;
+    link.dataset.workflowOrigin = owner;
+    link.hidden = true;
+    link.href = `#${target.id}`;
+    link.textContent = text;
+
+    links[owner] = link;
+    navigation.append(link);
+  });
+
+  return { links, navigation };
+};
+
 const _rail = (
   store: WorkflowStore,
   kind: CatalogueKind,
@@ -306,7 +348,7 @@ const _rail = (
 };
 
 const _owner = (
-  owner: 'shipped' | 'custom',
+  owner: CatalogueOwner,
   titleText: string,
   descriptionText: string,
   className: string,
@@ -318,6 +360,7 @@ const _owner = (
   const content = document.createElement('div');
 
   section.className = `${theme.bemClass(ROOT_CLASS, 'owner')} ${className}`;
+  section.id = OWNER_SECTION_IDS[owner];
   section.dataset.workflowOrigin = owner;
   header.className = theme.bemClass(ROOT_CLASS, 'owner-header');
   heading.className = theme.bemClass(ROOT_CLASS, 'owner-title');
@@ -347,6 +390,17 @@ const _setRail = (
   count.setAttribute(
     'aria-label',
     `${result.count} ${result.count === 1 ? kind : `${kind}s`}`,
+  );
+};
+
+const _setJump = (
+  navigation: HTMLElement,
+  link: HTMLAnchorElement,
+  available: boolean,
+) => {
+  link.hidden = !available;
+  navigation.hidden = Array.from(navigation.querySelectorAll<HTMLAnchorElement>('a')).every(
+    (candidate) => candidate.hidden,
   );
 };
 
@@ -501,11 +555,12 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
       HOME_CLASSES.blockMasonry,
       failedHeroes,
     );
+    const jumps = _jumpNavigation({ shipped: shipped.section, custom: custom.section });
     const { h1, title } = _title();
 
     shipped.content.append(orchestra.rail, block.rail);
     catalogue.append(shipped.section, custom.section);
-    _root.append(title, description, catalogue);
+    _root.append(title, description, jumps.navigation, catalogue);
 
     elements[MAIN_CLASSES._].prepend(_root);
 
@@ -517,6 +572,9 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     uiRegistry.set(HOME_CLASSES.customCatalogue, custom.content);
     uiRegistry.set(HOME_CLASSES.description, description);
     uiRegistry.set(HOME_CLASSES.h1, h1);
+    uiRegistry.set(HOME_CLASSES.jumpCustom, jumps.links.custom);
+    uiRegistry.set(HOME_CLASSES.jumpNavigation, jumps.navigation);
+    uiRegistry.set(HOME_CLASSES.jumpShipped, jumps.links.shipped);
     uiRegistry.set(HOME_CLASSES.orchestraMasonry, orchestra.masonry);
     uiRegistry.set(HOME_CLASSES.orchestraRail, orchestra.rail);
     uiRegistry.set(HOME_CLASSES.shipped, shipped.section);
@@ -543,6 +601,9 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     const blockRail = elements[HOME_CLASSES.blockRail] as HTMLElement;
     const custom = elements[HOME_CLASSES.custom] as HTMLElement;
     const customCatalogue = elements[HOME_CLASSES.customCatalogue] as HTMLElement;
+    const jumpCustom = elements[HOME_CLASSES.jumpCustom] as HTMLAnchorElement;
+    const jumpNavigation = elements[HOME_CLASSES.jumpNavigation] as HTMLElement;
+    const jumpShipped = elements[HOME_CLASSES.jumpShipped] as HTMLAnchorElement;
     const shipped = elements[HOME_CLASSES.shipped] as HTMLElement;
     if (
       !orchestraMasonry ||
@@ -551,6 +612,9 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
       !blockRail ||
       !custom ||
       !customCatalogue ||
+      !jumpCustom ||
+      !jumpNavigation ||
+      !jumpShipped ||
       !shipped
     ) {
       return;
@@ -569,6 +633,8 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     shipped.hidden = orchestras.count + blocks.count === 0;
     custom.hidden =
       _renderCustomCatalogue(store, customCatalogue, customNodes, labels, failedHeroes) === 0;
+    _setJump(jumpNavigation, jumpShipped, orchestras.count + blocks.count > 0);
+    _setJump(jumpNavigation, jumpCustom, customNodes.length > 0);
 
     debugLog(HOME_UPDATED);
   };
