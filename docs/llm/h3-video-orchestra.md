@@ -17,7 +17,9 @@ LLM pass, not a guarantee that the prose or resulting video is correct.
 
 ## Controls and references
 
-The ordinary form contains only the idea, Picture 1, duration, and aspect ratio.
+The ordinary form contains the idea, Picture 1, duration, aspect ratio, and
+Output quality. Standard is unchanged; [optional HD](h3-hd-output.md) adds the
+learned four-step finishing pass to the renderer, without another writer call.
 Advanced contains review, explicit H3 mode, connection/model controls, additional
 instructions, Pictures 2–9, and seed. References may have different dimensions;
 fill them consecutively so the writer and renderer see identical Picture order.
@@ -30,6 +32,7 @@ Duration is selected from the existing H3 frame presets. Both blocks receive the
 same precise seconds value; the renderer uses the corresponding frame count at
 24 fps. The UI rounds the seconds label, not the underlying value. Rendering uses
 the existing native-canvas, Kitchen 20-step recipe and existing device policy.
+HD adds target-resolution refinement after that first pass and retains its audio.
 
 ## One-time host setup
 

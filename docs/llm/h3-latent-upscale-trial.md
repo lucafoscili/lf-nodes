@@ -1,10 +1,11 @@
 # H3 learned latent upscale — paired trial, 2026-09-26
 
-**Keep as an optional candidate; do not replace the accepted default.** The
+**Keep as an opt-in output; do not replace the accepted default.** The
 learned upscale plus short refinement adds visible detail, especially to the
 face, hair and corset, while retaining the scene and action in five matched
-frames. It also redraws small features. The phone orchestra is not yet wired to
-this experimental path.
+frames. It also redraws small features. Following Luca's acceptance, the
+[four-step HD option](h3-hd-output.md) is now wired into the rendering blocks and
+H3-backed orchestras. The results below record the preceding experiments.
 
 ## Exact case
 
