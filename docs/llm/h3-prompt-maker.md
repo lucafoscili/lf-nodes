@@ -47,14 +47,15 @@ saved with `t2va`, select Auto before connecting reference images.
 For explicit memory handoff, see [LMS Load/Unload](lms-models.md). Set the same LMS
 endpoint on connected operations. A blank model still uses the sole loaded LLM.
 
-## Checks and next live test
+## Checks and live evidence
 
 Offline checkpoint, 2026-09-26: 257 focused Python contracts and 241 related
 Runner/pipeline contracts passed; the final node-only recheck passed all 38 tests.
 The frontend suite passed 590 tests, with 25 focused socket/widget tests rechecked
 after type-only adjustments. The full frontend build and static node contracts
-passed. Live Qwen output quality and Comfy/Titanic hydration are **untested**:
-Comfy was stopped and LMS had no loaded model; neither was started for this check.
+passed. At that offline checkpoint, live provider quality and Comfy/Titanic
+hydration were untested. The subsequent [Qwen live trial](h3-live-trial.md)
+exercises the public Python nodes against LMS, without starting Comfy.
 
 ```powershell
 python -I scripts/quality/run_pytests.py -q modules/tests/nodes/llm/test_h3_prompt_maker.py modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py modules/tests/utils/helpers/llm/test_h3_prompt_skill.py
