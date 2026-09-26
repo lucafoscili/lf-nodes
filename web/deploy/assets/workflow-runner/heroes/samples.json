@@ -12,6 +12,32 @@
     "status": "succeeded"
   },
   "sources": {
+    "iso-ground-input": {
+      "workflowId": "iso_ground_tiles",
+      "runId": "e97ce907-adf5-4abf-bf0b-630f67b6cd7d",
+      "artifact": "output/hero-cards/catalogue-20260926/iso-ground-source-imagegen.png",
+      "sha256": "bbb3266d5c82282588d687075956b0738cdad37f16d6650ae513630d75cd2cf7",
+      "dimensions": [1254, 1254],
+      "role": "Actual input consumed by the block; original generic texture made with built-in ImageGen, not a Krea or orchestra output.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: original square input texture for a real isometric ground-tile workflow demonstration. Generate one flat, strictly top-down orthographic texture of small irregular warm-gray medieval cobblestones with moss in the joints and subtle earthy grit. Hand-painted game-environment material, finely detailed but readable, even diffuse lighting. The same ground fills the entire 1024x1024 image edge to edge, consistent stone size everywhere, no perspective or horizon, no vignette, no directional cast shadows, no characters, buildings, objects, text, labels, logos, borders, or watermark. It need not already tile perfectly: our actual workflow will make the wrap seamless and extract diamond tiles. Deliver only the source texture, not a mockup, diagram, or tileset."
+    },
+    "iso-ground-texture": {
+      "workflowId": "iso_ground_tiles",
+      "runId": "e97ce907-adf5-4abf-bf0b-630f67b6cd7d",
+      "submissionId": "lf-catalogue:hero:20260926:iso-ground-imagegen-a1",
+      "artifact": "output/LF_Nodes/IsoGroundTiles/128x64-v4-seed-42/texture_00002_.png",
+      "sha256": "a95867a67821c4dda402333f5bdacf827ff79f64e5d847ab267ef1f9077d6c77",
+      "dimensions": [1254, 1254],
+      "role": "Actual seamless texture output from the successful block run."
+    },
+    "iso-ground-tiles": {
+      "workflowId": "iso_ground_tiles",
+      "runId": "e97ce907-adf5-4abf-bf0b-630f67b6cd7d",
+      "artifact": "output/LF_Nodes/IsoGroundTiles/128x64-v4-seed-42/tiles_00002_.png",
+      "sha256": "baec4f865c4f286257826f604b711be66380f2438938bfce3b8ff88713fac8b1",
+      "dimensions": [512, 64],
+      "role": "Actual RGBA atlas: four 128x64 diamond variants."
+    },
     "generate": {
       "workflowId": "krea2_generate",
       "runId": "2fd5ce09-d029-4481-a925-2e482033d69d",
@@ -801,6 +827,15 @@
     }
   },
   "heroes": [
+    {
+      "workflowId": "iso_ground_tiles",
+      "asset": "image/iso-ground-tiles.webp",
+      "sources": ["iso-ground-input", "iso-ground-texture", "iso-ground-tiles"],
+      "display": "Browser-rendered layout of unchanged input and output images, contain-fitted with labels on a dark background. Complete four-tile atlas enlarged for readability. No retouching; embedded source metadata omitted.",
+      "qualityScope": "Root visually accepted the texture and four diamond variants. Broad seam-blend softening remains visible on the full texture. This is block evidence only, not execution of the prompt-to-tiles orchestra.",
+      "sha256": "c9c6817eddb220d5c38b7bb52906f7cc038d1aeebfbc897bca83cd22f2444a2d",
+      "bytes": 85156
+    },
     {
       "workflowId": "krea2_generate",
       "asset": "krea2/generate.webp",

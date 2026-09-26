@@ -9,6 +9,7 @@ from ..services.registry import (
     InputValidationError,
     WorkflowCardPresentation,
     WorkflowCell,
+    WorkflowHeroImage,
     WorkflowNode,
 )
 from .utils import resolve_load_image_reference
@@ -201,7 +202,11 @@ WORKFLOW = WorkflowNode(
     ),
     category="Image Processing",
     card=WorkflowCardPresentation(
-        summary="Turn a top-down texture into seamless isometric diamond tiles."
+        summary="Turn a top-down texture into seamless isometric diamond tiles.",
+        hero=WorkflowHeroImage(
+            asset="image/iso-ground-tiles.webp",
+            alt="Original cobblestone texture beside the workflow's seamless output and four actual isometric diamond tiles.",
+        ),
     ),
     inputs=inputs,
     outputs=outputs,

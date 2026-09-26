@@ -1,10 +1,10 @@
 # Workflow Runner showcase
 
-Working snapshot: **2026-08-31**. This covers all 41 shipped workflows (39 blocks
+Historical snapshot: **2026-08-31**. This covers the then-current 41 shipped workflows (39 blocks
 and two orchestras), not a claim that the catalogue is finished or that every
 workflow has passed visual acceptance. Active work can advance beyond this
 snapshot; update the affected row after inspecting the result. The manifest
-currently contains **28 curated covers**; seven samples need further quality
+then contained **28 curated covers**; seven samples needed further quality
 work, five workflows are blocked on setup/access, and the sound-effects example
 awaits listening acceptance. None of those 13 receives a substitute or fabricated
 cover.
@@ -280,3 +280,28 @@ the undeclared deploy-path copy was removed.
 Titanic gate, because LM Studio has no loaded model instance; and
 canon/promotion. The seven mode-2 provider branches remain explicit policy
 skips and were not called.
+
+## Catalogue QoL and fresh samples — 2026-09-26
+
+The current catalogue has **48 shipped workflows** (43 blocks, five orchestras).
+The home page separates LF Nodes from custom collections, retains each owner's
+Orchestras/Blocks grouping, and provides jump links to both owners. Custom
+overrides remain custom; missing provenance is not treated as shipped. Every
+shipped card now has a concise summary; long legacy descriptions no longer
+produce disproportionately tall cards.
+
+**Keep — Iso Ground Tiles:** fresh block run
+`e97ce907-adf5-4abf-bf0b-630f67b6cd7d` succeeded with a new original, top-down
+cobblestone texture made using built-in ImageGen. Root inspected the actual
+seamless texture and all four 128×64 diamond variants. The cover shows the input,
+seamless output, and complete output atlas, with only contain-fit and labels.
+Broad cross-shaped seam-blend softening is still visible on the full texture;
+the cover does not retouch it away. The manifest records the input's generation
+prompt and the real block output hashes. This brings the manifest to **29
+curated covers**. It is not a run of the Krea-powered prompt-to-tiles orchestra.
+
+Local receipt and presentation sources are in
+`output/hero-cards/catalogue-20260926/`; the packaged WebP contains no embedded
+prompt or execution metadata. Older rejected, setup-blocked, and unlistened
+samples retain their previous decisions. Personal-reference H3/sprite samples
+were excluded from distributable covers even when their runs had succeeded.
