@@ -140,6 +140,10 @@ describe('Titanic publication sanitizer', () => {
     expect(byId(553).widgets_values_named).toMatchObject({ width: 448, height: 150 });
     expect(fixture.links).toContainEqual([1221, 556, 0, 605, 4, 'IMAGE']);
     expect(fixture.links).toContainEqual([1222, 553, 0, 605, 10, 'IMAGE']);
+    expect(byId(589).widgets_values_named.batch_size).toBe(6);
+    expect(byId(589).outputs[0].links).toContain(1213);
+    expect(byId(563).outputs[0].links).not.toContain(1213);
+    expect(fixture.links).toContainEqual([1213, 589, 0, 600, 0, 'IMAGE']);
     expect(fixture.links).toContainEqual([1219, 603, 0, 607, 1, 'STRING']);
     expect(fixture.links).toContainEqual([1228, 606, 0, 607, 0, 'STRING']);
 
