@@ -62,9 +62,13 @@ endpoint on connected operations. A blank model still uses the sole loaded LLM.
 Prose-only revision: 63 focused node/instruction/registry/metadata tests and 50
 Runner tests passed, along with syntax compilation and the static node contract
 check. These verify unchanged sockets, ordered image inputs, one/two provider
-calls, verbatim output/history, and honest unvalidated status. No new live model
-run, Comfy hydration, or video render was performed for this revision. Frontend
-code is unchanged, so the earlier frontend build evidence still applies.
+calls, verbatim output/history, and honest unvalidated status. The subsequent
+[six prose-only live trials](h3-prose-trials.md) exercised this revision against
+Qwen3.5 4B through LMS: five returned prose and one returned no answer. Reference
+handling, history, and exact-instance unloading worked, but prompt quality and
+review were inconsistent; this is not authoring-quality acceptance. No Comfy
+hydration or video render was performed. Frontend code is unchanged, so the
+earlier frontend build evidence still applies.
 
 Offline checkpoint, 2026-09-26: 257 focused Python contracts and 241 related
 Runner/pipeline contracts passed; the final node-only recheck passed all 38 tests.
@@ -82,8 +86,8 @@ corepack yarn exec vitest run web/src/helpers/h3PromptMaker.test.ts --pool=threa
 
 The accepted September 7 video baseline is preserved in
 [H3_CHECKPOINT.md](../H3_CHECKPOINT.md); it does not prove this new authoring path.
-Live acceptance for this batch: one short walking idea plus one reference, then
-two differently sized references; inspect concise bindings, identity, new setting,
-camera intent, no invented frame anchor, and no internal bookkeeping in the output.
-Also verify saved-node reload, growing sockets, review opt-out, and exact-instance
-LMS release. Comfy hydration and live provider quality require the running services.
+The prose-only trials cover the short walking idea, differently sized references,
+review opt-out, exact speech, fixed first-frame intent, and exact-instance release.
+Authoring-quality follow-up remains necessary; see the trial's keep/defer judgment.
+Saved-node reload and growing sockets still need live Comfy/Titanic inspection,
+and prompt observations do not establish rendered-video quality.
