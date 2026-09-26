@@ -6,6 +6,9 @@ full-reference generation with images. Duration and Review are ordinary controls
 model, endpoint, explicit frame mode, reasoning, temperature, and optional extra
 instructions are marked Advanced in Comfy's schema.
 
+For a single phone-friendly run through prompt writing and video generation, use
+the [Idea to Video orchestra](h3-video-orchestra.md) in Workflow Runner.
+
 Connect another image to the next reference socket as it appears. Each socket
 accepts a single image, batch, or ordered list. Inputs are flattened in socket
 number order, then batch/list order; no shared dimensions or resizing is required.

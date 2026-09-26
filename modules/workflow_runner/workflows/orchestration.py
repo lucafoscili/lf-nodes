@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from ..config import get_settings
 from ..services.registry import (
     WorkflowCardPresentation,
     WorkflowCell,
@@ -18,11 +19,14 @@ from ..services.registry import (
     WorkflowSequenceLiteralBinding,
     WorkflowSequencePublicInputBinding,
     WorkflowSequenceStage,
+    WorkflowSequenceTextBinding,
 )
 from .cardinal_turnaround import WORKFLOW as assemble_cardinal_turnaround
 from .iso_ground_tiles import WORKFLOW as iso_ground_tiles
 from .krea2 import character_restage, generate as krea2_generate, identity_edit
 from .minimax_h3 import directed_view, reference_restage
+from .minimax_h3_prompt_maker import WORKFLOW as h3_prompt_maker
+from .minimax_h3_prompt_video import WORKFLOW as h3_prompt_video
 from .sprite_loop_cut import WORKFLOW as sprite_loop_cut
 
 
@@ -619,10 +623,86 @@ iso_ground_tiles_orchestra = WorkflowOrchestraNode(
 )
 
 
+def _h3_orchestra_inputs() -> tuple[WorkflowCell, ...]:
+    """One small creative form; host connection details stay in Advanced."""
+
+    idea = _renamed_input(h3_prompt_maker, "intent", public_id="intent", label="Your video idea")
+    idea.props["lfValue"] = "Walking from behind in a medieval town."
+    maker_ids = (
+        "review", "mode", "model", "endpoint", "manage_model", "reasoning",
+        "temperature", "instructions", *(f"picture_{n}" for n in range(2, 10)),
+    )
+    extra = [_input_cell(h3_prompt_maker, name) for name in maker_ids]
+    settings = get_settings()
+    model = getattr(settings, "WORKFLOW_RUNNER_LMS_MODEL", "").strip()
+    endpoint = getattr(settings, "WORKFLOW_RUNNER_LMS_ENDPOINT", "http://127.0.0.1:1234/api/v1/chat")
+    for cell in extra:
+        cell.advanced = True
+        if cell.id == "model":
+            cell.props["lfValue"] = model
+        elif cell.id == "endpoint":
+            cell.props["lfValue"] = endpoint
+        elif cell.id == "manage_model":
+            # A configured host model opts into a full phone-to-video handoff.
+            # Unconfigured installations retain the sole-loaded-model behavior.
+            cell.props["lfValue"] = bool(model)
+    seed = _input_cell(h3_prompt_video, "seed")
+    seed.advanced = True
+    return (
+        idea,
+        _input_cell(h3_prompt_maker, "picture_1"),
+        _input_cell(h3_prompt_video, "duration"),
+        _input_cell(h3_prompt_video, "aspect_ratio"),
+        *extra,
+        seed,
+    )
+
+
+_H3_SHARED_INPUTS = ("mode", "duration", *(f"picture_{n}" for n in range(1, 10)))
+minimax_h3_video_orchestra = WorkflowOrchestraNode(
+    id="minimax_h3_video_orchestra",
+    value="MiniMax H3 / Idea to Video",
+    description=(
+        "Describe a video in ordinary words and optionally add reference pictures. "
+        "Prompt Maker writes and reviews the H3 prompt, then H3 renders video with audio. "
+        "The same ordered references and duration are used in both stages."
+    ),
+    category="MiniMax H3",
+    card=WorkflowCardPresentation(summary="A simple idea and optional references in; video with audio out."),
+    inputs=_h3_orchestra_inputs(),
+    stages=(
+        WorkflowSequenceStage(
+            id="write_prompt",
+            workflow_id=h3_prompt_maker.id,
+            bindings=tuple(
+                WorkflowSequencePublicInputBinding(target_input_id=name, public_input_id=name)
+                for name in (
+                    "intent", "review", "endpoint", "model", "manage_model",
+                    "reasoning", "temperature", "instructions", *_H3_SHARED_INPUTS,
+                )
+            ),
+        ),
+        WorkflowSequenceStage(
+            id="render_video",
+            workflow_id=h3_prompt_video.id,
+            bindings=(
+                WorkflowSequenceTextBinding(target_input_id="prompt", output_id="prompt"),
+                *(
+                    WorkflowSequencePublicInputBinding(target_input_id=name, public_input_id=name)
+                    for name in ("aspect_ratio", "seed", *_H3_SHARED_INPUTS)
+                ),
+            ),
+        ),
+    ),
+    final_output_ids=("video", "prompt"),
+)
+
+
 WORKFLOWS = (
     identity_cleanup_restage,
     character_turnaround_orchestra,
     sprite_loop_orchestra,
     iso_ground_tiles_orchestra,
+    minimax_h3_video_orchestra,
 )
 WORKFLOW_BY_ID = {workflow.id: workflow for workflow in WORKFLOWS}

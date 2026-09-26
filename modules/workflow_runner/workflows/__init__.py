@@ -42,6 +42,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "load_metadata",
     "minimax_h3",
     "minimax_h3_prompt_maker",
+    "minimax_h3_prompt_video",
     "remove_bg",
     "simple_chat",
     "sort_json_keys",
