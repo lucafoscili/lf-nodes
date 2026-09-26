@@ -2258,6 +2258,7 @@ const _title$2 = () => {
 const createHomeSection = (store) => {
   const { HOME_DESTROYED, HOME_MOUNTED, HOME_UPDATED } = DEBUG_MESSAGES;
   const failedHeroes = /* @__PURE__ */ new Set();
+  let renderedWorkflows;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -2266,6 +2267,7 @@ const createHomeSection = (store) => {
       uiRegistry.remove(element);
     }
     failedHeroes.clear();
+    renderedWorkflows = void 0;
     debugLog(HOME_DESTROYED);
   };
   const mount = () => {
@@ -2329,7 +2331,11 @@ const createHomeSection = (store) => {
     if (!orchestraMasonry || !orchestraRail || !blockMasonry || !blockRail || !custom || !customCatalogue || !jumpCustom || !jumpNavigation || !jumpShipped || !shipped) {
       return;
     }
-    const clone = JSON.parse(JSON.stringify(state.workflows));
+    const serializedWorkflows = JSON.stringify(state.workflows);
+    if (serializedWorkflows === renderedWorkflows) {
+      return;
+    }
+    const clone = JSON.parse(serializedWorkflows);
     const nodes = _deduplicateNodes(clone.nodes || []);
     const labels = new Map(nodes.map((node) => [node.id, String(node.value || node.id)]));
     const shippedNodes = nodes.filter(_isShipped);
@@ -2342,6 +2348,7 @@ const createHomeSection = (store) => {
     custom.hidden = _renderCustomCatalogue(store, customCatalogue, customNodes, labels, failedHeroes) === 0;
     _setJump(jumpNavigation, jumpShipped, orchestras.count + blocks.count > 0);
     _setJump(jumpNavigation, jumpCustom, customNodes.length > 0);
+    renderedWorkflows = serializedWorkflows;
     debugLog(HOME_UPDATED);
   };
   return {
