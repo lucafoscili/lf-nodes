@@ -9,9 +9,67 @@
 
   &__catalogue {
     display: grid;
-    gap: 2.75em;
+    gap: 3.5em;
     max-width: 1120px;
     width: 100%;
+  }
+
+  &__owner {
+    display: grid;
+    gap: 1.75em;
+    min-width: 0;
+    width: 100%;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &-header {
+      border-block-end: 1px solid rgba(var(--lf-color-border), 0.45);
+      padding-block-end: 0.75em;
+    }
+
+    &-title {
+      font-size: 1.35em;
+      font-weight: 650;
+      margin: 0;
+    }
+
+    &-description {
+      font-size: 0.9em;
+      margin: 0.3em 0 0;
+      opacity: 0.68;
+    }
+
+    &-content {
+      display: grid;
+      gap: 2.75em;
+      min-width: 0;
+    }
+  }
+
+  &__collection {
+    display: grid;
+    gap: 1em;
+    min-width: 0;
+
+    & + & {
+      border-block-start: 1px solid rgba(var(--lf-color-border), 0.3);
+      padding-block-start: 1.5em;
+    }
+
+    &-title {
+      font-size: 1.05em;
+      font-weight: 600;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    &-rails {
+      display: grid;
+      gap: 2.25em;
+      min-width: 0;
+    }
   }
 
   &__description {
@@ -76,5 +134,20 @@
     font-size: 1.5em;
     font-weight: 600;
     margin: 1em 0 0.5em;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-section {
+    padding-inline: 0.65em;
+
+    &__catalogue {
+      gap: 2.75em;
+    }
+
+    &__owner-content,
+    &__collection-rails {
+      gap: 2em;
+    }
   }
 }

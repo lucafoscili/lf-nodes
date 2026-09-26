@@ -132,11 +132,23 @@ describe('Home Element', () => {
         expect.any(Element),
       );
       expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
+        'home-section-custom',
+        expect.any(Element),
+      );
+      expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
+        'home-section-custom-catalogue',
+        expect.any(Element),
+      );
+      expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
         'home-section-orchestra-masonry',
         expect.any(Element),
       );
       expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
         'home-section-orchestra-rail',
+        expect.any(Element),
+      );
+      expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
+        'home-section-shipped',
         expect.any(Element),
       );
       expect(mockManager.uiRegistry.set).toHaveBeenCalledWith(
@@ -165,8 +177,19 @@ describe('Home Element', () => {
       expect(description).toBeTruthy();
       expect(description?.className).toContain('home-section-description');
       expect(description?.textContent).toBe(
-        'Choose a focused block or a ready-made orchestra.',
+        'Browse LF Nodes workflows and your registered custom collections.',
       );
+    });
+
+    it('creates distinct LF Nodes and Custom workflow ownership sections', () => {
+      createHomeSection(store).mount();
+
+      const owners = mockMainElement.querySelectorAll('.home-section-owner');
+      expect(owners).toHaveLength(2);
+      expect(owners[0].getAttribute('data-workflow-origin')).toBe('shipped');
+      expect(owners[0].querySelector('h2')?.textContent).toBe('LF Nodes');
+      expect(owners[1].getAttribute('data-workflow-origin')).toBe('custom');
+      expect(owners[1].querySelector('h2')?.textContent).toBe('Custom workflows');
     });
 
     it('creates distinct orchestra and block rails with canonical attributes', () => {
@@ -233,12 +256,17 @@ describe('Home Element', () => {
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-block-masonry');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-block-rail');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-catalogue');
+      expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-custom');
+      expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith(
+        'home-section-custom-catalogue',
+      );
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-description');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-title-h1');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith(
         'home-section-orchestra-masonry',
       );
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-orchestra-rail');
+      expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-shipped');
       expect(mockManager.uiRegistry.remove).toHaveBeenCalledWith('home-section-title');
     });
   });
@@ -248,6 +276,9 @@ describe('Home Element', () => {
       // Setup mounted elements for render tests
       const homeSection = document.createElement('section');
       const catalogue = document.createElement('div');
+      const custom = document.createElement('section');
+      const customCatalogue = document.createElement('div');
+      custom.appendChild(customCatalogue);
       const orchestraMasonry = document.createElement('lf-masonry');
       const orchestraRail = document.createElement('section');
       const orchestraCount = document.createElement('span');
@@ -261,6 +292,7 @@ describe('Home Element', () => {
       const h1 = document.createElement('h1');
       const description = document.createElement('p');
       const title = document.createElement('div');
+      const shipped = document.createElement('section');
 
       mockManager.uiRegistry.get.mockReturnValue({
         [MAIN_CLASSES._]: mockMainElement,
@@ -268,8 +300,11 @@ describe('Home Element', () => {
         'home-section-block-rail': blockRail,
         'home-section': homeSection,
         'home-section-catalogue': catalogue,
+        'home-section-custom': custom,
+        'home-section-custom-catalogue': customCatalogue,
         'home-section-orchestra-masonry': orchestraMasonry,
         'home-section-orchestra-rail': orchestraRail,
+        'home-section-shipped': shipped,
         'home-section-title-h1': h1,
         'home-section-description': description,
         'home-section-title': title,
@@ -287,6 +322,7 @@ describe('Home Element', () => {
             value: 'Test Workflow',
             category: 'Test Category',
             description: 'A test workflow',
+            origin: 'shipped' as const,
             children: [undefined, undefined] as [undefined, undefined],
           },
         ],
@@ -321,6 +357,7 @@ describe('Home Element', () => {
             value: 'My Workflow',
             category: 'Image Processing',
             description: 'Processes images',
+            origin: 'shipped' as const,
             children: [undefined, undefined] as [undefined, undefined],
           },
         ],
@@ -352,6 +389,7 @@ describe('Home Element', () => {
         value: 'Identity Edit',
         category: 'Krea 2',
         description: 'Edit one identity.',
+        origin: 'shipped' as const,
         children: [undefined, undefined] as [undefined, undefined],
       };
       const restage = {
@@ -359,6 +397,7 @@ describe('Home Element', () => {
         value: 'Character Restage',
         category: 'Krea 2',
         description: 'Restage one character.',
+        origin: 'shipped' as const,
         children: [undefined, undefined] as [undefined, undefined],
       };
       const sequence = {
@@ -369,6 +408,7 @@ describe('Home Element', () => {
         children: [undefined, undefined] as [undefined, undefined],
         kind: 'orchestra' as const,
         downloadable: false,
+        origin: 'shipped' as const,
         stages: [
           { id: 'identity', workflowId: 'krea2_identity_edit' },
           { id: 'restage', workflowId: 'krea2_character_restage' },
@@ -417,6 +457,7 @@ describe('Home Element', () => {
         value: 'Directed View',
         category: 'MiniMax H3',
         description: 'Generate one directed character view.',
+        origin: 'shipped' as const,
         children: [undefined, undefined] as [undefined, undefined],
       };
       const assembler = {
@@ -424,6 +465,7 @@ describe('Home Element', () => {
         value: 'Assemble Cardinal Turnaround',
         category: 'Image Processing',
         description: 'Assemble four views.',
+        origin: 'shipped' as const,
         children: [undefined, undefined] as [undefined, undefined],
       };
       const orchestra = {
@@ -433,6 +475,7 @@ describe('Home Element', () => {
         description: 'Build the stable cardinal sheet.',
         children: [undefined, undefined] as [undefined, undefined],
         kind: 'orchestra' as const,
+        origin: 'shipped' as const,
         stages: [
           { id: 'subject_right', workflowId: directedView.id },
           { id: 'back', workflowId: directedView.id },
@@ -464,6 +507,7 @@ describe('Home Element', () => {
         category: 'Custom',
         description: 'Still a block.',
         kind: 'workflow' as const,
+        origin: 'shipped' as const,
         children: [undefined, undefined] as [undefined, undefined],
       };
       const malformedSequence = {
@@ -472,6 +516,7 @@ describe('Home Element', () => {
         category: 'Orchestration',
         description: 'Malformed test declaration.',
         kind: 'sequence' as const,
+        origin: 'shipped' as const,
         children: [undefined, undefined] as [undefined, undefined],
       };
       vi.spyOn(store, 'getState').mockReturnValue({
@@ -493,6 +538,61 @@ describe('Home Element', () => {
       expect(orchestraRoot.cells['empty-sequence'].lfDataset.nodes[0].cells['2'].value).toBe(
         'ORCHESTRA',
       );
+    });
+
+    it('separates custom collections, treats missing provenance as custom, and never duplicates overrides', () => {
+      const section = createHomeSection(store);
+      const shipped = {
+        id: 'shared', value: 'Shipped original', category: 'Image Processing',
+        description: 'Packaged version.', origin: 'shipped' as const,
+        children: [undefined, undefined] as [undefined, undefined],
+      };
+      const customOverride = {
+        ...shipped, value: 'Custom override', origin: 'custom' as const, collection: 'Velora',
+      };
+      const customOrchestra = {
+        id: 'garage-orchestra', value: 'Garage Orchestra', category: 'Orchestration',
+        description: 'A custom sequence.', kind: 'orchestra' as const,
+        origin: 'custom' as const, collection: 'Garage',
+        stages: [{ id: 'custom', workflowId: 'unmarked' }],
+        children: [undefined, undefined] as [undefined, undefined],
+      };
+      const unmarked = {
+        id: 'unmarked', value: 'Unmarked Custom', category: 'Local',
+        description: 'Conservative provenance.',
+        children: [undefined, undefined] as [undefined, undefined],
+      };
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(), manager: mockManager,
+        workflows: { nodes: [shipped, customOverride, customOrchestra, unmarked] },
+      });
+
+      section.render();
+
+      const elements = mockManager.uiRegistry.get();
+      const shippedCells = elements['home-section-block-masonry'].lfDataset.nodes[0].cells;
+      const customRoot = elements['home-section-custom-catalogue'];
+      const groups = [...customRoot.querySelectorAll('.home-section-collection')];
+      expect(groups.map((group: HTMLElement) => group.dataset.workflowCollection)).toEqual([
+        'Custom', 'Garage', 'Velora',
+      ]);
+      expect(shippedCells.shared).toBeUndefined();
+      expect(elements['home-section-shipped'].hidden).toBe(true);
+      expect(elements['home-section-custom'].hidden).toBe(false);
+
+      const allCustomCells = groups.flatMap((group: HTMLElement) =>
+        Array.from(group.querySelectorAll('lf-masonry')).flatMap((masonry: any) =>
+          Object.values(masonry.lfDataset.nodes[0].cells),
+        ),
+      ) as any[];
+      expect(allCustomCells.map((cell) => cell.lfDataset.nodes[0].id).sort()).toEqual([
+        'garage-orchestra', 'shared', 'unmarked',
+      ]);
+      const override = allCustomCells.find((cell) => cell.lfDataset.nodes[0].id === 'shared');
+      expect(override.lfDataset.nodes[0].cells['1'].value).toBe('Custom override');
+      expect(override.htmlProps.dataset).toMatchObject({
+        workflowCollection: 'Velora', workflowKind: 'block', workflowOrigin: 'custom',
+      });
     });
 
     it('handles empty workflows gracefully', () => {

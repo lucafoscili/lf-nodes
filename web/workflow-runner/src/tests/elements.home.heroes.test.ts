@@ -15,6 +15,7 @@ const workflow = (id: string, overrides: Partial<WorkflowAPIItem> = {}): Workflo
   id,
   value: `Workflow ${id}`,
   kind: 'block',
+  origin: 'shipped',
   category: 'Image tools',
   description: 'Legacy full description.',
   children: [],
@@ -114,7 +115,7 @@ describe('home catalogue heroes', () => {
     expect(cell.lfSizeY).toBe('auto');
     expect(cell.lfStyle).toContain('aspect-ratio: 16 / 9');
     expect(cell.lfStyle).toContain('--lf-image-object-fit: contain');
-    expect(cell.lfStyle).toContain(':host .material-layout .text-content__description { white-space: nowrap');
+    expect(cell.lfStyle).toContain('-webkit-line-clamp: 4');
     expect(cell.lfStyle).toContain(':host .material-layout__actions-section { position: static');
     expect(cell.lfStyle.includes('height: 100%')).toBe(false);
     if (kind === 'orchestra') {
@@ -147,7 +148,8 @@ describe('home catalogue heroes', () => {
         lfUiState: 'primary',
       },
     });
-    expect(legacy.lfStyle).toBeUndefined();
+    expect(legacy.lfSizeY).toBe('auto');
+    expect(legacy.lfStyle).toContain('-webkit-line-clamp: 4');
     for (const id of ['summary', 'unsafe']) {
       const cells = cardCell(masonry, id).lfDataset.nodes[0].cells;
       expect(cells.hero).toBeUndefined();

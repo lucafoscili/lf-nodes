@@ -26,10 +26,13 @@ export const HOME_CLASSES = {
   blockMasonry: theme.bemClass(ROOT_CLASS, 'block-masonry'),
   blockRail: theme.bemClass(ROOT_CLASS, 'block-rail'),
   catalogue: theme.bemClass(ROOT_CLASS, 'catalogue'),
+  custom: theme.bemClass(ROOT_CLASS, 'custom'),
+  customCatalogue: theme.bemClass(ROOT_CLASS, 'custom-catalogue'),
   description: theme.bemClass(ROOT_CLASS, 'description'),
   h1: theme.bemClass(ROOT_CLASS, 'title-h1'),
   orchestraMasonry: theme.bemClass(ROOT_CLASS, 'orchestra-masonry'),
   orchestraRail: theme.bemClass(ROOT_CLASS, 'orchestra-rail'),
+  shipped: theme.bemClass(ROOT_CLASS, 'shipped'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
 } as const;
 //#endregion
@@ -42,22 +45,43 @@ const ORCHESTRA_CARD_ACCENT = [
   '  border-inline-start: 4px double rgb(var(--lf-card-color-primary, var(--lf-color-secondary)));',
   '}',
 ].join('\n');
-const ORCHESTRA_CARD_STYLE = `${ORCHESTRA_CARD_ACCENT}\n.material-layout__text-section { height: 100%; }`;
-const HERO_CARD_STYLE = [
+const CARD_STYLE = [
   // LF's adopted base stylesheet follows lfStyle; :host makes these overrides
   // win without relying on insertion order or changing the shared widget.
   ':host .material-layout { height: auto; overflow: hidden; }',
+  ':host .material-layout__text-section { height: auto; min-width: 0; overflow: hidden; }',
+  ':host .material-layout .text-content__description {',
+  '  display: -webkit-box; overflow: hidden; white-space: pre-line;',
+  '  -webkit-box-orient: vertical; -webkit-line-clamp: 4;',
+  '}',
+  ':host .material-layout--has-actions { padding-bottom: 0; }',
+  ':host .material-layout__actions-section { position: static; height: auto; padding: 0 .5em .35em; }',
+].join('\n');
+const HERO_CARD_STYLE = [
   ':host .material-layout__cover-section {',
   '  aspect-ratio: 16 / 9; flex: none; height: auto; overflow: hidden;',
   '  --lf-image-object-fit: contain;',
   '}',
-  ':host .material-layout__text-section { height: auto; min-width: 0; overflow: hidden; }',
-  ':host .material-layout .text-content__description { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }',
-  ':host .material-layout--has-actions { padding-bottom: 0; }',
-  ':host .material-layout__actions-section { position: static; height: auto; padding: 0 .5em .35em; }',
 ].join('\n');
 
 const _kind = (node: WorkflowAPIItem): CatalogueKind => normalizeWorkflowKind(node.kind);
+
+const _isShipped = (node: WorkflowAPIItem) => node.origin === 'shipped';
+
+const _deduplicateNodes = (nodes: WorkflowAPIItem[]) => {
+  const unique = new Map<string, WorkflowAPIItem>();
+  nodes.forEach((node) => {
+    const current = unique.get(node.id);
+    // Custom registrations are authoritative overrides. Once one has claimed
+    // an id, a stale shipped record cannot make the same workflow appear twice.
+    if (!current || !_isShipped(node) || _isShipped(current)) {
+      unique.set(node.id, node);
+    }
+  });
+  return [...unique.values()];
+};
+
+const _collectionName = (node: WorkflowAPIItem) => node.collection?.trim() || 'Custom';
 
 const _fallbackStageLabel = (value: string) =>
   value
@@ -115,7 +139,11 @@ const _createDataset = (
         presentation?.summary || [trail, node.description].filter(Boolean).join('\n');
       root.cells[id] = {
         htmlProps: {
-          dataset: { workflowKind: kind },
+          dataset: {
+            workflowCollection: _collectionName(node),
+            workflowKind: kind,
+            workflowOrigin: _isShipped(node) ? 'shipped' : 'custom',
+          },
         },
         lfDataset: {
           nodes: [
@@ -155,21 +183,13 @@ const _createDataset = (
             },
           ],
         },
-        ...(presentation
-          ? {
-              lfSizeY: 'auto',
-              lfStyle: [
-                HERO_CARD_STYLE,
-                kind === 'orchestra' ? ORCHESTRA_CARD_ACCENT : '',
-              ].join('\n'),
-              ...(kind === 'orchestra' ? { lfUiState: 'secondary' as const } : {}),
-            }
-          : kind === 'orchestra'
-          ? {
-              lfStyle: ORCHESTRA_CARD_STYLE,
-              lfUiState: 'secondary' as const,
-            }
-          : {}),
+        lfSizeY: 'auto',
+        lfStyle: [
+          CARD_STYLE,
+          hero ? HERO_CARD_STYLE : '',
+          kind === 'orchestra' ? ORCHESTRA_CARD_ACCENT : '',
+        ].join('\n'),
+        ...(kind === 'orchestra' ? { lfUiState: 'secondary' as const } : {}),
         shape: 'card',
         value: '',
       };
@@ -236,7 +256,7 @@ const _masonry = (store: WorkflowStore, className: string, failedHeroes: Set<str
 const _description = () => {
   const p = document.createElement('p');
   p.className = HOME_CLASSES.description;
-  p.textContent = 'Choose a focused block or a ready-made orchestra.';
+  p.textContent = 'Browse LF Nodes workflows and your registered custom collections.';
 
   return p;
 };
@@ -249,6 +269,8 @@ const _rail = (
   railClass: string,
   masonryClass: string,
   failedHeroes: Set<string>,
+  origin: 'shipped' | 'custom' = 'shipped',
+  collection?: string,
 ) => {
   const rail = document.createElement('section');
   const header = document.createElement('header');
@@ -260,6 +282,10 @@ const _rail = (
 
   rail.className = `${theme.bemClass(ROOT_CLASS, 'rail')} ${railClass}`;
   rail.dataset.workflowKind = kind;
+  rail.dataset.workflowOrigin = origin;
+  if (collection) {
+    rail.dataset.workflowCollection = collection;
+  }
   header.className = theme.bemClass(ROOT_CLASS, 'rail-header');
   headingRow.className = theme.bemClass(ROOT_CLASS, 'rail-heading');
   heading.className = theme.bemClass(ROOT_CLASS, 'rail-title');
@@ -277,6 +303,119 @@ const _rail = (
   rail.append(header, masonry);
 
   return { masonry, rail };
+};
+
+const _owner = (
+  owner: 'shipped' | 'custom',
+  titleText: string,
+  descriptionText: string,
+  className: string,
+) => {
+  const section = document.createElement('section');
+  const header = document.createElement('header');
+  const heading = document.createElement('h2');
+  const description = document.createElement('p');
+  const content = document.createElement('div');
+
+  section.className = `${theme.bemClass(ROOT_CLASS, 'owner')} ${className}`;
+  section.dataset.workflowOrigin = owner;
+  header.className = theme.bemClass(ROOT_CLASS, 'owner-header');
+  heading.className = theme.bemClass(ROOT_CLASS, 'owner-title');
+  description.className = theme.bemClass(ROOT_CLASS, 'owner-description');
+  content.className = theme.bemClass(ROOT_CLASS, 'owner-content');
+  heading.textContent = titleText;
+  description.textContent = descriptionText;
+  header.append(heading, description);
+  section.append(header, content);
+
+  return { content, section };
+};
+
+const _setRail = (
+  rail: HTMLElement,
+  masonry: HTMLLfMasonryElement,
+  result: ReturnType<typeof _createDataset>,
+  kind: CatalogueKind,
+) => {
+  masonry.lfDataset = result.dataset;
+  rail.hidden = result.count === 0;
+  const count = rail.querySelector<HTMLElement>(`[data-rail-count="${kind}"]`);
+  if (!count) {
+    return;
+  }
+  count.textContent = String(result.count);
+  count.setAttribute(
+    'aria-label',
+    `${result.count} ${result.count === 1 ? kind : `${kind}s`}`,
+  );
+};
+
+const _renderCustomCatalogue = (
+  store: WorkflowStore,
+  catalogue: HTMLElement,
+  nodes: WorkflowAPIItem[],
+  labels: Map<string, string>,
+  failedHeroes: Set<string>,
+) => {
+  const groups = new Map<string, WorkflowAPIItem[]>();
+  nodes.forEach((node) => {
+    const name = _collectionName(node);
+    groups.set(name, [...(groups.get(name) || []), node]);
+  });
+
+  const fragment = document.createDocumentFragment();
+  [...groups.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .forEach(([name, collectionNodes]) => {
+      const group = document.createElement('section');
+      const heading = document.createElement('h3');
+      const rails = document.createElement('div');
+      const orchestra = _rail(
+        store,
+        'orchestra',
+        'Orchestras',
+        'Multi-block pipelines.',
+        theme.bemClass(ROOT_CLASS, 'custom-orchestra-rail'),
+        theme.bemClass(ROOT_CLASS, 'custom-orchestra-masonry'),
+        failedHeroes,
+        'custom',
+        name,
+      );
+      const block = _rail(
+        store,
+        'block',
+        'Blocks',
+        'Single-purpose tools.',
+        theme.bemClass(ROOT_CLASS, 'custom-block-rail'),
+        theme.bemClass(ROOT_CLASS, 'custom-block-masonry'),
+        failedHeroes,
+        'custom',
+        name,
+      );
+
+      group.className = theme.bemClass(ROOT_CLASS, 'collection');
+      group.dataset.workflowCollection = name;
+      heading.className = theme.bemClass(ROOT_CLASS, 'collection-title');
+      heading.textContent = name;
+      rails.className = theme.bemClass(ROOT_CLASS, 'collection-rails');
+
+      const orchestras = _createDataset(
+        collectionNodes,
+        labels,
+        'orchestra',
+        failedHeroes,
+      );
+      const blocks = _createDataset(collectionNodes, labels, 'block', failedHeroes);
+      _setRail(orchestra.rail, orchestra.masonry, orchestras, 'orchestra');
+      _setRail(block.rail, block.masonry, blocks, 'block');
+
+      rails.append(orchestra.rail, block.rail);
+      group.append(heading, rails);
+      fragment.append(group);
+    });
+
+  catalogue.replaceChildren(fragment);
+  return groups.size;
 };
 
 const _title = () => {
@@ -331,6 +470,19 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     catalogue.className = HOME_CLASSES.catalogue;
 
     const description = _description();
+    const shipped = _owner(
+      'shipped',
+      'LF Nodes',
+      'Curated workflows included with LF Nodes.',
+      HOME_CLASSES.shipped,
+    );
+    const custom = _owner(
+      'custom',
+      'Custom workflows',
+      'Workflows registered by your projects and local extensions.',
+      HOME_CLASSES.custom,
+    );
+    custom.content.classList.add(HOME_CLASSES.customCatalogue);
     const orchestra = _rail(
       store,
       'orchestra',
@@ -351,7 +503,8 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     );
     const { h1, title } = _title();
 
-    catalogue.append(orchestra.rail, block.rail);
+    shipped.content.append(orchestra.rail, block.rail);
+    catalogue.append(shipped.section, custom.section);
     _root.append(title, description, catalogue);
 
     elements[MAIN_CLASSES._].prepend(_root);
@@ -360,10 +513,13 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     uiRegistry.set(HOME_CLASSES.blockMasonry, block.masonry);
     uiRegistry.set(HOME_CLASSES.blockRail, block.rail);
     uiRegistry.set(HOME_CLASSES.catalogue, catalogue);
+    uiRegistry.set(HOME_CLASSES.custom, custom.section);
+    uiRegistry.set(HOME_CLASSES.customCatalogue, custom.content);
     uiRegistry.set(HOME_CLASSES.description, description);
     uiRegistry.set(HOME_CLASSES.h1, h1);
     uiRegistry.set(HOME_CLASSES.orchestraMasonry, orchestra.masonry);
     uiRegistry.set(HOME_CLASSES.orchestraRail, orchestra.rail);
+    uiRegistry.set(HOME_CLASSES.shipped, shipped.section);
     uiRegistry.set(HOME_CLASSES.title, title);
 
     debugLog(HOME_MOUNTED);
@@ -385,41 +541,34 @@ export const createHomeSection = (store: WorkflowStore): WorkflowSectionControll
     const orchestraRail = elements[HOME_CLASSES.orchestraRail] as HTMLElement;
     const blockMasonry = elements[HOME_CLASSES.blockMasonry] as HTMLLfMasonryElement;
     const blockRail = elements[HOME_CLASSES.blockRail] as HTMLElement;
-    if (!orchestraMasonry || !orchestraRail || !blockMasonry || !blockRail) {
+    const custom = elements[HOME_CLASSES.custom] as HTMLElement;
+    const customCatalogue = elements[HOME_CLASSES.customCatalogue] as HTMLElement;
+    const shipped = elements[HOME_CLASSES.shipped] as HTMLElement;
+    if (
+      !orchestraMasonry ||
+      !orchestraRail ||
+      !blockMasonry ||
+      !blockRail ||
+      !custom ||
+      !customCatalogue ||
+      !shipped
+    ) {
       return;
     }
 
     const clone: WorkflowAPIDataset = JSON.parse(JSON.stringify(state.workflows));
-    const nodes = clone.nodes || [];
+    const nodes = _deduplicateNodes(clone.nodes || []);
     const labels = new Map(nodes.map((node) => [node.id, String(node.value || node.id)]));
-    const orchestras = _createDataset(nodes, labels, 'orchestra', failedHeroes);
-    const blocks = _createDataset(nodes, labels, 'block', failedHeroes);
+    const shippedNodes = nodes.filter(_isShipped);
+    const customNodes = nodes.filter((node) => !_isShipped(node));
+    const orchestras = _createDataset(shippedNodes, labels, 'orchestra', failedHeroes);
+    const blocks = _createDataset(shippedNodes, labels, 'block', failedHeroes);
 
-    orchestraMasonry.lfDataset = orchestras.dataset;
-    blockMasonry.lfDataset = blocks.dataset;
-    orchestraRail.hidden = orchestras.count === 0;
-    blockRail.hidden = blocks.count === 0;
-
-    const orchestraCount = orchestraRail.querySelector<HTMLElement>(
-      '[data-rail-count="orchestra"]',
-    );
-    const blockCount = blockRail.querySelector<HTMLElement>(
-      '[data-rail-count="block"]',
-    );
-    if (orchestraCount) {
-      orchestraCount.textContent = String(orchestras.count);
-      orchestraCount.setAttribute(
-        'aria-label',
-        `${orchestras.count} ${orchestras.count === 1 ? 'orchestra' : 'orchestras'}`,
-      );
-    }
-    if (blockCount) {
-      blockCount.textContent = String(blocks.count);
-      blockCount.setAttribute(
-        'aria-label',
-        `${blocks.count} ${blocks.count === 1 ? 'block' : 'blocks'}`,
-      );
-    }
+    _setRail(orchestraRail, orchestraMasonry, orchestras, 'orchestra');
+    _setRail(blockRail, blockMasonry, blocks, 'block');
+    shipped.hidden = orchestras.count + blocks.count === 0;
+    custom.hidden =
+      _renderCustomCatalogue(store, customCatalogue, customNodes, labels, failedHeroes) === 0;
 
     debugLog(HOME_UPDATED);
   };
