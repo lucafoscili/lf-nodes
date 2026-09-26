@@ -73,6 +73,11 @@ review were inconsistent; this is not authoring-quality acceptance. No Comfy
 hydration or video render was performed. Frontend code is unchanged, so the
 earlier frontend build evidence still applies.
 
+The [worked-example comparison](h3-example-trials.md) records the subsequent
+mode-specific teaching examples and explicit-brief revision against the same
+ideas and Qwen settings. It separates improvements in format/action coverage from
+remaining scene-coherence and review weaknesses.
+
 Offline checkpoint, 2026-09-26: 257 focused Python contracts and 241 related
 Runner/pipeline contracts passed; the final node-only recheck passed all 38 tests.
 The frontend suite passed 590 tests, with 25 focused socket/widget tests rechecked
