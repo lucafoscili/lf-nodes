@@ -1,5 +1,9 @@
 # Reviewed H3 prompt maker: accepted checkpoint
 
+Historical baseline: the September 26 ergonomic authoring revision is described
+in [H3 Prompt Maker](llm/h3-prompt-maker.md). The video acceptance below applies
+to the earlier pipeline, not to an untested revision.
+
 Decision: **keep**, accepted by Luca on 2026-09-07 after viewing the full
 prompt-to-video result.
 

@@ -20,30 +20,16 @@ from ...workflow_runner.prompts.minimax_h3 import (
     H3_PROMPT_MODES,
     compile_h3_prompt_response,
 )
-from ...workflow_runner.prompts.minimax_h3_pipeline import (
-    build_h3_planner_context,
-    build_h3_prompt_planner_system,
-    build_h3_scope_classifier_system,
-    build_h3_scope_context,
-    build_h3_visual_inventory_system,
-)
-from ...workflow_runner.prompts.minimax_h3_audit import (
-    build_h3_audit_context,
-    build_h3_audit_system,
-    build_h3_repair_system,
-    parse_h3_audit_response,
-)
+from ...utils.helpers.llm.h3_prompt import build_authoring_system
 
 
 _T = TypeVar("_T")
-_MAX_TOKENS = 8192
-_TIMEOUT_SECONDS = 300
-# Cross-checking all stages can use more reasoning than the writers themselves.
-_REVIEW_MAX_TOKENS = 32768
-_REVIEW_TIMEOUT_SECONDS = 600
+# Reasoning and final prose share the provider's output budget.
+_MAX_TOKENS = 32768
+_TIMEOUT_SECONDS = 600
 _MAX_INTENT_CHARACTERS = 24_000
 _LM_STUDIO_NATIVE_CHAT_PATH = "/api/v1/chat"
-_MODES = list(H3_PROMPT_MODES)
+_MODES = ["auto", *H3_PROMPT_MODES]
 _REASONING_PROFILES = ["vision", "off", "auto", "on"]
 _FIXED_REFERENCE_COUNTS = {
     "t2va": 0,
@@ -53,12 +39,10 @@ _FIXED_REFERENCE_COUNTS = {
 }
 _PROGRESS_MESSAGES = {
     "model": "Resolving the loaded local model...",
-    "inventory": "Inspecting the ordered Picture references...",
-    "scope": "Classifying exact reference-transfer scope...",
-    "planner": "Planning the MiniMax H3 sequence...",
-    "review": "Auditing the stages against the original request and references...",
-    "repair": "Repairing the earliest failing stage and rebuilding its dependents...",
-    "compiler": "Compiling and validating the MiniMax H3 prompt...",
+    "writer": "Writing the scene from your idea and references...",
+    "review": "Reviewing the prompt against your idea and references...",
+    "repair": "Correcting the H3 format...",
+    "compiler": "Validating the MiniMax H3 prompt...",
 }
 
 
@@ -109,7 +93,7 @@ def _validated_inputs(kwargs: dict[str, Any]) -> tuple[
     bool,
 ]:
     intent = _scalar(kwargs.get("intent", ""), "intent")
-    mode = _scalar(kwargs.get("mode", "t2va"), "mode")
+    mode = _scalar(kwargs.get("mode", "auto"), "mode")
     duration_seconds = _scalar(
         kwargs.get("duration_seconds", 6.0),
         "duration_seconds",
@@ -123,6 +107,8 @@ def _validated_inputs(kwargs: dict[str, Any]) -> tuple[
     reasoning = _scalar(kwargs.get("reasoning", "vision"), "reasoning")
     review = _scalar(kwargs.get("review", True), "review")
     images = normalize_input_image(kwargs.get("image"))
+    for index in range(2, 10):
+        images.extend(normalize_input_image(kwargs.get(f"image_{index}")))
 
     if not isinstance(review, bool):
         raise TypeError("review must be a boolean")
@@ -140,8 +126,10 @@ def _validated_inputs(kwargs: dict[str, Any]) -> tuple[
     if not isinstance(mode, str):
         raise TypeError("mode must be a string")
     mode = mode.strip().lower()
-    if mode not in H3_PROMPT_MODES:
-        raise ValueError("mode must be one of: " + ", ".join(H3_PROMPT_MODES))
+    if mode not in _MODES:
+        raise ValueError("mode must be one of: " + ", ".join(_MODES))
+    if mode == "auto":
+        mode = "ref2va" if images else "t2va"
 
     if isinstance(duration_seconds, bool) or not isinstance(
         duration_seconds,
@@ -221,7 +209,7 @@ def _reasoning_modes(profile: str) -> tuple[str, str]:
 
 # region LF_H3PromptMaker
 class LF_H3PromptMaker:
-    """Create one compiler-validated MiniMax H3 prompt as one operation."""
+    """Turn a short idea and ordered references into a reviewed H3 prompt."""
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -233,16 +221,22 @@ class LF_H3PromptMaker:
                         "default": "",
                         "multiline": True,
                         "tooltip": (
-                            "Describe the desired video, reference roles, exact "
-                            "continuity, motion, camera, dialogue, and sound."
+                            "A short idea is enough, e.g. walking from behind in a "
+                            "medieval town. Add reference roles or constraints only "
+                            "when you want to override the automatic choices."
                         ),
                     },
                 ),
                 "mode": (
                     _MODES,
                     {
-                        "default": "t2va",
-                        "tooltip": "MiniMax H3 input and prompt format.",
+                        "default": "auto",
+                        "advanced": True,
+                        "tooltip": (
+                            "Auto uses text generation without images and reusable "
+                            "references with images. Choose i2va/fl2va/l2va only "
+                            "for fixed first/last frames."
+                        ),
                     },
                 ),
                 "duration_seconds": (
@@ -259,6 +253,7 @@ class LF_H3PromptMaker:
                     Input.STRING,
                     {
                         "default": "http://127.0.0.1:1234/api/v1/chat",
+                        "advanced": True,
                         "tooltip": (
                             "LM Studio native /api/v1/chat endpoint. This route "
                             "supports blank-model discovery, vision, and the "
@@ -272,8 +267,8 @@ class LF_H3PromptMaker:
                     Input.IMAGE,
                     {
                         "tooltip": (
-                            "Ordered Picture references. Count must match the "
-                            "selected H3 mode."
+                            "Picture 1 (or an ordered image list). Connect more "
+                            "references below; different sizes are preserved."
                         ),
                     },
                 ),
@@ -281,6 +276,7 @@ class LF_H3PromptMaker:
                     Input.STRING,
                     {
                         "default": "",
+                        "advanced": True,
                         "tooltip": (
                             "Optional model identifier. A blank native LM Studio "
                             "request uses its sole loaded LLM instance."
@@ -291,6 +287,7 @@ class LF_H3PromptMaker:
                     Input.FLOAT,
                     {
                         "default": 0.2,
+                        "advanced": True,
                         "min": 0.0,
                         "max": 1.0,
                         "step": 0.1,
@@ -301,6 +298,7 @@ class LF_H3PromptMaker:
                     _REASONING_PROFILES,
                     {
                         "default": "vision",
+                        "advanced": True,
                         "tooltip": (
                             "Vision reasons while inspecting or reviewing pixels; other "
                             "profiles apply to every stage."
@@ -313,10 +311,26 @@ class LF_H3PromptMaker:
                     {
                         "default": True,
                         "tooltip": (
-                            "Independently review the original request, images, "
-                            "and every stage. Repair once and recheck if needed. "
-                            "Off skips LLM review/repair, not format validation."
+                            "Review the completed prompt against your idea and "
+                            "images. Off skips this creative review, not H3 "
+                            "format checks and one bounded format repair."
                         ),
+                    },
+                ),
+                **{
+                    f"image_{index}": (
+                        Input.IMAGE,
+                        {"tooltip": "Next ordered Picture reference; no shared size required."},
+                    )
+                    for index in range(2, 10)
+                },
+                "instructions": (
+                    Input.STRING,
+                    {
+                        "default": "",
+                        "multiline": True,
+                        "advanced": True,
+                        "tooltip": "Optional authoring direction. H3 grammar remains enforced.",
                     },
                 ),
             },
@@ -331,8 +345,8 @@ class LF_H3PromptMaker:
     OUTPUT_IS_LIST = (False, False, False)
     OUTPUT_TOOLTIPS = (
         "Copy-ready MiniMax H3 prompt in the selected official format.",
-        "H3 format validation plus the independent review findings or skipped status.",
-        "Validated per-Picture allow, forbid, and uncertain evidence ledger.",
+        "H3 format validation and review completion or skipped status.",
+        "Ordered reference receipt; images are read directly without an intermediate facts ledger.",
     )
 
     @classmethod
@@ -354,228 +368,111 @@ class LF_H3PromptMaker:
     def on_exec(self, **kwargs: Any):
         node_id = kwargs.get("node_id")
         (
-            intent,
-            mode,
-            duration_seconds,
-            url,
-            model,
-            temperature,
-            reasoning,
-            images,
-            review,
-        ) = _run_stage(
-            "Input validation",
-            lambda: _validated_inputs(kwargs),
-        )
+            intent, mode, duration_seconds, url, model, temperature,
+            reasoning, images, review,
+        ) = _run_stage("Input validation", lambda: _validated_inputs(kwargs))
+        instructions = _scalar(kwargs.get("instructions", ""), "instructions")
+        if not isinstance(instructions, str):
+            raise TypeError("instructions must be a string")
         reference_image_count = len(images)
         vision_reasoning, text_reasoning = _reasoning_modes(reasoning)
+        stage_reasoning = vision_reasoning if images else text_reasoning
 
         if not model and _uses_lm_studio_native_chat(url):
             _publish_progress(node_id, "model")
             model = _run_stage(
                 "Model resolution",
-                lambda: resolve_loaded_lm_studio_llm(
-                    url,
-                    _TIMEOUT_SECONDS,
-                ),
+                lambda: resolve_loaded_lm_studio_llm(url, _TIMEOUT_SECONDS),
             )
 
-        def request(
-            stage: str,
-            prompt: str,
-            system_message: str,
-            stage_images: list[Any],
-            stage_reasoning: str,
-        ) -> str:
+        calls: list[str] = []
+
+        def request(stage: str, prompt: str, *, reviewing: bool = False) -> str:
             _publish_progress(node_id, stage)
-            text, _response_json = _run_stage(
+            system = build_authoring_system(
+                mode, duration_seconds, reference_image_count,
+                review=reviewing, instructions=instructions,
+            )
+            text, _response = _run_stage(
                 stage.capitalize(),
                 lambda: request_local_chat_completion(
-                    prompt=prompt,
-                    url=url,
-                    system_message=system_message,
-                    images=stage_images,
-                    model=model,
-                    temperature=temperature,
-                    max_tokens=(
-                        _REVIEW_MAX_TOKENS if stage == "review" else _MAX_TOKENS
-                    ),
+                    prompt=prompt, url=url, system_message=system, images=images,
+                    model=model, temperature=temperature,
+                    max_tokens=_MAX_TOKENS,
                     reasoning=stage_reasoning,
-                    timeout=(
-                        _REVIEW_TIMEOUT_SECONDS
-                        if stage == "review"
-                        else _TIMEOUT_SECONDS
-                    ),
+                    timeout=_TIMEOUT_SECONDS,
                 ),
             )
+            calls.append(stage)
             return text
 
-        stages: dict[str, dict[str, str]] = {}
-        visual_observations: dict[str, Any] = {"pictures": []}
-        visual_inventory: dict[str, Any] = {"pictures": []}
-        scope_context = ""
-        scope_text = json.dumps({"pictures": []})
-        candidate_plan = ""
-
-        def generate(
-            stage: str,
-            stage_prompt: str,
-            system: str,
-            stage_images: list[Any],
-            stage_reasoning: str,
-            findings: list[dict[str, str]],
-        ) -> str:
-            feedback = [item for item in findings if item["stage"] == stage]
-            if feedback:
-                previous = stages[stage]["response_text"]
-                context = (
-                    {"request": stage_prompt}
-                    if stage == "inventory"
-                    else json.loads(stage_prompt)
-                )
-                context.update(
-                    previous_response_text=previous,
-                    audit_findings=feedback,
-                )
-                stage_prompt = json.dumps(context, ensure_ascii=False)
-                system = build_h3_repair_system(system, stage)
-            text = request(stage, stage_prompt, system, stage_images, stage_reasoning)
-            stages[stage] = {
-                "stage": stage,
-                "system_message": system,
-                "prompt": stage_prompt,
-                "response_text": text,
-            }
-            return text
-
-        def generate_from(start: str, findings: list[dict[str, str]]) -> None:
-            nonlocal visual_observations, visual_inventory
-            nonlocal scope_context, scope_text, candidate_plan
-            if start == "inventory":
-                inventory_text = generate(
-                    "inventory",
-                    f"Inspect all {reference_image_count} attached Pictures and return "
-                    "only the requested atomic pixel observations.",
-                    build_h3_visual_inventory_system(mode, duration_seconds, reference_image_count),
-                    images,
-                    vision_reasoning,
-                    findings,
-                )
-                scope_context, visual_observations = _run_stage(
-                    "Inventory",
-                    lambda: build_h3_scope_context(
-                        inventory_text, intent, mode, duration_seconds, reference_image_count
-                    ),
-                )
-            if images and start in {"inventory", "scope"}:
-                scope_text = generate(
-                    "scope",
-                    scope_context,
-                    build_h3_scope_classifier_system(mode, duration_seconds, reference_image_count),
-                    [],
-                    text_reasoning,
-                    findings,
-                )
-            planner_context, visual_inventory = _run_stage(
-                "Scope" if images else "Planner",
-                lambda: build_h3_planner_context(
-                    scope_text, visual_observations, intent, mode,
-                    duration_seconds, reference_image_count,
-                ),
-            )
-            candidate_plan = generate(
-                "planner",
-                planner_context,
-                build_h3_prompt_planner_system(mode, duration_seconds, reference_image_count),
-                [],
-                text_reasoning,
-                findings,
-            )
-
-        generate_from("inventory" if images else "planner", [])
-        audit_reports: list[dict[str, Any]] = []
-        repaired_stage: str | None = None
-
-        def compile_candidate() -> tuple[str, dict[str, Any]]:
+        def compile_candidate(candidate: str) -> tuple[str, dict[str, Any]]:
             return compile_h3_prompt_response(
-                candidate_plan, mode, duration_seconds, reference_image_count
+                candidate, mode, duration_seconds, reference_image_count,
             )
+
+        candidate = request("writer", intent)
+        writer_error = None
+        try:
+            compile_candidate(candidate)
+        except (TypeError, ValueError) as error:
+            writer_error = str(error)
 
         if review:
-            # At most one repair cycle. Syntax checks remain authoritative even
-            # when the independent model misses a compiler-reported defect.
-            for attempt in range(2):
-                compiled = None
-                compiler_error = None
-                try:
-                    compiled = compile_candidate()
-                except (TypeError, ValueError) as error:
-                    compiler_error = str(error)
-                audit_context = _run_stage(
-                    "Review",
-                    lambda: build_h3_audit_context(
-                        intent=intent,
-                        mode=mode,
-                        duration_seconds=duration_seconds,
-                        visual_observations=visual_observations,
-                        visual_inventory=visual_inventory,
-                        stages=list(stages.values()),
-                        candidate_validation_error=compiler_error,
-                    ),
-                )
-                audit_text = request(
-                    "review",
-                    audit_context,
-                    build_h3_audit_system(mode, duration_seconds, reference_image_count),
-                    images,
-                    vision_reasoning if images else text_reasoning,
-                )
-                audit = _run_stage(
-                    "Review",
-                    lambda: parse_h3_audit_response(audit_text, list(stages)),
-                )
-                if compiler_error is not None:
-                    audit["verdict"] = "fail"
-                    audit["findings"].append({
-                        "stage": "planner",
-                        "path": "$",
-                        "rule": "The semantic plan must pass deterministic H3 format validation.",
-                        "evidence": compiler_error,
-                        "correction": "Correct this compiler error in the semantic plan.",
-                    })
-                audit_reports.append(audit)
-                if audit["verdict"] == "pass":
-                    assert compiled is not None
-                    prompt, validation_report = compiled
-                    break
-                if attempt == 1:
-                    # Include the evidence in the exception so failed Comfy
-                    # history retains findings even without a successful UI result.
-                    raise ValueError(
-                        "Review stage failed after one repair: "
-                        + json.dumps(audit, ensure_ascii=False)
-                    )
-                order = {"inventory": 0, "scope": 1, "planner": 2}
-                repaired_stage = min(
-                    (finding["stage"] for finding in audit["findings"]),
-                    key=order.__getitem__,
-                )
-                _publish_progress(node_id, "repair")
-                generate_from(repaired_stage, audit["findings"])
-        else:
-            prompt, validation_report = _run_stage("Compiler", compile_candidate)
+            candidate = request(
+                "review",
+                json.dumps({
+                    "original_request": intent,
+                    "candidate_prompt": candidate,
+                    "format_error": writer_error,
+                }, ensure_ascii=False),
+                reviewing=True,
+            )
+
+        format_repaired = False
+        try:
+            prompt, validation_report = compile_candidate(candidate)
+        except (TypeError, ValueError) as error:
+            candidate = request(
+                "repair",
+                json.dumps({
+                    "original_request": intent,
+                    "candidate_prompt": candidate,
+                    "format_error": str(error),
+                    "task": "Correct this format error while preserving the requested scene. "
+                            "Return the complete H3 prompt, not a patch or explanation.",
+                }, ensure_ascii=False),
+                reviewing=True,
+            )
+            format_repaired = True
+            prompt, validation_report = _run_stage(
+                "H3 format", lambda: compile_candidate(candidate),
+            )
 
         _publish_progress(node_id, "compiler")
         validation_report["review"] = {
             "enabled": review,
-            "status": "passed" if review else "skipped",
-            "repaired_stage": repaired_stage,
-            "attempts": audit_reports,
+            "status": "completed" if review else "skipped",
+            "repaired_stage": ("review" if review else "writer") if format_repaired else None,
+            "attempts": [],
+        }
+        validation_report["authoring"] = {
+            "method": "direct_vision",
+            "stages": calls,
+            "formatRepaired": format_repaired,
+        }
+        # Keep the published socket and pictures/facts containers. An empty ledger
+        # is explicit: no claims were extracted by a separate inventory model.
+        visual_inventory = {
+            "pictures": [
+                {"picture": index, "facts": []}
+                for index in range(1, reference_image_count + 1)
+            ],
+            "method": "direct_vision",
+            "inventoryPerformed": False,
         }
         final_payload = {
-            "status": "complete",
-            "stage": "complete",
-            "value": prompt,
+            "status": "complete", "stage": "complete", "value": prompt,
             "validation_report": validation_report,
             "visual_inventory": visual_inventory,
         }

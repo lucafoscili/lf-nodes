@@ -18,6 +18,7 @@ import {
   refreshChart,
 } from '../utils/common';
 import { applyEditorConfigToDataset } from './imageEditor/dataset';
+import { installH3References } from './h3PromptMaker';
 
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
@@ -261,6 +262,8 @@ export const onNodeCreated = async (nodeType: NodeType) => {
   nodeType.prototype.onNodeCreated = function () {
     const r = onNodeCreated ? onNodeCreated.apply(this, arguments) : void 0;
     const node = this;
+
+    if (node.comfyClass === NodeName.h3PromptMaker) installH3References(node);
 
     for (let index = 0; index < node.widgets?.length; index++) {
       const w: GenericWidget = node.widgets[index];

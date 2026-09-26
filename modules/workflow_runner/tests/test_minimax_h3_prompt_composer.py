@@ -176,6 +176,26 @@ def _base_response(description: str = "[Shot 1] A quiet locked shot.") -> str:
     )
 
 
+def test_final_h3_text_and_fenced_text_compile_like_legacy_section_json():
+    fields = json.loads(_base_response())
+    raw = "\n\n".join(f"{name}:\n{value}" for name, value in fields.items())
+    expected, _ = compile_h3_prompt_response(json.dumps(fields), "t2va", 6, 0)
+    for response in (raw, f"```text\n{raw}\n```", raw.replace("\n", "\r\n")):
+        prompt, report = compile_h3_prompt_response(response, "t2va", 6, 0)
+        assert prompt == expected
+        assert report["sourceFormat"] == "h3_text"
+
+
+def test_direct_text_rejects_duplicate_sections_and_commentary():
+    raw = "integrated_multimodal_description:\n[Shot 1] Rain.\noverall_soundscape:\nRain.\nnon_diegetic_music:\nN/A"
+    with pytest.raises(ValueError, match="repeated"):
+        compile_h3_prompt_response(raw + "\noverall_soundscape:\nWind.", "t2va", 6, 0)
+    with pytest.raises(ValueError, match="Return only"):
+        compile_h3_prompt_response("Here is your prompt:\n" + raw, "t2va", 6, 0)
+    with pytest.raises(ValueError, match="unexpected: subject_definitions"):
+        compile_h3_prompt_response(raw + "\nsubject_definitions:\nExtra section.", "t2va", 6, 0)
+
+
 def _reference_response(**overrides: str) -> str:
     values = {
         "subject_definitions": (

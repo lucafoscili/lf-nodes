@@ -1337,6 +1337,8 @@ var NodeName;
   NodeName2["localChatCompletions"] = "LF_LocalChatCompletions";
   NodeName2["llmChat"] = "LF_LLMChat";
   NodeName2["llmMessenger"] = "LF_LLMMessenger";
+  NodeName2["lmsLoadModel"] = "LF_LMSLoadModel";
+  NodeName2["lmsUnloadModel"] = "LF_LMSUnloadModel";
   NodeName2["loadAndEditImages"] = "LF_LoadAndEditImages";
   NodeName2["loadClipSegModel"] = "LF_LoadCLIPSegModel";
   NodeName2["loadFileOnce"] = "LF_LoadFileOnce";
@@ -1660,6 +1662,51 @@ const resolveSelectionIndex = (selectedShape, nodes) => {
   });
   return resolvedIndex >= 0 ? resolvedIndex : void 0;
 };
+const ordinal = (name = "") => name === "image" ? 1 : /^image_[2-9]$/.test(name) ? Number(name.slice(6)) : 0;
+function refreshH3References(node) {
+  var _a;
+  if (!node.addInput || !node.removeInput)
+    return;
+  const inputs = node.inputs ?? [];
+  const connected = inputs.filter((input) => input.link != null).map((input) => ordinal(input.name));
+  const last = Math.max(0, ...connected);
+  const needed = Math.min(9, last + 1);
+  for (let index = inputs.length - 1; index >= 0; index--) {
+    if (ordinal(inputs[index].name) > needed && inputs[index].link == null) {
+      node.removeInput(index);
+    }
+  }
+  for (let index = 2; index <= needed; index++) {
+    const name = `image_${index}`;
+    if (!((_a = node.inputs) == null ? void 0 : _a.some((input) => input.name === name)))
+      node.addInput(name, "IMAGE");
+  }
+}
+function installH3References(node) {
+  let pending = false;
+  const schedule = () => {
+    if (pending)
+      return;
+    pending = true;
+    queueMicrotask(() => {
+      refreshH3References(node);
+      pending = false;
+    });
+  };
+  const onConnectionsChange2 = node.onConnectionsChange;
+  node.onConnectionsChange = function(...args) {
+    const result = onConnectionsChange2 == null ? void 0 : onConnectionsChange2.apply(this, args);
+    schedule();
+    return result;
+  };
+  const onConfigure = node.onConfigure;
+  node.onConfigure = function(...args) {
+    const result = onConfigure == null ? void 0 : onConfigure.apply(this, args);
+    schedule();
+    return result;
+  };
+  schedule();
+}
 const NODE_WIDGET_MAP = {
   LF_ACEStepRemix: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
@@ -1720,6 +1767,8 @@ const NODE_WIDGET_MAP = {
   LF_LocalChatCompletions: [CustomWidgetName.code],
   LF_LLMChat: [CustomWidgetName.chat],
   LF_LLMMessenger: [CustomWidgetName.messenger],
+  LF_LMSLoadModel: [],
+  LF_LMSUnloadModel: [],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
   LF_LoadFileOnce: [CustomWidgetName.history],
@@ -1869,6 +1918,8 @@ const onNodeCreated = async (nodeType) => {
     var _a;
     const r = onNodeCreated2 ? onNodeCreated2.apply(this, arguments) : void 0;
     const node = this;
+    if (node.comfyClass === NodeName.h3PromptMaker)
+      installH3References(node);
     for (let index = 0; index < ((_a = node.widgets) == null ? void 0 : _a.length); index++) {
       const w = node.widgets[index];
       switch (w.type.toUpperCase()) {

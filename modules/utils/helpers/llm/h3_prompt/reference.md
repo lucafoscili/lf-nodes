@@ -57,8 +57,8 @@ Do not put speaker IDs in this section.
 
 Begin with one or two English sentences establishing the visual style before
 `[Shot 1]`. This is the difference from the base-mode style opening. Write
-350–500 English words for this section, targeting 400–450 words so the complete
-description fits the local validator. Count only this section, not definitions,
+normally 350–500 English words for this section, targeting 400–450 words.
+Count only this section, not definitions,
 summary, retention, or sound sections. A single shot still needs grounded detail:
 develop action phases, spatial relationships, framing, light, texture, material
 movement, camera continuity, and synchronized sound without adding plot beats,

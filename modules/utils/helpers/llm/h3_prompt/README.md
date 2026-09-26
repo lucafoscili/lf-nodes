@@ -27,8 +27,8 @@ The Markdown is a compact, independently written adaptation of the relevant
 image-only grammar, not a runtime router to unavailable external files.
 
 The official generation guideline normally calls for 350–500 English words in
-`detailed_description`; the local validator enforces that band, so this bundle
-targets 400–450. Short bindings and identity preservation leave unspecified
+`detailed_description`; this bundle targets 400–450 without rejecting otherwise
+valid section text solely for its word count. Short bindings and identity preservation leave unspecified
 scene, action, and camera choices open. A simple action defaults to one continuous
 shot, no unsolicited speech, and no audience-only music. Review returns a whole
 usable prompt rather than an audit object. These are local authoring defaults.

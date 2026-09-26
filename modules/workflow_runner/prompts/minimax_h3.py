@@ -1684,7 +1684,7 @@ def compile_h3_prompt_response(
     duration_seconds: float,
     reference_image_count: int,
 ) -> tuple[str, dict[str, Any]]:
-    """Validate one LMS JSON response and compile an exact H3 prompt."""
+    """Validate H3 section text (or a legacy JSON response) and compile a prompt."""
 
     mode, duration, duration_text, reference_image_count = (
         _validated_writer_request(
@@ -1693,6 +1693,29 @@ def compile_h3_prompt_response(
             reference_image_count,
         )
     )
+    if not isinstance(response_text, str):
+        raise TypeError("LMS response must be a string")
+    text = response_text.strip()
+    if text.startswith("```") and text.endswith("```"):
+        text = text.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+    expected = _REFERENCE_FIELDS if mode == "ref2va" else _BASE_FIELDS
+    section_pattern = r"(?m)^(" + "|".join(dict.fromkeys((*_BASE_FIELDS, *_REFERENCE_FIELDS))) + r"):[ \t]*"
+    if not text.startswith("{") and re.search(section_pattern, text):
+        headings = list(re.finditer(
+            section_pattern, text
+        ))
+        if not headings or text[:headings[0].start()].strip():
+            raise ValueError("Return only the labeled H3 sections, starting with " + expected[0] + ":")
+        fields = {}
+        for index, heading in enumerate(headings):
+            name = heading.group(1)
+            if name in fields:
+                raise ValueError(f"H3 section {name} is repeated")
+            end = headings[index + 1].start() if index + 1 < len(headings) else len(text)
+            fields[name] = text[heading.end():end].strip()
+        return _compile_fields(
+            fields, mode, duration, duration_text, reference_image_count, "h3_text"
+        )
     parsed, source_format = _json_object(response_text)
     legacy_discriminators = {
         "integrated_multimodal_description",
