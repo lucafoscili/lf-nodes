@@ -3,7 +3,10 @@
 Question: can the accepted Kitchen/res_multistep 20-step reference recipe deliver
 useful ~2 MP detail faster by generating a smaller latent, learning its spatial
 upscale, then refining briefly? This is a local candidate, not production wiring.
-Decision: **defer** promotion until paired videos and timings are inspected.
+Decision: **keep as a candidate**, defer promotion to the default renderer.
+The [2026-09-26 paired trial](../../docs/llm/h3-latent-upscale-trial.md) succeeded
+and added subject detail, but also redrew small facial/jewelry features. The
+accepted phone orchestra remains unchanged.
 
 `h3_latent_upscale.py` accepts a configured Runner reference API graph and creates
 a new graph without importing Comfy, contacting a provider, or submitting work.

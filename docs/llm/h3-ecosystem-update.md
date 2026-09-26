@@ -65,8 +65,15 @@ The first updated startup loaded all installed node packages, including LF and
 the new upscaler. Core and the 390×844 phone orchestra form hydrated and were
 visually inspected with Playwright. This is hydration, **not** full-suite E2E.
 The focused existing renderer/orchestra tests passed (71), as did the offline
-experiment wiring tests (3). The registry package updates require a subsequent
-restart before their new code is considered runtime-verified.
+experiment wiring tests (3). The paired live H3 render subsequently succeeded in
+391.46 seconds; see [the results](h3-latent-upscale-trial.md).
+
+The final restart was rejected by execution policy before running. No alternate
+shutdown/restart mechanism was attempted. Comfy remains running and its queue
+was confirmed empty afterward. The three registry package updates are on disk
+but require a normal user-initiated Comfy restart before their new code is
+considered runtime-verified. The Core, Git updates and upscaler were already
+active during the successful trial.
 
 Core migrated its asset database from revision 0006 to 0008. A separate offline
 backup was taken before startup. The old database had zero assets, references,
@@ -95,7 +102,8 @@ Do not run a broad reset or merge older registry backups into newer directories.
 The existing LAN proxy, TLS, access controls, reference images, model weights,
 and accepted video were not replaced.
 
-**Keep:** the reviewed updates, subject to the live H3 trial and final registry
-restart. **Defer:** unrelated optional dependency additions and dirty repositories.
+**Keep:** the reviewed updates and successful H3 execution. **Pending:** user
+restart and import verification of the three registry packages. **Defer:**
+unrelated optional dependency additions and dirty repositories.
 See [the experiment](../../scripts/experiments/README.md) for the separate quality
 question; successful imports alone do not establish upscaled video quality.
