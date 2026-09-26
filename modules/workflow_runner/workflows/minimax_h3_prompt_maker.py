@@ -48,14 +48,13 @@ _REASONING_OPTIONS = (
     (
         "vision",
         "Vision only",
-        "Let the visual inventory and image review stages reason, while keeping the schema-heavy "
-        "text stages direct and reliable.",
+        "Enable reasoning when writing or reviewing with images; keep text-only requests direct.",
     ),
     (
         "off",
         "Off",
         "Use LM Studio's supported non-thinking mode so the answer budget is "
-        "reserved for the H3 plan.",
+        "reserved for the H3 prompt.",
     ),
     (
         "auto",
@@ -69,6 +68,11 @@ _REASONING_OPTIONS = (
     ),
 )
 _MODE_OPTIONS = (
+    (
+        "auto",
+        "Automatic",
+        "Write from text alone, or use uploaded Pictures as references.",
+    ),
     (
         "t2va",
         "Text to video + audio",
@@ -179,8 +183,15 @@ def _reference_fields(inputs: Dict[str, Any], mode: str) -> tuple[str, ...]:
 
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     # Validate scalar controls plus the mode/count/gap contract before staging.
-    mode = choice(inputs, "mode", "t2va", H3_PROMPT_MODES)
+    mode = choice(inputs, "mode", "auto", ("auto", *H3_PROMPT_MODES))
+    if mode == "auto":
+        mode = (
+            "ref2va"
+            if any(has_input_value(inputs, field_id) for field_id in _PICTURE_IDS)
+            else "t2va"
+        )
     intent = required_text(inputs, "intent")
+    instructions = _text(inputs, "instructions", "", allow_empty=True)
     duration_seconds = _bounded_float(
         inputs,
         "duration",
@@ -220,6 +231,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     prompt["h3_prompt_maker"]["inputs"].update(
         {
             "intent": intent,
+            "instructions": instructions,
             "mode": mode,
             "duration_seconds": duration_seconds,
             "url": endpoint,
@@ -252,8 +264,8 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
 
 def _mode_cell() -> WorkflowCell:
     description = (
-        "Choose the exact MiniMax H3 prompt family. The selected family also "
-        "determines how many ordered Picture uploads are valid."
+        "Automatic uses uploaded Pictures as references. Choose a frame mode "
+        "only when a Picture must be an exact first or last frame."
     )
     return WorkflowCell(
         node_id="h3_prompt_maker",
@@ -277,15 +289,16 @@ def _mode_cell() -> WorkflowCell:
                 "lfHelper": {"showWhenFocused": False, "value": description},
                 "lfLabel": "H3 mode",
             },
-            "lfValue": "t2va",
+            "lfValue": "auto",
         },
+        advanced=True,
     )
 
 
 def _reasoning_cell() -> WorkflowCell:
     description = (
-        "One reasoning profile for the pipeline. Vision only improves small-model "
-        "pixel recall while reserving the text stages for direct schema output."
+        "Control reasoning for the writer and optional review. Vision only "
+        "enables reasoning when reference images are present."
     )
     return WorkflowCell(
         node_id="h3_prompt_maker",
@@ -457,6 +470,17 @@ input_model = _text_cell(
         "to use the sole LLM already loaded at the endpoint."
     ),
     required=False,
+    advanced=True,
+)
+input_instructions = _text_cell(
+    node_id="h3_prompt_maker",
+    cell_id="instructions",
+    label="Additional instructions",
+    default="",
+    description="Optional preferences for the writer, such as tone, pacing, or creative constraints.",
+    textarea=True,
+    advanced=True,
+    required=False,
 )
 input_temperature = _number_cell(
     node_id="h3_prompt_maker",
@@ -466,7 +490,7 @@ input_temperature = _number_cell(
     minimum=0.0,
     maximum=1.0,
     step=0.1,
-    description="Sampling randomness applied independently to each pipeline stage.",
+    description="Sampling randomness for writing and optional review.",
     advanced=True,
     required=False,
 )
@@ -477,9 +501,8 @@ input_review = WorkflowCell(
     value="Review",
     shape="toggle",
     description=(
-        "Independently audit the plan and repair detected issues once. Disable "
-        "to compile the planner's output directly, skipping review calls for "
-        "trusted models."
+        "Review and revise the written prompt against your idea and reference "
+        "images. Disable to use the writer's prompt directly."
     ),
     props={"lfLabel": "Review", "lfValue": DEFAULT_REVIEW},
     required=False,
@@ -504,8 +527,8 @@ outputs = [
         id="visual_inventory",
         shape="code",
         description=(
-            "Validated per-Picture atomic visual facts tagged allow, forbid, or "
-            "uncertain. Planning receives only allowed facts; review sees the full ledger."
+            "Reference Picture list for direct vision authoring. Images are read "
+            "by the writer; no separate visual inventory is extracted."
         ),
         props={"lfLanguage": "json"},
     ),
@@ -518,12 +541,12 @@ WORKFLOW = WorkflowNode(
     value="MiniMax H3 / Prompt Maker",
     description=(
         "Turn a plain-language video idea and optional ordered Picture references "
-        "into a copy-ready MiniMax H3 prompt through pixel inventory, explicit "
-        "scope classification, semantic planning, and optional independent review."
+        "into a copy-ready MiniMax H3 prompt using the official writing guides, "
+        "direct image understanding, and optional review."
     ),
     category="MiniMax H3",
     card=WorkflowCardPresentation(
-        summary="Observe, scope, plan, audit, and compile strict H3 prompts locally."
+        summary="Write an H3 prompt from your idea and optional reference images."
     ),
     inputs=[
         _mode_cell(),
@@ -535,6 +558,7 @@ WORKFLOW = WorkflowNode(
         input_endpoint,
         input_temperature,
         input_reasoning,
+        input_instructions,
         *[_picture_cell(ordinal) for ordinal in range(3, 10)],
     ],
     outputs=outputs,

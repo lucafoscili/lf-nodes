@@ -62,7 +62,8 @@
   "h3_prompt_maker": {
     "inputs": {
       "intent": "Create a cinematic video with clear action, coherent camera movement, and synchronized environmental sound.",
-      "mode": "t2va",
+      "mode": "auto",
+      "instructions": "",
       "duration_seconds": 6.0,
       "url": "http://127.0.0.1:1234/api/v1/chat",
       "image": ["image_list", 0],
@@ -97,6 +98,6 @@
       "ui_widget": ""
     },
     "class_type": "LF_DisplayJSON",
-    "_meta": {"title": "Validated visual evidence inventory"}
+    "_meta": {"title": "Direct vision reference Pictures"}
   }
 }

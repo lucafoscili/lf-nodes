@@ -84,6 +84,7 @@ def test_card_is_registered_and_exposes_the_small_standalone_contract() -> None:
         "endpoint",
         "temperature",
         "reasoning",
+        "instructions",
         *PICTURE_IDS[2:],
     ]
     assert [cell.id for cell in WORKFLOW.outputs] == [
@@ -118,7 +119,11 @@ def test_picture_and_transport_controls_have_the_required_progressive_disclosure
         )
     )
     assert not cells["model"].required
-    assert not cells["model"].advanced
+    assert cells["model"].advanced
+    assert cells["mode"].advanced
+    assert cells["mode"].props["lfValue"] == "auto"
+    assert cells["instructions"].advanced
+    assert not cells["instructions"].required
     assert cells["review"].shape == "toggle"
     assert cells["review"].value == "Review"
     assert cells["review"].props == {"lfLabel": "Review", "lfValue": True}
@@ -143,7 +148,7 @@ def test_picture_and_transport_controls_have_the_required_progressive_disclosure
     assert [
         option["workflowValue"]
         for option in cells["mode"].props["lfDataset"]["nodes"]
-    ] == ["t2va", "i2va", "fl2va", "l2va", "ref2va"]
+    ] == ["auto", "t2va", "i2va", "fl2va", "l2va", "ref2va"]
     assert all(
         cells[name].node_id == "h3_prompt_maker"
         for name in (
@@ -168,7 +173,8 @@ def test_graph_uses_one_public_atomic_h3_prompt_maker() -> None:
                 "Create a cinematic video with clear action, coherent camera "
                 "movement, and synchronized environmental sound."
             ),
-            "mode": "t2va",
+            "mode": "auto",
+            "instructions": "",
             "duration_seconds": 6.0,
             "url": "http://127.0.0.1:1234/api/v1/chat",
             "image": ["image_list", 0],
@@ -216,6 +222,7 @@ def test_text_only_configuration_removes_the_image_branch() -> None:
     assert graph["h3_prompt_maker"]["inputs"] == {
         "intent": "A crane crosses a misty harbor while its bell rings once.",
         "mode": "t2va",
+        "instructions": "",
         "duration_seconds": 7.5,
         "url": "http://127.0.0.1:1234/api/v1/chat",
         "model": "vision-writer",
@@ -253,6 +260,7 @@ def test_configure_atomic_node_and_keeps_only_the_exact_ordered_image_branch(
     expected_inputs = {
         "intent": "A crane crosses a misty harbor while its bell rings once.",
         "mode": mode,
+        "instructions": "",
         "duration_seconds": 7.5,
         "url": "http://127.0.0.1:1234/api/v1/chat",
         "model": "vision-writer",
@@ -324,15 +332,17 @@ def test_extra_picture_fails_before_staging_or_graph_mutation(
     assert graph == original
 
 
+@pytest.mark.parametrize("mode", ("ref2va", "auto"))
 def test_gapped_picture_sequence_fails_before_staging_or_graph_mutation(
     monkeypatch: pytest.MonkeyPatch,
+    mode: str,
 ) -> None:
     monkeypatch.setattr(
         workflow_module,
         "resolve_load_image_reference",
         lambda *_: pytest.fail("Gaps must be checked before staging."),
     )
-    inputs = _inputs("ref2va", 1)
+    inputs = _inputs(mode, 1)
     inputs["picture_3"] = [Path("C:/uploads/picture-3.png")]
     graph = WORKFLOW.load_prompt()
     original = deepcopy(graph)
@@ -341,6 +351,35 @@ def test_gapped_picture_sequence_fails_before_staging_or_graph_mutation(
         WORKFLOW.configure_prompt(graph, inputs)
 
     assert graph == original
+
+
+@pytest.mark.parametrize("reference_count", (0, 1, 9))
+@pytest.mark.parametrize("explicit_auto", (False, True))
+def test_automatic_mode_uses_references_without_requiring_a_mode_choice(
+    monkeypatch: pytest.MonkeyPatch,
+    reference_count: int,
+    explicit_auto: bool,
+) -> None:
+    staged: list[str] = []
+
+    def resolve(inputs: dict[str, Any], name: str) -> str:
+        staged.append(name)
+        return f"staged/{name}.png [input]"
+
+    monkeypatch.setattr(workflow_module, "resolve_load_image_reference", resolve)
+    inputs = _inputs("auto", reference_count)
+    if not explicit_auto:
+        inputs.pop("mode")
+    inputs["instructions"] = "  Give the scene a playful ending.  "
+    graph = WORKFLOW.load_prompt()
+
+    WORKFLOW.configure_prompt(graph, inputs)
+
+    node_inputs = graph["h3_prompt_maker"]["inputs"]
+    assert node_inputs["mode"] == ("ref2va" if reference_count else "t2va")
+    assert node_inputs["instructions"] == "Give the scene a playful ending."
+    assert staged == list(PICTURE_IDS[:reference_count])
+    assert ("image" in node_inputs) is bool(reference_count)
 
 
 @pytest.mark.parametrize("duration", (False, 0, "nan", 6_000, 6_000.001))
@@ -369,6 +408,7 @@ def test_invalid_duration_fails_before_staging_or_graph_mutation(
     (
         ("endpoint", "  "),
         ("model", False),
+        ("instructions", False),
         ("temperature", "nan"),
         ("temperature", 1.1),
         ("reasoning", "sometimes"),
