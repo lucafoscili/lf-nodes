@@ -26,6 +26,8 @@ def main() -> int:
     parser.add_argument("--reference", action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--no-review", action="store_true")
+    parser.add_argument("--mode", choices=("auto", "t2va", "i2va", "fl2va", "l2va", "ref2va"), default="auto")
+    parser.add_argument("--duration", type=float, default=6.0)
     args = parser.parse_args()
     if len(args.reference) > 9:
         parser.error("At most nine reference files are supported.")
@@ -70,7 +72,7 @@ def main() -> int:
 
     h3.request_local_chat_completion = observe
     save("request.json", {"model": args.model, "idea": args.idea, "references": sources,
-                          "review": not args.no_review, "mode": "auto", "duration": 6})
+                          "review": not args.no_review, "mode": args.mode, "duration": args.duration})
     existing = {instance["id"] for model in _inventory(args.url, 15)
                 for instance in model["loaded_instances"]}
     instance_id = None
@@ -81,7 +83,7 @@ def main() -> int:
         instance_id, = LF_LMSLoadModel().on_exec([args.model], [args.url])
         save("lifecycle.json", {"instance_id": instance_id, "owned": instance_id not in existing})
         kwargs = {"intent": [args.idea], "url": [args.url], "model": [instance_id],
-                  "mode": ["auto"], "duration_seconds": [6.0], "review": [not args.no_review]}
+                  "mode": [args.mode], "duration_seconds": [args.duration], "review": [not args.no_review]}
         for number, pixels in enumerate(images, 1):
             kwargs["image" if number == 1 else f"image_{number}"] = [pixels]
         result = h3.LF_H3PromptMaker().on_exec(**kwargs)

@@ -89,6 +89,8 @@ python -I scripts/quality/live_h3_prompt.py --model <downloaded-model-key> --url
 ```
 
 Repeat `--reference` for mixed-size inputs; add `--no-review` for opt-out.
+Use `--mode i2va` (or another explicit H3 mode) to probe fixed-frame behavior,
+and `--duration` to set the requested seconds. Defaults remain Auto and six seconds.
 Local trial artifacts live under `output/h3-prompt-live/` in the named directories
 `2026-09-26-single-reference`, `2026-09-26-mixed-references`, and
 `2026-09-26-review-off`. Each has `request.json`, `stages.json`, `prompt.txt`,
