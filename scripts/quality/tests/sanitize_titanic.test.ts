@@ -114,11 +114,14 @@ describe('Titanic publication sanitizer', () => {
       'LF_ViewImages',
     ]);
     expect(byId(605).widgets_values_named).toMatchObject({
-      intent: 'walking through a medieval town',
+      intent: 'A yellow diagonal line glides slowly across a dark blue background.',
       mode: 'auto',
       review: true,
     });
-    expect(byId(608).widgets_values_named.review).toBe(false);
+    expect(byId(608).widgets_values_named).toMatchObject({
+      intent: 'A yellow diagonal line glides slowly across a dark blue background.',
+      review: false,
+    });
     expect(byId(599).widgets_values).toEqual([
       64, 32, 4, 42, 'fixed', 0.5, {},
     ]);
