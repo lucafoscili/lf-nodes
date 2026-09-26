@@ -29,6 +29,7 @@ class Input:
     COMBO = "COMBO"
     CONDITIONING = "CONDITIONING"
     FILE_BLOB = "FILE_BLOB"
+    FILE_3D_GLB = "FILE_3D_GLB"
     FLOAT = "FLOAT"
     IMAGE = "IMAGE"
     INTEGER = "INT"

@@ -23,6 +23,7 @@ import { installH3References } from './h3PromptMaker';
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ACEStepRemix: [],
+  LF_ApplyTextureToGLB: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
