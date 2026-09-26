@@ -119,6 +119,23 @@ describe('Titanic publication sanitizer', () => {
       review: true,
     });
     expect(byId(608).widgets_values_named.review).toBe(false);
+    expect(byId(599).widgets_values).toEqual([
+      64, 32, 4, 42, 'fixed', 0.5, {},
+    ]);
+    expect(byId(599).widgets_values_named).toMatchObject({
+      seed: 42,
+      control_after_generate: 'fixed',
+      texture_scale: 0.5,
+      ui_widget: {},
+    });
+    expect(byId(606).widgets_values).toEqual([
+      '\n\n---\n\n', '', '', false, 42, 'fixed', '',
+    ]);
+    expect(byId(606).widgets_values_named).toMatchObject({
+      seed: 42,
+      control_after_generate: 'fixed',
+      ui_widget: '',
+    });
     expect(byId(555).widgets_values_named).toMatchObject({ width: 512, height: 320 });
     expect(byId(553).widgets_values_named).toMatchObject({ width: 448, height: 150 });
     expect(fixture.links).toContainEqual([1221, 556, 0, 605, 4, 'IMAGE']);
