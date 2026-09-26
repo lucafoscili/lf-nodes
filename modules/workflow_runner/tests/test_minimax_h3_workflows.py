@@ -364,8 +364,9 @@ def test_only_animate_and_directed_view_expose_fast_and_baseline_profiles() -> N
         "minimax_h3_directed_view",
     ):
         requirements = workflows[workflow_id].input_option_requirements
-        assert len(requirements) == 1
-        requirement = requirements[0]
+        requirement = next(
+            item for item in requirements if item.input_id == "execution_profile"
+        )
         assert requirement.input_id == "execution_profile"
         assert requirement.option_value == "turbo_preview"
         assert requirement.required_node_types == (
@@ -376,7 +377,10 @@ def test_only_animate_and_directed_view_expose_fast_and_baseline_profiles() -> N
         "loras/MiniMax-H3/minimax_h3_turbo_v4_step600_ema.safetensors",
     )
     assert all(
-        not workflow.input_option_requirements
+        all(
+            requirement.input_id != "execution_profile"
+            for requirement in workflow.input_option_requirements
+        )
         for workflow_id, workflow in workflows.items()
         if workflow_id
         not in {"minimax_h3_animate_image", "minimax_h3_directed_view"}
@@ -1141,6 +1145,7 @@ def test_directed_view_exposes_only_proven_fast_and_baseline_profiles(
     ]
     assert workflow.input_option_requirements == (
         workflow_module._TURBO_V4_OPTION_REQUIREMENT,
+        workflow_module.hd.HD_OPTION_REQUIREMENT,
     )
 
     prompt, _calls = _configure(
@@ -1643,4 +1648,3 @@ def test_reference_cards_export_portably_with_placeholder_sources() -> None:
     for spec_workflow in _workflows().values():
         if spec_workflow.id.startswith("minimax_h3_") and spec_workflow.workflow_path == workflow.workflow_path:
             assert spec_workflow.configure_download is not None, spec_workflow.id
-

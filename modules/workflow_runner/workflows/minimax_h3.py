@@ -32,6 +32,7 @@ from .minimax_h3_profiles import (
     TURBO_V4_6STEP_LORA,
     resolve_h3_execution_profile,
 )
+from . import minimax_h3_hd as hd
 from .utils import (
     choice as _choice,
     has_input_value as _has_image,
@@ -352,6 +353,7 @@ def _common_settings(
         raise RuntimeError(
             f"Focused MiniMax H3 cards require a profile-owned step count: {profile.id}."
         )
+    hd.resolve_output_quality(inputs, profile_id=profile.id)
     return _CommonSettings(
         aspect_ratio=aspect_ratio,
         width=width,
@@ -797,6 +799,13 @@ def _configure_base_card(
         settings,
         output_folder=spec.output_folder,
     )
+    hd.apply_optional_hd_pass(
+        prompt,
+        inputs,
+        base_width=settings.width,
+        base_height=settings.height,
+        profile_id=settings.profile.id,
+    )
 
 
 def _configure_directed_view(
@@ -914,6 +923,13 @@ def _configure_directed_view(
         "class_type": "LF_DisplayJSON",
         "_meta": {"title": "Publish settled-frame selection receipt"},
     }
+    hd.apply_optional_hd_pass(
+        prompt,
+        inputs,
+        base_width=settings.width,
+        base_height=settings.height,
+        profile_id=settings.profile.id,
+    )
 
 
 def _configure_directed_view_run(
@@ -1062,6 +1078,13 @@ def _configure_character_turnaround(
     prompt["save_atlas"]["_meta"]["title"] = (
         "Save the labeled turnaround contact sheet"
     )
+    hd.apply_optional_hd_pass(
+        prompt,
+        inputs,
+        base_width=settings.width,
+        base_height=settings.height,
+        profile_id=settings.profile.id,
+    )
 
 
 def _configure_character_turnaround_run(
@@ -1127,6 +1150,13 @@ def _configure_anchored_sprite_loop(
         conditioning = [guide.guide_node, 0]
     prompt["guider"]["inputs"]["conditioning"] = conditioning
     _apply_anchored_sprite_graph_settings(prompt, settings)
+    hd.apply_optional_hd_pass(
+        prompt,
+        inputs,
+        base_width=settings.common.width,
+        base_height=settings.common.height,
+        profile_id=settings.common.profile.id,
+    )
 
 
 def _configure_anchored_sprite_loop_download(
@@ -1138,6 +1168,13 @@ def _configure_anchored_sprite_loop_download(
     _remove_inactive_anchored_guides(prompt, set())
     prompt["guider"]["inputs"]["conditioning"] = ["h3", 0]
     _apply_anchored_sprite_graph_settings(prompt, settings)
+    hd.apply_optional_hd_pass(
+        prompt,
+        inputs,
+        base_width=settings.common.width,
+        base_height=settings.common.height,
+        profile_id=settings.common.profile.id,
+    )
 
 
 def _validate_reference_tags(compiled_prompt: str, reference_count: int) -> None:
@@ -1278,6 +1315,13 @@ def _configure_reference_card(
         settings,
         output_folder=spec.output_folder,
         reference_count=len(resolved_references),
+    )
+    hd.apply_optional_hd_pass(
+        prompt,
+        inputs,
+        base_width=settings.width,
+        base_height=settings.height,
+        profile_id=settings.profile.id,
     )
 
 
@@ -1614,6 +1658,7 @@ def _common_cells(
             maximum=_MAX_SEED,
             description="Reuse a seed for controlled prompt and profile comparisons.",
         ),
+        hd.output_quality_cell(),
     ]
 
 
@@ -1986,9 +2031,9 @@ def _make_base_workflow(spec: _BaseCardSpec) -> WorkflowNode:
         configure_prompt=partial(_configure_base_card, spec=spec),
         workflow_path=_BASE_GRAPH,
         input_option_requirements=(
-            (_TURBO_V4_OPTION_REQUIREMENT,)
+            (_TURBO_V4_OPTION_REQUIREMENT, hd.HD_OPTION_REQUIREMENT)
             if spec.workflow_id == "minimax_h3_animate_image"
-            else ()
+            else (hd.HD_OPTION_REQUIREMENT,)
         ),
     )
 
@@ -2230,6 +2275,7 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
         configure_download=_configure_anchored_sprite_loop_download,
         workflow_path=_ANCHORED_GRAPH,
         required_model_assets=_RMBG2_MODEL_ASSETS,
+        input_option_requirements=(hd.HD_OPTION_REQUIREMENT,),
     )
 
 
@@ -2272,6 +2318,7 @@ def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
         configure_prompt=partial(_configure_reference_card, spec=spec),
         configure_download=partial(_configure_reference_card_download, spec=spec),
         workflow_path=_REFERENCE_GRAPH,
+        input_option_requirements=(hd.HD_OPTION_REQUIREMENT,),
     )
 
 
@@ -2386,7 +2433,10 @@ def _make_directed_view_workflow() -> WorkflowNode:
         configure_prompt=_configure_directed_view_run,
         configure_download=_configure_directed_view_download,
         workflow_path=_ANCHORED_GRAPH,
-        input_option_requirements=(_TURBO_V4_OPTION_REQUIREMENT,),
+        input_option_requirements=(
+            _TURBO_V4_OPTION_REQUIREMENT,
+            hd.HD_OPTION_REQUIREMENT,
+        ),
     )
 
 
@@ -2501,6 +2551,7 @@ def _make_character_turnaround_workflow() -> WorkflowNode:
         configure_download=_configure_character_turnaround_download,
         workflow_path=_ANCHORED_GRAPH,
         required_model_assets=_RMBG2_MODEL_ASSETS,
+        input_option_requirements=(hd.HD_OPTION_REQUIREMENT,),
     )
 
 
