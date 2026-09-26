@@ -66,6 +66,45 @@ class GraphTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.build_graph(result)
 
+    def test_comparison_shares_base_audio_conditioning_and_noise(self):
+        original = deepcopy(self.graph)
+        result = module.build_refinement_comparison(self.graph)
+        self.assertEqual(self.graph, original)
+        self.assertEqual(result["sample"], original["sample"])
+        self.assertEqual(sum(n["class_type"] == "SamplerCustomAdvanced" for n in result.values()), 1)
+        first = deepcopy(result["experiment_upscale"]["inputs"])
+        second = deepcopy(result["experiment_upscale_8"]["inputs"])
+        self.assertEqual(first.pop("sigmas"), ["experiment_schedule", 0])
+        self.assertEqual(second.pop("sigmas"), ["experiment_schedule_8", 0])
+        self.assertEqual(first, second)
+        self.assertEqual(first["latent"], ["sample", 1])
+        four = deepcopy(result["experiment_schedule"]["inputs"])
+        eight = deepcopy(result["experiment_schedule_8"]["inputs"])
+        self.assertEqual(four.pop("steps"), 4)
+        self.assertEqual(eight.pop("steps"), 8)
+        self.assertEqual(four, eight)
+        self.assertEqual(result["decode_audio"], original["decode_audio"])
+        self.assertEqual(result["experiment_create_8"]["inputs"]["audio"],
+                         result["create_video"]["inputs"]["audio"])
+        self.assertNotIn("experiment_baseline_save", result)
+        with self.assertRaises(ValueError):
+            module.build_refinement_comparison(self.graph, second_steps=8)
+
+    def test_comparison_encodes_each_decoded_video_at_both_qualities(self):
+        result = module.build_refinement_comparison(self.graph)
+        savers = [node["inputs"] for node in result.values() if node["class_type"] == "SaveVideo"]
+        self.assertEqual(len(savers), 4)
+        self.assertEqual(len({s["filename_prefix"] for s in savers}), 4)
+        for video in ("create_video", "experiment_create_8"):
+            pair = [s for s in savers if s["video"] == [video, 0]]
+            self.assertEqual({s["format.codec.encoding.crf"] for s in pair}, {18.0, 23.0})
+            for s in pair:
+                self.assertEqual(s["format"], "mp4")
+                self.assertEqual(s["format.codec"], "h264")
+                self.assertEqual(s["format.codec.encoding"], "re-encode")
+                self.assertNotIn("codec", s)
+        self.assertFalse(any(node["class_type"] == "LoadVideo" for node in result.values()))
+
 
 if __name__ == "__main__":
     unittest.main()

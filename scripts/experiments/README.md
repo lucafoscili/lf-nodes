@@ -40,6 +40,25 @@ python scripts/experiments/h3_latent_upscale.py --help
 python scripts/experiments/test_h3_latent_upscale.py
 ```
 
+## Refinement and compression comparison
+
+`--compare-refinement` builds one graph with a shared first-pass AV latent,
+original audio, target conditioning and noise seed. Only the refinement schedule
+differs between the four-step and eight-step branches. Each decoded result is
+saved twice: H.264 CRF 23 (the original encoder quality) and CRF 18 (cleaner).
+Both exports come from the generated frames, not from recompressing an MP4.
+This separates refinement changes from compression differences. The base video
+is not saved again. Keep the default 0.25 denoise to reproduce the intended test.
+The comparison baseline is fixed to four steps; `--second-steps` remains useful
+for the original single-refinement experiment only.
+
+```powershell
+python scripts/experiments/h3_latent_upscale.py accepted-api.json comparison-api.json --compare-refinement
+```
+
+This uses the updated Core SaveVideo nested encoding controls. No runtime restart
+or production renderer change is required; submit only when the queue is idle.
+
 The output file must be new. These structural tests prove wiring and input
 preservation only; they do not establish quality, audio playback, timing or GPU
 compatibility. Keep source reference media and existing accepted outputs intact.

@@ -81,6 +81,44 @@ def build_graph(graph: dict, *, base_width=768, base_height=1024,
     return result
 
 
+def build_refinement_comparison(graph: dict, **settings) -> dict:
+    """Compare 4/8 steps and CRF 23/18 from one shared first-pass AV latent."""
+    if settings.get("second_steps", 4) != 4:
+        raise ValueError("The comparison baseline must use four refinement steps.")
+    result = build_graph(graph, **settings)
+    for name in ("experiment_baseline_decode", "experiment_baseline_create",
+                 "experiment_baseline_save"):
+        result.pop(name)
+
+    result["experiment_schedule_8"] = deepcopy(result["experiment_schedule"])
+    result["experiment_schedule_8"]["inputs"]["steps"] = 8
+    result["experiment_upscale_8"] = deepcopy(result["experiment_upscale"])
+    result["experiment_upscale_8"]["inputs"]["sigmas"] = ["experiment_schedule_8", 0]
+    result["experiment_decode_8"] = deepcopy(result["decode_video"])
+    result["experiment_decode_8"]["inputs"]["samples"] = ["experiment_upscale_8", 0]
+    result["experiment_create_8"] = deepcopy(result["create_video"])
+    result["experiment_create_8"]["inputs"]["images"] = ["experiment_decode_8", 0]
+
+    saver = result.pop("save")
+    prefix = graph["save"]["inputs"]["filename_prefix"]
+    for steps, video_node in ((4, "create_video"), (8, "experiment_create_8")):
+        for crf in (23, 18):
+            node = deepcopy(saver)
+            node["inputs"].pop("codec", None)
+            node["inputs"].update({
+                "video": [video_node, 0],
+                "filename_prefix": f"{prefix}-{steps}step-crf{crf}",
+                "format": "mp4",
+                "format.codec": "h264",
+                "format.codec.encoding": "re-encode",
+                "format.codec.encoding.crf": float(crf),
+            })
+            node["_meta"] = {"title": f"{steps} refinement steps / H.264 CRF {crf}"}
+            node_id = "save" if (steps, crf) == (4, 23) else f"experiment_save_{steps}_crf{crf}"
+            result[node_id] = node
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path, help="Existing Runner API graph JSON (not UI workflow JSON)")
@@ -91,9 +129,12 @@ def main() -> None:
     parser.add_argument("--second-denoise", type=float, default=0.25)
     parser.add_argument("--model-name", default="minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors")
     parser.add_argument("--precision", choices=("bf16", "fp16", "fp32"), default="bf16")
+    parser.add_argument("--compare-refinement", action="store_true",
+                        help="Share one base latent across 4/8 steps, each saved at CRF 23 and 18")
     args = vars(parser.parse_args())
     source, target = args.pop("input"), args.pop("output")
-    result = build_graph(json.loads(source.read_text(encoding="utf-8-sig")), **args)
+    builder = build_refinement_comparison if args.pop("compare_refinement") else build_graph
+    result = builder(json.loads(source.read_text(encoding="utf-8-sig")), **args)
     with target.open("x", encoding="utf-8") as stream:
         json.dump(result, stream, indent=2, ensure_ascii=False)
         stream.write("\n")
