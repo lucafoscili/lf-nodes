@@ -576,7 +576,11 @@ iso_ground_tiles_orchestra = WorkflowOrchestraNode(
     ),
     category="Image Processing",
     card=WorkflowCardPresentation(
-        summary="Generate a ground texture from text, make it seamless, and cut isometric tiles."
+        summary="Generate a ground texture from text, make it seamless, and cut isometric tiles.",
+        hero=WorkflowHeroImage(
+            asset="orchestra/iso-ground-tiles.webp",
+            alt="Actual generated cobblestone texture, seam-blended result, and four diamond tiles from one successful orchestra.",
+        ),
     ),
     inputs=(
         _ground_texture_prompt_input(),

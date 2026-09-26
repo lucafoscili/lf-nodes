@@ -12,6 +12,44 @@
     "status": "succeeded"
   },
   "sources": {
+    "iso-orchestra": {
+      "workflowId": "iso_ground_tiles_orchestra",
+      "runId": "lf-sequence:8db3f31fd34041419e951609bc5c5e72",
+      "submissionId": "lf-catalogue:hero:20260926:iso-ground-tiles-orchestra-a1",
+      "status": "succeeded",
+      "stages": [
+        {"id": "generate", "workflowId": "krea2_generate", "source": "iso-orchestra-generate"},
+        {"id": "tiles", "workflowId": "iso_ground_tiles", "source": "iso-orchestra-tiles"}
+      ],
+      "role": "Actual local two-block parent, with no hosted API call or checkpoint substitution."
+    },
+    "iso-orchestra-generate": {
+      "workflowId": "krea2_generate",
+      "runId": "78ab9c10-56eb-44dc-8183-817243c478ae",
+      "parentRunId": "lf-sequence:8db3f31fd34041419e951609bc5c5e72",
+      "artifact": "output/LF_Nodes/Krea2/Generate/seed-260926_00001_.png",
+      "sha256": "f7df0dd02c4a449ab2d5c4dbf777f6b7c95c1ce47756b4251a8f43f46d96ef87",
+      "dimensions": [1408, 1408],
+      "role": "Actual first-stage generated source before seam blending."
+    },
+    "iso-orchestra-texture": {
+      "workflowId": "iso_ground_tiles",
+      "runId": "4e36fea0-e692-4d22-a2d0-4d593462fc11",
+      "parentRunId": "lf-sequence:8db3f31fd34041419e951609bc5c5e72",
+      "artifact": "output/LF_Nodes/IsoGroundTiles/128x64-v4-seed-260926/texture_00001_.png",
+      "sha256": "5bc6f1223e23b902964e0d236966f5cc7be07a586a3291b334f723a2842a717e",
+      "dimensions": [1408, 1408],
+      "role": "Actual second-stage seam-blended texture, not the raw generation."
+    },
+    "iso-orchestra-tiles": {
+      "workflowId": "iso_ground_tiles",
+      "runId": "4e36fea0-e692-4d22-a2d0-4d593462fc11",
+      "parentRunId": "lf-sequence:8db3f31fd34041419e951609bc5c5e72",
+      "artifact": "output/LF_Nodes/IsoGroundTiles/128x64-v4-seed-260926/tiles_00001_.png",
+      "sha256": "90455575fe3dcc25d3598f1d157f76da9f3fb3ac0ec5b6f6744ffb19a76a4d3a",
+      "dimensions": [512, 64],
+      "role": "Actual second-stage four-tile output atlas."
+    },
     "h3-idea-orchestra": {
       "workflowId": "minimax_h3_video_orchestra",
       "runId": "lf-sequence:3959a6e747c744218e0f7643548fc34a",
@@ -873,6 +911,15 @@
     }
   },
   "heroes": [
+    {
+      "workflowId": "iso_ground_tiles_orchestra",
+      "asset": "orchestra/iso-ground-tiles.webp",
+      "sources": ["iso-orchestra", "iso-orchestra-generate", "iso-orchestra-texture", "iso-orchestra-tiles"],
+      "display": "Actual first-stage generated texture, second-stage seam-blended texture, and complete four-tile atlas from this one parent. Browser contain-fit and labels; no retouching, metadata stripped.",
+      "qualityScope": "Root inspected and accepted the complete images and tile atlas as a workflow example. Seam blending remains visibly softened in square/cross regions of the large texture; not a flawless material or universal seamlessness guarantee.",
+      "sha256": "de8358854c87885488616cd628d85c9ac310f7f177530087873025c556d8716f",
+      "bytes": 78508
+    },
     {
       "workflowId": "minimax_h3_prompt_maker",
       "asset": "minimax-h3/prompt-maker.webp",

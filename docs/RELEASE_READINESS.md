@@ -8,6 +8,25 @@ under that identity is not a valid next-release operation.
 
 ## Scope
 
+### Later catalogue probes — 2026-09-26
+
+Fresh showcase runs added evidence after the gates below: reviewed H3
+Idea to Video (reasoning off), local Illustrious XL, Iso Ground Tiles, and the
+local prompt-to-tiles orchestra succeeded. Six genuine previews were added;
+the [showcase log](WORKFLOW_RUNNER_SHOWCASE.md#catalogue-qol-and-fresh-samples--2026-09-26)
+records exact runs and remaining cover gaps. Catalogue UI checks passed 593
+frontend tests; this is not a rerun of the complete publication gate.
+
+**New unresolved runtime blocker:** the sprite orchestra's background-removal
+stage failed to load its model (`name 'HierarAttDecBlk' is not defined`). H3
+restaging succeeded, but no final atlas was produced. Resolve this dependency
+failure and replay the complete sprite orchestra before claiming that path is
+release-ready. Separately, Qwen returned no final writer answer with reasoning
+`vision`; a simpler prompt with reasoning `off` and review on succeeded. This
+remains a reliability limitation, not a fixed default behavior.
+
+### Prepared candidate scope
+
 - 148 public LF node types; ten additions since v3.0.0. The count and its
   publication contract now agree.
 - Canonical Titanic: 372 nodes / 490 links, including all 148 public LF types.

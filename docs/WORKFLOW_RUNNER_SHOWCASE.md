@@ -319,7 +319,28 @@ has been fixed; no Prompt Maker implementation/default was changed here.
 used the declared Genesis v0.10 checkpoint and seed 260926. Root accepted the
 actual brown-haired, green-eyed anime portrait with a mustard jacket, white
 shirt, relaxed smile, and leafy natural light. The earlier rejected output is
-not republished. These additions bring the manifest to **33 curated covers**.
+not republished.
+
+**Keep — Iso Ground Tiles from a Prompt:** parent
+`lf-sequence:8db3f31fd34041419e951609bc5c5e72` completed with local Krea generation
+child `78ab9c10-56eb-44dc-8183-817243c478ae` and tile child
+`4e36fea0-e692-4d22-a2d0-4d593462fc11`. The cover retains all three actual
+images: raw generated source, seam-blended texture, and four-tile atlas. Root
+accepted it with visible seam-blend softening disclosed, not removed.
+
+**Blocked — Sprite Loop:** parent
+`lf-sequence:7298e08418944a3aa532c3a3936897b9` produced an H3 restage video in
+child `2a7099a7-e01e-4e00-95f8-18c6fd4d2287`, but cut child
+`e8e5d0eb-b98c-4f8b-ab7e-10b166c94aba` failed during background-removal model
+loading: `name 'HierarAttDecBlk' is not defined`. No finished transparent atlas
+exists for this run. Neither the orchestra nor cutter receives a cover from
+the successful intermediate video. This runtime dependency needs follow-up;
+no loader/model implementation was changed by the catalogue work.
+
+The manifest now contains **34 curated covers**: six added in this batch,
+with **14 shipped cards still without accepted covers**. Those require setup,
+fresh successful trials, or perceptual review; text/audio workflows can have
+exact-text or audio-derived previews, but are not exempt from actual execution.
 
 Local receipt and presentation sources are in
 `output/hero-cards/catalogue-20260926/`; the packaged WebP contains no embedded

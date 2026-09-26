@@ -107,9 +107,10 @@ def test_shipped_heroes_are_small_decodable_and_metadata_free(samples) -> None:
             assert not raster.getexif(), workflow_id
 
 
-def test_h3_orchestra_covers_retain_actual_child_relationships(samples, shipped_workflows) -> None:
+@pytest.mark.parametrize("source_id", ["h3-idea-orchestra", "iso-orchestra"])
+def test_new_orchestra_covers_retain_actual_child_relationships(samples, shipped_workflows, source_id) -> None:
     sources = samples["sources"]
-    parent = sources["h3-idea-orchestra"]
+    parent = sources[source_id]
     definition = shipped_workflows[parent["workflowId"]]
     assert parent["status"] == "succeeded"
     assert [(stage["id"], stage["workflowId"]) for stage in parent["stages"]] == [

@@ -22,6 +22,8 @@ remaining prerequisites; this draft does not declare a full E2E pass.
 - **Runner assemblies and history:** reusable multi-block orchestras, named
   artifact/text handoffs and durable child-run outputs, alongside proxy/auth
   hardening and phone-oriented controls.
+- **Clearer catalogue:** separate LF Nodes and custom collections, quick section
+  links, concise card descriptions, and six new previews from real workflow runs.
 - **Release coverage:** all 148 current public LF node types have a canonical
   Titanic specimen; new-node omissions are checked automatically. CPU publication
   contracts include the new tools and H3/HD/orchestration paths. Live gate outcomes
