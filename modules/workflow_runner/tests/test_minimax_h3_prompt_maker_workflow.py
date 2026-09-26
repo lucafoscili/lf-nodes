@@ -80,6 +80,7 @@ def test_card_is_registered_and_exposes_the_small_standalone_contract() -> None:
         "duration",
         *PICTURE_IDS[:2],
         "model",
+        "manage_model",
         "review",
         "endpoint",
         "temperature",
@@ -231,6 +232,55 @@ def test_text_only_configuration_removes_the_image_branch() -> None:
         "review": True,
         "ui_widget": "",
     }
+
+
+@pytest.mark.parametrize("mode,count", [("auto", 0), ("auto", 1), ("ref2va", 9), ("fl2va", 2)])
+def test_portable_configuration_does_not_stage_uploads(monkeypatch, mode, count):
+    def no_staging(*args):
+        pytest.fail("Portable configuration must not stage uploads")
+
+    monkeypatch.setattr(workflow_module, "resolve_load_image_reference", no_staging)
+    graph = WORKFLOW.load_prompt()
+    WORKFLOW.configure_download(graph, _inputs(mode, count))
+    for ordinal in range(1, count + 1):
+        assert graph[f"picture_{ordinal}"]["inputs"]["image"] == f"picture_{ordinal}.png"
+    assert len([key for key in graph if key in PICTURE_IDS]) == count
+
+
+def test_managed_writer_releases_exact_instance_before_exposing_prompt():
+    graph = WORKFLOW.load_prompt()
+    inputs = {**_inputs("auto", 0), "manage_model": True}
+    WORKFLOW.configure_prompt(graph, inputs)
+    assert graph["load_lms"]["inputs"] == {
+        "model": "vision-writer", "url": "http://127.0.0.1:1234/api/v1/chat"
+    }
+    assert graph["h3_prompt_maker"]["inputs"]["model"] == ["load_lms", 0]
+    assert graph["release_lms"]["inputs"] == {
+        "prompt": ["h3_prompt_maker", 0],
+        "instance_id": ["load_lms", 0],
+        "url": "http://127.0.0.1:1234/api/v1/chat",
+    }
+    assert graph["display_prompt"]["inputs"]["string"] == ["release_lms", 0]
+
+
+def test_managed_writer_requires_model_before_staging(monkeypatch):
+    def no_staging(*args):
+        pytest.fail("Model selection must be checked before upload staging")
+
+    monkeypatch.setattr(workflow_module, "resolve_load_image_reference", no_staging)
+    inputs = {**_inputs("auto", 1), "model": "", "manage_model": True}
+    with pytest.raises(ValueError, match="Choose an LM Studio model"):
+        WORKFLOW.configure_prompt(WORKFLOW.load_prompt(), inputs)
+
+
+def test_writer_residency_is_opt_in():
+    cell = next(cell for cell in WORKFLOW.inputs if cell.id == "manage_model")
+    assert cell.advanced and not cell.required
+    assert cell.props["lfValue"] is False
+    graph = WORKFLOW.load_prompt()
+    WORKFLOW.configure_prompt(graph, _inputs("auto", 0))
+    assert "load_lms" not in graph and "release_lms" not in graph
+    assert graph["display_prompt"]["inputs"]["string"] == ["h3_prompt_maker", 0]
 
 
 @pytest.mark.parametrize(

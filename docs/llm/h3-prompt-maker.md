@@ -60,6 +60,14 @@ saved with `t2va`, select Auto before connecting reference images.
 For explicit memory handoff, see [LMS Load/Unload](lms-models.md). Set the same LMS
 endpoint on connected operations. A blank model still uses the sole loaded LLM.
 
+The Runner Prompt Maker block also offers an Advanced **Load and release writer**
+toggle (off by default). Select an exact downloaded model key to load it before
+authoring and release that instance after review, before exposing the prompt to
+the next orchestra stage. This explicitly also releases an already-loaded
+matching instance. Authoring failure can leave the writer loaded; this is an
+ordered graph handoff, not a guaranteed cleanup handler. Portable preparation
+validates settings and reference order without staging uploads or contacting LMS.
+
 ## Checks and live evidence
 
 Prose-only revision: 63 focused node/instruction/registry/metadata tests and 50

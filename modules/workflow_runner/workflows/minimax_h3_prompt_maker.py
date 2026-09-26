@@ -178,7 +178,9 @@ def _reference_fields(inputs: Dict[str, Any], mode: str) -> tuple[str, ...]:
     return tuple(present_fields)
 
 
-def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
+def _configure(
+    prompt: Dict[str, Any], inputs: Dict[str, Any], *, resolve_upload: bool = True
+) -> None:
     # Validate scalar controls plus the mode/count/gap contract before staging.
     mode = choice(inputs, "mode", "auto", tuple(option[0] for option in _MODE_OPTIONS))
     if mode == "auto":
@@ -217,11 +219,18 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         (option[0] for option in _REASONING_OPTIONS),
     )
     review = _boolean(inputs, "review", DEFAULT_REVIEW)
+    manage_model = _boolean(inputs, "manage_model", False)
+    if manage_model and not model:
+        raise ValueError("Choose an LM Studio model to load and release automatically.")
     reference_fields = _reference_fields(inputs, mode)
     reference_count = len(reference_fields)
 
     resolved_references = [
-        resolve_load_image_reference(inputs, field_id)
+        (
+            resolve_load_image_reference(inputs, field_id)
+            if resolve_upload
+            else f"{field_id}.png"
+        )
         for field_id in reference_fields
     ]
 
@@ -238,6 +247,30 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             "review": review,
         }
     )
+
+    if manage_model:
+        # Explicit opt-in: this graph owns the selected instance's residency,
+        # including release when an already loaded matching instance is reused.
+        prompt["load_lms"] = {
+            "class_type": "LF_LMSLoadModel",
+            "inputs": {"model": model, "url": endpoint},
+            "_meta": {"title": "Load the selected prompt writer"},
+        }
+        prompt["h3_prompt_maker"]["inputs"]["model"] = ["load_lms", 0]
+        prompt["release_lms"] = {
+            "class_type": "LF_LMSUnloadModel",
+            "inputs": {
+                "prompt": ["h3_prompt_maker", 0],
+                "instance_id": ["load_lms", 0],
+                "url": endpoint,
+            },
+            "_meta": {"title": "Release the writer before video generation"},
+        }
+        prompt["display_prompt"]["inputs"]["string"] = ["release_lms", 0]
+    else:
+        prompt.pop("load_lms", None)
+        prompt.pop("release_lms", None)
+        prompt["display_prompt"]["inputs"]["string"] = ["h3_prompt_maker", 0]
 
     list_inputs = prompt["image_list"]["inputs"]
     for ordinal in range(1, _MAX_REFERENCE_IMAGES + 1):
@@ -257,6 +290,12 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     else:
         prompt.pop("image_list", None)
         prompt["h3_prompt_maker"]["inputs"].pop("image", None)
+
+
+def _configure_download(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
+    """Validate a portable graph without staging uploads or contacting LMS."""
+
+    _configure(prompt, inputs, resolve_upload=False)
 
 
 def _mode_cell() -> WorkflowCell:
@@ -504,6 +543,20 @@ input_review = WorkflowCell(
     props={"lfLabel": "Review", "lfValue": DEFAULT_REVIEW},
     required=False,
 )
+input_manage_model = WorkflowCell(
+    node_id="load_lms",
+    id="manage_model",
+    value="Load and release writer",
+    shape="toggle",
+    description=(
+        "Load the selected downloaded LM Studio model, then release that exact "
+        "instance after writing and review to free memory for video. Also releases "
+        "a matching instance already loaded. If authoring fails, it may remain loaded."
+    ),
+    props={"lfLabel": "Load and release writer", "lfValue": False},
+    required=False,
+    advanced=True,
+)
 outputs = [
     WorkflowCell(
         node_id="display_prompt",
@@ -551,6 +604,7 @@ WORKFLOW = WorkflowNode(
         input_duration,
         *[_picture_cell(ordinal) for ordinal in range(1, 3)],
         input_model,
+        input_manage_model,
         input_review,
         input_endpoint,
         input_temperature,
@@ -560,6 +614,7 @@ WORKFLOW = WorkflowNode(
     ],
     outputs=outputs,
     configure_prompt=_configure,
+    configure_download=_configure_download,
     workflow_path=Path(__file__).resolve().with_suffix(".json"),
 )
 
