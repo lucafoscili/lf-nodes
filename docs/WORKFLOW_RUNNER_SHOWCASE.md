@@ -347,3 +347,26 @@ Local receipt and presentation sources are in
 prompt or execution metadata. Older rejected, setup-blocked, and unlistened
 samples retain their previous decisions. Personal-reference H3/sprite samples
 were excluded from distributable covers even when their runs had succeeded.
+
+### Post-restart catalogue acceptance — 2026-09-26
+
+**Keep:** after Luca finished the Queen session, reviewed JOC controls unloaded
+the idle LMS model and started Comfy with its phone-facing proxy. Both services
+reported ready with an empty queue; no new generations were submitted.
+
+The live catalogue on both endpoints contains 48 shipped workflows and 20
+custom workflows (Garage 7, Velora 13), with all 34 curated cover declarations
+matching the manifest. All six new cover files returned successfully through
+both endpoints and matched the committed bytes.
+
+Real-browser inspection at 1440×1080 on the core endpoint and 390×844 through
+the HTTPS proxy confirmed rendered covers, readable cards, and working card
+navigation. The phone-sized Custom workflows shortcut lands below the fixed
+header without horizontal overflow. The Idea to Video form exposes Output
+quality with Standard selected. This was browser viewport testing, not a
+physical-phone session or a new Standard/HD generation comparison. The final
+browser console reported no errors or warnings.
+
+Screenshots and snapshots are retained under `output/playwright/` with the
+`catalogue-live-` prefix. This closes the deferred post-restart catalogue check;
+the sprite model-loading failure and 14 missing accepted covers remain open.

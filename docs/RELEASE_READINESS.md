@@ -17,6 +17,12 @@ the [showcase log](WORKFLOW_RUNNER_SHOWCASE.md#catalogue-qol-and-fresh-samples--
 records exact runs and remaining cover gaps. Catalogue UI checks passed 593
 frontend tests; this is not a rerun of the complete publication gate.
 
+The subsequent reviewed JOC handover restarted the stopped Comfy stack and
+loaded the new catalogue. Desktop and phone-sized HTTPS-proxy browser checks
+passed for covers, collection separation, shortcuts, and card navigation;
+Output quality is visible with Standard selected. No new generations were
+queued during this post-restart check; remaining execution limits below stand.
+
 **New unresolved runtime blocker:** the sprite orchestra's background-removal
 stage failed to load its model (`name 'HierarAttDecBlk' is not defined`). H3
 restaging succeeded, but no final atlas was produced. Resolve this dependency
@@ -120,11 +126,11 @@ Ignored local evidence:
 
 ## Before publication
 
-1. Restart Comfy in the normal user-controlled way to load the updated Python
-   workflow catalogue and pending ecosystem updates. The running service was
-   not restarted in this batch. Confirm the phone form exposes Output quality,
-   Standard still runs normally, and HD availability reflects installed optional
-   nodes/checkpoint. Fresh-process graph tests do not certify the old catalogue UI.
+1. The updated catalogue is now loaded after the reviewed JOC handover; the
+   phone-sized proxy form exposes Output quality with Standard selected. Retain
+   the remaining live Standard/HD execution and optional-node/checkpoint
+   availability checks required by the advertised release scope. Catalogue
+   browser acceptance alone does not certify those generation paths.
 2. Complete whichever remaining model/provider/editor live cases are required
    for the release's advertised scope; record unavailable prerequisites as such.
 3. Have Luca select the next version and accept the candidate. Update runtime,
