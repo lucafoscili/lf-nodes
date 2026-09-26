@@ -67,6 +67,7 @@ def test_sprite_loop_orchestra_chains_restage_into_cut_by_video() -> None:
         "source_image",
         "direction",
         "aspect_ratio",
+        "output_quality",
         "duration_frames",
         "seed",
         "frame_count",
