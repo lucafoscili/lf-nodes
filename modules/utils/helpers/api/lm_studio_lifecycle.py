@@ -8,8 +8,8 @@ from urllib.parse import urlsplit, urlunsplit
 import requests
 
 from ...constants import HEADERS
+from .lm_studio_auth import with_lm_studio_auth
 from .lm_studio_models import lm_studio_models_url, _response_error_detail
-from .read_secret import read_secret
 from .resolve_url import local_proxy_request_options, resolve_api_url
 
 
@@ -38,10 +38,7 @@ def _endpoint(url: str, action: str = "") -> str:
 def _request(url: str, timeout: int, payload: dict | None = None) -> dict:
     if isinstance(timeout, bool) or not isinstance(timeout, int) or timeout < 1:
         raise ValueError("timeout must be a positive integer.")
-    options = local_proxy_request_options(url, HEADERS)
-    token = read_secret("LM_API_TOKEN")
-    if token:
-        options["headers"]["Authorization"] = f"Bearer {token}"
+    options, token = with_lm_studio_auth(local_proxy_request_options(url, HEADERS))
     options["allow_redirects"] = False
     try:
         if payload is None:
@@ -57,9 +54,7 @@ def _request(url: str, timeout: int, payload: dict | None = None) -> dict:
         ) from error
     status = getattr(response, "status_code", None)
     if status != 200:
-        detail = _response_error_detail(response)
-        if detail and token:
-            detail = detail.replace(token, "[redacted]")
+        detail = _response_error_detail(response, token)
         hint = (
             " Check LM_API_TOKEN (or LM_API_TOKEN_FILE) on the Comfy server."
             if status in (401, 403) else ""

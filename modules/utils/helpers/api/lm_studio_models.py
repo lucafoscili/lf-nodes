@@ -8,6 +8,7 @@ from urllib.parse import urlsplit, urlunsplit
 import requests
 
 from ...constants import HEADERS
+from .lm_studio_auth import with_lm_studio_auth
 from .resolve_url import local_proxy_request_options, resolve_api_url
 
 
@@ -77,7 +78,7 @@ def select_loaded_lm_studio_llm_id(data: Any) -> str:
     return loaded_ids[0]
 
 
-def _response_error_detail(response: Any) -> str | None:
+def _response_error_detail(response: Any, token: str | None = None) -> str | None:
     try:
         payload = response.json()
     except (TypeError, ValueError):
@@ -93,6 +94,8 @@ def _response_error_detail(response: Any) -> str | None:
         candidate = payload.get("detail") or payload.get("message")
     if not isinstance(candidate, str):
         return None
+    if token:
+        candidate = candidate.replace(token, "[redacted]")
     detail = " ".join(candidate.split())
     if not detail:
         return None
@@ -105,11 +108,14 @@ def resolve_loaded_lm_studio_llm(chat_url: str, timeout: int) -> str:
     """Query LM Studio and return its sole loaded LLM instance identifier."""
 
     models_url = lm_studio_models_url(chat_url)
+    request_options, token = with_lm_studio_auth(
+        local_proxy_request_options(models_url, HEADERS)
+    )
     try:
         response = requests.get(
             resolve_api_url(models_url),
             timeout=timeout,
-            **local_proxy_request_options(models_url, HEADERS),
+            **request_options,
         )
     except requests.RequestException as error:
         raise ValueError(
@@ -119,7 +125,7 @@ def resolve_loaded_lm_studio_llm(chat_url: str, timeout: int) -> str:
 
     status_code = getattr(response, "status_code", None)
     if status_code != 200:
-        upstream_detail = _response_error_detail(response)
+        upstream_detail = _response_error_detail(response, token)
         provider_message = (
             f" Provider said: {upstream_detail}" if upstream_detail else ""
         )

@@ -27,8 +27,10 @@ the released prompt.
 Both nodes accept `url` (default `http://127.0.0.1:1234/api/v1/chat`) and optional
 `timeout` (120 seconds). Use the same server URL as the prompt maker; the nodes
 derive its native model-management routes. Authentication, if enabled, reads
-`LM_API_TOKEN` or `LM_API_TOKEN_FILE` on the Comfy server. Tokens are not saved
-in node widgets.
+`LM_API_TOKEN` or `LM_API_TOKEN_FILE` on the Comfy server. Native chat, automatic
+model discovery, and lifecycle operations all use this authentication, so the
+whole connected chain works with an authenticated LM Studio server. The token
+is not sent to generic OpenAI-compatible endpoints or saved in node widgets.
 
 Each node consumes one scalar value per input, including Comfy's singleton
 list envelopes; multi-item inputs fail before a lifecycle request. Both nodes

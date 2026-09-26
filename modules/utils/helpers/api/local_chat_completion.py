@@ -12,6 +12,7 @@ import requests
 from ...constants import HEADERS
 from .build_multimodal_content import build_openai_multimodal_content
 from .handle_response import require_response_text
+from .lm_studio_auth import with_lm_studio_auth
 from .lm_studio_models import resolve_loaded_lm_studio_llm
 from .parse_openai_response import parse_openai_response
 from .resolve_url import local_proxy_request_options, resolve_api_url
@@ -22,7 +23,7 @@ _LM_STUDIO_NATIVE_CHAT_PATH = "/api/v1/chat"
 _REASONING_OPTIONS = ("auto", "off", "on")
 
 
-def _upstream_error_detail(response: Any) -> str | None:
+def _upstream_error_detail(response: Any, token: str | None = None) -> str | None:
     """Return one bounded, human-readable error supplied by the endpoint."""
 
     try:
@@ -41,6 +42,8 @@ def _upstream_error_detail(response: Any) -> str | None:
         candidate = payload.get("detail") or payload.get("message")
     if not isinstance(candidate, str):
         return None
+    if token:
+        candidate = candidate.replace(token, "[redacted]")
 
     detail = " ".join(candidate.split())
     if not detail:
@@ -219,6 +222,9 @@ def request_local_chat_completion(
 
     resolved_url = resolve_api_url(normalized_url)
     request_options = local_proxy_request_options(normalized_url, HEADERS)
+    token = None
+    if uses_native_chat:
+        request_options, token = with_lm_studio_auth(request_options)
     try:
         response = requests.post(
             resolved_url,
@@ -234,7 +240,7 @@ def request_local_chat_completion(
 
     status_code = getattr(response, "status_code", None)
     if status_code != 200:
-        upstream_detail = _upstream_error_detail(response)
+        upstream_detail = _upstream_error_detail(response, token)
         provider_message = (
             f" Provider said: {upstream_detail}" if upstream_detail else ""
         )

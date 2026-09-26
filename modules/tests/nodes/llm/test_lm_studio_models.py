@@ -11,6 +11,7 @@ from modules.utils.constants import Input
 
 nodes = importlib.import_module("modules.nodes.llm.lm_studio_models")
 api = importlib.import_module("modules.utils.helpers.api.lm_studio_lifecycle")
+auth = importlib.import_module("modules.utils.helpers.api.lm_studio_auth")
 URL = "http://localhost.test:1234/api/v1/chat"
 MODELS = "http://localhost.test:1234/api/v1/models"
 
@@ -41,7 +42,7 @@ def inventory(*instance_ids):
 def transport(monkeypatch):
     calls = []
     replies = []
-    monkeypatch.setattr(api, "read_secret", lambda _name: None)
+    monkeypatch.setattr(auth, "read_secret", lambda _name: None)
 
     def request(method, url, **kwargs):
         calls.append((method, url, kwargs))
@@ -190,7 +191,7 @@ def test_invalid_timeout_fails_before_http(transport, timeout):
 
 def test_auth_is_transport_only_and_errors_redact_token(transport, monkeypatch):
     calls, replies = transport
-    monkeypatch.setattr(api, "read_secret", lambda name: "private-token" if name == "LM_API_TOKEN" else None)
+    monkeypatch.setattr(auth, "read_secret", lambda name: "private-token" if name == "LM_API_TOKEN" else None)
     replies.append(Response({"error": "private-token denied"}, 401))
     with pytest.raises(ValueError, match="LM_API_TOKEN") as error:
         api.load_lm_studio_model("my/model", URL)
