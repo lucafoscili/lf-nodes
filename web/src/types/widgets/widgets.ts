@@ -116,6 +116,8 @@ export enum NodeName {
   localChatCompletions = 'LF_LocalChatCompletions',
   llmChat = 'LF_LLMChat',
   llmMessenger = 'LF_LLMMessenger',
+  lmsLoadModel = 'LF_LMSLoadModel',
+  lmsUnloadModel = 'LF_LMSUnloadModel',
   loadAndEditImages = 'LF_LoadAndEditImages',
   loadClipSegModel = 'LF_LoadCLIPSegModel',
   loadFileOnce = 'LF_LoadFileOnce',

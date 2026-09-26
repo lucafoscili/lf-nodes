@@ -28,6 +28,11 @@ describe('External intake widget contracts', () => {
 });
 
 describe('LLM widget contracts', () => {
+  it('uses native Comfy controls for LM Studio model lifecycle', () => {
+    expect(NODE_WIDGET_MAP[NodeName.lmsLoadModel]).toEqual([]);
+    expect(NODE_WIDGET_MAP[NodeName.lmsUnloadModel]).toEqual([]);
+  });
+
   it('renders local chat-completion results with the LF code widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.localChatCompletions]).toEqual([CustomWidgetName.code]);
   });

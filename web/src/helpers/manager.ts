@@ -80,6 +80,8 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LocalChatCompletions: [CustomWidgetName.code],
   LF_LLMChat: [CustomWidgetName.chat],
   LF_LLMMessenger: [CustomWidgetName.messenger],
+  LF_LMSLoadModel: [],
+  LF_LMSUnloadModel: [],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
   LF_LoadFileOnce: [CustomWidgetName.history],
