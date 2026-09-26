@@ -255,6 +255,7 @@ character_turnaround_orchestra = WorkflowOrchestraNode(
         _input_cell(identity_edit, "grounding_px"),
         _input_cell(directed_view, "retention_details"),
         _input_cell(directed_view, "execution_profile"),
+        _input_cell(directed_view, "output_quality"),
         _input_cell(directed_view, "duration_frames"),
         _input_cell(directed_view, "tail_fraction"),
         _input_cell(directed_view, "analysis_max_edge"),
@@ -319,6 +320,10 @@ character_turnaround_orchestra = WorkflowOrchestraNode(
                     WorkflowSequencePublicInputBinding(
                         target_input_id="execution_profile",
                         public_input_id="execution_profile",
+                    ),
+                    WorkflowSequencePublicInputBinding(
+                        target_input_id="output_quality",
+                        public_input_id="output_quality",
                     ),
                     WorkflowSequenceLiteralBinding(
                         target_input_id="aspect_ratio",
@@ -485,6 +490,7 @@ sprite_loop_orchestra = WorkflowOrchestraNode(
         _sprite_loop_source_input(),
         _sprite_loop_direction_input(),
         _input_cell(reference_restage, "aspect_ratio"),
+        _input_cell(reference_restage, "output_quality"),
         _input_cell(reference_restage, "duration_frames"),
         _input_cell(reference_restage, "seed"),
         _input_cell(sprite_loop_cut, "frame_count"),
@@ -508,6 +514,10 @@ sprite_loop_orchestra = WorkflowOrchestraNode(
                 WorkflowSequencePublicInputBinding(
                     target_input_id="direction",
                     public_input_id="direction",
+                ),
+                WorkflowSequencePublicInputBinding(
+                    target_input_id="output_quality",
+                    public_input_id="output_quality",
                 ),
                 WorkflowSequencePublicInputBinding(
                     target_input_id="aspect_ratio",
@@ -653,6 +663,7 @@ def _h3_orchestra_inputs() -> tuple[WorkflowCell, ...]:
         _input_cell(h3_prompt_maker, "picture_1"),
         _input_cell(h3_prompt_video, "duration"),
         _input_cell(h3_prompt_video, "aspect_ratio"),
+        _input_cell(h3_prompt_video, "output_quality"),
         *extra,
         seed,
     )
@@ -689,7 +700,7 @@ minimax_h3_video_orchestra = WorkflowOrchestraNode(
                 WorkflowSequenceTextBinding(target_input_id="prompt", output_id="prompt"),
                 *(
                     WorkflowSequencePublicInputBinding(target_input_id=name, public_input_id=name)
-                    for name in ("aspect_ratio", "seed", *_H3_SHARED_INPUTS)
+                    for name in ("aspect_ratio", "output_quality", "seed", *_H3_SHARED_INPUTS)
                 ),
             ),
         ),

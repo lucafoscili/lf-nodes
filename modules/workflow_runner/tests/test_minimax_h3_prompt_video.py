@@ -45,7 +45,8 @@ def _assert_links_resolve(graph):
 def test_public_contract_and_portable_defaults():
     assert WORKFLOW.id == "minimax_h3_prompt_video"
     cells = {cell.id: cell for cell in WORKFLOW.inputs}
-    assert set(cells) == {"prompt", "mode", "duration", "aspect_ratio", "seed", *renderer._PICTURE_IDS}
+    assert set(cells) == {"prompt", "mode", "duration", "aspect_ratio", "output_quality", "seed", *renderer._PICTURE_IDS}
+    assert cells["output_quality"].props["lfValue"] == "standard"
     assert [cell.id for cell in WORKFLOW.outputs] == ["video", "prompt"]
     assert all(not cells[field].required for field in renderer._PICTURE_IDS)
     assert cells["duration"].props["lfValue"] == str(124 / 24)
@@ -133,6 +134,7 @@ def test_seconds_select_exact_allowed_frames(frames, numeric):
     {"duration": "5.17"}, {"duration": "124"}, {"duration": "nan"},
     {"duration": True}, {"duration": 0}, {"duration": []},
     {"seed": -1}, {"aspect_ratio": "invalid"}, {"execution_profile": "turbo_preview"},
+    {"output_quality": "invalid"}, {"output_quality": True},
     {"mode": "ref2va"}, {"mode": "i2va"}, {"mode": "fl2va", "picture_1": "one.png"},
     {"mode": "t2va", "picture_1": "one.png"}, {"picture_2": "gap.png"},
 ])
@@ -153,3 +155,30 @@ def test_reconfiguration_switches_graph_families_without_stale_nodes():
         _assert_links_resolve(graph)
         assert ("source_1" in graph) == (mode == "ref2va")
         assert ("source_last" in graph) == (mode == "l2va")
+
+
+@pytest.mark.parametrize("mode,count", [
+    ("auto", 0), ("auto", 1), ("t2va", 0), ("i2va", 1),
+    ("fl2va", 2), ("l2va", 1), ("ref2va", 9),
+])
+@pytest.mark.parametrize("download", [False, True])
+def test_optional_hd_preserves_raw_prose_references_and_first_pass(monkeypatch, mode, count, download):
+    monkeypatch.setattr(renderer, "resolve_load_image_reference", lambda _values, field: f"staged/{field}.png")
+    values = {**_inputs(mode, count), "aspect_ratio": "3:4"}
+    configure = WORKFLOW.configure_download if download else WORKFLOW.configure_prompt
+    baseline = WORKFLOW.load_prompt()
+    configure(baseline, values)
+    graph = WORKFLOW.load_prompt()
+    configure(graph, {**values, "output_quality": "hd"})
+    for node_id, node in baseline.items():
+        if node_id not in {"decode_video", "save"}:
+            assert graph[node_id] == node
+    target = [node for node_id, node in graph.items() if node_id != "h3"
+              and node["class_type"] == graph["h3"]["class_type"]]
+    assert len(target) == 1
+    assert target[0]["inputs"] == {**baseline["h3"]["inputs"], "width": 1248, "height": 1664}
+    assert graph["display_prompt"]["inputs"]["string"] == PROSE
+    assert graph["save"]["inputs"]["filename_prefix"].endswith("-hd4")
+    _assert_links_resolve(graph)
+    configure(graph, values)
+    assert graph == baseline

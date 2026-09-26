@@ -13,6 +13,7 @@ from ..services.registry import (
     WorkflowNode,
 )
 from . import minimax_h3 as h3
+from . import minimax_h3_hd as hd
 from .minimax_h3_prompt_maker import _MODE_OPTIONS, _PICTURE_IDS, _reference_fields
 from .utils import choice, has_input_value, resolve_load_image_reference
 
@@ -103,6 +104,10 @@ def _configure(
     h3._apply_common_graph_settings(
         graph, settings, output_folder="PromptVideo", reference_count=len(references)
     )
+    hd.apply_optional_hd_pass(
+        graph, inputs, base_width=settings.width, base_height=settings.height,
+        profile_id=settings.profile.id,
+    )
     graph["display_prompt"] = {
         "class_type": "LF_DisplayString",
         "inputs": {"string": prose, "ui_widget": ""},
@@ -118,7 +123,8 @@ WORKFLOW = WorkflowNode(
     value="Render H3 Prompt",
     description=(
         "Render a finished prompt exactly as supplied, with optional ordered Pictures. "
-        "Uses the Kitchen 20-step quality recipe and saves video with stereo audio."
+        "Uses the Kitchen 20-step quality recipe with optional four-step HD refinement "
+        "and saves video with the original stereo audio."
     ),
     category="MiniMax H3",
     card=WorkflowCardPresentation(summary="Render finished H3 prose and retain the exact prompt."),
@@ -156,6 +162,7 @@ WORKFLOW = WorkflowNode(
     workflow_path=h3._BASE_GRAPH,
     configure_prompt=partial(_configure, resolve_upload=True),
     configure_download=partial(_configure, resolve_upload=False),
+    input_option_requirements=(hd.HD_OPTION_REQUIREMENT,),
 )
 
 __all__ = ["WORKFLOW"]

@@ -242,6 +242,7 @@ def test_character_turnaround_orchestra_is_five_focused_blocks() -> None:
         "grounding_px",
         "retention_details",
         "execution_profile",
+        "output_quality",
         "duration_frames",
         "tail_fraction",
         "analysis_max_edge",
