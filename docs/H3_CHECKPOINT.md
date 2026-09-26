@@ -1,8 +1,56 @@
-# Reviewed H3 prompt maker: accepted checkpoint
+# H3 accepted checkpoints
 
-Historical baseline: the September 26 ergonomic authoring revision is described
-in [H3 Prompt Maker](llm/h3-prompt-maker.md). The video acceptance below applies
-to the earlier pipeline, not to an untested revision.
+## Current milestone: phone-friendly Idea to Video — 2026-09-26
+
+Decision: **keep**, accepted by Luca after testing the new orchestra from the
+phone: "Works beautifully 🤩 I’d milestone this 🦾". This closes the end-to-end
+acceptance deferred at the previous handoff. Acceptance is Luca's report, not a
+new independent audiovisual inspection by the agent.
+
+Accepted implementation: `af78eb2ca7edecaa366a7cdbd9b07db11b7ea64e` and its
+preceding authoring, renderer, and text-handoff commits. See the
+[Idea to Video guide](llm/h3-video-orchestra.md) for controls, host setup, owning
+code, and verification details.
+
+Durable Runner history contains one matching successful orchestra run. Its
+parent and both child records are marked `succeeded`:
+
+- Parent: `lf-sequence:d7e3c0423e884d80b0e4a22011c7f833`,
+  2026-09-26 10:52:02–10:56:41 UTC (12:52–12:56 Europe/Rome).
+- Prompt Maker: `9dd5e799-1087-4be0-8836-99de747a184e`.
+- Renderer: `40263f99-fbed-4706-9e18-11f16a15fb67`.
+- Output relative to Comfy output:
+  `LF_Nodes/MiniMaxH3/PromptVideo/kitchen_quality/seed-42-refs1-f124_00001_.mp4`.
+
+The output file's presence was checked without replaying, copying, or changing
+the media. Run records establish execution success; Luca's report establishes
+acceptance of the experience.
+
+The milestone includes:
+
+- A small phone form: ordinary-language idea, optional reference, duration, and
+  aspect ratio; extra references and expert controls remain under Advanced.
+- Prose-only Prompt Maker with mode-specific teaching examples and optional
+  review, on by default; no intermediate prompt schema or compiler.
+- A real two-block Runner orchestra passing the exact saved prompt to H3, with
+  shared duration and ordered references, returning video and the prompt used.
+- Explicit LMS load/release ordering so successful writing and review release
+  the selected writer before video rendering. The local host defaults select
+  Luca's existing Qwen3.5 4B setup; generic source does not hardcode that endpoint.
+
+Verification retained from the implementation checkpoint: 119 block tests,
+23 assembly tests, 105 sequence/submission tests, and 10 executor/preflight tests
+passed in isolated groups. The live catalogue reported ready, and the phone-sized
+form and existing LAN proxy were checked. No source behavior changed for this
+milestone, so these checks were not repeated and no extra render was queued.
+
+This accepts the tested experience, not every reference mode, prompt, identity
+constraint, or audio case. **Deferred:** broader creative-quality coverage and
+cleanup after authoring failure/cancellation; downstream unload currently runs
+only on the successful path. Public-node saved-graph/Titanic acceptance is a
+separate scope. The historical baseline below remains preserved for comparison.
+
+## Historical milestone: reviewed compiler pipeline — 2026-09-07
 
 Decision: **keep**, accepted by Luca on 2026-09-07 after viewing the full
 prompt-to-video result.

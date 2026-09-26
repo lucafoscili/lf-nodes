@@ -103,8 +103,10 @@ python -I scripts/quality/run_pytests.py -q modules/tests/nodes/llm/test_h3_prom
 corepack yarn exec vitest run web/src/helpers/h3PromptMaker.test.ts --pool=threads
 ```
 
-The accepted September 7 video baseline is preserved in
-[H3_CHECKPOINT.md](../H3_CHECKPOINT.md); it does not prove this new authoring path.
+The September 26 phone-to-video orchestra is now an accepted milestone following
+Luca's successful trial; see [H3 accepted checkpoints](../H3_CHECKPOINT.md).
+The separate September 7 compiler-backed video baseline remains preserved there
+as historical evidence, not proof of the new authoring path.
 The prose-only trials cover the short walking idea, differently sized references,
 review opt-out, exact speech, fixed first-frame intent, and exact-instance release.
 Authoring-quality follow-up remains necessary; see the trial's keep/defer judgment.

@@ -70,9 +70,18 @@ tests passed. The suites are separate because existing workflow tests install
 module doubles that interfere with the broader service imports in one process.
 The real catalogue loaded the orchestra, the 390×844 phone-sized form was visually
 checked, and the existing LAN proxy served the page. Qwen's configured model key
-was found in LMS with no loaded instance. No new video render was submitted:
-end-to-end generation and audiovisual quality remain for the phone trial.
+was found in LMS with no loaded instance. No video render was submitted during
+that implementation check; end-to-end acceptance was left for Luca's phone trial.
 
-**Keep:** the two-block, prose-preserving phone workflow. **Deferred:** acceptance
-of the first generated video; the earlier accepted video used an older authoring
-path and is not evidence for this new orchestra.
+## Accepted milestone — 2026-09-26
+
+Luca subsequently tested the orchestra from the phone and accepted the result:
+"Works beautifully 🤩 I’d milestone this 🦾". **Keep:** the two-block,
+prose-preserving phone workflow. The accepted source baseline is `af78eb2`.
+See [H3 accepted checkpoints](../H3_CHECKPOINT.md) for the milestone boundary.
+
+This is user-reported end-to-end acceptance, not an additional agent-reviewed
+render. The unchanged implementation checks above remain valid; no extra GPU
+run was needed to record the milestone. **Deferred:** broader creative-quality
+coverage and failure/cancellation cleanup. Acceptance of this run does not
+guarantee every reference mode, identity constraint, or audio case.
