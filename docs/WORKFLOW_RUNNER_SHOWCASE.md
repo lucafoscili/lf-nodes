@@ -370,3 +370,37 @@ browser console reported no errors or warnings.
 Screenshots and snapshots are retained under `output/playwright/` with the
 `catalogue-live-` prefix. This closes the deferred post-restart catalogue check;
 the sprite model-loading failure and 14 missing accepted covers remain open.
+
+### Flicker fix and caption/audio follow-up — 2026-09-26
+
+**Keep — catalogue stability:** unrelated queue/run mutations cloned the store
+collections and triggered home rendering. The custom section replaced its card
+elements on each render, restarting their 250 ms fade-in. Home now compares
+workflow content before rebuilding; actual metadata changes still update and
+destroy/remount resets the remembered content. Broken-hero recovery is retained.
+The full frontend suite passed **596 tests**, TypeScript checks and production
+build passed. Through the HTTPS proxy, twelve browser-local queue transitions
+at each of 1950×1174 and 390×844 left the custom group identities unchanged and
+card opacity at 1 throughout. No real jobs were submitted by that diagnostic.
+Screenshots are `output/playwright/catalogue-fix-{desktop,phone}.png`.
+
+**Defer — Caption Image cover:** two actual Runner runs using the installed
+Qwen3.5 4B vision model and the workflow's default 2048-token budget returned
+non-empty captions: `178e9502-5750-4fcc-8371-c1e747b0ed11` (campfire icon) and
+`5caafbe7-2485-4065-a46f-a6152df9224a` (generic explorer). The icon description
+incorrectly counts four logs; the explorer description also miscounts jacket
+buttons. Successful transport and visible text do not establish factual
+caption quality. Neither sample is promoted to a cover. Full receipts are
+`output/hero-cards/catalogue-20260926/caption-vision-a{3,4}.json`. Only the small
+test model was loaded, then unloaded after each trial; no models were downloaded
+and Comfy was not restarted. Next evidence question: can a concise, literal
+caption instruction reduce unsupported detail without requiring manual repair?
+
+**Awaiting Luca's listening judgment — Sound Effects:** all five retained WAVs
+still exist with receipt-matching sizes. Hearth seed 42 (10.031 seconds) and axe
+seed 46 (2.972 seconds) were surfaced as the first listening pair, based on
+their use cases and existing execution evidence, not an unheard quality ranking.
+The actual files are in Comfy's `output/lf-workflow-runner/stable-audio-3/`, named
+`sfx-seed-42_1.wav` and `sfx-seed-46_1.wav`. No audio was regenerated or accepted
+on waveform evidence alone. The previous quiet-tail/possible-double-hit limits
+remain unresolved. Cover totals remain 34 curated and 14 without accepted samples.
