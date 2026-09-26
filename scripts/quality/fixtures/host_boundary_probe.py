@@ -3,6 +3,7 @@ def test_host_modules_are_inert_precollection_stubs() -> None:
     import sys
 
     import comfy
+    import execution
     import folder_paths
     import nodes
     import server
@@ -10,9 +11,16 @@ def test_host_modules_are_inert_precollection_stubs() -> None:
 
     assert root_init.__lf_nodes_test_stub__ is True
     assert comfy.__lf_nodes_test_stub__ is True
+    assert execution.__lf_nodes_test_stub__ is True
     assert folder_paths.__lf_nodes_test_stub__ is True
     assert nodes.__lf_nodes_test_stub__ is True
     assert server.__lf_nodes_test_stub__ is True
+
+    import asyncio
+    import pytest
+
+    with pytest.raises(AssertionError, match="explicitly mock execution.validate_prompt"):
+        asyncio.run(execution.validate_prompt("test", {}, None))
 
     lf_root = Path(__file__).resolve().parents[3]
     comfy_root = lf_root.parents[1].resolve()

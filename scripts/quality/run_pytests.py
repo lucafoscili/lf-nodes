@@ -47,6 +47,17 @@ def _install_host_stubs() -> None:
     nodes.__lf_nodes_test_stub__ = True
     sys.modules["nodes"] = nodes
 
+    # Runner admission tests import this host boundary at collection time too.
+    # Never import Core's GPU execution stack or silently pretend validation ran.
+    execution = types.ModuleType("execution")
+    execution.__lf_nodes_test_stub__ = True
+
+    async def _unspecified_prompt_validation(*_args, **_kwargs):
+        raise AssertionError("CPU tests must explicitly mock execution.validate_prompt")
+
+    execution.validate_prompt = _unspecified_prompt_validation
+    sys.modules["execution"] = execution
+
     comfy = types.ModuleType("comfy")
     comfy.__path__ = []
     comfy.__lf_nodes_test_stub__ = True
