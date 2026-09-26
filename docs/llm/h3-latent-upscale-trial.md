@@ -73,3 +73,65 @@ experiment graph, submission/history, before/after environment receipts,
 `paired-comparison.json`, `paired-contact-sheet.png`, `paired-detail-crops.png`,
 individual sampled frames and runtime logs. Do not overwrite accepted source
 media or treat the recovery backups as disposable scratch files.
+
+## Follow-up: four/eight steps and export quality
+
+**Keep four steps for this candidate; defer eight-step promotion.** The extra
+refinement did not produce a convincing visual improvement in this clip.
+Lower-compression CRF 18 is a useful optional export, not a fix for generated
+softness. No production renderer or phone orchestra default was changed.
+
+Prompt `ddddb81c-91db-479a-bc4e-b723902c5a5e` completed successfully in **346.51
+seconds**. The comparison shares the exact first-pass denoised AV latent,
+reference, prompt, seed, target conditioning and original audio. Both branches
+use the same learned upscale and 0.25 denoise; only the second-pass schedule
+changes from four to eight steps. The base and four-step branch were cached.
+The four-step CRF 23 export has all 124 compressed video packets and their timing
+identical to the previous upscale, despite differing container metadata.
+
+Eight-step sampling took about **250 seconds**, versus **124 seconds** logged
+for the previous four-step sampling. These are sampling-stage measurements,
+not cold end-to-end comparisons: the new total includes cached inputs, exports
+of the four-step result, learned upscaling, eight-step sampling, decode and saves.
+The simple schedules start at the same noise level; eight steps add intermediate
+sampling points, not a higher initial denoise strength.
+
+Each decoded result was exported directly at H.264 CRF 23 and CRF 18, without
+recompressing an existing MP4. Encoder headers confirm the requested CRF values.
+Files under `ComfyUI/output/LF_Nodes/MiniMaxH3/RefinementComparison/20260926/`:
+
+| File | Bytes |
+| --- | ---: |
+| `seed42-4step-crf23_00001_.mp4` | 2,372,085 |
+| `seed42-4step-crf18_00001_.mp4` | 4,797,916 |
+| `seed42-8step-crf23_00001_.mp4` | 2,295,220 |
+| `seed42-8step-crf18_00001_.mp4` | 4,567,876 |
+
+All four contain 124 decoded frames at 1248×1664 and 24 fps, with a 5.167-second
+container duration. All 163 AAC packets, payloads and timing match across all
+four files. Both CRF 18 versions loaded in the browser player and reached the
+end with no reported playback error. A Windows connection-reset callback was
+logged after successful execution; neither render history nor player reported
+failure. No service restart or ecosystem update was attempted in this follow-up.
+
+Two independent still-frame reviews compared the same five timestamps and
+equal-area, equal-display-size crops. Eight steps slightly redraw the face,
+eyeliner, earring and corset trim; some areas appear smoother rather than more
+detailed. The scene, silhouette and action match in these samples. Pavement
+remains soft, and no clear overall quality gain or new major structural defect
+was found. CRF 18 preserves slightly cleaner fine hair/corset/stone textures at
+both step counts, but is nearly indistinguishable at phone-sized full-frame
+display while roughly doubling file size.
+
+This supports four steps as the better time/quality tradeoff **for this clip**,
+not a universal H3 ceiling. Continuous-motion quality and human listening remain
+for Luca's judgment; reaching the end of playback is only a compatibility check.
+More seeds, other schedules and direct native-resolution generation remain
+untested. Preserve both candidates for comparison rather than relabeling eight
+steps as a higher-quality preset.
+
+Replay: `h3_latent_upscale.py --compare-refinement`. Five CPU structural tests
+passed, and live prompt validation accepted all four saver branches. Ignored
+local evidence lives in `output/h3-refinement-20260926/`: source/comparison API
+graphs, submission, full history, `comparison-summary.json`, frame samples and
+`refinement-crf18` / `compression-4step` / `compression-8step` comparison sheets.

@@ -59,6 +59,12 @@ python scripts/experiments/h3_latent_upscale.py accepted-api.json comparison-api
 This uses the updated Core SaveVideo nested encoding controls. No runtime restart
 or production renderer change is required; submit only when the queue is idle.
 
+The [2026-09-26 follow-up](../../docs/llm/h3-latent-upscale-trial.md#follow-up-foureight-steps-and-export-quality)
+found no convincing eight-step visual win in the accepted clip despite roughly
+double the refinement sampling time. Keep four steps as the candidate; defer
+eight-step promotion. CRF 18 gives minor fine-texture improvement at roughly
+double the file size. All four outputs retain identical audio and timing.
+
 The output file must be new. These structural tests prove wiring and input
 preservation only; they do not establish quality, audio playback, timing or GPU
 compatibility. Keep source reference media and existing accepted outputs intact.
