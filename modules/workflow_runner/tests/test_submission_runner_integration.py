@@ -148,6 +148,23 @@ def _sequence_blocks_by_id():
     }
 
 
+def test_sequence_preflight_uses_only_a_temporary_deferred_text_value(run_service_module):
+    plan = _sequence_admission_plan()
+    plan["stages"][1]["bindings"].append({
+        "kind": "text", "target_input_id": "prompt", "output_id": "text",
+        "output_node_id": "display",
+    })
+    with patch.object(
+        run_service_module, "get_workflow", side_effect=_sequence_blocks_by_id().get,
+    ):
+        run_service_module._validate_sequence_stage_requirements(plan)
+    preflight = run_service_module.validate_sequence_stage_preflight
+    assert preflight.call_count == 2
+    assert preflight.call_args_list[1].args[1]["prompt"].strip()
+    assert "prompt" not in plan["inputs"]
+    assert "prompt" not in plan["stages"][1]["defaults"]
+
+
 async def test_external_call_cannot_claim_private_sequence_child_namespace(
     run_service_module,
 ):

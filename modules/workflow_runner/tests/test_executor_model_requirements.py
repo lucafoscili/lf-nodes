@@ -208,6 +208,32 @@ def test_sequence_stage_preflight_requires_a_portable_configurator(
     )
 
 
+def test_sequence_preflight_exercises_required_text_using_only_portable_configuration(monkeypatch):
+    from modules.workflow_runner.services.sequence_runtime import sequence_stage_preflight_inputs
+
+    configured = []
+
+    def configure_download(prompt, inputs):
+        assert isinstance(inputs["prompt"], str) and inputs["prompt"].strip()
+        prompt["encode"]["inputs"]["text"] = inputs["prompt"]
+        configured.append(prompt)
+
+    definition = SimpleNamespace(
+        id="text-consumer",
+        load_prompt=lambda: {"encode": {"class_type": "TextEncode", "inputs": {}}},
+        configure_download=configure_download,
+        configure_prompt=lambda *_args: pytest.fail("preflight must not configure real submission"),
+    )
+    state = {"inputs": {}, "stages": [{"defaults": {}, "bindings": [
+        {"kind": "text", "target_input_id": "prompt"},
+    ]}]}
+    monkeypatch.setattr(executor, "validate_workflow_requirements", lambda *_args: None)
+    monkeypatch.setattr(executor, "evaluate_workflow_readiness", lambda *_args, **_kwargs: {"status": "ready"})
+    executor.validate_sequence_stage_preflight(definition, sequence_stage_preflight_inputs(state, 0))
+    assert configured[0]["encode"]["inputs"]["text"].strip()
+    assert state["stages"][0]["defaults"] == {}
+
+
 @pytest.mark.parametrize("code", ["node_missing", "model_missing"])
 def test_sequence_stage_preflight_rejects_unready_configured_graph(
     monkeypatch: pytest.MonkeyPatch,

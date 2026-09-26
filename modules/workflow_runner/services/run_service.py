@@ -50,7 +50,7 @@ from .sequence_runtime import (
     is_sequence_parent_job,
     make_sequence_parent_run_id,
     normalize_sequence_definition,
-    sequence_stage_declared_inputs,
+    sequence_stage_preflight_inputs,
     start_sequence_execution,
 )
 from .lifecycle import (
@@ -306,7 +306,7 @@ def _validate_sequence_stage_requirements(plan: Mapping[str, Any]) -> None:
             )
         validate_sequence_stage_preflight(
             block,
-            sequence_stage_declared_inputs(plan, stage_index),
+            sequence_stage_preflight_inputs(plan, stage_index),
         )
 
 

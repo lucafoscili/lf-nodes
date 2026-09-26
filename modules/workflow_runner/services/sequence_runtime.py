@@ -3,7 +3,7 @@
 The runtime intentionally composes ordinary workflow submissions.  It does not
 own Comfy graphs, infer domain compatibility, or create a second execution
 path.  A sequence is a bounded list of narrow workflows whose public inputs,
-literal defaults, and artifacts from declared earlier stages are wired
+literal defaults, and durable media or text from declared earlier stages are wired
 declaratively. Stages still execute one at a time in declaration order.
 """
 
@@ -216,6 +216,7 @@ def _binding_kind(binding: Any) -> str:
         WorkflowSequenceArtifactBinding,
         WorkflowSequenceLiteralBinding,
         WorkflowSequencePublicInputBinding,
+        WorkflowSequenceTextBinding,
     )
 
     if isinstance(binding, WorkflowSequencePublicInputBinding):
@@ -224,6 +225,8 @@ def _binding_kind(binding: Any) -> str:
         return "literal"
     if isinstance(binding, WorkflowSequenceArtifactBinding):
         return "artifact"
+    if isinstance(binding, WorkflowSequenceTextBinding):
+        return "text"
     explicit = _read(binding, "kind")
     if isinstance(explicit, str):
         normalized = explicit.strip().lower().replace("-", "_")
@@ -233,6 +236,7 @@ def _binding_kind(binding: Any) -> str:
             "public_input": "public_input",
             "literal": "literal",
             "artifact": "artifact",
+            "text": "text",
         }
         if normalized in aliases:
             return aliases[normalized]
@@ -261,12 +265,14 @@ def normalize_sequence_definition(
         raise TypeError("sequence inputs must be a mapping")
     raw_inputs = _json_copy(dict(inputs), "sequence inputs")
     declared_public_cells = _read(definition, "inputs", None)
+    public_cells_by_id: dict[str, Any] = {}
     if declared_public_cells is None:
         # Structural test/embedding declarations predate WorkflowSequenceNode.
         # Production declarations always publish their public input cells.
         normalized_inputs = raw_inputs
     else:
         public_cells = tuple(declared_public_cells)
+        public_cells_by_id = {_read(cell, "id"): cell for cell in public_cells}
         public_ids = {
             _bounded_id(_read(cell, "id"), "sequence public input id")
             for cell in public_cells
@@ -351,6 +357,19 @@ def normalize_sequence_definition(
                     _read(binding, "public_input_id"), "public input id"
                 )
                 if public_input_id not in normalized_inputs:
+                    public_cell = public_cells_by_id.get(public_input_id)
+                    target_cell = next((
+                        cell for cell in _read(block, "inputs", ())
+                        if _read(cell, "id") == target_input_id
+                    ), None)
+                    if all(
+                        cell is not None
+                        and _read(cell, "shape") == "upload"
+                        and not _read(cell, "required", True)
+                        for cell in (public_cell, target_cell)
+                    ):
+                        target_ids.remove(target_input_id)
+                        continue
                     raise ValueError(
                         f"sequence input '{public_input_id}' required by stage "
                         f"'{stage_id}' is missing"
@@ -362,7 +381,7 @@ def normalize_sequence_definition(
                 )
             else:
                 if stage_index == 0:
-                    raise ValueError("the first sequence stage cannot consume an artifact")
+                    raise ValueError(f"the first sequence stage cannot consume an {kind} output")
                 output_id = _bounded_id(_read(binding, "output_id"), "output id")
                 raw_source_stage_id = _read(binding, "source_stage_id")
                 if raw_source_stage_id is None:
@@ -374,7 +393,7 @@ def normalize_sequence_definition(
                 else:
                     source_stage_id = _bounded_id(
                         raw_source_stage_id,
-                        "artifact source stage id",
+                        f"{kind} source stage id",
                     )
                     try:
                         source_stage_index = declared_stage_ids.index(
@@ -382,16 +401,16 @@ def normalize_sequence_definition(
                         )
                     except ValueError as exc:
                         raise ValueError(
-                            f"stage '{stage_id}' references unknown artifact source "
+                            f"stage '{stage_id}' references unknown {kind} source "
                             f"stage '{source_stage_id}'"
                         ) from exc
                     if source_stage_index == stage_index:
                         raise ValueError(
-                            f"stage '{stage_id}' cannot consume an artifact from itself"
+                            f"stage '{stage_id}' cannot consume an {kind} from itself"
                         )
                     if source_stage_index > stage_index:
                         raise ValueError(
-                            f"stage '{stage_id}' references future artifact source "
+                            f"stage '{stage_id}' references future {kind} source "
                             f"stage '{source_stage_id}'"
                         )
                     normalized["source_stage_id"] = source_stage_id
@@ -402,7 +421,7 @@ def normalize_sequence_definition(
                 )
                 output_node_id = resolve_output(source_workflow_id, output_id)
                 if not isinstance(output_node_id, str) or not output_node_id:
-                    raise ValueError("artifact output resolver returned an invalid node id")
+                    raise ValueError(f"{kind} output resolver returned an invalid node id")
                 normalized["output_id"] = output_id
                 normalized["output_node_id"] = output_node_id
             normalized_bindings.append(normalized)
@@ -930,11 +949,39 @@ def _artifact_reference(
     return deepcopy(dict(reference))
 
 
+def _text_output(previous_result: Any, output_node_id: str, output_id: str) -> str:
+    body = previous_result.get("body") if isinstance(previous_result, Mapping) else None
+    payload = body.get("payload") if isinstance(body, Mapping) else None
+    history = payload.get("history") if isinstance(payload, Mapping) else None
+    outputs = history.get("outputs") if isinstance(history, Mapping) else None
+    node_output = outputs.get(output_node_id) if isinstance(outputs, Mapping) else None
+    items = node_output.get("lf_output") if isinstance(node_output, Mapping) else None
+    if not isinstance(items, list) or not items:
+        raise SequenceExecutionError(
+            "sequence_text_unavailable",
+            f"prior output '{output_id}' is missing; expected one durable text payload",
+        )
+    if len(items) != 1:
+        raise SequenceExecutionError(
+            "sequence_text_unavailable",
+            f"prior output '{output_id}' is ambiguous; expected one durable text payload",
+        )
+    item = items[0]
+    # DisplayString history uses `string`; authoring nodes use `value`.
+    keys = [key for key in ("string", "value") if isinstance(item, Mapping) and key in item]
+    if len(keys) != 1 or not isinstance(item[keys[0]], str):
+        raise SequenceExecutionError(
+            "sequence_text_unavailable",
+            f"prior output '{output_id}' must contain exactly one string or value text field",
+        )
+    return item[keys[0]]
+
+
 def sequence_stage_declared_inputs(
     state: Mapping[str, Any],
     stage_index: int,
 ) -> dict[str, Any]:
-    """Return stage values known before any prior artifact is materialized."""
+    """Return stage values known before any prior output is materialized."""
 
     stage = state["stages"][stage_index]
     inputs: dict[str, Any] = deepcopy(stage.get("defaults", {}))
@@ -947,6 +994,18 @@ def sequence_stage_declared_inputs(
     return inputs
 
 
+def sequence_stage_preflight_inputs(
+    state: Mapping[str, Any], stage_index: int,
+) -> dict[str, Any]:
+    """Exercise portable graph configuration without submitting a placeholder."""
+
+    inputs = sequence_stage_declared_inputs(state, stage_index)
+    for binding in state["stages"][stage_index]["bindings"]:
+        if binding["kind"] == "text":
+            inputs[binding["target_input_id"]] = "Pending text from an earlier orchestra stage."
+    return inputs
+
+
 async def _stage_inputs(
     state: Mapping[str, Any],
     stage_index: int,
@@ -955,7 +1014,8 @@ async def _stage_inputs(
     stage = state["stages"][stage_index]
     inputs = sequence_stage_declared_inputs(state, stage_index)
     for binding in stage["bindings"]:
-        if binding["kind"] != "artifact":
+        kind = binding["kind"]
+        if kind not in {"artifact", "text"}:
             continue
         target = binding["target_input_id"]
         source_stage_index = binding.get("source_stage_index")
@@ -965,8 +1025,8 @@ async def _stage_inputs(
             # original immediately-previous semantics.
             if stage_index <= 0:
                 raise SequenceExecutionError(
-                    "sequence_artifact_source_invalid",
-                    f"stage '{stage.get('id')}' has no earlier artifact source",
+                    f"sequence_{kind}_source_invalid",
+                    f"stage '{stage.get('id')}' has no earlier {kind} source",
                 )
             source_stage_index = stage_index - 1
         elif (
@@ -977,36 +1037,41 @@ async def _stage_inputs(
             or source_stage_index >= stage_index
         ):
             raise SequenceExecutionError(
-                "sequence_artifact_source_invalid",
-                f"stage '{stage.get('id')}' has malformed artifact source authority",
+                f"sequence_{kind}_source_invalid",
+                f"stage '{stage.get('id')}' has malformed {kind} source authority",
             )
 
         source = state["stages"][source_stage_index]
         if source_stage_id is not None and source.get("id") != source_stage_id:
             raise SequenceExecutionError(
-                "sequence_artifact_source_invalid",
-                f"stage '{stage.get('id')}' artifact source no longer matches "
+                f"sequence_{kind}_source_invalid",
+                f"stage '{stage.get('id')}' {kind} source no longer matches "
                 f"stage '{source_stage_id}'",
             )
         source_run_id = source.get("child_run_id")
         if not isinstance(source_run_id, str) or not source_run_id:
             raise SequenceExecutionError(
-                "sequence_artifact_unavailable",
+                f"sequence_{kind}_unavailable",
                 f"source stage '{source.get('id')}' has no durable child run",
             )
         source_job = await job_store.get_job(source_run_id)
         if source_job is None or _job_status(source_job) != "succeeded":
             raise SequenceExecutionError(
-                "sequence_artifact_unavailable",
+                f"sequence_{kind}_unavailable",
                 f"source stage '{source.get('id')}' result is no longer available",
             )
         _validate_child_job(source_job, source, owner_id)
-        inputs[target] = _artifact_reference(
-            source_run_id,
-            source_job.result,
-            binding["output_node_id"],
-            binding["output_id"],
-        )
+        if kind == "text":
+            inputs[target] = _text_output(
+                source_job.result, binding["output_node_id"], binding["output_id"],
+            )
+        else:
+            inputs[target] = _artifact_reference(
+                source_run_id,
+                source_job.result,
+                binding["output_node_id"],
+                binding["output_id"],
+            )
     return inputs
 
 

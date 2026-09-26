@@ -381,10 +381,30 @@ class WorkflowSequenceArtifactBinding:
             )
 
 
+@dataclass(frozen=True, slots=True)
+class WorkflowSequenceTextBinding:
+    """Feed one durable text output from an earlier block into a text input."""
+
+    target_input_id: str
+    output_id: str
+    source_stage_id: str | None = None
+
+    def __post_init__(self) -> None:
+        for name in ("target_input_id", "output_id", "source_stage_id"):
+            value = getattr(self, name)
+            if name == "source_stage_id" and value is None:
+                continue
+            object.__setattr__(
+                self, name,
+                _normalized_identifier(value, label=f"sequence text {name}"),
+            )
+
+
 WorkflowSequenceBinding = (
     WorkflowSequencePublicInputBinding
     | WorkflowSequenceLiteralBinding
     | WorkflowSequenceArtifactBinding
+    | WorkflowSequenceTextBinding
 )
 
 
@@ -420,6 +440,7 @@ class WorkflowSequenceStage:
                     WorkflowSequencePublicInputBinding,
                     WorkflowSequenceLiteralBinding,
                     WorkflowSequenceArtifactBinding,
+                    WorkflowSequenceTextBinding,
                 ),
             )
             for binding in bindings
@@ -705,10 +726,11 @@ class WorkflowRegistry:
                             f"Sequence stage '{stage.id}' references unknown public "
                             f"input '{binding.public_input_id}'."
                         )
-                elif isinstance(binding, WorkflowSequenceArtifactBinding):
+                elif isinstance(binding, (WorkflowSequenceArtifactBinding, WorkflowSequenceTextBinding)):
+                    kind = "text" if isinstance(binding, WorkflowSequenceTextBinding) else "artifact"
                     if index == 0:
                         raise ValueError(
-                            "The first sequence stage cannot bind a previous artifact."
+                            f"The first sequence stage cannot bind a previous {kind}."
                         )
                     source_stage_id = binding.source_stage_id
                     if source_stage_id is None:
@@ -725,13 +747,13 @@ class WorkflowRegistry:
                         if source_index == index:
                             raise ValueError(
                                 f"Sequence stage '{stage.id}' cannot consume an "
-                                "artifact from itself."
+                                f"{kind} from itself."
                             )
                         if source_index > index:
                             raise ValueError(
                                 f"Sequence stage '{stage.id}' references future source "
                                 f"stage '{source_stage_id}'; only earlier stages may "
-                                "provide artifacts."
+                                f"provide {kind} outputs."
                             )
                         source_description = f"source stage '{source_stage_id}'"
 
@@ -745,7 +767,18 @@ class WorkflowRegistry:
                             f"Sequence stage '{stage.id}' references unknown output "
                             f"port '{binding.output_id}' on {source_description}."
                         )
-                    if target.shape != "upload":
+                    if kind == "text":
+                        if target.shape not in {"textarea", "textfield"}:
+                            raise ValueError(
+                                f"Sequence text target '{stage.id}.{binding.target_input_id}' "
+                                "must be a textarea or textfield input."
+                            )
+                        if source_outputs[binding.output_id].shape not in {"code", "textarea", "textfield"}:
+                            raise ValueError(
+                                f"Sequence text output '{binding.output_id}' on "
+                                f"{source_description} must be a text display."
+                            )
+                    elif target.shape != "upload":
                         raise ValueError(
                             f"Sequence artifact target '{stage.id}."
                             f"{binding.target_input_id}' must be an upload input."

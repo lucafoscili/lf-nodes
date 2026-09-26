@@ -14,14 +14,14 @@ Runner exposes two composition roles:
   policy.
 - An **orchestra** is a graph-free ordered assembly of two to eight registered
   blocks. It owns only its public presentation, projected inputs, fixed literals,
-  artifact wiring, and exposed final outputs. Model policy and graph mutation stay
+  artifact/text wiring, and exposed final outputs. Model policy and graph mutation stay
   with the blocks.
 
 Graph size does not decide the role. Loading models, sampling latents, decoding,
 previewing, validating, and saving may all remain inside one block when they serve
 one capability and do not create a useful durable boundary. Repeated MODEL, CLIP,
 VAE, conditioning, latent, or tensor plumbing is an internal graph-fragment DRY
-opportunity, not a public block: orchestras compose durable media artifacts rather
+opportunity, not a public block: orchestras compose durable media and text rather
 than live Comfy objects.
 
 A differently worded recipe is not automatically a third runtime role. Shipped
@@ -31,13 +31,24 @@ authority. The catalogue wire contract emits `kind: block` or
 `kind: orchestra`; legacy custom declarations using `workflow`, `sequence`, or no
 kind are normalized at the frontend boundary.
 
-Current orchestras are deliberately ordered: an artifact binding consumes one
+Current orchestras are deliberately ordered: an artifact or text binding consumes one
 declared output from either the immediately previous stage or an explicitly named
 earlier stage. Named sources permit honest fan-out and fan-in without exposing
 live Comfy objects; forward, self, unknown-stage, and unknown-output references
 fail declaration validation. Every referenced block must also provide a portable
 `configure_download` callback so the complete assembly can be preflighted before
 its first stage is queued. Only outputs declared by the final stage are public.
+`WorkflowSequenceTextBinding(target_input_id, output_id, source_stage_id=None)`
+connects a declared text display (`code`, `textarea`, or `textfield`) to a
+`textarea` or `textfield` input. It reads exactly one durable `lf_output` payload
+from that declared output node, using its string `string` (DisplayString) or
+`value` field verbatim. Missing, multiple, or non-text values fail the sequence;
+there is no JSON-path selection or string coercion. Source stages use the same
+earlier-stage and child-owner checks as artifact bindings. Portable preflight
+uses a temporary nonempty text placeholder; real submissions read the durable
+source result and never use that placeholder. An omitted public upload is skipped
+only when both the public upload and its bound block upload are optional.
+
 Compound cards such as H3 Anchored Sprite Loop, H3 Character Turnaround, and
 YouTube ACE-Step Remix remain transitional blocks until their intermediate values
 or ordered media batches can cross that boundary without quality loss or fictional
