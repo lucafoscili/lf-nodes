@@ -1935,33 +1935,62 @@ const HOME_CLASSES = {
   blockMasonry: theme$4.bemClass(ROOT_CLASS$4, "block-masonry"),
   blockRail: theme$4.bemClass(ROOT_CLASS$4, "block-rail"),
   catalogue: theme$4.bemClass(ROOT_CLASS$4, "catalogue"),
+  custom: theme$4.bemClass(ROOT_CLASS$4, "custom"),
+  customCatalogue: theme$4.bemClass(ROOT_CLASS$4, "custom-catalogue"),
   description: theme$4.bemClass(ROOT_CLASS$4, "description"),
   h1: theme$4.bemClass(ROOT_CLASS$4, "title-h1"),
+  jump: theme$4.bemClass(ROOT_CLASS$4, "jump"),
+  jumpCustom: theme$4.bemClass(ROOT_CLASS$4, "jump-custom"),
+  jumpNavigation: theme$4.bemClass(ROOT_CLASS$4, "jump-navigation"),
+  jumpShipped: theme$4.bemClass(ROOT_CLASS$4, "jump-shipped"),
   orchestraMasonry: theme$4.bemClass(ROOT_CLASS$4, "orchestra-masonry"),
   orchestraRail: theme$4.bemClass(ROOT_CLASS$4, "orchestra-rail"),
+  shipped: theme$4.bemClass(ROOT_CLASS$4, "shipped"),
   title: theme$4.bemClass(ROOT_CLASS$4, "title")
+};
+const OWNER_SECTION_IDS = {
+  shipped: "workflow-catalogue-lf-nodes",
+  custom: "workflow-catalogue-custom"
 };
 const ORCHESTRA_CARD_ACCENT = [
   ".material-layout {",
   "  border-inline-start: 4px double rgb(var(--lf-card-color-primary, var(--lf-color-secondary)));",
   "}"
 ].join("\n");
-const ORCHESTRA_CARD_STYLE = `${ORCHESTRA_CARD_ACCENT}
-.material-layout__text-section { height: 100%; }`;
-const HERO_CARD_STYLE = [
+const CARD_STYLE = [
   // LF's adopted base stylesheet follows lfStyle; :host makes these overrides
   // win without relying on insertion order or changing the shared widget.
   ":host .material-layout { height: auto; overflow: hidden; }",
-  ":host .material-layout__cover-section {",
-  "  aspect-ratio: 16 / 9; flex: none; height: auto; overflow: hidden;",
-  "  --lf-image-object-fit: contain;",
-  "}",
   ":host .material-layout__text-section { height: auto; min-width: 0; overflow: hidden; }",
-  ":host .material-layout .text-content__description { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }",
+  ":host .material-layout .text-content__description {",
+  "  display: -webkit-box; overflow: hidden; white-space: pre-line;",
+  "  -webkit-box-orient: vertical; -webkit-line-clamp: 4;",
+  "}",
   ":host .material-layout--has-actions { padding-bottom: 0; }",
   ":host .material-layout__actions-section { position: static; height: auto; padding: 0 .5em .35em; }"
 ].join("\n");
+const HERO_CARD_STYLE = [
+  ":host .material-layout__cover-section {",
+  "  aspect-ratio: 16 / 9; flex: none; height: auto; overflow: hidden;",
+  "  --lf-image-object-fit: contain;",
+  "}"
+].join("\n");
 const _kind = (node) => normalizeWorkflowKind(node.kind);
+const _isShipped = (node) => node.origin === "shipped";
+const _deduplicateNodes = (nodes) => {
+  const unique = /* @__PURE__ */ new Map();
+  nodes.forEach((node) => {
+    const current = unique.get(node.id);
+    if (!current || !_isShipped(node) || _isShipped(current)) {
+      unique.set(node.id, node);
+    }
+  });
+  return [...unique.values()];
+};
+const _collectionName = (node) => {
+  var _a2;
+  return ((_a2 = node.collection) == null ? void 0 : _a2.trim()) || "Custom";
+};
 const _fallbackStageLabel = (value) => value.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const _stageTrail = (node, labels) => {
   var _a2;
@@ -1997,7 +2026,11 @@ const _createDataset$1 = (nodes, labels, kind, failedHeroes) => {
     const description = (presentation == null ? void 0 : presentation.summary) || [trail, node.description].filter(Boolean).join("\n");
     root.cells[id] = {
       htmlProps: {
-        dataset: { workflowKind: kind }
+        dataset: {
+          workflowCollection: _collectionName(node),
+          workflowKind: kind,
+          workflowOrigin: _isShipped(node) ? "shipped" : "custom"
+        }
       },
       lfDataset: {
         nodes: [
@@ -2034,17 +2067,13 @@ const _createDataset$1 = (nodes, labels, kind, failedHeroes) => {
           }
         ]
       },
-      ...presentation ? {
-        lfSizeY: "auto",
-        lfStyle: [
-          HERO_CARD_STYLE,
-          kind === "orchestra" ? ORCHESTRA_CARD_ACCENT : ""
-        ].join("\n"),
-        ...kind === "orchestra" ? { lfUiState: "secondary" } : {}
-      } : kind === "orchestra" ? {
-        lfStyle: ORCHESTRA_CARD_STYLE,
-        lfUiState: "secondary"
-      } : {},
+      lfSizeY: "auto",
+      lfStyle: [
+        CARD_STYLE,
+        hero ? HERO_CARD_STYLE : "",
+        kind === "orchestra" ? ORCHESTRA_CARD_ACCENT : ""
+      ].join("\n"),
+      ...kind === "orchestra" ? { lfUiState: "secondary" } : {},
       shape: "card",
       value: ""
     };
@@ -2099,10 +2128,34 @@ const _masonry$1 = (store, className, failedHeroes) => {
 const _description$1 = () => {
   const p = document.createElement("p");
   p.className = HOME_CLASSES.description;
-  p.textContent = "Choose a focused block or a ready-made orchestra.";
+  p.textContent = "Browse LF Nodes workflows and your registered custom collections.";
   return p;
 };
-const _rail = (store, kind, titleText, descriptionText, railClass, masonryClass, failedHeroes) => {
+const _jumpNavigation = (targets) => {
+  const navigation = document.createElement("nav");
+  const label = document.createElement("span");
+  const links = {};
+  navigation.className = HOME_CLASSES.jumpNavigation;
+  navigation.setAttribute("aria-label", "Jump to workflow collection");
+  navigation.hidden = true;
+  label.className = theme$4.bemClass(ROOT_CLASS$4, "jump-label");
+  label.textContent = "Jump to";
+  navigation.append(label);
+  ["shipped", "custom"].forEach((owner) => {
+    const link = document.createElement("a");
+    const target = targets[owner];
+    const text = owner === "shipped" ? "LF Nodes" : "Custom workflows";
+    link.className = `${HOME_CLASSES.jump} ${owner === "shipped" ? HOME_CLASSES.jumpShipped : HOME_CLASSES.jumpCustom}`;
+    link.dataset.workflowOrigin = owner;
+    link.hidden = true;
+    link.href = `#${target.id}`;
+    link.textContent = text;
+    links[owner] = link;
+    navigation.append(link);
+  });
+  return { links, navigation };
+};
+const _rail = (store, kind, titleText, descriptionText, railClass, masonryClass, failedHeroes, origin = "shipped", collection) => {
   const rail = document.createElement("section");
   const header = document.createElement("header");
   const headingRow = document.createElement("div");
@@ -2112,6 +2165,10 @@ const _rail = (store, kind, titleText, descriptionText, railClass, masonryClass,
   const masonry = _masonry$1(store, masonryClass, failedHeroes);
   rail.className = `${theme$4.bemClass(ROOT_CLASS$4, "rail")} ${railClass}`;
   rail.dataset.workflowKind = kind;
+  rail.dataset.workflowOrigin = origin;
+  if (collection) {
+    rail.dataset.workflowCollection = collection;
+  }
   header.className = theme$4.bemClass(ROOT_CLASS$4, "rail-header");
   headingRow.className = theme$4.bemClass(ROOT_CLASS$4, "rail-heading");
   heading.className = theme$4.bemClass(ROOT_CLASS$4, "rail-title");
@@ -2126,6 +2183,68 @@ const _rail = (store, kind, titleText, descriptionText, railClass, masonryClass,
   header.append(headingRow, description);
   rail.append(header, masonry);
   return { masonry, rail };
+};
+const _owner = (owner, titleText, descriptionText, className) => {
+  const section = document.createElement("section");
+  const header = document.createElement("header");
+  const heading = document.createElement("h2");
+  const description = document.createElement("p");
+  const content = document.createElement("div");
+  section.className = `${theme$4.bemClass(ROOT_CLASS$4, "owner")} ${className}`;
+  section.id = OWNER_SECTION_IDS[owner];
+  section.dataset.workflowOrigin = owner;
+  header.className = theme$4.bemClass(ROOT_CLASS$4, "owner-header");
+  heading.className = theme$4.bemClass(ROOT_CLASS$4, "owner-title");
+  description.className = theme$4.bemClass(ROOT_CLASS$4, "owner-description");
+  content.className = theme$4.bemClass(ROOT_CLASS$4, "owner-content");
+  heading.textContent = titleText;
+  description.textContent = descriptionText;
+  header.append(heading, description);
+  section.append(header, content);
+  return { content, section };
+};
+const _setRail = (rail, masonry, result, kind) => {
+  masonry.lfDataset = result.dataset;
+  rail.hidden = result.count === 0;
+  const count = rail.querySelector(`[data-rail-count="${kind}"]`);
+  if (!count) {
+    return;
+  }
+  count.textContent = String(result.count);
+  count.setAttribute("aria-label", `${result.count} ${result.count === 1 ? kind : `${kind}s`}`);
+};
+const _setJump = (navigation, link, available) => {
+  link.hidden = !available;
+  navigation.hidden = Array.from(navigation.querySelectorAll("a")).every((candidate) => candidate.hidden);
+};
+const _renderCustomCatalogue = (store, catalogue, nodes, labels, failedHeroes) => {
+  const groups = /* @__PURE__ */ new Map();
+  nodes.forEach((node) => {
+    const name = _collectionName(node);
+    groups.set(name, [...groups.get(name) || [], node]);
+  });
+  const fragment = document.createDocumentFragment();
+  [...groups.entries()].sort(([left], [right]) => left.localeCompare(right)).forEach(([name, collectionNodes]) => {
+    const group = document.createElement("section");
+    const heading = document.createElement("h3");
+    const rails = document.createElement("div");
+    const orchestra = _rail(store, "orchestra", "Orchestras", "Multi-block pipelines.", theme$4.bemClass(ROOT_CLASS$4, "custom-orchestra-rail"), theme$4.bemClass(ROOT_CLASS$4, "custom-orchestra-masonry"), failedHeroes, "custom", name);
+    const block = _rail(store, "block", "Blocks", "Single-purpose tools.", theme$4.bemClass(ROOT_CLASS$4, "custom-block-rail"), theme$4.bemClass(ROOT_CLASS$4, "custom-block-masonry"), failedHeroes, "custom", name);
+    group.className = theme$4.bemClass(ROOT_CLASS$4, "collection");
+    group.dataset.workflowCollection = name;
+    heading.className = theme$4.bemClass(ROOT_CLASS$4, "collection-title");
+    heading.textContent = name;
+    rails.className = theme$4.bemClass(ROOT_CLASS$4, "collection-rails");
+    const orchestras = _createDataset$1(collectionNodes, labels, "orchestra", failedHeroes);
+    const blocks = _createDataset$1(collectionNodes, labels, "block", failedHeroes);
+    _setRail(orchestra.rail, orchestra.masonry, orchestras, "orchestra");
+    _setRail(block.rail, block.masonry, blocks, "block");
+    rails.append(orchestra.rail, block.rail);
+    group.append(heading, rails);
+    fragment.append(group);
+  });
+  catalogue.replaceChildren(fragment);
+  return groups.size;
 };
 const _title$2 = () => {
   const title = document.createElement("div");
@@ -2161,20 +2280,31 @@ const createHomeSection = (store) => {
     _root.className = HOME_CLASSES._;
     catalogue.className = HOME_CLASSES.catalogue;
     const description = _description$1();
+    const shipped = _owner("shipped", "LF Nodes", "Curated workflows included with LF Nodes.", HOME_CLASSES.shipped);
+    const custom = _owner("custom", "Custom workflows", "Workflows registered by your projects and local extensions.", HOME_CLASSES.custom);
+    custom.content.classList.add(HOME_CLASSES.customCatalogue);
     const orchestra = _rail(store, "orchestra", "Orchestras", "Multi-block pipelines.", HOME_CLASSES.orchestraRail, HOME_CLASSES.orchestraMasonry, failedHeroes);
     const block = _rail(store, "block", "Blocks", "Single-purpose tools.", HOME_CLASSES.blockRail, HOME_CLASSES.blockMasonry, failedHeroes);
+    const jumps = _jumpNavigation({ shipped: shipped.section, custom: custom.section });
     const { h1, title } = _title$2();
-    catalogue.append(orchestra.rail, block.rail);
-    _root.append(title, description, catalogue);
+    shipped.content.append(orchestra.rail, block.rail);
+    catalogue.append(shipped.section, custom.section);
+    _root.append(title, description, jumps.navigation, catalogue);
     elements[MAIN_CLASSES._].prepend(_root);
     uiRegistry.set(HOME_CLASSES._, _root);
     uiRegistry.set(HOME_CLASSES.blockMasonry, block.masonry);
     uiRegistry.set(HOME_CLASSES.blockRail, block.rail);
     uiRegistry.set(HOME_CLASSES.catalogue, catalogue);
+    uiRegistry.set(HOME_CLASSES.custom, custom.section);
+    uiRegistry.set(HOME_CLASSES.customCatalogue, custom.content);
     uiRegistry.set(HOME_CLASSES.description, description);
     uiRegistry.set(HOME_CLASSES.h1, h1);
+    uiRegistry.set(HOME_CLASSES.jumpCustom, jumps.links.custom);
+    uiRegistry.set(HOME_CLASSES.jumpNavigation, jumps.navigation);
+    uiRegistry.set(HOME_CLASSES.jumpShipped, jumps.links.shipped);
     uiRegistry.set(HOME_CLASSES.orchestraMasonry, orchestra.masonry);
     uiRegistry.set(HOME_CLASSES.orchestraRail, orchestra.rail);
+    uiRegistry.set(HOME_CLASSES.shipped, shipped.section);
     uiRegistry.set(HOME_CLASSES.title, title);
     debugLog(HOME_MOUNTED);
   };
@@ -2190,28 +2320,28 @@ const createHomeSection = (store) => {
     const orchestraRail = elements[HOME_CLASSES.orchestraRail];
     const blockMasonry = elements[HOME_CLASSES.blockMasonry];
     const blockRail = elements[HOME_CLASSES.blockRail];
-    if (!orchestraMasonry || !orchestraRail || !blockMasonry || !blockRail) {
+    const custom = elements[HOME_CLASSES.custom];
+    const customCatalogue = elements[HOME_CLASSES.customCatalogue];
+    const jumpCustom = elements[HOME_CLASSES.jumpCustom];
+    const jumpNavigation = elements[HOME_CLASSES.jumpNavigation];
+    const jumpShipped = elements[HOME_CLASSES.jumpShipped];
+    const shipped = elements[HOME_CLASSES.shipped];
+    if (!orchestraMasonry || !orchestraRail || !blockMasonry || !blockRail || !custom || !customCatalogue || !jumpCustom || !jumpNavigation || !jumpShipped || !shipped) {
       return;
     }
     const clone = JSON.parse(JSON.stringify(state.workflows));
-    const nodes = clone.nodes || [];
+    const nodes = _deduplicateNodes(clone.nodes || []);
     const labels = new Map(nodes.map((node) => [node.id, String(node.value || node.id)]));
-    const orchestras = _createDataset$1(nodes, labels, "orchestra", failedHeroes);
-    const blocks = _createDataset$1(nodes, labels, "block", failedHeroes);
-    orchestraMasonry.lfDataset = orchestras.dataset;
-    blockMasonry.lfDataset = blocks.dataset;
-    orchestraRail.hidden = orchestras.count === 0;
-    blockRail.hidden = blocks.count === 0;
-    const orchestraCount = orchestraRail.querySelector('[data-rail-count="orchestra"]');
-    const blockCount = blockRail.querySelector('[data-rail-count="block"]');
-    if (orchestraCount) {
-      orchestraCount.textContent = String(orchestras.count);
-      orchestraCount.setAttribute("aria-label", `${orchestras.count} ${orchestras.count === 1 ? "orchestra" : "orchestras"}`);
-    }
-    if (blockCount) {
-      blockCount.textContent = String(blocks.count);
-      blockCount.setAttribute("aria-label", `${blocks.count} ${blocks.count === 1 ? "block" : "blocks"}`);
-    }
+    const shippedNodes = nodes.filter(_isShipped);
+    const customNodes = nodes.filter((node) => !_isShipped(node));
+    const orchestras = _createDataset$1(shippedNodes, labels, "orchestra", failedHeroes);
+    const blocks = _createDataset$1(shippedNodes, labels, "block", failedHeroes);
+    _setRail(orchestraRail, orchestraMasonry, orchestras, "orchestra");
+    _setRail(blockRail, blockMasonry, blocks, "block");
+    shipped.hidden = orchestras.count + blocks.count === 0;
+    custom.hidden = _renderCustomCatalogue(store, customCatalogue, customNodes, labels, failedHeroes) === 0;
+    _setJump(jumpNavigation, jumpShipped, orchestras.count + blocks.count > 0);
+    _setJump(jumpNavigation, jumpCustom, customNodes.length > 0);
     debugLog(HOME_UPDATED);
   };
   return {
