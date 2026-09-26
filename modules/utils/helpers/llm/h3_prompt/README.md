@@ -9,6 +9,10 @@ to both writer and reviewer. Resolve `auto` in the caller: no images means
 - `SKILL.md`: creative brief and direct-output contract.
 - `base.md`: shared shot, voice, sound grammar and base-mode sections.
 - `reference.md`: Ref2VA's six sections, concise bindings, and role-specific retention.
+- `examples/`: complete original input/output demonstrations selected by resolved
+  mode: three reference cases, two text-only cases, two opening-frame cases, and
+  one each for first/last and last-frame alignment. Example pictures are fictional,
+  not observations of current attachments; examples never become output templates.
 - `__init__.py`: deterministic local builder and runtime constraints.
 - `modules/tests/utils/helpers/llm/test_h3_prompt_skill.py`: focused coverage.
 
@@ -17,6 +21,12 @@ for fixed-frame modes. The application returns that text unchanged: no generatio
 schema, parsing, compilation, validation verdict, or format-repair call. H3's
 format is writing guidance in the system prompt. This bundle performs no provider
 calls or runtime downloads and does not independently prove live model quality.
+
+The active mode, exact section order, duration, and image mapping follow the
+examples in the system message and are repeated beside the untouched idea in
+the user message. Review additionally receives the untouched draft and explicit
+action/constraint-coverage guidance. This framing does not extract a plan or
+validate an answer. Tests inspect the checked-in demonstrations, not model outputs.
 
 ## Sources and deliberate local choices
 

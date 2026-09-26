@@ -18,6 +18,7 @@ from ...utils.helpers.logic import normalize_input_image
 from ...utils.helpers.llm.h3_prompt import (
     H3_PROMPT_MODES,
     build_authoring_system,
+    build_authoring_user,
 )
 
 
@@ -401,13 +402,15 @@ class LF_H3PromptMaker:
             calls.append(stage)
             return text
 
-        prompt = request("writer", intent)
+        prompt = request("writer", build_authoring_user(
+            intent, mode, duration_seconds, reference_image_count,
+        ))
         if review:
             prompt = request(
                 "review",
-                f"Original idea:\n{intent}\n\nDraft prompt:\n{prompt}\n\n"
-                "Review this draft against the original idea, attached images, and "
-                "authoring guidance. Return only the complete prompt prose.",
+                build_authoring_user(
+                    intent, mode, duration_seconds, reference_image_count, draft=prompt,
+                ),
                 reviewing=True,
             )
 

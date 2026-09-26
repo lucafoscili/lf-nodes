@@ -23,6 +23,9 @@ Unspecified environment, action development, camera and sound are creative choic
 - Public node: `modules/nodes/llm/h3_prompt_maker.py`.
 - System instructions: `modules/utils/helpers/llm/h3_prompt/` (local Markdown;
   includes adapted H3 grammar, not just links to a skill).
+- Complete teaching examples in `h3_prompt/examples/` are selected by active
+  mode. The current request repeats its mode, section order, duration, and image
+  mapping beside the original idea; example content must not enter the new scene.
 - Writer sees the original ordered images and user idea directly. Review defaults
   on and receives the idea and draft as plain text, returning revised or unchanged
   complete prose. Review off returns the writer's text. There is exactly one

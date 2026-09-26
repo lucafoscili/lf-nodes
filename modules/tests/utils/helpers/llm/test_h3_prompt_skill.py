@@ -1,8 +1,11 @@
 """The direct writer receives complete, mode-specific offline H3 instructions."""
 
+import re
+from pathlib import Path
+
 import pytest
 
-from modules.utils.helpers.llm.h3_prompt import build_authoring_system
+from modules.utils.helpers.llm.h3_prompt import build_authoring_system, build_authoring_user
 
 
 @pytest.mark.parametrize(
@@ -89,3 +92,60 @@ def test_optional_controls_are_typed():
         build_authoring_system("t2va", 6, 0, review="yes")
     with pytest.raises(TypeError, match="instructions"):
         build_authoring_system("t2va", 6, 0, instructions=None)
+
+
+@pytest.mark.parametrize(("mode", "count", "examples"), [
+    ("t2va", 0, 2), ("i2va", 1, 2), ("fl2va", 2, 1),
+    ("l2va", 1, 1), ("ref2va", 2, 3),
+])
+def test_only_selected_mode_examples_are_included_before_current_request(mode, count, examples):
+    system = build_authoring_system(mode, 7.125, count)
+    teaching, current = system.split("## Current request\n\n")
+    assert teaching.count("Example output:") == examples
+    assert "hypothetical teaching scenarios" in teaching or "hypothetical teaching scenario" in teaching
+    assert f"Resolved mode: {mode}. Exact target duration: 7.125 seconds." in current
+    assert "Example output:" not in current
+    assert ("# Complete reference-mode examples" in teaching) is (mode == "ref2va")
+    for other in ("t2va", "i2va", "fl2va", "l2va"):
+        assert (f"# Complete {other.upper()} example" in teaching) is (mode == other)
+
+
+@pytest.mark.parametrize("mode", ["t2va", "i2va", "fl2va", "l2va", "ref2va"])
+def test_checked_in_teaching_outputs_are_complete(mode):
+    # Authoring-asset checks only; never apply these checks to model responses.
+    assets = Path(__file__).resolve().parents[4] / "utils/helpers/llm/h3_prompt/examples"
+    text = (assets / f"{mode}.md").read_text(encoding="utf-8")
+    fields = (["subject_definitions", "summary", "retention_analysis", "detailed_description"]
+              if mode == "ref2va" else ["integrated_multimodal_description"])
+    fields += ["overall_soundscape", "non_diegetic_music"]
+    for example in text.split("### Example ")[1:]:
+        output = example.split("Example output:\n", 1)[1].strip()
+        assert re.findall(r"^([a-z_]+):$", output, re.MULTILINE) == fields
+        assert "[Shot 1]" in output
+        assert not re.search(r"\[Shot 1\]\s+At \d", output)
+        assert "```" not in output
+        if mode == "ref2va":
+            description = output.split("detailed_description:\n", 1)[1].split("overall_soundscape:", 1)[0]
+            assert 350 <= len(description.split()) <= 500
+            assert output.startswith("subject_definitions:")
+        elif mode == "t2va":
+            assert "<Picture" not in output
+            assert output.startswith("integrated_multimodal_description:")
+        else:
+            assert output.index("<Picture" if mode != "fl2va" else "Picture 1") < output.index(fields[0])
+
+
+def test_actual_brief_preserves_idea_and_draft_without_parsing_or_examples():
+    idea = 'Keep the sign "Entrée" and say exactly: À demain !'
+    draft = "  unstructured draft\nwith whitespace  \n"
+    writer = build_authoring_user(idea, "ref2va", 8, 2)
+    reviewer = build_authoring_user(idea, "ref2va", 8, 2, draft=draft)
+    for prompt in (writer, reviewer):
+        assert "Resolved mode: ref2va. Exact target duration: 8 seconds." in prompt
+        assert "Attachment order is <Picture 1>, <Picture 2>." in prompt
+        assert f"Original idea:\n{idea}\n\n" in prompt
+        assert "integrated_multimodal_description" not in prompt
+        assert "Example output:" not in prompt
+    assert "Draft prompt:" not in writer
+    assert f"Draft prompt:\n{draft}\n\n" in reviewer
+    assert "Check each requested action" in reviewer

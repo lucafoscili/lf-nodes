@@ -292,9 +292,11 @@ def test_short_intent_and_one_image_go_directly_to_writer_and_reviewer(monkeypat
     intent = "Walking from behind in a medieval town"
     result = _execute(mode="auto", image=image, intent=intent)
     assert len(calls) == 2
-    assert calls[0]["prompt"] == intent
+    assert f"Original idea:\n{intent}\n\n" in calls[0]["prompt"]
+    assert all("Resolved mode: ref2va." in call["prompt"] for call in calls)
+    assert all("Output sections, in order: subject_definitions, summary," in call["prompt"] for call in calls)
     assert all(torch.equal(call["images"][0], image) for call in calls)
-    assert calls[1]["prompt"].startswith(f"Original idea:\n{intent}\n\nDraft prompt:\n")
+    assert f"Original idea:\n{intent}\n\nDraft prompt:\n" in calls[1]["prompt"]
     assert _REFERENCE_TEXT in calls[1]["prompt"]
     assert "format_error" not in calls[1]["prompt"]
     prompt, report, receipt = result["result"]
