@@ -15,6 +15,7 @@ from ...logic import normalize_output_image
 from ...temp_cache import TempFileCache
 from ...ui import create_masonry_node
 from ..context import clear_editing_context, register_editing_context
+from ..dataset import normalize_editor_image_entries
 from ..file_lock import edit_dataset_lock
 from ..ownership import OWNER_CLIENT_ID_KEY, get_owner_client_id, normalize_client_id
 
@@ -34,6 +35,7 @@ class EditingSession:
     node_id: str
     temp_cache: TempFileCache = field(default_factory=TempFileCache)
     owner_client_id: str | None = None
+    _image_entry_ids: tuple[str, ...] | None = field(default=None, init=False)
 
     def __post_init__(self) -> None:
         self.node_id = str(self.node_id)
@@ -114,6 +116,9 @@ class EditingSession:
         return dataset
 
     def register_context(self, dataset: Dict[str, Any], **context: Any) -> None:
+        if "image_entries" in dataset:
+            entries = normalize_editor_image_entries(dataset["image_entries"], len(dataset.get("nodes", [])))
+            self._image_entry_ids = tuple(entry["id"] for entry in entries)
         context_id = dataset["context_id"]
         with edit_dataset_lock(context_id):
             self._write_dataset(dataset)
@@ -205,6 +210,19 @@ class EditingSession:
         nodes = dataset.get("nodes")
         if not isinstance(nodes, list):
             raise ValueError("Editing dataset nodes must be a list.")
+
+        if self._image_entry_ids is not None:
+            by_id = {}
+            for node in nodes:
+                identity = node.get("id") if isinstance(node, dict) else None
+                if not isinstance(identity, str) or identity not in self._image_entry_ids:
+                    raise ValueError("Editing image entries contain an unexpected or missing identity.")
+                if identity in by_id:
+                    raise ValueError("Editing image entries contain a duplicate identity.")
+                by_id[identity] = node
+            if len(by_id) != len(self._image_entry_ids):
+                raise ValueError("Editing image entries were deleted; every input image must remain.")
+            nodes = [by_id[identity] for identity in self._image_entry_ids]
 
         edited_images = []
         selected_entry = self._resolve_selected_entry(dataset)

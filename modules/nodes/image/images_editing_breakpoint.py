@@ -7,6 +7,7 @@ from ...utils.helpers.editing import (
     EditingSession,
     apply_editor_config_to_dataset,
     build_editor_config_from_dataset,
+    normalize_editor_image_entries,
 )
 from ...utils.helpers.logic import (
     normalize_conditioning,
@@ -109,6 +110,8 @@ class LF_ImagesEditingBreakpoint:
             config_value = build_editor_config_from_dataset(ui_state_value)
 
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
+        if isinstance(config_value, dict) and "image_entries" in config_value:
+            normalize_editor_image_entries(config_value["image_entries"], len(image))
 
         dataset = session.build_dataset(image, filename_prefix="edit_breakpoint")
 
@@ -140,12 +143,12 @@ class LF_ImagesEditingBreakpoint:
             raise
 
         batch_list, image_list = normalize_output_image(image)
-        results = session.collect_results(dataset)
-        edited_batch_list, edited_image_list = results.batch_list, results.image_list
-
-        config_out = build_editor_config_from_dataset(dataset)
-
-        session.cleanup(dataset)
+        try:
+            results = session.collect_results(dataset)
+            edited_batch_list, edited_image_list = results.batch_list, results.image_list
+            config_out = build_editor_config_from_dataset(dataset)
+        finally:
+            session.cleanup(dataset)
 
         return (edited_batch_list[0], edited_image_list, batch_list[0], image_list, config_out)
 # endregion

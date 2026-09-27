@@ -174,6 +174,25 @@ def extract_dataset_entries(
 # endregion
 
 # region editor_config_helpers
+def normalize_editor_image_entries(entries, count):
+    """Validate the opt-in, ordered identity/label contract for one image batch."""
+    if not isinstance(entries, list) or len(entries) != count:
+        raise ValueError("Editor image_entries must contain exactly one entry per input image.")
+    normalized = []
+    seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or any(
+            not isinstance(entry.get(key), str) or not entry[key].strip()
+            for key in ("id", "label")
+        ):
+            raise ValueError("Editor image_entries requires nonempty string id and label values.")
+        if entry["id"] in seen:
+            raise ValueError("Editor image_entries IDs must be unique.")
+        seen.add(entry["id"])
+        normalized.append({"id": entry["id"], "label": entry["label"]})
+    return normalized
+
+
 def apply_editor_config_to_dataset(
     dataset: Optional[Dataset],
     config: Optional[Dataset],
@@ -185,9 +204,21 @@ def apply_editor_config_to_dataset(
       - "navigation": copied directly to dataset["navigation"] if present.
       - "defaults": shallow-merged into dataset["defaults"].
       - "selection": copied to dataset["selection"] with any 'context_id' removed.
+      - "image_entries": opt-in ordered {id, label} entries, paired exactly with images.
     """
     if not isinstance(dataset, dict) or not isinstance(config, dict):
         return
+
+    if "image_entries" in config:
+        entries = normalize_editor_image_entries(config["image_entries"], len(dataset.get("nodes", [])))
+        dataset["image_entries"] = entries
+        for node, entry in zip(dataset["nodes"], entries):
+            node["id"] = entry["id"]
+            node["value"] = entry["label"]
+            cell = node["cells"]["lfImage"]
+            cell.setdefault("htmlProps", {})["title"] = entry["label"]
+            cell["htmlProps"]["aria-label"] = entry["label"]
+            cell.setdefault("lfHtmlAttributes", {})["alt"] = entry["label"]
 
     navigation = config.get("navigation")
     if isinstance(navigation, dict):
@@ -218,11 +249,16 @@ def build_editor_config_from_dataset(dataset: Optional[Dataset]) -> Dict[str, An
       - "navigation": copied from dataset["navigation"]
       - "defaults": copied from dataset["defaults"]
       - "selection": copied from dataset["selection"] with 'context_id' removed
+      - "image_entries": the opt-in original ordered image identities and labels
     """
     if not isinstance(dataset, dict):
         return {}
 
     config: Dict[str, Any] = {}
+    if "image_entries" in dataset:
+        config["image_entries"] = normalize_editor_image_entries(
+            dataset["image_entries"], len(dataset.get("nodes", []))
+        )
 
     navigation = dataset.get("navigation")
     if isinstance(navigation, dict):
