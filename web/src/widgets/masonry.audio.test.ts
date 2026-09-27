@@ -64,6 +64,22 @@ beforeEach(() => {
 });
 
 describe('image masonry selection hydration', () => {
+  it('resolves clicked identity from the current dataset when the rendered shape omits custom fields', () => {
+    const { widget, state } = render(NodeName.loadImages);
+    const identity = { directory: 'F:/covers', relative_path: 'wanted.png' };
+    widget.options.setValue(JSON.stringify({ dataset: { nodes: [
+      { id: 'first', cells: { lfImage: { file_identity: { ...identity, relative_path: 'other.png' } } } },
+      { id: 'wanted', cells: { lfImage: { file_identity: identity } } },
+    ] } }));
+    EV_HANDLERS.masonry(state, new CustomEvent('lf-event', { detail: {
+      comp: state.masonry, eventType: 'lf-event',
+      originalEvent: new CustomEvent('image', { detail: { eventType: 'click' } }),
+      selectedShape: { index: 1, shape: { value: '/view?filename=preview.png' } },
+    } }) as never);
+    expect(state.selected.file_identity).toEqual(identity);
+    expect((widget.options.getValue() as MasonryDeserializedValue).file_identity).toEqual(identity);
+  });
+
   it('highlights identity-only hydration and follows that file when the dataset order changes', () => {
     const { widget, state } = render(NodeName.loadImages);
     state.masonry.setSelectedShape = vi.fn();

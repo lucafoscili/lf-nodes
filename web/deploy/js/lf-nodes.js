@@ -9896,7 +9896,7 @@ const installAudioPreviewHistory = (node, apply) => {
 const EV_HANDLERS$3 = {
   //#region Masonry handler
   masonry: (state, e) => {
-    var _a, _b, _c;
+    var _a, _b, _c, _d, _e, _f, _g;
     const { comp, eventType, originalEvent, selectedShape } = e.detail;
     if (!comp.lfSelectable) {
       return;
@@ -9909,7 +9909,8 @@ const EV_HANDLERS$3 = {
             const v = ((_a = selectedShape.shape) == null ? void 0 : _a.value) || ((_b = selectedShape.shape) == null ? void 0 : _b.lfValue);
             state.selected.index = selectedShape.index;
             state.selected.name = v ? String(v).valueOf() : "";
-            const identity = (_c = selectedShape.shape) == null ? void 0 : _c.file_identity;
+            const selectedCell = (_f = (_e = (_d = (_c = state.masonry.lfDataset) == null ? void 0 : _c.nodes) == null ? void 0 : _d[selectedShape.index]) == null ? void 0 : _e.cells) == null ? void 0 : _f.lfImage;
+            const identity = (selectedCell == null ? void 0 : selectedCell.file_identity) ?? ((_g = selectedShape.shape) == null ? void 0 : _g.file_identity);
             if (identity && typeof identity.directory === "string" && typeof identity.relative_path === "string") {
               state.selected.file_identity = { ...identity };
             } else {
