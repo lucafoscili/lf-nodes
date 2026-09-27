@@ -1279,6 +1279,8 @@ var NodeName;
 (function(NodeName2) {
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
   NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
+  NodeName2["composeImageRegions"] = "LF_ComposeImageRegions";
+  NodeName2["extractImageRegions"] = "LF_ExtractImageRegions";
   NodeName2["backgroundRemover"] = "LF_BackgroundRemover";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
@@ -1711,6 +1713,8 @@ function installH3References(node) {
 const NODE_WIDGET_MAP = {
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
+  LF_ComposeImageRegions: [],
+  LF_ExtractImageRegions: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
