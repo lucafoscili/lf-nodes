@@ -58,6 +58,8 @@ export enum CustomWidgetName {
 export enum NodeName {
   aceStepRemix = 'LF_ACEStepRemix',
   applyTextureToGLB = 'LF_ApplyTextureToGLB',
+  composeImageRegions = 'LF_ComposeImageRegions',
+  extractImageRegions = 'LF_ExtractImageRegions',
   backgroundRemover = 'LF_BackgroundRemover',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
