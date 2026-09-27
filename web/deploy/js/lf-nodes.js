@@ -6534,6 +6534,16 @@ function installLFRefreshNodeHook(appObj, opts = {}) {
   }
   return { refreshHook: patched };
 }
+const LF_EXTENSION_PATH = "extensions/lf-nodes";
+const resolveLfExtensionUrl = (relativePath, options = {}) => {
+  var _a, _b;
+  const href = options.href ?? window.location.href;
+  const suffix = relativePath.replace(/^\/+/, "");
+  const extensionPath = `${LF_EXTENSION_PATH}/${suffix}`;
+  const route = `/${extensionPath}`;
+  const resolved = ((_b = (_a = options.api) == null ? void 0 : _a.fileURL) == null ? void 0 : _b.call(_a, route)) ?? extensionPath;
+  return new URL(resolved, href).href;
+};
 const CATEGORY = "✨ LF Nodes";
 const DESCRIPTION = "Virtual reroute node that propagates upstream type and optional label.";
 const DISPLAY_NAME = "Reroute";
@@ -10921,7 +10931,7 @@ class LFWidgets {
         const icon = action === "focus tab" ? "photo-search" : action === "interrupt" ? "x" : action === "interrupt and queue" ? "refresh" : action === "queue prompt" ? "stack-push" : "";
         const options = {
           body: message,
-          icon: icon ? window.location.href + `extensions/lf-nodes/assets/svg/${icon}.svg` : void 0,
+          icon: icon ? resolveLfExtensionUrl(`assets/svg/${icon}.svg`, { api: getComfyAPI() }) : void 0,
           requireInteraction: action === "none" ? false : true,
           silent,
           tag
@@ -11010,7 +11020,7 @@ class LFManager {
     _LFManager_LATEST_RELEASE.set(this, void 0);
     _LFManager_MANAGERS.set(this, {});
     _LFManager_SYSTEM_TIMEOUT.set(this, 0);
-    const assetsUrl = window.location.href + "extensions/lf-nodes/assets";
+    const assetsUrl = resolveLfExtensionUrl("assets", { api: getComfyAPI() });
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").lfFramework = getLfFramework();
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").lfFramework.assets.set(assetsUrl);
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").lfFramework.theme.set("dark");

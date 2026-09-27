@@ -31,6 +31,7 @@ import {
 } from '../types/manager/manager';
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
 import { getComfyAPI, getComfyAPP } from '../utils/common';
+import { resolveLfExtensionUrl } from '../utils/extensionUrl';
 import { LFNodes } from './nodes';
 import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
@@ -67,7 +68,7 @@ export class LFManager {
   #SYSTEM_TIMEOUT = 0;
 
   constructor() {
-    const assetsUrl = window.location.href + 'extensions/lf-nodes/assets';
+    const assetsUrl = resolveLfExtensionUrl('assets', { api: getComfyAPI() });
     this.#MANAGERS.lfFramework = getLfFramework();
     this.#MANAGERS.lfFramework.assets.set(assetsUrl);
     this.#MANAGERS.lfFramework.theme.set('dark');

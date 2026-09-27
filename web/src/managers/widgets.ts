@@ -7,7 +7,14 @@ import { Card } from '../types/widgets/card';
 import { CardsWithChip, CardsWithChipDeserializedValue } from '../types/widgets/cardsWithChip';
 import { ImageEditorState } from '../types/widgets/imageEditor';
 import { CustomWidgetName, NodeName, WidgetFactory } from '../types/widgets/widgets';
-import { getApiRoutes, getCustomWidget, getLfManager, resolveNodeId } from '../utils/common';
+import {
+  getApiRoutes,
+  getComfyAPI,
+  getCustomWidget,
+  getLfManager,
+  resolveNodeId,
+} from '../utils/common';
+import { resolveLfExtensionUrl } from '../utils/extensionUrl';
 import { cardFactory } from '../widgets/card';
 import { cardsWithChipFactory } from '../widgets/cardsWithChip';
 import { carouselFactory } from '../widgets/carousel';
@@ -257,7 +264,9 @@ export class LFWidgets {
       const options: NotificationOptions = {
         body: message,
         icon: icon
-          ? window.location.href + `extensions/lf-nodes/assets/svg/${icon}.svg`
+          ? resolveLfExtensionUrl(`assets/svg/${icon}.svg`, {
+              api: getComfyAPI(),
+            })
           : undefined,
         requireInteraction: action === 'none' ? false : true,
         silent,
