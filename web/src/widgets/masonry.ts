@@ -59,7 +59,18 @@ export const masonryFactory: MasonryFactory = {
           } else if (isValidNumber(index) || typeof name === 'string') {
             delete selected.file_identity;
           }
-          if (isValidNumber(index)) {
+          if (selected.file_identity) {
+            const identity = selected.file_identity;
+            const matchedIndex = (masonry.lfDataset?.nodes || []).findIndex((tile) => {
+              const cell = tile.cells?.lfImage as unknown as { file_identity?: typeof identity };
+              const candidate = cell?.file_identity;
+              return candidate?.directory === identity.directory &&
+                candidate?.relative_path === identity.relative_path;
+            });
+            selected.index = matchedIndex >= 0 ? matchedIndex : NaN;
+            if (typeof name === 'string') selected.name = name;
+            if (matchedIndex >= 0) masonry.setSelectedShape(matchedIndex);
+          } else if (isValidNumber(index)) {
             selected.index = index;
             selected.name = name || '';
             masonry.setSelectedShape(index);

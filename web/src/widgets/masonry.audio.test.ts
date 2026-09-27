@@ -64,6 +64,23 @@ beforeEach(() => {
 });
 
 describe('image masonry selection hydration', () => {
+  it('highlights identity-only hydration and follows that file when the dataset order changes', () => {
+    const { widget, state } = render(NodeName.loadImages);
+    state.masonry.setSelectedShape = vi.fn();
+    const identity = { directory: 'F:/covers', relative_path: 'wanted.png' };
+    const wanted = { id: 'wanted', cells: { lfImage: { file_identity: identity } } };
+    const other = { id: 'other', cells: { lfImage: {
+      file_identity: { directory: 'F:/covers', relative_path: 'other.png' },
+    } } };
+    widget.options.setValue(JSON.stringify({ file_identity: identity, dataset: { nodes: [other, wanted] } }));
+    expect(state.selected.index).toBe(1);
+    expect(state.masonry.setSelectedShape).toHaveBeenLastCalledWith(1);
+    widget.options.setValue(JSON.stringify({ dataset: { nodes: [wanted, other] } }));
+    expect(state.selected.index).toBe(0);
+    expect(state.masonry.setSelectedShape).toHaveBeenLastCalledWith(0);
+    expect(state.selected.file_identity).toEqual(identity);
+  });
+
   it('persists clicked file identity through reload without confusing it with the preview URL', () => {
     const { widget, state } = render(NodeName.loadImages);
     const identity = { directory: 'F:/covers', relative_path: 'wanted.png' };

@@ -9944,6 +9944,7 @@ const masonryFactory = {
       },
       setValue(value) {
         const callback = (_, u) => {
+          var _a;
           const state = STATE$6.get(wrapper);
           const { masonry, selected } = state;
           const { audio, columns, dataset, index, name, view, slot_map, file_identity } = u.parsedJSON;
@@ -9961,7 +9962,20 @@ const masonryFactory = {
           } else if (isValidNumber(index) || typeof name === "string") {
             delete selected.file_identity;
           }
-          if (isValidNumber(index)) {
+          if (selected.file_identity) {
+            const identity = selected.file_identity;
+            const matchedIndex = (((_a = masonry.lfDataset) == null ? void 0 : _a.nodes) || []).findIndex((tile) => {
+              var _a2;
+              const cell = (_a2 = tile.cells) == null ? void 0 : _a2.lfImage;
+              const candidate = cell == null ? void 0 : cell.file_identity;
+              return (candidate == null ? void 0 : candidate.directory) === identity.directory && (candidate == null ? void 0 : candidate.relative_path) === identity.relative_path;
+            });
+            selected.index = matchedIndex >= 0 ? matchedIndex : NaN;
+            if (typeof name === "string")
+              selected.name = name;
+            if (matchedIndex >= 0)
+              masonry.setSelectedShape(matchedIndex);
+          } else if (isValidNumber(index)) {
             selected.index = index;
             selected.name = name || "";
             masonry.setSelectedShape(index);
