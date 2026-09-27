@@ -1279,6 +1279,7 @@ var NodeName;
 (function(NodeName2) {
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
   NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
+  NodeName2["composeImageLayers"] = "LF_ComposeImageLayers";
   NodeName2["composeImageRegions"] = "LF_ComposeImageRegions";
   NodeName2["extractImageRegions"] = "LF_ExtractImageRegions";
   NodeName2["backgroundRemover"] = "LF_BackgroundRemover";
@@ -1355,6 +1356,7 @@ var NodeName;
   NodeName2["loraSelector"] = "LF_LoraSelector";
   NodeName2["lutApplication"] = "LF_LUTApplication";
   NodeName2["lutGeneration"] = "LF_LUTGeneration";
+  NodeName2["loadImageLayers"] = "LF_LoadImageLayers";
   NodeName2["mathOperation"] = "LF_MathOperation";
   NodeName2["multipleImageResizeForWeb"] = "LF_MultipleImageResizeForWeb";
   NodeName2["normalizeSpriteBatch"] = "LF_NormalizeSpriteBatch";
@@ -1713,6 +1715,7 @@ function installH3References(node) {
 const NODE_WIDGET_MAP = {
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
+  LF_ComposeImageLayers: [],
   LF_ComposeImageRegions: [],
   LF_ExtractImageRegions: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
@@ -1788,6 +1791,7 @@ const NODE_WIDGET_MAP = {
   LF_LoraSelector: [CustomWidgetName.card],
   LF_LUTApplication: [CustomWidgetName.compare],
   LF_LUTGeneration: [CustomWidgetName.tabBarChart],
+  LF_LoadImageLayers: [],
   LF_MarkdownDocGenerator: [CustomWidgetName.code],
   LF_MathOperation: [CustomWidgetName.code],
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],

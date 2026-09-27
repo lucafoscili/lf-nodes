@@ -24,6 +24,7 @@ import { installH3References } from './h3PromptMaker';
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
+  LF_ComposeImageLayers: [],
   LF_ComposeImageRegions: [],
   LF_ExtractImageRegions: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
@@ -99,6 +100,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LoraSelector: [CustomWidgetName.card],
   LF_LUTApplication: [CustomWidgetName.compare],
   LF_LUTGeneration: [CustomWidgetName.tabBarChart],
+  LF_LoadImageLayers: [],
   LF_MarkdownDocGenerator: [CustomWidgetName.code],
   LF_MathOperation: [CustomWidgetName.code],
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],

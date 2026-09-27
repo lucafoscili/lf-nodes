@@ -96,12 +96,73 @@ def _resize(image, height, width):
                          align_corners=False, antialias=True).permute(0, 2, 3, 1)
 
 
+def aspect_fit_content_rect(width, height, size):
+    """Return the centred content rectangle for an aspect-fit square canvas."""
+    return _content_rect([0, 0, width, height], size)
+
+
+def aspect_fit_canvas(image, size, *, padding='replicate'):
+    """Fit one image into a square editing canvas without stretching it."""
+    if image.ndim != 4 or image.shape[0] != 1:
+        raise ValueError('aspect_fit_canvas requires one [1,H,W,C] image.')
+    _, height, width, _ = image.shape
+    content_rect = aspect_fit_content_rect(width, height, size)
+    cx, cy, cw, ch = content_rect
+    fitted = _resize(image.to(dtype=torch.float32), ch, cw).clamp(0, 1)
+    channels_first = fitted.permute(0, 3, 1, 2)
+    padding_values = (cx, size-cw-cx, cy, size-ch-cy)
+    if padding == 'replicate':
+        canvas = F.pad(channels_first, padding_values, mode='replicate')
+    elif padding == 'transparent':
+        canvas = F.pad(channels_first, padding_values, mode='constant', value=0)
+    else:
+        raise ValueError("padding must be 'replicate' or 'transparent'.")
+    return canvas.permute(0, 2, 3, 1).contiguous(), content_rect
+
+
+def restore_rgb_canvas_edit(source, edited, baseline, expected_canvas, content_rect, *, name):
+    """Project an editor RGB delta onto native pixels while preserving alpha."""
+    if source.ndim != 4 or source.shape[0] != 1 or source.shape[-1] not in (3, 4):
+        raise ValueError(f'{name} source must be one RGB/RGBA image.')
+    if expected_canvas.ndim != 4 or expected_canvas.shape[0] != 1:
+        raise ValueError(f'{name} expected canvas must be one image.')
+    if tuple(baseline.shape) != tuple(expected_canvas.shape):
+        raise ValueError(f'{name} original canvas dimensions/channels do not match the layout.')
+    if (edited.ndim != 4 or edited.shape[0] != 1
+            or edited.shape[1:3] != expected_canvas.shape[1:3]
+            or edited.shape[-1] not in (3, 4)):
+        raise ValueError(f'{name} edited canvas must match the layout dimensions and use RGB/RGBA.')
+
+    device = source.device
+    baseline = baseline.to(device=device, dtype=torch.float32)
+    expected_canvas = expected_canvas.to(device=device, dtype=torch.float32)
+    if (baseline - expected_canvas).abs().max() > PNG_TOLERANCE:
+        raise ValueError(f'{name} original canvas does not match extraction order/source.')
+
+    edited = edited.to(device=device, dtype=torch.float32)
+    cx, cy, cw, ch = content_rect
+    delta = (edited[:, cy:cy+ch, cx:cx+cw, :3]
+             - baseline[:, cy:cy+ch, cx:cx+cw, :3])
+    # Zero each unchanged channel before interpolation so PNG noise cannot
+    # bleed into neighbouring edited pixels. Alpha is never composed.
+    delta = torch.where(delta.abs() > PNG_TOLERANCE, delta, 0)
+    result = source.clone()
+    if not torch.count_nonzero(delta):
+        return result
+
+    _, height, width, _ = source.shape
+    projected = _resize(delta, height, width)
+    target = result[..., :3]
+    changed = projected != 0
+    candidate = (target.to(dtype=torch.float32) + projected).clamp(0, 1).to(dtype=target.dtype)
+    target.copy_(torch.where(changed, candidate, target))
+    return result
+
+
 def _canvas(image, row, size):
     x, y, w, h = row['rect']
-    cx, cy, cw, ch = row['content_rect']
-    fitted = _resize(image[:, y:y+h, x:x+w].to(dtype=torch.float32), ch, cw).clamp(0, 1)
-    return F.pad(fitted.permute(0, 3, 1, 2), (cx, size-cw-cx, cy, size-ch-cy),
-                 mode='replicate').permute(0, 2, 3, 1).contiguous()
+    canvas, _ = aspect_fit_canvas(image[:, y:y+h, x:x+w], size, padding='replicate')
+    return canvas
 
 
 def extract_image_regions(image, regions, canvas_size):
@@ -143,19 +204,9 @@ def compose_image_regions(original, edited, original_regions, layout):
         edited_image = edited_image.to(device=source.device, dtype=torch.float32)
         baseline = baseline.to(device=source.device, dtype=torch.float32)
         expected = _canvas(source, row, size)
-        if (baseline - expected).abs().max() > PNG_TOLERANCE:
-            raise ValueError('original_regions does not match extraction order/source; use the editor original image list.')
-        cx, cy, cw, ch = row['content_rect']
-        delta = edited_image[:, cy:cy+ch, cx:cx+cw, :3] - baseline[:, cy:cy+ch, cx:cx+cw, :3]
-        # Zero each unchanged channel before interpolation so PNG noise cannot
-        # bleed into neighbouring edited pixels. Alpha is never composed.
-        delta = torch.where(delta.abs() > PNG_TOLERANCE, delta, 0)
-        if not torch.count_nonzero(delta):
-            continue
         x, y, w, h = row['rect']
-        projected = _resize(delta, h, w)
-        target = result[:, y:y+h, x:x+w, :3]
-        changed = projected != 0
-        candidate = (target.to(dtype=torch.float32) + projected).clamp(0, 1).to(dtype=target.dtype)
-        target.copy_(torch.where(changed, candidate, target))
+        restored = restore_rgb_canvas_edit(
+            source[:, y:y+h, x:x+w], edited_image, baseline, expected,
+            row['content_rect'], name='Region')
+        result[:, y:y+h, x:x+w].copy_(restored)
     return result

@@ -58,6 +58,7 @@ export enum CustomWidgetName {
 export enum NodeName {
   aceStepRemix = 'LF_ACEStepRemix',
   applyTextureToGLB = 'LF_ApplyTextureToGLB',
+  composeImageLayers = 'LF_ComposeImageLayers',
   composeImageRegions = 'LF_ComposeImageRegions',
   extractImageRegions = 'LF_ExtractImageRegions',
   backgroundRemover = 'LF_BackgroundRemover',
@@ -134,6 +135,7 @@ export enum NodeName {
   loraSelector = 'LF_LoraSelector',
   lutApplication = 'LF_LUTApplication',
   lutGeneration = 'LF_LUTGeneration',
+  loadImageLayers = 'LF_LoadImageLayers',
   mathOperation = 'LF_MathOperation',
   multipleImageResizeForWeb = 'LF_MultipleImageResizeForWeb',
   normalizeSpriteBatch = 'LF_NormalizeSpriteBatch',
