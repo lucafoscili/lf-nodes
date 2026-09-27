@@ -47,6 +47,11 @@ def test_labels_order_snapshot_identity_and_legacy_collection(tmp_path, monkeypa
     apply_editor_config_to_dataset(dataset, config)
     assert build_editor_config_from_dataset(dataset)["image_entries"] == ENTRIES
     assert dataset["nodes"][0]["cells"]["lfImage"]["htmlProps"]["title"] == "First panel"
+    captioned_cell = dataset["nodes"][0]["cells"]["lfImage"]
+    assert "content: attr(title)" in captioned_cell["lfStyle"]
+    assert "pointer-events: none" in captioned_cell["lfStyle"]
+    assert "First panel" not in captioned_cell["lfStyle"]
+    assert captioned_cell["lfHtmlAttributes"]["alt"] == "First panel"
     session = sessions.EditingSession("entry-test")
     session.bind_dataset_context(dataset, default_status="pending")
     session.register_context(dataset)

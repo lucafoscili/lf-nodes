@@ -4,6 +4,27 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 Dataset = Dict[str, Any]
 
+# Image-widget overlay only: labels never enter the editable image pixels.
+_IMAGE_ENTRY_CAPTION_STYLE = """
+:host::after {
+  content: attr(title);
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  padding: 0.35rem 0.5rem;
+  background: rgba(var(--lf-color-surface), 0.95);
+  color: rgb(var(--lf-color-on-surface));
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+""".strip()
+
 # region Helpers
 def _as_dict(value: Any) -> Dict[str, Any]:
     """
@@ -219,6 +240,7 @@ def apply_editor_config_to_dataset(
             cell.setdefault("htmlProps", {})["title"] = entry["label"]
             cell["htmlProps"]["aria-label"] = entry["label"]
             cell.setdefault("lfHtmlAttributes", {})["alt"] = entry["label"]
+            cell["lfStyle"] = _IMAGE_ENTRY_CAPTION_STYLE
 
     navigation = config.get("navigation")
     if isinstance(navigation, dict):
