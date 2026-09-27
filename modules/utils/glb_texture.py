@@ -53,6 +53,17 @@ def read_glb(blob):
     return document, binary
 
 
+def pack_glb(document, binary):
+    """Pack a document and embedded buffer without changing their contents."""
+    binary = bytes(binary)
+    binary += b'\0' * (-len(binary) % 4)
+    encoded = json.dumps(document, ensure_ascii=False, allow_nan=False, separators=(',', ':')).encode('utf-8')
+    encoded += b' ' * (-len(encoded) % 4)
+    return (struct.pack('<4sII', b'glTF', 2, 28 + len(encoded) + len(binary))
+            + struct.pack('<II', len(encoded), 0x4E4F534A) + encoded
+            + struct.pack('<II', len(binary), 0x004E4942) + binary)
+
+
 def apply_texture_to_glb(blob, image, material_index=0):
     """Embed PIL RGB/RGBA pixels; preserve source binary and every other binding.
 
@@ -87,9 +98,4 @@ def apply_texture_to_glb(blob, image, material_index=0):
     binding['index'] = len(textures) - 1
     binary += payload
     document['buffers'][0]['byteLength'] = len(binary)
-    binary += b'\0' * (-len(binary) % 4)
-    encoded = json.dumps(document, ensure_ascii=False, allow_nan=False, separators=(',', ':')).encode('utf-8')
-    encoded += b' ' * (-len(encoded) % 4)
-    return (struct.pack('<4sII', b'glTF', 2, 28 + len(encoded) + len(binary))
-            + struct.pack('<II', len(encoded), 0x4E4F534A) + encoded
-            + struct.pack('<II', len(binary), 0x004E4942) + binary)
+    return pack_glb(document, binary)

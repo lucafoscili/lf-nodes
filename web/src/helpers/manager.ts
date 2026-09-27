@@ -24,6 +24,7 @@ import { installH3References } from './h3PromptMaker';
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
+  LF_ScaleGLBNodes: [],
   LF_ComposeImageLayers: [],
   LF_ComposeImageRegions: [],
   LF_ExtractImageRegions: [],

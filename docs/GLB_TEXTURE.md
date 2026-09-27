@@ -1,5 +1,7 @@
 # Apply Texture to GLB
 
+For pose-preserving joint scaling, see [Scale GLB Nodes](GLB_SCALE.md).
+
 `LF_ApplyTextureToGLB` connects an edited IMAGE to an existing animated GLB
 without converting the scene into Comfy's flattened MESH representation.
 

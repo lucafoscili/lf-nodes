@@ -1279,6 +1279,7 @@ var NodeName;
 (function(NodeName2) {
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
   NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
+  NodeName2["scaleGLBNodes"] = "LF_ScaleGLBNodes";
   NodeName2["composeImageLayers"] = "LF_ComposeImageLayers";
   NodeName2["composeImageRegions"] = "LF_ComposeImageRegions";
   NodeName2["extractImageRegions"] = "LF_ExtractImageRegions";
@@ -1715,6 +1716,7 @@ function installH3References(node) {
 const NODE_WIDGET_MAP = {
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
+  LF_ScaleGLBNodes: [],
   LF_ComposeImageLayers: [],
   LF_ComposeImageRegions: [],
   LF_ExtractImageRegions: [],
@@ -10931,7 +10933,9 @@ class LFWidgets {
         const icon = action === "focus tab" ? "photo-search" : action === "interrupt" ? "x" : action === "interrupt and queue" ? "refresh" : action === "queue prompt" ? "stack-push" : "";
         const options = {
           body: message,
-          icon: icon ? resolveLfExtensionUrl(`assets/svg/${icon}.svg`, { api: getComfyAPI() }) : void 0,
+          icon: icon ? resolveLfExtensionUrl(`assets/svg/${icon}.svg`, {
+            api: getComfyAPI()
+          }) : void 0,
           requireInteraction: action === "none" ? false : true,
           silent,
           tag
