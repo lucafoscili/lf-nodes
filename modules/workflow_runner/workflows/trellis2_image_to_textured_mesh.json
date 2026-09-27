@@ -234,12 +234,10 @@
     "inputs": {
       "mesh": ["decode_shape", 0],
       "resolution": 1024,
-      "sign_mode": {
-        "sign_mode": "udf",
-        "qef": false,
-        "drop_inverted_components": false,
-        "drop_enclosed_components": false
-      },
+      "sign_mode": "udf",
+      "sign_mode.qef": false,
+      "sign_mode.drop_inverted_components": false,
+      "sign_mode.drop_enclosed_components": false,
       "band": 1.0,
       "project_back": 0.0,
       "fix_poles": false,
@@ -254,7 +252,7 @@
     "inputs": {
       "mesh": ["remesh", 0],
       "target_face_count": 200000,
-      "placement_mode": {"placement_mode": "midpoint"}
+      "placement_mode": "midpoint"
     },
     "_meta": {"title": "Reduce the presentation mesh"}
   },

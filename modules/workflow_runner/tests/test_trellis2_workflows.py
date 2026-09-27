@@ -183,17 +183,28 @@ def test_graph_uses_the_official_core_stage_contract() -> None:
     assert prompt["sample_structure"]["inputs"]["cfg"] == 7.5
     assert prompt["sample_shape"]["inputs"]["scheduler"] == "simple"
     assert prompt["sample_texture"]["inputs"]["cfg"] == 1.0
-    assert prompt["remesh"]["inputs"]["sign_mode"] == {
-        "sign_mode": "udf",
-        "qef": False,
-        "drop_inverted_components": False,
-        "drop_enclosed_components": False,
-    }
     assert prompt["decimate"]["inputs"]["target_face_count"] == 200000
     assert prompt["unwrap"]["inputs"]["resolution"] == 4096
     assert prompt["bake_texture"]["inputs"]["texture_size"] == 4096
     assert "Pixal3DConditioning" not in class_types
     assert not any(class_type.startswith("MoGe") for class_type in class_types)
+
+
+@pytest.mark.parametrize("quality", ["draft", "balanced"])
+def test_mesh_dynamic_combos_use_core_api_wire_format(quality: str) -> None:
+    prompt = SINGLE.load_prompt()
+    SINGLE.configure_download(prompt, _single_inputs(quality=quality))
+
+    # Core selects the option from a scalar, then nests dotted child inputs
+    # for execute(). An already-nested object silently loses the whole input.
+    remesh = prompt["remesh"]["inputs"]
+    assert {key: value for key, value in remesh.items() if key.startswith("sign_mode")} == {
+        "sign_mode": "udf",
+        "sign_mode.qef": False,
+        "sign_mode.drop_inverted_components": False,
+        "sign_mode.drop_enclosed_components": False,
+    }
+    assert prompt["decimate"]["inputs"]["placement_mode"] == "midpoint"
 
 
 def test_export_uses_standard_comfy_3d_history() -> None:
