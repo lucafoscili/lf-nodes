@@ -542,6 +542,53 @@ FILTER_PROCESSORS: Dict[str, FilterProcessor] = {
     "vignette": apply_vignette_filter,
 }
 
+# These tools edit colour while retaining the input canvas geometry. Their
+# implementations historically consume RGB, so the editor boundary owns the
+# small RGBA adapter and keeps source alpha outside every effect/model call.
+# Geometry- or alpha-owning tools deliberately remain on the direct path.
+RGBA_RGB_PROCESSORS = frozenset({
+    "blend",
+    "bloom",
+    "brightness",
+    "brush",
+    "clarity",
+    "contrast",
+    "desaturate",
+    "film_grain",
+    "gaussian_blur",
+    "inpaint",
+    "line",
+    "saturation",
+    "sepia",
+    "split_tone",
+    "tilt_shift",
+    "unsharp_mask",
+    "vibrance",
+    "vignette",
+})
+
+
+def _process_rgba_as_rgb(
+    processor: FilterProcessor,
+    image: torch.Tensor,
+    settings: dict,
+) -> FilterResult:
+    rgb = image[..., :3]
+    alpha = image[..., 3:4]
+    processed, payload = processor(rgb, settings)
+    if not isinstance(processed, torch.Tensor) or tuple(processed.shape) != tuple(rgb.shape):
+        actual = (
+            tuple(processed.shape)
+            if isinstance(processed, torch.Tensor)
+            else type(processed).__name__
+        )
+        raise ValueError(
+            "Alpha-preserving editor filters must return the original RGB geometry; "
+            f"got {actual} for {tuple(rgb.shape)}."
+        )
+    processed = processed.to(device=image.device, dtype=image.dtype)
+    return torch.cat((processed, alpha), dim=-1), payload
+
 # region Process
 def process_filter(filter_type: str, image: torch.Tensor, settings: dict) -> FilterResult:
     """
@@ -562,5 +609,12 @@ def process_filter(filter_type: str, image: torch.Tensor, settings: dict) -> Fil
         processor = FILTER_PROCESSORS[filter_type]
     except KeyError as exc:
         raise UnknownFilterError(f"Unsupported filter type: {filter_type}") from exc
+    if (
+        filter_type in RGBA_RGB_PROCESSORS
+        and isinstance(image, torch.Tensor)
+        and image.ndim == 4
+        and image.shape[-1] == 4
+    ):
+        return _process_rgba_as_rgb(processor, image, settings)
     return processor(image, settings)
 # endregion
