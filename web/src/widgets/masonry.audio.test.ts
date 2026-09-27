@@ -4,6 +4,7 @@ import { LFWidgets } from '../managers/widgets';
 import { MasonryAudioFile, MasonryDeserializedValue, MasonryState } from '../types/widgets/masonry';
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
 import { masonryFactory } from './masonry';
+import { EV_HANDLERS } from '../helpers/masonry';
 
 const MANAGER_SYMBOL = Symbol.for('__LfManager__');
 const files: MasonryAudioFile[] = [
@@ -63,6 +64,26 @@ beforeEach(() => {
 });
 
 describe('image masonry selection hydration', () => {
+  it('persists clicked file identity through reload without confusing it with the preview URL', () => {
+    const { widget, state } = render(NodeName.loadImages);
+    const identity = { directory: 'F:/covers', relative_path: 'wanted.png' };
+    EV_HANDLERS.masonry(state, new CustomEvent('lf-event', { detail: {
+      comp: state.masonry,
+      eventType: 'lf-event',
+      originalEvent: new CustomEvent('image', { detail: { eventType: 'click' } }),
+      selectedShape: { index: 0, shape: { value: '/view?filename=preview.png', file_identity: identity } },
+    } }) as never);
+    expect(state.selected.file_identity).toEqual(identity);
+    const restored = render(NodeName.loadImages);
+    restored.state.masonry.setSelectedShape = vi.fn();
+    restored.widget.options.setValue(JSON.stringify(widget.options.getValue()));
+    expect(restored.state.selected.file_identity).toEqual(identity);
+    restored.widget.options.setValue(JSON.stringify({ dataset: { nodes: [] } }));
+    expect(restored.state.selected.file_identity).toEqual(identity);
+    restored.widget.options.setValue(JSON.stringify({ name: 'working.png' }));
+    expect(restored.state.selected.file_identity).toBeUndefined();
+  });
+
   it('hydrates a name-only selection and clears a stale positional selection', () => {
     const { widget, state } = render(NodeName.loadImages);
     state.selected = { index: 7, name: 'previous.png' };

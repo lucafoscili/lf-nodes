@@ -9896,7 +9896,7 @@ const installAudioPreviewHistory = (node, apply) => {
 const EV_HANDLERS$3 = {
   //#region Masonry handler
   masonry: (state, e) => {
-    var _a, _b;
+    var _a, _b, _c;
     const { comp, eventType, originalEvent, selectedShape } = e.detail;
     if (!comp.lfSelectable) {
       return;
@@ -9909,6 +9909,12 @@ const EV_HANDLERS$3 = {
             const v = ((_a = selectedShape.shape) == null ? void 0 : _a.value) || ((_b = selectedShape.shape) == null ? void 0 : _b.lfValue);
             state.selected.index = selectedShape.index;
             state.selected.name = v ? String(v).valueOf() : "";
+            const identity = (_c = selectedShape.shape) == null ? void 0 : _c.file_identity;
+            if (identity && typeof identity.directory === "string" && typeof identity.relative_path === "string") {
+              state.selected.file_identity = { ...identity };
+            } else {
+              delete state.selected.file_identity;
+            }
             break;
         }
         break;
@@ -9927,6 +9933,7 @@ const masonryFactory = {
         const { audio, masonry, selected } = STATE$6.get(wrapper);
         const { index, name } = selected;
         return {
+          ...selected.file_identity ? { file_identity: { ...selected.file_identity } } : {},
           ...audio ? { audio: audio.map((file) => ({ ...file })) } : {},
           columns: (masonry == null ? void 0 : masonry.lfColumns) || 3,
           dataset: (masonry == null ? void 0 : masonry.lfDataset) || {},
@@ -9939,7 +9946,7 @@ const masonryFactory = {
         const callback = (_, u) => {
           const state = STATE$6.get(wrapper);
           const { masonry, selected } = state;
-          const { audio, columns, dataset, index, name, view, slot_map } = u.parsedJSON;
+          const { audio, columns, dataset, index, name, view, slot_map, file_identity } = u.parsedJSON;
           if (columns) {
             masonry.lfColumns = columns;
           }
@@ -9948,6 +9955,11 @@ const masonryFactory = {
           }
           if (view) {
             masonry.lfView = view;
+          }
+          if (file_identity && typeof file_identity.directory === "string" && typeof file_identity.relative_path === "string") {
+            selected.file_identity = { ...file_identity };
+          } else if (isValidNumber(index) || typeof name === "string") {
+            delete selected.file_identity;
           }
           if (isValidNumber(index)) {
             selected.index = index;

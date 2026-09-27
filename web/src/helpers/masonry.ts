@@ -1,5 +1,5 @@
 import { LfDataCell, LfImageEventPayload, LfMasonryEventPayload } from '@lf-widgets/foundations';
-import { MasonryState } from '../types/widgets/masonry';
+import { MasonryFileIdentity, MasonryState } from '../types/widgets/masonry';
 
 export const EV_HANDLERS = {
   //#region Masonry handler
@@ -19,6 +19,12 @@ export const EV_HANDLERS = {
               selectedShape.shape?.value || (selectedShape.shape as LfDataCell<'image'>)?.lfValue;
             state.selected.index = selectedShape.index;
             state.selected.name = v ? String(v).valueOf() : '';
+            const identity = (selectedShape.shape as unknown as { file_identity?: MasonryFileIdentity })?.file_identity;
+            if (identity && typeof identity.directory === 'string' && typeof identity.relative_path === 'string') {
+              state.selected.file_identity = { ...identity };
+            } else {
+              delete state.selected.file_identity;
+            }
             break;
         }
         break;

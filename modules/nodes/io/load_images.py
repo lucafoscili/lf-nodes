@@ -28,6 +28,20 @@ from ...utils.helpers.torch import create_dummy_image_tensor
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_LoadImages
+def _identity_selection_index(identity, directory, dataset):
+    if identity is None:
+        return None
+    if not isinstance(identity, dict) or not isinstance(identity.get("directory"), str) or not isinstance(identity.get("relative_path"), str):
+        raise ValueError("Image file identity requires directory and relative_path strings.")
+    if not directory or os.path.normcase(os.path.abspath(identity["directory"])) != os.path.normcase(os.path.abspath(directory)):
+        raise ValueError("Selected image belongs to a different directory; select an image from the current directory.")
+    for index, node in enumerate(dataset.get("nodes", [])):
+        candidate = node.get("cells", {}).get("lfImage", {}).get("file_identity", {})
+        if candidate.get("relative_path") == identity["relative_path"]:
+            return index
+    raise ValueError("Selected image file is missing from the current directory listing.")
+
+
 class LF_LoadImages:
     def __init__(self):
         self._cached_images = {}
@@ -101,6 +115,7 @@ class LF_LoadImages:
         cache_images: bool = normalize_list_to_value(kwargs.get("cache_images"))
         copy_into_input_dir: bool = normalize_list_to_value(kwargs.get("copy_into_input_dir"))
         ui_widget: dict = normalize_json_input(kwargs.get("ui_widget", {}))
+        file_identity = ui_widget.get("file_identity") if ui_widget else None
 
         base_input_dir = get_comfy_dir("input")
         resolved_dir, resolved_directory, is_external_dir = resolve_input_directory_path(dir)
@@ -157,6 +172,9 @@ class LF_LoadImages:
 
             sel_idx_input = selected_index if isinstance(selected_index, int) else None
             sel_name_input = selected_name if isinstance(selected_name, str) else None
+            identity_index = _identity_selection_index(file_identity, resolved_dir, cached_dataset)
+            if identity_index is not None:
+                sel_idx_input = identity_index
 
             sel_img, sel_idx, sel_name = resolve_image_selection(
                 image_list,
@@ -277,7 +295,12 @@ class LF_LoadImages:
                             }
                         )
 
-                        nodes.append(create_masonry_node(preview_filename, url, index))
+                        tile = create_masonry_node(preview_filename, url, index)
+                        tile["cells"]["lfImage"]["file_identity"] = {
+                            "directory": os.path.abspath(resolved_dir),
+                            "relative_path": os.path.relpath(image_path, resolved_dir).replace("\\", "/"),
+                        }
+                        nodes.append(tile)
 
                         index += 1
                         if load_cap > 0 and index >= load_cap:
@@ -313,6 +336,9 @@ class LF_LoadImages:
 
         sel_idx_input = selected_index if isinstance(selected_index, int) else None
         sel_name_input = selected_name if isinstance(selected_name, str) else None
+        identity_index = _identity_selection_index(file_identity, resolved_dir, dataset)
+        if identity_index is not None:
+            sel_idx_input = identity_index
 
         sel_img, sel_idx, sel_name = resolve_image_selection(
             image_list,

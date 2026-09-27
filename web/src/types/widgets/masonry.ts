@@ -27,7 +27,12 @@ export interface MasonryAudioFile {
   subfolder: string;
   type: 'output';
 }
+export interface MasonryFileIdentity {
+  directory: string;
+  relative_path: string;
+}
 export interface MasonryDeserializedValue {
+  file_identity?: MasonryFileIdentity;
   audio?: MasonryAudioFile[];
   columns?: LfMasonryColumns;
   dataset: LfDataDataset;
@@ -43,6 +48,7 @@ export interface MasonryState extends BaseWidgetState {
   audio?: MasonryAudioFile[];
   masonry: HTMLLfMasonryElement;
   selected: {
+    file_identity?: MasonryFileIdentity;
     index?: number;
     name?: string;
   };

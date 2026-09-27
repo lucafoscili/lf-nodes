@@ -28,6 +28,7 @@ export const masonryFactory: MasonryFactory = {
         const { index, name } = selected;
 
         return {
+          ...(selected.file_identity ? { file_identity: { ...selected.file_identity } } : {}),
           ...(audio ? { audio: audio.map((file) => ({ ...file })) } : {}),
           columns: masonry?.lfColumns || 3,
           dataset: masonry?.lfDataset || {},
@@ -41,7 +42,7 @@ export const masonryFactory: MasonryFactory = {
           const state = STATE.get(wrapper);
           const { masonry, selected } = state;
 
-          const { audio, columns, dataset, index, name, view, slot_map } =
+          const { audio, columns, dataset, index, name, view, slot_map, file_identity } =
             u.parsedJSON as unknown as MasonryDeserializedValue;
 
           if (columns) {
@@ -52,6 +53,11 @@ export const masonryFactory: MasonryFactory = {
           }
           if (view) {
             masonry.lfView = view;
+          }
+          if (file_identity && typeof file_identity.directory === 'string' && typeof file_identity.relative_path === 'string') {
+            selected.file_identity = { ...file_identity };
+          } else if (isValidNumber(index) || typeof name === 'string') {
+            delete selected.file_identity;
           }
           if (isValidNumber(index)) {
             selected.index = index;
