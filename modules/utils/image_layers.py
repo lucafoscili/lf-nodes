@@ -12,10 +12,12 @@ from PIL import Image
 import torch
 
 from .helpers.conversion import pil_to_tensor
-from .helpers.logic import normalize_json_input
+from .helpers.logic import normalize_json_input, normalize_masks_for_images
 from .image_regions import (
     aspect_fit_canvas,
     aspect_fit_content_rect,
+    compose_image_regions,
+    extract_image_regions,
     image_items,
     restore_rgb_canvas_edit,
     single_image,
@@ -131,13 +133,43 @@ def _load_rgba(path, expected_sha256):
     return image, digest
 
 
-def load_image_layers(manifest, canvas_size):
+def _as_rgba(image):
+    if image.shape[-1] == 4:
+        return image
+    return torch.cat((image, torch.ones_like(image[..., :1])), dim=-1)
+
+
+def _retention_source(source):
+    return torch.cat((torch.ones_like(source[..., :3]), source[..., 3:4]), dim=-1)
+
+
+def _editor_entries(rows, base_layout, include_masks):
+    entries = []
+    if base_layout is not None:
+        for index, row in enumerate(base_layout['regions']):
+            entries.append({'kind': 'base', 'index': index, 'id': f"base:{row['id']}",
+                            'label': f"Base · {row['label']}"})
+    for index, row in enumerate(rows):
+        entries.append({'kind': 'layer', 'index': index, 'id': f"layer:{row['id']}",
+                        'label': f"{row['label']} · Fabric"})
+        if include_masks:
+            entries.append({'kind': 'mask', 'index': index, 'id': f"mask:{row['id']}",
+                            'label': f"{row['label']} · Cut · white keeps / black cuts"})
+    return entries
+
+
+def load_image_layers(manifest, canvas_size, include_masks=False, base=None, base_regions=None):
     document = _document(manifest, 'manifest')
     root = _root(document.get('root'))
     rows = document.get('layers')
     if not isinstance(rows, list) or not rows:
         raise ValueError('manifest layers must be a non-empty array.')
     size = _canvas_size(canvas_size)
+    include_masks = single_value(include_masks, 'include_masks')
+    if type(include_masks) is not bool:
+        raise ValueError('include_masks must be a boolean.')
+    if (base is None) != (base_regions is None):
+        raise ValueError('base and base_regions must be supplied together.')
 
     identifiers = set()
     canvases, sources, layout_rows = [], [], []
@@ -172,6 +204,24 @@ def load_image_layers(manifest, canvas_size):
     config = {'image_entries': [
         {'id': row['id'], 'label': row['label']} for row in layout_rows
     ]}
+    if include_masks or base is not None:
+        base_canvases, base_layout = [], None
+        if base is not None:
+            base_image = _as_rgba(single_image(base, 'base'))
+            base_canvases, base_layout, _ = extract_image_regions(base_image, base_regions, size)
+            layout['base_layout'] = base_layout
+            layout['base_rgba_sha256'] = _rgba_digest(base_image)
+        entries = _editor_entries(layout_rows, base_layout, include_masks)
+        expanded = list(base_canvases)
+        for canvas, source in zip(canvases, sources):
+            expanded.append(canvas)
+            if include_masks:
+                mask_canvas, _ = aspect_fit_canvas(_retention_source(source), size, padding='transparent')
+                expanded.append(mask_canvas)
+        canvases = expanded
+        layout['include_masks'] = include_masks
+        layout['editor_entries'] = entries
+        config = {'image_entries': [{'id': entry['id'], 'label': entry['label']} for entry in entries]}
     return canvases, layout, config, sources
 
 
@@ -215,20 +265,57 @@ def _layout(value):
     return size, result
 
 
-def compose_image_layers(base, edited, original_layers, source_layers, layout):
+def compose_image_layers(base, edited, original_layers, source_layers, layout, base_mask=None):
     base_image = single_image(base, 'base')
     size, rows = _layout(layout)
     edits = image_items(edited, 'edited')
     baselines = image_items(original_layers, 'original_layers')
     sources = image_items(source_layers, 'source_layers')
-    if len(edits) != len(rows) or len(baselines) != len(rows) or len(sources) != len(rows):
+    document = _document(layout, 'layout')
+    include_masks = document.get('include_masks', False)
+    if type(include_masks) is not bool:
+        raise ValueError('layout include_masks must be a boolean.')
+    base_layout = document.get('base_layout')
+    base_count = 0
+    if base_layout is not None:
+        base_image = _as_rgba(base_image)
+        if _rgba_digest(base_image) != document.get('base_rgba_sha256'):
+            raise ValueError('base does not match extraction source.')
+        _, expected_layout, _ = extract_image_regions(base_image, base_layout, size)
+        if expected_layout != base_layout:
+            raise ValueError('base_layout does not match extraction geometry.')
+        base_count = len(base_layout['regions'])
+    if base_mask is not None and base_layout is None:
+        raise ValueError('base_mask requires editable base regions in layout.')
+    if 'editor_entries' in document or include_masks or base_layout is not None:
+        if document.get('editor_entries') != _editor_entries(rows, base_layout, include_masks):
+            raise ValueError('layout editor_entries do not match extraction order.')
+    entry_count = base_count + len(rows) * (2 if include_masks else 1)
+    if len(edits) != entry_count or len(baselines) != entry_count or len(sources) != len(rows):
         raise ValueError(
             'edited, original_layers and source_layers must match layout cardinality exactly; '
             'no broadcast.')
 
+    if base_layout is not None:
+        edited_base = compose_image_regions(
+            base_image, [_as_rgba(item) for item in edits[:base_count]],
+            baselines[:base_count], base_layout)
+        if base_mask is not None:
+            mask = normalize_masks_for_images(base_mask, 1)[0].to(
+                device=base_image.device, dtype=base_image.dtype)
+            if tuple(mask.shape) != tuple(base_image.shape[:3]):
+                raise ValueError('base_mask dimensions must match the base image.')
+            if not torch.isfinite(mask).all() or mask.min() < 0 or mask.max() > 1:
+                raise ValueError('base_mask requires finite pixels in 0..1.')
+            edited_base[..., :3] = base_image[..., :3] + (
+                edited_base[..., :3] - base_image[..., :3]) * mask.unsqueeze(-1)
+        base_image = edited_base
+
     _, base_height, base_width, _ = base_image.shape
     restored_layers = []
-    for row, edited_image, baseline, source in zip(rows, edits, baselines, sources):
+    for index, (row, source) in enumerate(zip(rows, sources)):
+        entry_index = base_count + index * (2 if include_masks else 1)
+        edited_image, baseline = edits[entry_index], baselines[entry_index]
         x, y, width, height = row['rect']
         if x + width > base_width or y + height > base_height:
             raise ValueError('Layer rect must fit inside the base image bounds.')
@@ -245,8 +332,16 @@ def compose_image_layers(base, edited, original_layers, source_layers, layout):
             raise ValueError('edited layer dimensions must match the RGB/RGBA editing canvas.')
 
         expected, _ = aspect_fit_canvas(source, size, padding='transparent')
-        restored_layers.append(restore_rgb_canvas_edit(
-            source, edited_image, baseline, expected, row['content_rect'], name='Layer'))
+        restored = restore_rgb_canvas_edit(
+            source, edited_image, baseline, expected, row['content_rect'], name='Layer')
+        if include_masks:
+            retention_source = _retention_source(source)
+            expected_mask, _ = aspect_fit_canvas(retention_source, size, padding='transparent')
+            retention = restore_rgb_canvas_edit(
+                retention_source, edits[entry_index + 1], baselines[entry_index + 1],
+                expected_mask, row['content_rect'], name='Cut mask')
+            restored[..., 3:4] = source[..., 3:4] * retention[..., :3].mean(dim=-1, keepdim=True)
+        restored_layers.append(restored)
 
     atlas = _tensor_to_pil(base_image).convert('RGBA')
     for row, layer in zip(rows, restored_layers):

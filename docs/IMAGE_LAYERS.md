@@ -56,3 +56,35 @@ byte for 8-bit sources.
 Outputs are the RGBA atlas, its single-item list companion, and the restored
 native RGBA layer list. The latter is available for an explicit downstream
 saver; neither node writes it automatically.
+
+## Combined base and cut-mask editing
+
+Optional loader inputs `base` (one RGB/RGBA image) and `base_regions` must be
+supplied together. The region document uses the existing image-region format:
+`{"regions":[{"id":"panel","label":"Panel","rect":[0,0,256,128]}]}`.
+Regions must not overlap. Their RGBA canvases precede the layer canvases in the
+same batch, with IDs `base:<id>`. Base composition reuses Image Regions' local
+RGB delta restoration; original base alpha is retained.
+
+Set optional `include_masks` to true to place a cut-mask canvas after each
+fabric canvas. Expanded entries use `layer:<id>` and `mask:<id>` IDs. The
+complete order is base regions, fabric 1, cut mask 1, fabric 2, cut mask 2, and
+so on. Connect the entire edited and original editor lists to the composer;
+`source_layers` still contains only the native fabric sources. All editor
+canvases share the same square RGBA geometry. With both additions omitted,
+the original loader output and layout are unchanged.
+
+Cut masks start with white RGB and the source alpha, so original coverage is
+visible over the editor checkerboard. White retains/restores original source
+alpha, black cuts it, and gray multiplies it for partial coverage. Colored mask
+edits use their mean RGB value. Mask edits cannot expand source coverage;
+editor alpha and square padding edits are ignored. Unchanged masks preserve
+the native layer exactly, including soft source alpha. Cuts reveal lower
+layers and then the edited base.
+
+The composer's optional `base_mask` permits base RGB edits where white and
+preserves the original base where black (gray permits partial edits). Supply
+exactly one mask with the original base dimensions. It does not change base
+alpha or fabric coverage. Expanded layouts validate base identity, entry order,
+source identity, original canvases, and exact editor/source cardinalities.
+Neither node adds events, history state, or output sockets.

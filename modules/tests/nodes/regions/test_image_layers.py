@@ -12,6 +12,7 @@ import torch
 from modules.nodes.regions.image_layers import LF_LoadImageLayers, LF_ComposeImageLayers
 from modules.utils.helpers.conversion import pil_to_tensor
 from modules.utils.image_layers import load_image_layers, compose_image_layers
+from modules.utils.constants import Input
 
 
 def save_rgba(path: Path, size, seed, *, opaque=False):
@@ -247,3 +248,188 @@ def test_headless_nodes_accept_list_wrapped_controls_and_publish_list_metadata(t
     assert LF_ComposeImageLayers.OUTPUT_IS_LIST == (False, True, True)
     assert LF_LoadImageLayers.INPUT_IS_LIST is True
     assert LF_ComposeImageLayers.INPUT_IS_LIST is True
+
+
+def test_published_schema_is_unchanged_except_additive_optional_inputs():
+    loader = LF_LoadImageLayers.INPUT_TYPES()
+    assert loader['required'] == {
+        'manifest': (Input.JSON, {'tooltip': 'Object with root and ordered layers: [{id,label,file,sha256?,rect:[x,y,width,height]}].'}),
+        'canvas_size': (Input.INTEGER, {'default': 512, 'min': 1, 'max': 4096,
+            'tooltip': 'Square RGBA editing canvas; each native layer fits without stretching.'}),
+    }
+    assert list(loader['optional']) == ['include_masks', 'base', 'base_regions']
+    assert loader['optional']['include_masks'][0] == Input.BOOLEAN
+    assert loader['optional']['include_masks'][1]['default'] is False
+    assert loader['optional']['base'][0] == Input.IMAGE
+    assert loader['optional']['base_regions'][0] == Input.JSON
+    composer = LF_ComposeImageLayers.INPUT_TYPES()
+    assert composer['required'] == {
+        'base': (Input.IMAGE, {'tooltip': 'Exactly one RGB/RGBA base atlas.'}),
+        'edited': (Input.IMAGE, {'tooltip': 'Edited canvases in validated original entry order.'}),
+        'original_layers': (Input.IMAGE, {'tooltip': 'Breakpoint orig_image_list, in the same order; required for local edit deltas.'}),
+        'source_layers': (Input.IMAGE, {'tooltip': 'Native RGBA source_layers returned by Load Image Layers.'}),
+        'layout': (Input.JSON, {'tooltip': 'Layout returned by Load Image Layers.'}),
+    }
+    assert list(composer['optional']) == ['base_mask']
+    assert composer['optional']['base_mask'][0] == Input.MASK
+    assert LF_LoadImageLayers.RETURN_TYPES == (Input.IMAGE, Input.IMAGE, Input.JSON, Input.JSON, Input.IMAGE)
+    assert LF_ComposeImageLayers.RETURN_TYPES == (Input.IMAGE, Input.IMAGE, Input.IMAGE)
+
+
+def combined_fixture(tmp_path, *, include_masks=True):
+    root, manifest = fixture(tmp_path, overlap=True)
+    _, base = base_image()
+    regions = {'regions': [{'id': 'body', 'label': 'Body', 'rect': [1, 2, 4, 2]}]}
+    result = LF_LoadImageLayers().on_exec(
+        [manifest], [16], [include_masks], [base], [regions])
+    return root, manifest, base, result
+
+
+@pytest.mark.parametrize('include_masks', [False, True])
+def test_combined_noop_and_white_masks_match_baseline_and_preserve_sources(tmp_path, include_masks):
+    root, manifest, base, (batch, canvases, layout, config, sources) = combined_fixture(
+        tmp_path, include_masks=include_masks)
+    count = 5 if include_masks else 3
+    assert batch.shape == (count, 16, 16, 4)
+    assert len(sources) == 2
+    ids = ['base:body', 'layer:lower', 'mask:lower', 'layer:upper', 'mask:upper'] if include_masks else [
+        'base:body', 'layer:lower', 'layer:upper']
+    assert [row['id'] for row in config['image_entries']] == ids
+    source_before = [source.clone() for source in sources]
+    hashes = {path: digest(path) for path in root.rglob('*.png')}
+    base_pil, _ = base_image()
+    for transport in ('exact', 'png', 'white'):
+        edits = [canvas.clone() for canvas in canvases]
+        baselines = [canvas.clone() for canvas in canvases]
+        if transport == 'png':
+            edits = [canvas.mul(255).round().div(255) for canvas in edits]
+            baselines = [canvas.mul(255).round().div(255) for canvas in baselines]
+        if transport == 'white' and include_masks:
+            for index in (2, 4):
+                edits[index][..., :3] = 1
+                edits[index][..., 3] = 0  # Editor alpha does not control retention.
+        atlas, layers = compose_image_layers(base, edits, baselines, sources, layout)
+        assert tensor_bytes(atlas) == pillow_reference(base_pil, manifest).tobytes()
+        assert all(torch.equal(actual, original) for actual, original in zip(layers, sources))
+    assert all(torch.equal(actual, original) for actual, original in zip(sources, source_before))
+    assert {path: digest(path) for path in hashes} == hashes
+
+
+def test_black_cut_masks_reveal_edited_base_and_lower_layer_and_white_restores(tmp_path):
+    _, _, base, (_, canvases, layout, _, sources) = combined_fixture(tmp_path)
+    edits = [canvas.clone() for canvas in canvases]
+    edits[0][..., :3] = torch.tensor([1., 0., 0.])
+    edits[4][..., :3] = 0
+    atlas, layers = compose_image_layers(base, edits, canvases, sources, layout)
+    assert torch.count_nonzero(layers[1][..., 3]) == 0
+    assert torch.equal(layers[0], sources[0])
+    expected = Image.new('RGBA', (8, 8), (11, 22, 33, 255))
+    expected.paste((255, 0, 0, 255), (1, 2, 5, 4))
+    lower = Image.frombytes('RGBA', (4, 2), tensor_bytes(sources[0]))
+    expected.alpha_composite(lower, (1, 2))
+    assert tensor_bytes(atlas) == expected.tobytes()
+    edits[2][..., :3] = 0
+    atlas, layers = compose_image_layers(base, edits, canvases, sources, layout)
+    assert torch.all(atlas[0, 2:4, 1:5] == torch.tensor([1., 0., 0., 1.]))
+    for index in (2, 4):
+        edits[index][..., :3] = 1
+    _, restored = compose_image_layers(base, edits, canvases, sources, layout)
+    assert all(torch.equal(actual, source) for actual, source in zip(restored, sources))
+
+
+def test_gray_masks_multiply_native_alpha_and_ignore_padding(tmp_path):
+    _, manifest = fixture(tmp_path)
+    _, base = base_image()
+    canvases, layout, _, sources = load_image_layers(manifest, 16, include_masks=True)
+    edits = [canvas.clone() for canvas in canvases]
+    edits[1][:, 4:12, :, :3] = .5
+    edits[3][:, :4, :, :3] = 1  # Padding cannot add coverage.
+    edits[3][:, 12:, :, :3] = 1
+    atlas, layers = compose_image_layers(base, edits, canvases, sources, layout)
+    assert torch.allclose(layers[0][..., 3], sources[0][..., 3] * .5, atol=1e-7, rtol=0)
+    assert torch.equal(layers[0][..., :3], sources[0][..., :3])
+    assert torch.equal(layers[1], sources[1])
+    assert torch.all(atlas[..., 3] == 1)
+
+
+def test_uv_mask_protects_base_edits_and_preserves_original_alpha(tmp_path):
+    _, _, base, (_, canvases, layout, _, sources) = combined_fixture(tmp_path)
+    edits = [canvas.clone() for canvas in canvases]
+    edits[0][..., :3] = 1
+    edits[2][..., :3] = edits[4][..., :3] = 0
+    mask = torch.zeros((1, 8, 8))
+    mask[:, 2:4, 1:3] = 1
+    atlas, _, _ = LF_ComposeImageLayers().on_exec(
+        [base], edits, canvases, sources, [layout], [mask])
+    assert torch.all(atlas[:, 2:4, 1:3, :3] == 1)
+    assert torch.equal(atlas[:, 2:4, 3:5, :3], base[:, 2:4, 3:5])
+    assert torch.all(atlas[..., 3] == 1)
+
+
+@pytest.mark.parametrize('bad_input', ['count', 'source_count', 'order', 'mask_baseline', 'base', 'layout_order'])
+def test_combined_rejects_misaligned_baselines_and_layout(tmp_path, bad_input):
+    _, _, base, (_, canvases, layout, _, sources) = combined_fixture(tmp_path)
+    edits = [canvas.clone() for canvas in canvases]
+    baselines = [canvas.clone() for canvas in canvases]
+    message = 'cardinality'
+    if bad_input == 'count':
+        edits.pop()
+    elif bad_input == 'source_count':
+        sources.pop()
+    elif bad_input == 'order':
+        baselines[1], baselines[3] = baselines[3], baselines[1]
+        message = 'order/source'
+    elif bad_input == 'mask_baseline':
+        baselines[2][..., :3] = 0
+        message = 'order/source'
+    elif bad_input == 'base':
+        base = base.clone()
+        base[..., 0] = 1
+        message = 'extraction source'
+    else:
+        layout['editor_entries'].reverse()
+        message = 'extraction order'
+    with pytest.raises(ValueError, match=message):
+        compose_image_layers(base, edits, baselines, sources, layout)
+
+
+def test_optional_inputs_fail_clearly_when_incomplete(tmp_path):
+    _, manifest = fixture(tmp_path)
+    _, base = base_image()
+    with pytest.raises(ValueError, match='supplied together'):
+        load_image_layers(manifest, 16, base=base)
+    canvases, layout, _, sources = load_image_layers(manifest, 16)
+    assert set(layout) == {'schema', 'canvas_size', 'layers'}
+    with pytest.raises(ValueError, match='editable base regions'):
+        compose_image_layers(base, canvases, canvases, sources, layout, torch.ones((1, 8, 8)))
+
+
+def test_cut_masks_cannot_expand_transparent_source_and_base_alpha_is_retained(tmp_path):
+    root, manifest = fixture(tmp_path)
+    Image.new('RGBA', (4, 2), (200, 100, 50, 0)).save(root / 'first.png')
+    manifest['layers'] = [manifest['layers'][0]]
+    manifest['layers'][0]['sha256'] = digest(root / 'first.png')
+    base = pil_to_tensor(Image.new('RGBA', (8, 8), (11, 22, 33, 123)))
+    before = base.clone()
+    regions = {'regions': [{'id': 'panel', 'label': 'Panel', 'rect': [1, 2, 4, 2]}]}
+    canvases, layout, _, sources = load_image_layers(manifest, 16, True, base, regions)
+    edits = [canvas.clone() for canvas in canvases]
+    edits[0][..., :3] = 1
+    edits[0][..., 3] = 0
+    edits[2][...] = 1
+    atlas, layers = compose_image_layers(base, edits, canvases, sources, layout)
+    assert torch.count_nonzero(layers[0][..., 3]) == 0
+    assert torch.equal(atlas[..., 3], base[..., 3])
+    assert torch.equal(base, before)
+    assert torch.equal(atlas[:, :2], base[:, :2])
+
+
+@pytest.mark.parametrize('mask,message', [
+    (torch.ones((2, 8, 8)), 'count mismatch'),
+    (torch.ones((1, 4, 4)), 'dimensions'),
+    (torch.full((1, 8, 8), float('nan')), 'finite'),
+])
+def test_base_mask_requires_one_matching_finite_mask(tmp_path, mask, message):
+    _, _, base, (_, canvases, layout, _, sources) = combined_fixture(tmp_path)
+    with pytest.raises(ValueError, match=message):
+        compose_image_layers(base, canvases, canvases, sources, layout, mask)

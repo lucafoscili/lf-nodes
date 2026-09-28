@@ -16,6 +16,12 @@ class LF_LoadImageLayers:
                 'default': 512, 'min': 1, 'max': 4096,
                 'tooltip': 'Square RGBA editing canvas; each native layer fits without stretching.',
             }),
+        }, 'optional': {
+            'include_masks': (Input.BOOLEAN, {
+                'default': False, 'tooltip': 'Add cut-mask canvases: white keeps coverage, black cuts, gray partially keeps.',
+            }),
+            'base': (Input.IMAGE, {'tooltip': 'One base image; supply together with base_regions to edit it in the same session.'}),
+            'base_regions': (Input.JSON, {'tooltip': 'Non-overlapping base regions: {regions:[{id,label,rect:[x,y,width,height]}]}.'}),
         }}
 
     CATEGORY = CATEGORY
@@ -32,8 +38,9 @@ class LF_LoadImageLayers:
         'Authoritative ordered native-size RGBA sources; connect directly to Compose Image Layers.',
     )
 
-    def on_exec(self, manifest, canvas_size=512):
-        images, layout, config, sources = load_image_layers(manifest, canvas_size)
+    def on_exec(self, manifest, canvas_size=512, include_masks=False, base=None, base_regions=None):
+        images, layout, config, sources = load_image_layers(
+            manifest, canvas_size, include_masks, base, base_regions)
         batches, image_list = normalize_output_image(images)
         return (batches[0], image_list, layout, config, sources)
 
@@ -51,6 +58,8 @@ class LF_ComposeImageLayers:
                 'tooltip': 'Native RGBA source_layers returned by Load Image Layers.',
             }),
             'layout': (Input.JSON, {'tooltip': 'Layout returned by Load Image Layers.'}),
+        }, 'optional': {
+            'base_mask': (Input.MASK, {'tooltip': 'Base-region RGB edit coverage: white permits edits, black preserves the original base.'}),
         }}
 
     CATEGORY = CATEGORY
@@ -65,9 +74,9 @@ class LF_ComposeImageLayers:
         'Ordered native-size RGBA layer images with RGB edits and original alpha.',
     )
 
-    def on_exec(self, base, edited, original_layers, source_layers, layout):
+    def on_exec(self, base, edited, original_layers, source_layers, layout, base_mask=None):
         atlas, layers = compose_image_layers(
-            base, edited, original_layers, source_layers, layout)
+            base, edited, original_layers, source_layers, layout, base_mask)
         batches, atlas_list = normalize_output_image([atlas])
         return (batches[0], atlas_list, layers)
 
