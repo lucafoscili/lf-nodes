@@ -71,7 +71,7 @@ class LF_ComposeImageLayers:
     OUTPUT_TOOLTIPS = (
         'Pillow-compatible RGBA atlas with restored layers alpha-composited in manifest order.',
         'Single-item list containing the composed atlas.',
-        'Ordered native-size RGBA layer images with RGB edits and original alpha.',
+        'Ordered native-size RGBA layer images with RGB edits and original coverage, optionally reduced by cut masks.',
     )
 
     def on_exec(self, base, edited, original_layers, source_layers, layout, base_mask=None):
