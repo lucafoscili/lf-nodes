@@ -295,6 +295,10 @@ def test_combined_noop_and_white_masks_match_baseline_and_preserve_sources(tmp_p
     ids = ['base:body', 'layer:lower', 'mask:lower', 'layer:upper', 'mask:upper'] if include_masks else [
         'base:body', 'layer:lower', 'layer:upper']
     assert [row['id'] for row in config['image_entries']] == ids
+    labels = ['Base · Body', 'Fabric · Lower cloth', 'Cut · Lower cloth',
+              'Fabric · Upper cloth', 'Cut · Upper cloth'] if include_masks else [
+                  'Base · Body', 'Fabric · Lower cloth', 'Fabric · Upper cloth']
+    assert [row['label'] for row in config['image_entries']] == labels
     source_before = [source.clone() for source in sources]
     hashes = {path: digest(path) for path in root.rglob('*.png')}
     base_pil, _ = base_image()

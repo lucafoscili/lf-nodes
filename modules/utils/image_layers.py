@@ -151,10 +151,10 @@ def _editor_entries(rows, base_layout, include_masks):
                             'label': f"Base · {row['label']}"})
     for index, row in enumerate(rows):
         entries.append({'kind': 'layer', 'index': index, 'id': f"layer:{row['id']}",
-                        'label': f"{row['label']} · Fabric"})
+                        'label': f"Fabric · {row['label']}"})
         if include_masks:
             entries.append({'kind': 'mask', 'index': index, 'id': f"mask:{row['id']}",
-                            'label': f"{row['label']} · Cut · white keeps / black cuts"})
+                            'label': f"Cut · {row['label']}"})
     return entries
 
 

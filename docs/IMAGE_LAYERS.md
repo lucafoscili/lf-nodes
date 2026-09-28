@@ -67,8 +67,9 @@ same batch, with IDs `base:<id>`. Base composition reuses Image Regions' local
 RGB delta restoration; original base alpha is retained.
 
 Set optional `include_masks` to true to place a cut-mask canvas after each
-fabric canvas. Expanded entries use `layer:<id>` and `mask:<id>` IDs. The
-complete order is base regions, fabric 1, cut mask 1, fabric 2, cut mask 2, and
+fabric canvas. Expanded entries use `layer:<id>` and `mask:<id>` IDs. Labels
+begin with `Fabric ·` and `Cut ·` so the role remains visible in narrow editor
+tiles. The complete order is base regions, fabric 1, cut mask 1, fabric 2, cut mask 2, and
 so on. Connect the entire edited and original editor lists to the composer;
 `source_layers` still contains only the native fabric sources. All editor
 canvases share the same square RGBA geometry. With both additions omitted,
