@@ -265,7 +265,7 @@ def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
             assert prompt["sprite_sampler"]["class_type"] == (
                 "LF_PeriodicImageBatchSampler"
             )
-            assert prompt["remove_background"]["class_type"] == "VNCCS_RMBG2"
+            assert prompt["remove_background"]["class_type"] == "LF_BackgroundRemover"
             assert prompt["verify_rmbg_alpha"]["class_type"] == "ImageToMask"
             assert prompt["rmbg_transparency_mask"]["class_type"] == "InvertMask"
             assert prompt["validated_cutout"]["class_type"] == (
@@ -780,14 +780,9 @@ def test_anchored_sprite_loop_builds_the_exact_sprite_output_branch(
     }
     assert prompt["remove_background"]["inputs"] == {
         "image": ["sprite_sampler", 0],
+        "transparent_background": True,
+        "background_color": "#000000",
         "model": "RMBG-2.0",
-        "sensitivity": 1.0,
-        "process_res": 1024,
-        "mask_blur": 0,
-        "mask_offset": 0,
-        "invert_output": False,
-        "refine_foreground": False,
-        "background": "Alpha",
     }
     assert prompt["verify_rmbg_alpha"]["inputs"] == {
         "image": ["remove_background", 0],
@@ -922,7 +917,7 @@ def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
 
     assert len(workflow.required_model_assets) == 1
     asset = workflow.required_model_assets[0]
-    assert asset.label == "VNCCS RMBG-2.0 model"
+    assert asset.label == "RMBG-2.0 model"
     assert asset.relative_paths == (
         "RMBG/RMBG-2.0/config.json",
         "RMBG/RMBG-2.0/model.safetensors",
@@ -935,7 +930,7 @@ def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
         for workflow_id, other in workflows.items()
         if workflow_id not in {workflow.id, turnaround.id}
     )
-    assert "Runner does not start the wrapper's fallback download" in (
+    assert "Runner does not download model assets" in (
         workflow.description
     )
     assert "one reference-derived scale and horizontal pivot" in (
@@ -1007,6 +1002,13 @@ def test_character_turnaround_builds_one_closed_kitchen_orbit_and_four_views(
         "source_fps": 24.0,
         "intended_fps": 1.0,
         "sampling_basis": "visual_motion",
+    }
+    assert prompt["remove_background"]["class_type"] == "LF_BackgroundRemover"
+    assert prompt["remove_background"]["inputs"] == {
+        "image": ["sprite_sampler", 0],
+        "transparent_background": True,
+        "background_color": "#000000",
+        "model": "RMBG-2.0",
     }
     assert prompt["sprite_normalize"]["inputs"] == {
         "image": ["validated_cutout", 0],
@@ -1120,7 +1122,7 @@ def test_directed_view_download_prunes_template_only_sprite_dependencies() -> No
         "LF_NormalizeSpriteBatch",
         "LF_PeriodicImageBatchSampler",
         "MiniMaxH3AddGuide",
-        "VNCCS_RMBG2",
+        "LF_BackgroundRemover",
     }.isdisjoint(configured_types)
     assert "LF_SelectSettledImageFrame" in configured_types
     for removed in (

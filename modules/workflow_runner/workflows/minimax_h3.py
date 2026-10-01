@@ -64,7 +64,7 @@ _DIRECTED_VIEW_ANALYSIS_RESOLUTION = 96
 
 _RMBG2_MODEL_ASSETS = (
     WorkflowModelAsset(
-        label="VNCCS RMBG-2.0 model",
+        label="RMBG-2.0 model",
         relative_paths=(
             "RMBG/RMBG-2.0/config.json",
             "RMBG/RMBG-2.0/model.safetensors",
@@ -685,14 +685,9 @@ def _apply_anchored_sprite_graph_settings(
     )
     prompt["remove_background"]["inputs"].update(
         {
+            "transparent_background": True,
+            "background_color": "#000000",
             "model": "RMBG-2.0",
-            "sensitivity": 1.0,
-            "process_res": 1024,
-            "mask_blur": 0,
-            "mask_offset": 0,
-            "invert_output": False,
-            "refine_foreground": False,
-            "background": "Alpha",
         }
     )
     prompt["sprite_normalize"]["inputs"].update(
@@ -1013,14 +1008,9 @@ def _configure_character_turnaround(
     )
     prompt["remove_background"]["inputs"].update(
         {
+            "transparent_background": True,
+            "background_color": "#000000",
             "model": "RMBG-2.0",
-            "sensitivity": 1.0,
-            "process_res": 1024,
-            "mask_blur": 0,
-            "mask_offset": 0,
-            "invert_output": False,
-            "refine_foreground": False,
-            "background": "Alpha",
         }
     )
     prompt["sprite_normalize"]["inputs"].update(
@@ -2062,8 +2052,8 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
             "horizontal pivot to the entire batch while aligning each alpha baseline. It "
             "normalizes alpha-content bounds, not semantic body height: equipment, effects, "
             "and shadows count, and it does not stabilize the inferred matte itself. "
-            "It requires the installed VNCCS_RMBG2 node and the declared local RMBG-2.0 "
-            "files; Runner does not start the wrapper's fallback download."
+            "LF_BackgroundRemover uses the declared local RMBG-2.0 files; "
+            "Runner does not download model assets."
         ),
         category="MiniMax H3",
         card=WorkflowCardPresentation(

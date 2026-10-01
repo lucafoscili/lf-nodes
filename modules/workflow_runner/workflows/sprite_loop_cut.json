@@ -26,16 +26,11 @@
   "remove_background": {
     "inputs": {
       "image": ["select_loop", 0],
-      "model": "RMBG-2.0",
-      "sensitivity": 1.0,
-      "process_res": 1024,
-      "mask_blur": 0,
-      "mask_offset": 0,
-      "invert_output": false,
-      "refine_foreground": false,
-      "background": "Alpha"
+      "transparent_background": true,
+      "background_color": "#000000",
+      "model": "RMBG-2.0"
     },
-    "class_type": "VNCCS_RMBG2",
+    "class_type": "LF_BackgroundRemover",
     "_meta": {"title": "Cut the subject out"}
   },
   "verify_alpha": {

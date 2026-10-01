@@ -110,16 +110,12 @@ def test_every_direction_has_the_same_rmbg_and_alpha_validation_chain() -> None:
     prompt = WORKFLOW.load_prompt()
 
     for direction in DIRECTIONS:
+        assert prompt[f"remove_{direction}"]["class_type"] == "LF_BackgroundRemover"
         assert prompt[f"remove_{direction}"]["inputs"] == {
             "image": [f"load_{direction}", 0],
+            "transparent_background": True,
+            "background_color": "#000000",
             "model": "RMBG-2.0",
-            "sensitivity": 1.0,
-            "process_res": 1024,
-            "mask_blur": 0,
-            "mask_offset": 0,
-            "invert_output": False,
-            "refine_foreground": False,
-            "background": "Alpha",
         }
         assert prompt[f"verify_{direction}_alpha"]["class_type"] == "ImageToMask"
         assert prompt[f"verify_{direction}_alpha"]["inputs"] == {
@@ -135,7 +131,7 @@ def test_every_direction_has_the_same_rmbg_and_alpha_validation_chain() -> None:
         }
 
     assert sum(
-        node["class_type"] == "VNCCS_RMBG2" for node in prompt.values()
+        node["class_type"] == "LF_BackgroundRemover" for node in prompt.values()
     ) == 4
     assert sum(node["class_type"] == "ImageToMask" for node in prompt.values()) == 4
 

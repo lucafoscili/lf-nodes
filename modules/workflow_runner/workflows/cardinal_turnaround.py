@@ -50,7 +50,7 @@ _DIRECTIONS = (
 
 _RMBG2_MODEL_ASSETS = (
     WorkflowModelAsset(
-        label="VNCCS RMBG-2.0 model",
+        label="RMBG-2.0 model",
         relative_paths=(
             "RMBG/RMBG-2.0/config.json",
             "RMBG/RMBG-2.0/model.safetensors",

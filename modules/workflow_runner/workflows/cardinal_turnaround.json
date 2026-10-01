@@ -7,16 +7,11 @@
   "remove_front": {
     "inputs": {
       "image": ["load_front", 0],
-      "model": "RMBG-2.0",
-      "sensitivity": 1.0,
-      "process_res": 1024,
-      "mask_blur": 0,
-      "mask_offset": 0,
-      "invert_output": false,
-      "refine_foreground": false,
-      "background": "Alpha"
+      "transparent_background": true,
+      "background_color": "#000000",
+      "model": "RMBG-2.0"
     },
-    "class_type": "VNCCS_RMBG2",
+    "class_type": "LF_BackgroundRemover",
     "_meta": {"title": "Extract the front-view foreground"}
   },
   "verify_front_alpha": {
@@ -46,16 +41,11 @@
   "remove_right": {
     "inputs": {
       "image": ["load_right", 0],
-      "model": "RMBG-2.0",
-      "sensitivity": 1.0,
-      "process_res": 1024,
-      "mask_blur": 0,
-      "mask_offset": 0,
-      "invert_output": false,
-      "refine_foreground": false,
-      "background": "Alpha"
+      "transparent_background": true,
+      "background_color": "#000000",
+      "model": "RMBG-2.0"
     },
-    "class_type": "VNCCS_RMBG2",
+    "class_type": "LF_BackgroundRemover",
     "_meta": {"title": "Extract the subject-right foreground"}
   },
   "verify_right_alpha": {
@@ -85,16 +75,11 @@
   "remove_back": {
     "inputs": {
       "image": ["load_back", 0],
-      "model": "RMBG-2.0",
-      "sensitivity": 1.0,
-      "process_res": 1024,
-      "mask_blur": 0,
-      "mask_offset": 0,
-      "invert_output": false,
-      "refine_foreground": false,
-      "background": "Alpha"
+      "transparent_background": true,
+      "background_color": "#000000",
+      "model": "RMBG-2.0"
     },
-    "class_type": "VNCCS_RMBG2",
+    "class_type": "LF_BackgroundRemover",
     "_meta": {"title": "Extract the back-view foreground"}
   },
   "verify_back_alpha": {
@@ -124,16 +109,11 @@
   "remove_left": {
     "inputs": {
       "image": ["load_left", 0],
-      "model": "RMBG-2.0",
-      "sensitivity": 1.0,
-      "process_res": 1024,
-      "mask_blur": 0,
-      "mask_offset": 0,
-      "invert_output": false,
-      "refine_foreground": false,
-      "background": "Alpha"
+      "transparent_background": true,
+      "background_color": "#000000",
+      "model": "RMBG-2.0"
     },
-    "class_type": "VNCCS_RMBG2",
+    "class_type": "LF_BackgroundRemover",
     "_meta": {"title": "Extract the subject-left foreground"}
   },
   "verify_left_alpha": {

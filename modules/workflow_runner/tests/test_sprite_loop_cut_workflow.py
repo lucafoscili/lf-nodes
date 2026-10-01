@@ -67,7 +67,18 @@ def test_graph_feeds_decoded_frames_and_fps_into_the_loop_picker() -> None:
     assert prompt["select_loop"]["class_type"] == "LF_SelectLoopSegment"
     assert prompt["select_loop"]["inputs"]["image"] == ["components", 0]
     assert prompt["select_loop"]["inputs"]["source_fps"] == ["components", 2]
-    assert prompt["remove_background"]["inputs"]["image"] == ["select_loop", 0]
+    assert prompt["remove_background"]["class_type"] == "LF_BackgroundRemover"
+    assert prompt["remove_background"]["inputs"] == {
+        "image": ["select_loop", 0],
+        "transparent_background": True,
+        "background_color": "#000000",
+        "model": "RMBG-2.0",
+    }
+    assert prompt["verify_alpha"]["inputs"] == {
+        "image": ["remove_background", 0],
+        "channel": "alpha",
+    }
+    assert prompt["invert_alpha"]["inputs"] == {"mask": ["verify_alpha", 0]}
     assert prompt["validated_cutout"]["inputs"] == {
         "image": ["remove_background", 0],
         "alpha": ["invert_alpha", 0],
@@ -108,6 +119,18 @@ def test_download_keeps_the_placeholder_upload() -> None:
     WORKFLOW.configure_download(prompt, {"frame_count": "24", "columns": "6"})
     assert prompt["load_video"]["inputs"]["file"] == "shot.mp4"
     assert len(prompt["sprite_grid"]["inputs"]["dataset"]["nodes"]) == 4
+
+
+def test_model_readiness_requires_the_local_rmbg2_package() -> None:
+    assert len(WORKFLOW.required_model_assets) == 1
+    asset = WORKFLOW.required_model_assets[0]
+    assert asset.label == "RMBG-2.0 model"
+    assert asset.relative_paths == (
+        "RMBG/RMBG-2.0/config.json",
+        "RMBG/RMBG-2.0/model.safetensors",
+        "RMBG/RMBG-2.0/birefnet.py",
+        "RMBG/RMBG-2.0/BiRefNet_config.py",
+    )
 
 
 @pytest.mark.parametrize(
