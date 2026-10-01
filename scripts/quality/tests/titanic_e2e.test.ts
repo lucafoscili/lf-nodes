@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   classifyHistoryEntry,
+  buildCpuFixturePromptBindings,
   classifyPostCancellation,
   comfyArtifactKey,
   countPreviewReferences,
@@ -22,6 +23,8 @@ import {
   timedOutTerminalClassification,
   unwrapHistoryEntry,
   validateCaseOutputs,
+  validatePreviewAssetBytes,
+  validateLivePreviewWidget,
   validateCoverage,
   validateExecutionTrace,
   validateEditorClientBinding,
@@ -31,6 +34,56 @@ import {
 } from '../titanic_e2e_core.ts';
 
 describe('Titanic E2E pure contracts', () => {
+  it('verifies the stock temporary GLB preview without treating arbitrary result strings as assets', () => {
+    const output = { result: ['preview3d_advanced_aabb.glb [temp]', null, []] };
+    expect(collectPreviewUrls(output)).toEqual(['/view?filename=preview3d_advanced_aabb.glb&type=temp']);
+    expect(countPreviewReferences(output)).toBe(1);
+    expect(validateCaseOutputs({ id: 'glb', expect: { '615': {
+      minimumPreviewCount: 1, previewStorageType: 'temp',
+    } } } as any, { outputs: { '615': output } })).toEqual([]);
+    expect(collectPreviewUrls({ result: ['../../private.glb [temp]'] })).toEqual([]);
+    const bytes = new Uint8Array(28);
+    const header = new DataView(bytes.buffer);
+    header.setUint32(0, 0x46546c67, true);
+    header.setUint32(4, 2, true);
+    header.setUint32(8, 28, true);
+    expect(validatePreviewAssetBytes('model-3d', 'application/octet-stream', bytes)).toEqual([]);
+    expect(validatePreviewAssetBytes('model-3d', 'model/gltf-binary', bytes.slice(0, 27))).toHaveLength(1);
+    header.setUint32(8, 29, true);
+    expect(validatePreviewAssetBytes('model-3d', 'model/gltf-binary', bytes)).toHaveLength(1);
+    expect(validatePreviewAssetBytes('image', 'text/plain', new Uint8Array())).toHaveLength(2);
+    const live = { nodeId: 615, kind: 'model-3d' as const, found: true, hasElement: true, previewCount: 0 };
+    expect(validateLivePreviewWidget('615', { previewKind: 'model-3d', minimumPreviewCount: 1 }, live)).toEqual([]);
+    expect(validateLivePreviewWidget('615', { previewKind: 'model-3d' }, { ...live, found: false })).toEqual([
+      'node 615 live native 3D viewport is not hydrated',
+    ]);
+    expect(validateLivePreviewWidget('615', { minimumPreviewCount: 1 }, live)).toEqual([
+      'node 615 live ui_widget is not hydrated',
+    ]);
+  });
+  it('binds reviewed CPU fixture inputs without changing the portable prompt', () => {
+    const layers = { root: 'scripts/quality/fixtures/titanic-cpu', layers: [{ file: 'lower.png' }] };
+    const prompt = {
+      '612': { class_type: 'LF_ApplyTextureToGLB', inputs: { source_glb: 'titanic-cpu/synthetic.glb' } },
+      '622': { class_type: 'LF_WriteJSON', inputs: { ui_widget: JSON.stringify(layers) } },
+    };
+    const original = structuredClone(prompt);
+    const bindings = { fixtureGlbSourceNodeIds: [612], fixtureLayerManifestNodeIds: [622] };
+    const result = buildCpuFixturePromptBindings(prompt, bindings, '/checkout/lf-nodes/');
+    expect(result).toEqual([
+      { nodeId: '612', classType: 'LF_ApplyTextureToGLB', input: 'source_glb',
+        value: '/checkout/lf-nodes/scripts/quality/fixtures/titanic-cpu/synthetic.glb' },
+      { nodeId: '622', classType: 'LF_WriteJSON', input: 'ui_widget',
+        value: JSON.stringify({ ...layers, root: '/checkout/lf-nodes/scripts/quality/fixtures/titanic-cpu' }) },
+    ]);
+    expect(prompt).toEqual(original);
+    prompt['612'].inputs.source_glb = 'other.glb';
+    expect(() => buildCpuFixturePromptBindings(prompt, bindings, '/checkout')).toThrow('GLB fixture binding node 612 drifted');
+    prompt['612'].inputs.source_glb = original['612'].inputs.source_glb;
+    prompt['622'].inputs.ui_widget = JSON.stringify({ ...layers, root: '/private' });
+    expect(() => buildCpuFixturePromptBindings(prompt, bindings, '/checkout')).toThrow('root drifted');
+    expect(buildCpuFixturePromptBindings({}, undefined, '/checkout')).toEqual([]);
+  });
   it('finds only a named Comfy argv with relative, Windows, or POSIX main.py paths', () => {
     expect(findComfyArgv({ system: { argv: ['main.py', '--cache-none'] } })).toEqual([
       'main.py',

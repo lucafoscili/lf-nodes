@@ -35,7 +35,20 @@ def test_recorded_node_count_matches_unique_published_mappings():
     recorded = json.loads((REPO_ROOT / "count.json").read_text(encoding="utf-8"))["nodes"]
     mappings = discover_lf_node_types()
 
-    assert recorded == len(mappings) == 148
+    assert recorded == len(mappings) == 154
+
+
+def test_canonical_titanic_covers_exactly_the_published_lf_node_types():
+    from modules.workflow_runner.scripts.workflow_preflight import discover_lf_node_types
+
+    workflow = json.loads(
+        (REPO_ROOT / "scripts/quality/fixtures/E2E.json").read_text(encoding="utf-8")
+    )
+    fixture_types = {
+        node["type"] for node in workflow["nodes"] if node["type"].startswith("LF_")
+    }
+
+    assert fixture_types == set(discover_lf_node_types())
 
 
 def test_release_workflows_enforce_the_shared_frontend_gate():
@@ -71,5 +84,13 @@ def test_release_regressions_are_part_of_the_cpu_publication_gate():
         "modules/tests/test_generate_release_notes.py",
         "modules/tests/test_release_metadata.py",
         "modules/tests/test_release_workflows.py",
+        "modules/tests/nodes/io/test_apply_texture_to_glb.py",
+        "modules/tests/nodes/io/test_scale_glb_nodes.py",
+        "modules/tests/nodes/regions/test_image_regions.py",
+        "modules/tests/nodes/regions/test_image_layers.py",
+        "modules/tests/nodes/test_load_images_identity.py",
+        "modules/tests/nodes/test_editor_image_entries.py",
+        "modules/tests/nodes/filters/test_processor_rgba_contract.py",
+        "modules/tests/test_titanic_cpu_fixture.py",
     ):
         assert test_path in gate

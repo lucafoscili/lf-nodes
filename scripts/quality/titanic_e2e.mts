@@ -8,6 +8,7 @@ import type { Browser, Page } from 'playwright';
 
 import {
   classifyHistoryEntry,
+  buildCpuFixturePromptBindings,
   classifyPostCancellation,
   collectPreviewUrls,
   comfyArtifactKey,
@@ -26,6 +27,8 @@ import {
   timedOutTerminalClassification,
   unwrapHistoryEntry,
   validateCaseOutputs,
+  validatePreviewAssetBytes,
+  validateLivePreviewWidget,
   validateCoverage,
   validateExecutionTrace,
   validateEditorClientBinding,
@@ -35,6 +38,7 @@ import {
   type GateOutcome,
   type ManifestCase,
   type TitanicManifest,
+  type FixturePromptBinding,
 } from './titanic_e2e_core.ts';
 
 type JsonRecord = Record<string, any>;
@@ -76,6 +80,7 @@ interface CaseResult {
   executionTrace?: ExecutionTrace;
   downstreamArtifact?: JsonRecord;
   foreignWorkDetected?: boolean;
+  liveWidgetChecks?: Array<{ nodeId: number; kind: string; found: boolean; hasElement: boolean; previewCount: number }>;
 }
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -267,13 +272,10 @@ const validatePreviewAssets = async (
         }
         const contentType = response.headers.get('content-type') ?? '';
         const bytes = await response.arrayBuffer();
-        if (!contentType.startsWith('image/')) {
-          errors.push(
-            `node ${nodeId} preview is not an image (${contentType || 'missing content-type'}): ${previewUrl}`,
-          );
-        }
-        if (bytes.byteLength === 0) {
-          errors.push(`node ${nodeId} preview is empty: ${previewUrl}`);
+        for (const error of validatePreviewAssetBytes(
+          expectation.previewKind ?? 'image', contentType, new Uint8Array(bytes),
+        )) {
+          errors.push(`node ${nodeId} ${error}: ${previewUrl}`);
         }
       } catch (error) {
         errors.push(`node ${nodeId} preview did not resolve: ${previewUrl} (${String(error)})`);
@@ -639,6 +641,7 @@ const queueCaseThroughFrontend = async (
   bindings: ManifestCase['bindings'] | undefined,
   localModelId: string | undefined,
   localNativeChatUrl: string,
+  fixtureBindings: FixturePromptBinding[],
 ) =>
   page.evaluate(async ({
     targetIds,
@@ -646,6 +649,7 @@ const queueCaseThroughFrontend = async (
     caseBindings,
     boundLocalModelId,
     boundLocalNativeChatUrl,
+    boundFixtureInputs,
   }) => {
     const comfy = (window as any).comfyAPI;
     const app = comfy.app.app;
@@ -677,6 +681,14 @@ const queueCaseThroughFrontend = async (
     };
     api.queuePrompt = async function (...args: any[]) {
       const output = args[1]?.output;
+      for (const binding of boundFixtureInputs) {
+        const node = output?.[binding.nodeId];
+        if (node?.class_type !== binding.classType) {
+          throw new Error(`CPU fixture binding node ${binding.nodeId} class drifted`);
+        }
+        node.inputs[binding.input] = binding.value;
+        appliedBindings.push({ nodeId: binding.nodeId, input: binding.input, value: binding.value });
+      }
       for (const nodeId of caseBindings?.localModelIdNodeIds ?? []) {
         const node = output?.[String(nodeId)];
         if (node?.class_type !== 'LF_LMSLoadModel') {
@@ -746,6 +758,7 @@ const queueCaseThroughFrontend = async (
     caseBindings: bindings,
     boundLocalModelId: localModelId,
     boundLocalNativeChatUrl: localNativeChatUrl,
+    boundFixtureInputs: fixtureBindings,
   });
 
 const installExecutionRecorder = async (page: Page): Promise<string> => {
@@ -992,13 +1005,30 @@ const readLiveWidgets = async (page: Page, nodeIds: number[]) =>
     const graph = app.rootGraph ?? app.graph;
     return ids.map((nodeId) => {
       const node = graph.getNodeById(nodeId);
-      const widget = node?.widgets?.find((candidate: any) => candidate.name === 'ui_widget');
+      const native3d = node?.type === 'Preview3DAdvanced';
+      const widget = node?.widgets?.find((candidate: any) =>
+        candidate.name === (native3d ? 'viewport_state' : 'ui_widget'));
+      // Stock LOAD_3D is a Vue ComponentWidgetImpl: unlike LF DOM widgets it
+      // has no element field. Find its mounted wrapper by the exact widget ID.
+      const nativeElement = native3d && widget?.component
+        ? Array.from(document.querySelectorAll('.dom-widget')).find((element) => {
+          let component = (element as any).__vueParentComponent;
+          while (component) {
+            if (component.props?.widgetState?.widget?.id === widget.id) return true;
+            component = component.parent;
+          }
+          return false;
+        })
+        : undefined;
       const value = widget?.value;
       const dataset = value?.dataset ?? value;
       return {
         nodeId,
-        found: Boolean(widget),
-        hasElement: Boolean(widget?.element),
+        kind: native3d ? 'model-3d' as const : 'image' as const,
+        found: Boolean(widget) && (!native3d || Boolean(widget.component)),
+        hasElement: native3d
+          ? Boolean(nativeElement?.isConnected && nativeElement.querySelector('canvas'))
+          : Boolean(widget?.element),
         previewCount: Array.isArray(dataset?.nodes) ? dataset.nodes.length : 0,
       };
     });
@@ -2527,6 +2557,7 @@ const executeCase = async (
       manifestCase.bindings,
       options.localModelId,
       `${options.lmStudioUrl}/api/v1/chat`,
+      buildCpuFixturePromptBindings(prompt, manifestCase.bindings, repoRoot),
     );
   } catch (error) {
     submissionError = String(error);
@@ -2795,27 +2826,9 @@ const executeCase = async (
     ]),
   ];
   const liveWidgets = await readLiveWidgets(page, liveWidgetNodeIds);
-  for (const [nodeId, expectation] of Object.entries(manifestCase.expect ?? {}) as Array<
-    [
-      string,
-      {
-        receiptSchema?: string;
-        minimumPreviewCount?: number;
-        previewStorageType?: 'input' | 'output' | 'temp';
-      },
-    ]
-  >) {
+  for (const [nodeId, expectation] of Object.entries(manifestCase.expect ?? {})) {
     const live = liveWidgets.find((item) => String(item.nodeId) === nodeId);
-    if (!live?.found || !live.hasElement) {
-      assertions.push(`node ${nodeId} live ui_widget is not hydrated`);
-    } else if (
-      expectation.minimumPreviewCount !== undefined &&
-      live.previewCount < expectation.minimumPreviewCount
-    ) {
-      assertions.push(
-        `node ${nodeId} live widget has ${live.previewCount} previews; expected at least ${expectation.minimumPreviewCount}`,
-      );
-    }
+    assertions.push(...validateLivePreviewWidget(nodeId, expectation, live));
   }
   if (interaction?.error) assertions.push(`interaction failed: ${interaction.error}`);
   if (terminal.foreignIds?.length) {
@@ -2845,6 +2858,7 @@ const executeCase = async (
     promptEvidence,
     executionTrace,
     downstreamArtifact: downstream.evidence ?? undefined,
+    liveWidgetChecks: liveWidgets,
     foreignWorkDetected:
       foreignWorkDetected,
     assertions,
@@ -2993,6 +3007,17 @@ const main = async () => {
 
     const inventoryErrors: string[] = [];
     if (manifest.schema !== 'lf.titanic-e2e.manifest.v1') inventoryErrors.push('manifest schema mismatch');
+    for (const fixture of manifest.fixtures ?? []) {
+      try {
+        if (!/^scripts\/quality\/fixtures\/titanic-cpu\/(?:lower\.png|upper\.png|synthetic\.glb)$/.test(fixture.path)) {
+          throw new Error('unreviewed CPU fixture path');
+        }
+        const bytes = await readFile(resolve(repoRoot, fixture.path));
+        if (sha256(bytes) !== fixture.expectedSha256) throw new Error('SHA-256 drift');
+      } catch (error) {
+        inventoryErrors.push(`${fixture.path}: ${String(error)}`);
+      }
+    }
     for (const manifestCase of [...manifest.smokeCases, ...manifest.coverageCases]) {
       try {
         requiredFlagsForResourceClass(manifestCase.resourceClass);

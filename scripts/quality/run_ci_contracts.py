@@ -44,6 +44,7 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/nodes/filters/test_bloom_contract.py",
     "modules/tests/nodes/filters/test_filter_bhwc_contract.py",
     "modules/tests/nodes/filters/test_inpaint_list_contract.py",
+    "modules/tests/nodes/filters/test_processor_rgba_contract.py",
     "modules/tests/nodes/image/test_alpha_filter_contracts.py",
     "modules/tests/nodes/image/test_image_to_svg_list_contract.py",
     "modules/tests/nodes/image/test_multiple_image_resize_contract.py",
@@ -62,6 +63,10 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/nodes/image/test_periodic_image_batch_sampler.py",
     "modules/tests/nodes/image/test_side_by_side.py",
     "modules/tests/nodes/io/test_load_metadata_contract.py",
+    "modules/tests/nodes/io/test_apply_texture_to_glb.py",
+    "modules/tests/nodes/io/test_scale_glb_nodes.py",
+    "modules/tests/nodes/test_load_images_identity.py",
+    "modules/tests/nodes/test_editor_image_entries.py",
     "modules/tests/nodes/io/test_save_audio.py",
     "modules/tests/nodes/io/test_save_image_for_civitai_contract.py",
     "modules/tests/nodes/io/test_text_savers.py",
@@ -82,6 +87,8 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/nodes/logic/test_switch_tensor_contract.py",
     "modules/tests/nodes/primitives/test_something_2_string_contract.py",
     "modules/tests/nodes/regions/test_region_mask.py",
+    "modules/tests/nodes/regions/test_image_regions.py",
+    "modules/tests/nodes/regions/test_image_layers.py",
     "modules/tests/nodes/seeds/test_sequential_seeds_generator_contract.py",
     "modules/tests/nodes/selector/test_combo_transport_contract.py",
     "modules/tests/nodes/visual_novel/test_headless_import.py",
@@ -90,12 +97,18 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/test_generate_release_notes.py",
     "modules/tests/test_release_metadata.py",
     "modules/tests/test_release_workflows.py",
+    "modules/tests/test_titanic_cpu_fixture.py",
 )
 
 # These established suites install broader legacy import doubles while pytest
 # collects them.  Each is still a production behavior contract, but a separate
 # inert-host process prevents one suite's doubles from leaking into another.
 ISOLATED_BEHAVIOR_TESTS: tuple[tuple[str, ...], ...] = (
+    (
+        "modules/workflow_runner/tests/test_stable_audio_3_sfx_workflow.py",
+        "modules/workflow_runner/tests/test_workflow_hero_assets.py",
+        "modules/workflow_runner/tests/test_workflow_card_presentation.py",
+    ),
     ("modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py",),
     ("modules/workflow_runner/tests/test_minimax_h3_pipeline.py",),
     ("modules/workflow_runner/tests/test_minimax_h3_audit.py",),

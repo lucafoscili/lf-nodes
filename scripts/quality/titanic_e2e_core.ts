@@ -30,6 +30,8 @@ export interface ManifestCase {
   bindings?: {
     localModelIdNodeIds?: number[];
     localNativeChatNodeIds?: number[];
+    fixtureGlbSourceNodeIds?: number[];
+    fixtureLayerManifestNodeIds?: number[];
   };
   expect?: Record<
     string,
@@ -37,6 +39,7 @@ export interface ManifestCase {
       receiptSchema?: string;
       minimumPreviewCount?: number;
       previewStorageType?: 'input' | 'output' | 'temp';
+      previewKind?: 'image' | 'model-3d';
       forbidTopLevelJsonKeys?: string[];
       minimumStringLength?: number;
       forbiddenStringPrefixes?: string[];
@@ -104,7 +107,47 @@ export interface TitanicManifest {
   coverageCases: ManifestCase[];
   dormantNodeIds: number[];
   disabledNodes: Array<{ id: number; type: string; reason: string }>;
+  fixtures?: Array<{ path: string; expectedSha256: string }>;
 }
+
+export interface FixturePromptBinding {
+  nodeId: string;
+  classType: string;
+  input: string;
+  value: string;
+}
+
+/** Bind only the reviewed synthetic inputs, without editing serialized widgets. */
+export const buildCpuFixturePromptBindings = (
+  prompt: Record<string, any>,
+  bindings: ManifestCase['bindings'],
+  repoRoot: string,
+): FixturePromptBinding[] => {
+  const root = `${repoRoot.replace(/[\\/]+$/, '')}/scripts/quality/fixtures/titanic-cpu`;
+  const result: FixturePromptBinding[] = [];
+  for (const id of bindings?.fixtureGlbSourceNodeIds ?? []) {
+    const node = prompt[String(id)];
+    if (node?.class_type !== 'LF_ApplyTextureToGLB' ||
+        node.inputs?.source_glb !== 'titanic-cpu/synthetic.glb') {
+      throw new Error(`GLB fixture binding node ${id} drifted`);
+    }
+    result.push({ nodeId: String(id), classType: node.class_type,
+      input: 'source_glb', value: `${root}/synthetic.glb` });
+  }
+  for (const id of bindings?.fixtureLayerManifestNodeIds ?? []) {
+    const node = prompt[String(id)];
+    if (node?.class_type !== 'LF_WriteJSON' || typeof node.inputs?.ui_widget !== 'string') {
+      throw new Error(`layer fixture binding node ${id} is not LF_WriteJSON`);
+    }
+    const document = JSON.parse(node.inputs.ui_widget);
+    if (document.root !== 'scripts/quality/fixtures/titanic-cpu') {
+      throw new Error(`layer fixture binding node ${id} root drifted`);
+    }
+    result.push({ nodeId: String(id), classType: node.class_type,
+      input: 'ui_widget', value: JSON.stringify({ ...document, root }) });
+  }
+  return result;
+};
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -533,9 +576,65 @@ export const collectReceiptSchemas = (value: unknown): Set<string> => {
   return schemas;
 };
 
+const stockModelPreviewUrl = (record: Record<string, unknown>): string | null => {
+  const result = record.result;
+  if (!Array.isArray(result) || typeof result[0] !== 'string') return null;
+  const match = /^(preview3d_advanced_[A-Za-z0-9_-]+\.glb) \[(temp|input|output)\]$/.exec(result[0]);
+  if (!match) return null;
+  return `/view?${new URLSearchParams({ filename: match[1], type: match[2] })}`;
+};
+
+export const validatePreviewAssetBytes = (
+  kind: 'image' | 'model-3d',
+  contentType: string,
+  bytes: Uint8Array,
+): string[] => {
+  if (kind === 'image') {
+    return [
+      ...(!contentType.startsWith('image/') ? [`preview is not an image (${contentType || 'missing content-type'})`] : []),
+      ...(bytes.byteLength === 0 ? ['preview is empty'] : []),
+    ];
+  }
+  if (bytes.byteLength < 28) return ['3D preview has an invalid GLB 2 header or declared length'];
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  if (view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2 ||
+      view.getUint32(8, true) !== bytes.byteLength) {
+    return ['3D preview has an invalid GLB 2 header or declared length'];
+  }
+  return [];
+};
+
+export interface LivePreviewWidget {
+  nodeId: number;
+  kind: 'image' | 'model-3d';
+  found: boolean;
+  hasElement: boolean;
+  previewCount: number;
+}
+
+export const validateLivePreviewWidget = (
+  nodeId: string,
+  expectation: NonNullable<ManifestCase['expect']>[string],
+  live: LivePreviewWidget | undefined,
+): string[] => {
+  const kind = expectation.previewKind ?? 'image';
+  if (!live?.found || !live.hasElement || live.kind !== kind) {
+    return [`node ${nodeId} live ${kind === 'model-3d' ? 'native 3D viewport' : 'ui_widget'} is not hydrated`];
+  }
+  // Native 3D widgets expose a renderer, not LF's dataset. The history GLB is
+  // fetched and validated separately; geometry/animation judgment is visual QA.
+  if (kind === 'image' && expectation.minimumPreviewCount !== undefined &&
+      live.previewCount < expectation.minimumPreviewCount) {
+    return [`node ${nodeId} live widget has ${live.previewCount} previews; expected at least ${expectation.minimumPreviewCount}`];
+  }
+  return [];
+};
+
 export const collectPreviewUrls = (value: unknown): string[] => {
   const urls = new Set<string>();
   visit(value, (record) => {
+    const modelUrl = stockModelPreviewUrl(record);
+    if (modelUrl) urls.add(modelUrl);
     for (const key of ['lfValue', 'value']) {
       const candidate = record[key];
       if (typeof candidate === 'string' && candidate.startsWith('/view?')) {
@@ -549,6 +648,7 @@ export const collectPreviewUrls = (value: unknown): string[] => {
 export const countPreviewReferences = (value: unknown): number => {
   let count = 0;
   visit(value, (record) => {
+    if (stockModelPreviewUrl(record)) count += 1;
     if (
       ['lfValue', 'value'].some(
         (key) =>

@@ -70,11 +70,13 @@ describe('Titanic publication sanitizer', () => {
   it('keeps the checked-in canonical fixture clean and idempotent', () => {
     const fixture = readFixture();
     const sanitized = sanitizeTitanicWorkflow(fixture).workflow;
+    const manifest = readManifest();
 
     expect(sanitized).toEqual(fixture);
+    expect(createHash('sha256').update(readFileSync(fixturePath)).digest('hex')).toBe(manifest.workflow.expectedSha256);
     expect(auditSanitizedTitanic(sanitized)).toEqual([]);
-    expect(sanitized.nodes).toHaveLength(372);
-    expect(sanitized.links).toHaveLength(490);
+    expect(sanitized.nodes).toHaveLength(390);
+    expect(sanitized.links).toHaveLength(515);
     const indexedKey = sanitized.nodes.find((node) => node.id === 596);
     expect(indexedKey.type).toBe('LF_GetKeyFromJSONByIndex');
     expect(indexedKey.widgets_values_named.index).toBe(1);
@@ -89,6 +91,53 @@ describe('Titanic publication sanitizer', () => {
         .filter((type: unknown) => typeof type === 'string' && type.startsWith('LF_')),
     )].sort();
     expect(fixtureTypes).toEqual(publicNodeTypes());
+    expect(fixtureTypes).toHaveLength(154);
+  });
+
+  it('pins synthetic CPU inputs and connected coverage for all six additions', () => {
+    const fixture = readFixture();
+    const manifest = readManifest();
+    const byId = (id: number) => fixture.nodes.find((node: any) => node.id === id);
+    expect([612, 614, 618, 620, 623, 625].map((id) => byId(id).type)).toEqual([
+      'LF_ApplyTextureToGLB', 'LF_ScaleGLBNodes', 'LF_ExtractImageRegions',
+      'LF_ComposeImageRegions', 'LF_LoadImageLayers', 'LF_ComposeImageLayers',
+    ]);
+    const repoRoot = resolve(nodesRoot, '..', '..');
+    for (const asset of manifest.fixtures) {
+      const bytes = readFileSync(resolve(repoRoot, asset.path));
+      expect(createHash('sha256').update(bytes).digest('hex')).toBe(asset.expectedSha256);
+    }
+    expect(manifest.fixtures.map((asset: any) => asset.path.split('/').at(-1))).toEqual([
+      'lower.png', 'upper.png', 'synthetic.glb',
+    ]);
+    expect(byId(612).widgets_values_named.source_glb).toBe('titanic-cpu/synthetic.glb');
+    expect(byId(614).widgets_values_named.percent).toBe(75);
+    expect(byId(623).widgets_values_named.include_masks).toBe(true);
+    expect(byId(625).inputs.map((input: any) => input.link)).not.toContain(null);
+    expect(byId(623).outputs.map((output: any) => output.shape ?? null)).toEqual([null, 6, null, null, 6]);
+    expect(byId(625).outputs.map((output: any) => output.shape ?? null)).toEqual([null, 6, 6]);
+    expect(JSON.parse(byId(622).widgets_values_named.ui_widget).layers.map((layer: any) => layer.rect)).toEqual([
+      [8, 8, 32, 16], [24, 8, 16, 16],
+    ]);
+    expect(manifest.coverageCases.find((item: any) => item.id === 'cpu.glb-texture-scale')).toMatchObject({
+      resourceClass: 'cpu', targets: [613, 615], bindings: { fixtureGlbSourceNodeIds: [612] },
+    });
+    expect(manifest.coverageCases.find((item: any) => item.id === 'cpu.image-regions-layers')).toMatchObject({
+      resourceClass: 'cpu', targets: [616, 621, 622, 626, 627, 628], bindings: { fixtureLayerManifestNodeIds: [622] },
+    });
+    const newOutputIds = fixture.nodes.filter((node: any) => node.id >= 612 &&
+      ['LF_WriteJSON', 'LF_ViewImages', 'Preview3DAdvanced'].includes(node.type)).map((node: any) => node.id).sort();
+    const newTargets = manifest.coverageCases.flatMap((item: any) => item.targets)
+      .filter((id: number) => id >= 612).sort();
+    expect(newTargets).toEqual(newOutputIds);
+    // Every serialized socket points back to the same exact graph edge.
+    const nodes = new Map(fixture.nodes.map((node: any) => [node.id, node]));
+    for (const link of fixture.links.filter((edge: any) => edge[0] >= 1230)) {
+      const [id, source, sourceSlot, destination, destinationSlot, type] = link;
+      expect((nodes.get(source) as any).outputs[sourceSlot].links).toContain(id);
+      expect((nodes.get(destination) as any).inputs[destinationSlot].link).toBe(id);
+      expect((nodes.get(source) as any).outputs[sourceSlot].type).toBe(type);
+    }
   });
 
   it('pins the new media, audio, and exact-instance local-LLM coverage slice', () => {

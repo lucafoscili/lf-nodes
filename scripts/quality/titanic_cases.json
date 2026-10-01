@@ -2,10 +2,24 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "5a3ed5677af61c62f01e9cc36b6ae15a7c9fec3991100426542151b6cb0658f4",
-    "expectedNodeCount": 372,
-    "expectedLinkCount": 490
+    "expectedSha256": "97d5ac97c4f8dddae08d7a23b29073cf7698a92ffba45b4a6ba52cbca6bfdcfd",
+    "expectedNodeCount": 390,
+    "expectedLinkCount": 515
   },
+  "fixtures": [
+    {
+      "path": "scripts/quality/fixtures/titanic-cpu/lower.png",
+      "expectedSha256": "afbcccd4f3917c47243b6c80c5a22202278e0753601e697c02be7b40db986173"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-cpu/upper.png",
+      "expectedSha256": "4dfb4a49b8f41c30b959b9ac13594558a4e308888302c7dd2b8ac764a9645167"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-cpu/synthetic.glb",
+      "expectedSha256": "c8d8430e570de662b4ee476b5c1c51d243efcb8b30218e331ac306290902fd84"
+    }
+  ],
   "smokeCases": [
     {
       "id": "scratch.cpu-widget-previews",
@@ -57,6 +71,91 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.image-regions-layers",
+      "title": "Named region edits and combined RGBA layers with cut masks",
+      "resourceClass": "cpu",
+      "targets": [
+        616,
+        621,
+        622,
+        626,
+        627,
+        628
+      ],
+      "timeoutSeconds": 120,
+      "bindings": {
+        "fixtureLayerManifestNodeIds": [
+          622
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          618,
+          620,
+          623,
+          625
+        ],
+        "forbiddenCachedNodeIds": [
+          618,
+          620,
+          623,
+          625
+        ]
+      },
+      "expect": {
+        "621": {
+          "minimumPreviewCount": 1,
+          "previewStorageType": "input"
+        },
+        "626": {
+          "minimumPreviewCount": 1,
+          "previewStorageType": "input"
+        },
+        "627": {
+          "minimumPreviewCount": 2,
+          "previewStorageType": "input"
+        },
+        "628": {
+          "minimumPreviewCount": 6,
+          "previewStorageType": "input"
+        }
+      }
+    },
+    {
+      "id": "cpu.glb-texture-scale",
+      "title": "Pinned animated GLB texture replacement and joint scale",
+      "resourceClass": "cpu",
+      "targets": [
+        613,
+        615
+      ],
+      "timeoutSeconds": 120,
+      "bindings": {
+        "fixtureGlbSourceNodeIds": [
+          612
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          612,
+          614,
+          615
+        ],
+        "forbiddenCachedNodeIds": [
+          612,
+          614,
+          615
+        ]
+      },
+      "expect": {
+        "615": {
+          "minimumPreviewCount": 1,
+          "previewStorageType": "temp",
+          "previewKind": "model-3d"
+        }
+      }
+    },
     {
       "id": "cpu.json-key-index",
       "title": "Insertion-order JSON key selection and preview history",
