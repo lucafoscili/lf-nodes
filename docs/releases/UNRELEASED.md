@@ -16,6 +16,18 @@ remaining prerequisites; this draft does not declare a full E2E pass.
 - **Local model ergonomics:** local chat completions and exact-instance LM Studio
   load/unload nodes, including authenticated native discovery and model lifecycle.
   The writer can release its model before the video stage to free memory.
+- **Reversible image editing:** named image-region extraction/composition and
+  source-safe RGBA layer loading/composition. One editor session can combine
+  base-image regions, fabric layers and optional cut masks; original alpha is
+  locked by default. Labels and selection identity survive reordering and
+  reload. See [image regions](../IMAGE_REGIONS.md) and
+  [image layers](../IMAGE_LAYERS.md).
+- **Animated GLB tools:** replace a selected material's texture without flattening
+  its mesh, UVs, materials or animation, and scale selected joint subtrees around
+  explicit anchors. Source files remain unchanged; stock Comfy 3D previews and
+  savers consume the results. See [texture replacement](../GLB_TEXTURE.md) and
+  [joint scaling](../GLB_SCALE.md). Character-specific Studio recipes remain
+  consumer-owned, not new shipped Runner catalogue entries.
 - **Sprite, tile and media tools:** settled-frame selection, loop-segment
   selection, seamless textures, isometric diamond tiles, audio saving/preview,
   and JSON key lookup by index.
@@ -27,14 +39,18 @@ remaining prerequisites; this draft does not declare a full E2E pass.
   including a full stereo waveform of the user-accepted hearth sound effect.
   Unrelated queue/run updates now preserve mounted cards instead of restarting
   the custom collections' fade-in animations.
-- **Release coverage:** all 148 current public LF node types have a canonical
-  Titanic specimen; new-node omissions are checked automatically. CPU publication
-  contracts include the new tools and H3/HD/orchestration paths. Live gate outcomes
-  and intentionally unexecuted cases are recorded separately in readiness notes.
+- **Compatibility fixes:** RGB editor effects and inpainting retain source alpha
+  on RGBA images; file selection follows the selected file rather than a stale
+  position; proxy URLs with hashes/query strings resolve frontend assets correctly.
+  TRELLIS remesh/decimation inputs use native DynamicCombo wire formatting.
+- **Release coverage:** the suite now exposes 154 public LF node types. The
+  publication gate checks their canonical Titanic inventory separately from
+  hydration and execution. Live gate outcomes and intentionally unexecuted cases
+  are recorded in readiness notes, not inferred from unit-test totals.
 
 ## Compatibility and setup
 
-Ten public nodes have been added since v3.0.0. This batch changes no existing
+Sixteen public nodes have been added since v3.0.0. This batch changes no existing
 public output socket order. Existing H3 workflows keep Standard output unless HD
 is explicitly selected. HD does not combine with Turbo; select Kitchen 20.
 
@@ -48,3 +64,10 @@ Restart Comfy to load updated Python nodes/workflow definitions. Existing
 downloaded models are reused; no new model is downloaded automatically. LMS
 lifecycle operations require workflow ownership of the selected instance;
 failed/cancelled authoring may leave it loaded. See [LMS lifecycle](../llm/lms-models.md).
+
+Region/layer compositors require exact ordered editor outputs and the original
+source data; they do not guess pairing or overwrite source assets. Cut masks can
+reduce or restore original coverage, not paint outside it. GLB transforms accept
+self-contained GLB 2 inputs; texture replacement handles one image/material per
+invocation, and joint scaling requires an explicit target recipe. These limits
+are intentional and documented in the feature guides above.
