@@ -112,6 +112,7 @@ describe('Titanic publication sanitizer', () => {
     ]);
     expect(byId(612).widgets_values_named.source_glb).toBe('titanic-cpu/synthetic.glb');
     expect(byId(614).widgets_values_named.percent).toBe(75);
+    expect(byId(615).size).toEqual([500, 600]);
     expect(byId(623).widgets_values_named.include_masks).toBe(true);
     expect(byId(625).inputs.map((input: any) => input.link)).not.toContain(null);
     expect(byId(623).outputs.map((output: any) => output.shape ?? null)).toEqual([null, 6, null, null, 6]);

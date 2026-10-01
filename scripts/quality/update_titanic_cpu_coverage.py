@@ -156,6 +156,7 @@ def add_specimen(workflow, assets):
          [("model_3d", "FILE_3D", False), ("model_3d_info", "LOAD_3D_MODEL_INFO", False),
           ("camera_info", "LOAD_3D_CAMERA", False), ("width", "INT", False), ("height", "INT", False)],
          {"viewport_state": {}, "width": 256, "height": 256}, "Textured animated quad at 75% · temp preview")
+    nodes[-1]["size"] = [500, 600]
     regions = {"regions": [{"id": "left", "label": "Left panel", "rect": [0, 0, 32, 24]},
                            {"id": "right", "label": "Right panel", "rect": [32, 24, 32, 24]}]}
     write_json(616, 9700, -3700, regions, "Two non-overlapping base regions")
@@ -205,6 +206,9 @@ def add_specimen(workflow, assets):
     ):
         connect(source, output, target, name)
     existing = {n["id"]: n for n in workflow["nodes"]}
+    # Migrate the original short viewer allocation before checking specimen drift.
+    if existing.get(615, {}).get("size") == [340, 280]:
+        existing[615]["size"] = [500, 600]
     if any(n["id"] in existing for n in nodes):
         if any(existing.get(n["id"]) != n for n in nodes):
             raise ValueError("CPU specimen nodes drifted; review the canonical graph before updating.")

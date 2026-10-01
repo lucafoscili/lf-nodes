@@ -52,13 +52,23 @@ describe('Titanic E2E pure contracts', () => {
     header.setUint32(8, 29, true);
     expect(validatePreviewAssetBytes('model-3d', 'model/gltf-binary', bytes)).toHaveLength(1);
     expect(validatePreviewAssetBytes('image', 'text/plain', new Uint8Array())).toHaveLength(2);
-    const live = { nodeId: 615, kind: 'model-3d' as const, found: true, hasElement: true, previewCount: 0 };
-    expect(validateLivePreviewWidget('615', { previewKind: 'model-3d', minimumPreviewCount: 1 }, live)).toEqual([]);
+    const modelUrl = '/view?filename=preview3d_advanced_aabb.glb&type=temp';
+    const live = { nodeId: 615, kind: 'model-3d' as const, found: true, hasElement: true, previewCount: 0,
+      modelLoaded: true, modelUrl: '/api' + modelUrl + '&subfolder=&rand=0.25' };
+    expect(validateLivePreviewWidget('615', { previewKind: 'model-3d', minimumPreviewCount: 1 }, live, [modelUrl])).toEqual([]);
     expect(validateLivePreviewWidget('615', { previewKind: 'model-3d' }, { ...live, found: false })).toEqual([
       'node 615 live native 3D viewport is not hydrated',
     ]);
     expect(validateLivePreviewWidget('615', { minimumPreviewCount: 1 }, live)).toEqual([
       'node 615 live ui_widget is not hydrated',
+    ]);
+    for (const missingModel of [{ ...live, modelLoaded: false }, { ...live, modelUrl: '/view?filename=other.glb&type=temp' }]) {
+      expect(validateLivePreviewWidget('615', { previewKind: 'model-3d' }, missingModel, [modelUrl])).toEqual([
+        'node 615 live native 3D viewport has not loaded its terminal-history model',
+      ]);
+    }
+    expect(validateLivePreviewWidget('615', { previewKind: 'model-3d' }, { ...live, hasElement: false }, [modelUrl])).toEqual([
+      'node 615 live native 3D viewport is not hydrated',
     ]);
   });
   it('binds reviewed CPU fixture inputs without changing the portable prompt', () => {

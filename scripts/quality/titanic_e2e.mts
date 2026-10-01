@@ -1000,38 +1000,63 @@ const observeSubmissionDelta = async (
 };
 
 const readLiveWidgets = async (page: Page, nodeIds: number[]) =>
-  page.evaluate((ids) => {
+  page.evaluate(async (ids) => {
     const app = (window as any).comfyAPI.app.app;
     const graph = app.rootGraph ?? app.graph;
-    return ids.map((nodeId) => {
+    const checks = [];
+    for (const nodeId of ids) {
       const node = graph.getNodeById(nodeId);
       const native3d = node?.type === 'Preview3DAdvanced';
       const widget = node?.widgets?.find((candidate: any) =>
         candidate.name === (native3d ? 'viewport_state' : 'ui_widget'));
-      // Stock LOAD_3D is a Vue ComponentWidgetImpl: unlike LF DOM widgets it
-      // has no element field. Find its mounted wrapper by the exact widget ID.
-      const nativeElement = native3d && widget?.component
-        ? Array.from(document.querySelectorAll('.dom-widget')).find((element) => {
-          let component = (element as any).__vueParentComponent;
-          while (component) {
-            if (component.props?.widgetState?.widget?.id === widget.id) return true;
-            component = component.parent;
-          }
-          return false;
-        })
-        : undefined;
+      let renderer: any;
+      let nativeElement: HTMLCanvasElement | undefined;
+      let nativeVisible = false;
+      if (native3d && widget?.component) {
+        app.canvas.ds.scale = 0.8;
+        app.canvas.centerOnNode(node);
+        app.canvas.setDirty(true, true);
+        // Production Vue omits component pointers on DOM nodes. The installed
+        // composable's nodeToLoad3dMap binds the actual renderer to this node.
+        const moduleUrl = Array.from(document.querySelectorAll<HTMLLinkElement>(
+          'link[rel="modulepreload"]',
+        )).find((link) => /\/useLoad3d-[^/]+\.js$/.test(link.href))?.href;
+        if (moduleUrl) {
+          const exports = await import(moduleUrl);
+          const registry = Object.values(exports).find((value) => value instanceof Map) as Map<any, any>;
+          const deadline = performance.now() + 5_000;
+          do {
+            renderer = registry?.get(node);
+            nativeElement = renderer?.domElement;
+            const rect = nativeElement?.getBoundingClientRect();
+            nativeVisible = Boolean(nativeElement?.isConnected &&
+              nativeElement.width > 0 && nativeElement.height > 0 &&
+              rect && rect.width > 0 && rect.height > 0 &&
+              rect.right > 0 && rect.bottom > 0 &&
+              rect.left < innerWidth && rect.top < innerHeight);
+            if (nativeVisible && renderer.hasLoadedModel) break;
+            await new Promise((resolvePromise) => setTimeout(resolvePromise, 100));
+          } while (performance.now() < deadline);
+        }
+      }
       const value = widget?.value;
       const dataset = value?.dataset ?? value;
-      return {
+      checks.push({
         nodeId,
         kind: native3d ? 'model-3d' as const : 'image' as const,
         found: Boolean(widget) && (!native3d || Boolean(widget.component)),
         hasElement: native3d
-          ? Boolean(nativeElement?.isConnected && nativeElement.querySelector('canvas'))
+          ? nativeVisible
           : Boolean(widget?.element),
         previewCount: Array.isArray(dataset?.nodes) ? dataset.nodes.length : 0,
-      };
-    });
+        ...(native3d ? {
+          modelLoaded: Boolean(renderer?.hasLoadedModel && renderer.getCurrentModel()),
+          modelUrl: renderer?.getModelManager().originalURL ?? '',
+          canvasSize: nativeElement ? [nativeElement.width, nativeElement.height] : [],
+        } : {}),
+      });
+    }
+    return checks;
   }, nodeIds);
 
 const requireComfyClientId = async (page: Page, timeoutMs: number): Promise<string> => {
@@ -2828,7 +2853,9 @@ const executeCase = async (
   const liveWidgets = await readLiveWidgets(page, liveWidgetNodeIds);
   for (const [nodeId, expectation] of Object.entries(manifestCase.expect ?? {})) {
     const live = liveWidgets.find((item) => String(item.nodeId) === nodeId);
-    assertions.push(...validateLivePreviewWidget(nodeId, expectation, live));
+    assertions.push(...validateLivePreviewWidget(
+      nodeId, expectation, live, collectPreviewUrls(terminal.entry.outputs?.[nodeId]),
+    ));
   }
   if (interaction?.error) assertions.push(`interaction failed: ${interaction.error}`);
   if (terminal.foreignIds?.length) {

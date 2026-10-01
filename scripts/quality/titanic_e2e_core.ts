@@ -189,12 +189,12 @@ export const comfyArtifactKey = (value: unknown): string => {
   const raw = String(value ?? '');
   try {
     const url = new URL(raw, 'http://127.0.0.1');
-    if (url.pathname !== '/view') return `${url.pathname}${url.search}`;
+    if (url.pathname !== '/view' && url.pathname !== '/api/view') return `${url.pathname}${url.search}`;
     const params = new URLSearchParams();
     for (const key of ['filename', 'type', 'subfolder']) {
       params.set(key, url.searchParams.get(key) ?? '');
     }
-    return `${url.pathname}?${params.toString()}`;
+    return `/view?${params.toString()}`;
   } catch {
     return raw;
   }
@@ -610,19 +610,24 @@ export interface LivePreviewWidget {
   found: boolean;
   hasElement: boolean;
   previewCount: number;
+  modelLoaded?: boolean;
+  modelUrl?: string;
 }
 
 export const validateLivePreviewWidget = (
   nodeId: string,
   expectation: NonNullable<ManifestCase['expect']>[string],
   live: LivePreviewWidget | undefined,
+  historyPreviewUrls: string[] = [],
 ): string[] => {
   const kind = expectation.previewKind ?? 'image';
   if (!live?.found || !live.hasElement || live.kind !== kind) {
     return [`node ${nodeId} live ${kind === 'model-3d' ? 'native 3D viewport' : 'ui_widget'} is not hydrated`];
   }
-  // Native 3D widgets expose a renderer, not LF's dataset. The history GLB is
-  // fetched and validated separately; geometry/animation judgment is visual QA.
+  if (kind === 'model-3d' && (!live.modelLoaded || !live.modelUrl ||
+      !historyPreviewUrls.some((url) => comfyArtifactKey(url) === comfyArtifactKey(live.modelUrl)))) {
+    return [`node ${nodeId} live native 3D viewport has not loaded its terminal-history model`];
+  }
   if (kind === 'image' && expectation.minimumPreviewCount !== undefined &&
       live.previewCount < expectation.minimumPreviewCount) {
     return [`node ${nodeId} live widget has ${live.previewCount} previews; expected at least ${expectation.minimumPreviewCount}`];
