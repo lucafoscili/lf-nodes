@@ -1,4 +1,4 @@
-# Release readiness — 2026-09-26
+# Release readiness — 2026-10-01
 
 **Candidate preparation; no release published.** Optional four-step H3 HD is
 wired, Standard remains the default, and publication contracts cover the new
@@ -6,7 +6,62 @@ capabilities. The next version has intentionally not been selected or stamped.
 The current `3.0.0` version already has a release tag: publishing this checkout
 under that identity is not a valid next-release operation.
 
-## Scope
+## Consolidation checkpoint — 2026-10-01
+
+**Keep the candidate; defer release approval until the remaining live checks.**
+There are now **154 public LF node types**, sixteen additions since v3.0.0.
+The canonical Titanic contains **390 nodes / 515 links**, including the six
+new image-region/layer and GLB nodes. Its new CPU cases use three checked-in
+synthetic inputs, not private Studio assets or workstation paths. The release
+draft now includes the Studio-supporting public contracts and editor fixes;
+consumer-owned Studio workflows are not claimed as shipped Runner cards.
+
+The publication gate now includes region/layer composition, GLB texture/joint
+editing, image identity, editor input entries, RGBA processing, the exact
+synthetic specimen, and catalogue presentation/accepted covers. Two obsolete
+tests expecting missing Prompt Maker and Sound Effects covers were corrected
+to their accepted assets. Windows Vitest defaults to serial worker startup
+after concurrent startup stalled before collecting tests; non-Windows
+settings are unchanged.
+
+Fresh offline verification:
+
+- `python -I scripts/quality/run_ci_contracts.py`: **PASS**, 1,876 pytest
+  tests and twelve gate unit tests; four Windows symlink-permission skips.
+  Compilation and static contracts passed for all 154 mappings. Twelve Pillow
+  deprecation warnings remain non-blocking.
+- Frontend: **PASS**, 608 tests across 71 files, three example contracts,
+  all seventeen tracked examples sanitized without changes, and the complete
+  TypeScript/CSS/production build. The initial two-worker startup stall is not
+  counted as a pass; serial execution passed, and a default-settings focused
+  rerun passed after the Windows configuration change.
+- Titanic: **PASS**, 32 offline contracts and exact regeneration check for
+  390 nodes, 515 links and three pinned assets. This is not browser hydration
+  or live execution evidence.
+
+The sprite failure was traced to an eagerly referenced, undefined decoder in
+the **external** VNCCS package. Local owner commit
+`b843cc0caf1671e917f4567605b21269a03fc9cc` removes that unsupported mapping
+entry without changing weights, preprocessing or the selected decoder. Three
+CPU regression tests pass. This repair is not bundled by LF Nodes and is not
+yet evidence of successful live model loading or a completed sprite atlas.
+Fresh installations still need that owner fix or an equivalent upstream fix.
+See the [repair record](WORKFLOW_RUNNER_SHOWCASE.md#sprite-decoder-repair--2026-10-01).
+
+Live checks remain **not run for this consolidation**. Read-only JOC status
+reported Comfy and its proxy stopped; no service start, restart, model load or
+generation was performed. Runtime coordination was requested before using
+the shared service. Next: current Titanic hydration, both new CPU cases and
+visual inspection, then the saved successful H3 video through `sprite_loop_cut`
+before replaying the full sprite orchestra. Commands and cache prerequisites
+are in the [Titanic guide](../scripts/quality/TITANIC_E2E.md#synthetic-glb-region-and-layer-cases).
+The older live evidence below remains historical, not a pass for this fixture.
+
+Catalogue acceptance remains 35 curated covers out of 48 shipped workflows;
+the other thirteen have no accepted sample. No new cover is promoted by this
+consolidation. No version, tag, push or publication has been made.
+
+## Previous checkpoint — 2026-09-26
 
 ### Later catalogue probes — 2026-09-26
 
@@ -23,7 +78,7 @@ passed for covers, collection separation, shortcuts, and card navigation;
 Output quality is visible with Standard selected. No new generations were
 queued during this post-restart check; remaining execution limits below stand.
 
-**New unresolved runtime blocker:** the sprite orchestra's background-removal
+**Runtime blocker recorded at this checkpoint:** the sprite orchestra's background-removal
 stage failed to load its model (`name 'HierarAttDecBlk' is not defined`). H3
 restaging succeeded, but no final atlas was produced. Resolve this dependency
 failure and replay the complete sprite orchestra before claiming that path is
@@ -45,7 +100,7 @@ remains a reliability limitation, not a fixed default behavior.
   and [Titanic gate instructions](../scripts/quality/TITANIC_E2E.md) describe
   user-facing changes and reproducible checks.
 
-## Measured gates
+## Measured gates — 2026-09-26
 
 | Gate | Result |
 | --- | --- |
@@ -75,7 +130,7 @@ are not a claim that every external frontend extension is healthy.
 After the fixture corrections, its 29 focused contracts were rerun successfully;
 the unchanged frontend build/UI-test evidence was reused.
 
-## Live evidence boundaries
+## Live evidence boundaries — 2026-09-26
 
 The canonical fixture includes CPU tile/loop checks, a separate durable WAV
 saver, and a local model lifecycle case. The latter loads an explicit downloaded
@@ -126,11 +181,12 @@ Ignored local evidence:
 
 ## Before publication
 
-1. The updated catalogue is now loaded after the reviewed JOC handover; the
-   phone-sized proxy form exposes Output quality with Standard selected. Retain
-   the remaining live Standard/HD execution and optional-node/checkpoint
-   availability checks required by the advertised release scope. Catalogue
-   browser acceptance alone does not certify those generation paths.
+1. Finish the October consolidation's current-fixture hydration and six-node
+   CPU cases, inspect their previews, and replay the repaired sprite path.
+   Keep the external VNCCS requirement explicit. Retain the remaining live
+   Standard/HD execution and optional-node/checkpoint availability checks
+   required by the advertised scope; the historical catalogue browser pass
+   does not certify these generation paths.
 2. Complete whichever remaining model/provider/editor live cases are required
    for the release's advertised scope; record unavailable prerequisites as such.
 3. Have Luca select the next version and accept the candidate. Update runtime,
@@ -141,7 +197,7 @@ Ignored local evidence:
    as an explicit, separately authorized action. No push, tag or publication was
    performed during this preparation.
 
-## Final focused-execution update
+## Final focused-execution update — 2026-09-26
 
 All final targeted runs passed, with no foreign queue work observed. The final
 fixture hash is

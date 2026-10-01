@@ -51,6 +51,46 @@ receipts, generated preview URLs, live widget updates, durable `ui.lf_output`,
 and an unchanged workflow file. It never calls a provider or changes model
 residency.
 
+### Synthetic GLB, region and layer cases
+
+The six Studio-supporting public nodes have two dedicated CPU cases. With
+Comfy already running, idle and coordinated with other users:
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.glb-texture-scale
+corepack yarn test:titanic -- --full --case cpu.image-regions-layers
+```
+
+Use `--cache-none` at Comfy startup for repeatable actual-work checks. A first
+uncached run on a warm-cache service may explicitly add `--accept-warm-cache`,
+but these cases still require execution events from all six new LF nodes and
+reject their cached execution. Repeating the same warm-cache run is therefore
+not an execution pass. The gate does not restart Comfy or clear its cache.
+
+The GLB case replaces the texture of a tiny animated, skinned synthetic quad,
+scales its joint chain, and previews the result through stock
+`Preview3DAdvanced`. The gate fetches the history GLB, checks its header and
+declared length, and checks
+native viewport hydration; it does not mistake that widget for LF's image
+dataset. Geometry and animation quality still require visual inspection.
+The region/layer case edits named regions, composes unequal-sized RGBA layers,
+and exercises combined base regions and layer cut masks without model calls.
+
+Inputs are the three pinned assets in `fixtures/titanic-cpu/`, not workstation
+or user media. The harness binds their local repository paths only in the
+submitted prompt, leaving the serialized workflow untouched. This assumes
+Comfy and the harness can access the same repository filesystem.
+
+```powershell
+python -I scripts/quality/update_titanic_cpu_coverage.py --check
+```
+
+The generator verifies the synthetic assets, appended graph and manifest.
+Without `--check`, it regenerates those repository-owned fixtures; it never
+reads or edits the maintainer's external working projection. If refreshing
+Titanic from that older projection, reapply the synthetic append and review
+the resulting graph before committing.
+
 ## Full active-workflow gate
 
 ```powershell
