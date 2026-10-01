@@ -70,9 +70,10 @@ not an execution pass. The gate does not restart Comfy or clear its cache.
 The GLB case replaces the texture of a tiny animated, skinned synthetic quad,
 scales its joint chain, and previews the result through stock
 `Preview3DAdvanced`. The gate fetches the history GLB, checks its header and
-declared length, and checks
-native viewport hydration; it does not mistake that widget for LF's image
-dataset. Geometry and animation quality still require visual inspection.
+declared length, centers the native viewport, and waits for its exact renderer
+to mount and load that history artifact. It does not rely on development-only
+Vue pointers or mistake the native widget for LF's image dataset. Geometry
+and animation quality still require visual inspection.
 The region/layer case edits named regions, composes unequal-sized RGBA layers,
 and exercises combined base regions and layer cut masks without model calls.
 

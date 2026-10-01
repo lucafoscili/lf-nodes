@@ -450,7 +450,30 @@ LF Nodes release or published upstream**. A fresh installation still needs a
 VNCCS version containing the equivalent fix. No checkpoint replacement,
 download, dependency upgrade or LF-side monkeypatch was used.
 
-**Defer — live acceptance:** no new model inference, transparent atlas or cover
-is claimed by these source checks. The smallest next check is `sprite_loop_cut`
-against the already saved successful restage video from the original run, then
-the complete orchestra. Preserve the earlier failed parent as failure evidence.
+**Keep — live replay:** after a managed JOC cold start, the saved-video cut
+passed as `bd6c9ffa-6afb-4ff8-9d3a-545494440213` (18.66 seconds Core execution).
+The complete orchestra then passed as
+`lf-sequence:cf83c75a32d74995b392e51ec468f886` (272 seconds observed):
+fresh H3 restage `3544d24e-ef65-4da7-8a78-b413b8c93080` took 250.20 seconds,
+and cut `6c84436b-9828-4e74-a0fc-f46c78e32a94` took 19.10 seconds. All three
+Core histories reported no cached nodes. No token replacement, model download
+or dependency upgrade was needed. The earlier failed parent remains preserved.
+
+Both cuts saved 24 RGBA 256×256 frames and a 1536×1024 atlas, with transparent
+backgrounds, nonempty alpha, no clipping and the thresholded alpha bottom at
+row 235. The fresh orchestra selected source frames starting at 65 over a
+36-frame period: a 1.5-second cycle, resampled to 24 frames at 16 fps. Its final
+atlas is `LF_Nodes/SpriteLoopCut/256px-content-144px-bottom-20px-f24/atlas-6x4_00002_.png`
+under Comfy output; the saved-video retry uses atlas suffix `00001`.
+
+Atlas, enlarged light/checkerboard views and sampled seam poses were inspected.
+The wave, outfit and satchel remain recognizable, and the first/last poses are
+close rather than identical. **Defer showcase promotion and human motion
+acceptance**; successful extraction and sampled frames do not establish a
+perfectly seamless loop. No new cover was added.
+
+Fresh requests, admissions and terminal receipts are under ignored
+`output/live-consolidation-20261001/`; visual review artifacts are under
+`output/playwright/sprite-20261001/`. The live catalogue also confirmed the
+accepted `audio/hearth.webp` cover after startup, resolving the historical
+activation limitation above. All 48 shipped entries remain present.

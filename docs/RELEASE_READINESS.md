@@ -8,7 +8,8 @@ under that identity is not a valid next-release operation.
 
 ## Consolidation checkpoint — 2026-10-01
 
-**Keep the candidate; defer release approval until the remaining live checks.**
+**Keep — this consolidation's live checks passed; candidate acceptance and
+publication remain separate decisions.**
 There are now **154 public LF node types**, sixteen additions since v3.0.0.
 The canonical Titanic contains **390 nodes / 515 links**, including the six
 new image-region/layer and GLB nodes. Its new CPU cases use three checked-in
@@ -36,26 +37,65 @@ Fresh offline verification:
   counted as a pass; serial execution passed, and a default-settings focused
   rerun passed after the Windows configuration change.
 - Titanic: **PASS**, 32 offline contracts and exact regeneration check for
-  390 nodes, 515 links and three pinned assets. This is not browser hydration
-  or live execution evidence.
+  390 nodes, 515 links and three pinned assets, rerun after the live gate fix.
+  The broader unchanged CPU/frontend evidence above was reused.
 
 The sprite failure was traced to an eagerly referenced, undefined decoder in
 the **external** VNCCS package. Local owner commit
 `b843cc0caf1671e917f4567605b21269a03fc9cc` removes that unsupported mapping
 entry without changing weights, preprocessing or the selected decoder. Three
-CPU regression tests pass. This repair is not bundled by LF Nodes and is not
-yet evidence of successful live model loading or a completed sprite atlas.
-Fresh installations still need that owner fix or an equivalent upstream fix.
+CPU regression tests pass, followed by successful live cut and orchestra runs.
+This repair is not bundled by LF Nodes: fresh installations still need that
+owner fix or an equivalent upstream fix.
 See the [repair record](WORKFLOW_RUNNER_SHOWCASE.md#sprite-decoder-repair--2026-10-01).
 
-Live checks remain **not run for this consolidation**. Read-only JOC status
-reported Comfy and its proxy stopped; no service start, restart, model load or
-generation was performed. Runtime coordination was requested before using
-the shared service. Next: current Titanic hydration, both new CPU cases and
-visual inspection, then the saved successful H3 video through `sprite_loop_cut`
-before replaying the full sprite orchestra. Commands and cache prerequisites
-are in the [Titanic guide](../scripts/quality/TITANIC_E2E.md#synthetic-glb-region-and-layer-cases).
-The older live evidence below remains historical, not a pass for this fixture.
+Fresh live verification, after Luca authorized the shared runtime:
+
+- **Hydration passed:** 390 nodes, 515 links, 294 LF custom widgets, all 134
+  active outputs classified. Canonical bytes remained unchanged by each run.
+- **Region/layer targeted execution passed:**
+  `5ddb6d61-1431-4407-8c19-d68518980663`; all four new LF nodes actually ran.
+  Live/durable previews, ordered unequal-size layers and cut-mask composition
+  passed. Enlarged output inspection confirmed selected regions changed while
+  unselected regions remained intact.
+- **GLB targeted execution passed:** `a38db356-77a0-417c-930d-c9120eff6639`;
+  texture replacement, joint scaling and stock preview actually ran with no
+  cached nodes. The visible 384×341 renderer loaded the exact terminal-history
+  GLB. Geometry, replacement color and animation controls were inspected.
+- **Complete sprite orchestra passed:** fresh H3 restage followed by real
+  background removal/cutting, 24 transparent frames and atlas export in 272
+  seconds. The separate saved-video cut passed first. See the repair record
+  for child IDs, timings and sampled-frame visual judgment. No new catalogue
+  cover or human motion-quality acceptance is implied.
+
+The first GLB attempt completed backend work but failed its browser assertion:
+the viewer was offscreen and production Vue omits the debug pointers used by
+the check. The gate now centers the node and observes its exact renderer and
+loaded artifact. The 280-pixel node allocation also visibly clipped controls;
+the canonical viewer is now 500×600. This is the sole specimen change since
+the region/layer pass; inputs, links and execution behavior are unchanged.
+Final fixture SHA-256:
+`1e2fa82b557465119aa2ac406ae461dac1502956e87451627ef6f867fcb29ca7`.
+
+The achieved Titanic level is **hydration plus targeted branch execution**,
+not exhaustive Titanic execution. Provider/model-heavy/editor branches not
+selected here retain their earlier limits. Stock 3D previews remain temporary
+Core assets; the new gate does not claim restart-durable GLB storage.
+
+JOC started the stopped stack. The first attempt started the proxy but lost
+its status observation; a fresh read established proxy-ready/Comfy-absent
+before a successful managed retry. No manual launch or bypass was used.
+The final queue was idle and Comfy/proxy were left available. The live shipped
+catalogue has 48 entries and exposes the accepted hearth cover. No new credentials,
+model downloads or dependency upgrades were needed for these checks.
+
+Evidence: `output/titanic-e2e/consolidation-20261001-a1/` preserves the first
+attempt and region/layer pass; `consolidation-20261001-glb-final/` preserves
+the corrected GLB pass. Sprite receipts live in
+`output/live-consolidation-20261001/`; inspected screenshots are in
+`output/playwright/{sprite,native3d}-20261001/`. Commands and cache
+prerequisites are in the [Titanic guide](../scripts/quality/TITANIC_E2E.md#synthetic-glb-region-and-layer-cases).
+The September evidence below remains historical.
 
 Catalogue acceptance remains 35 curated covers out of 48 shipped workflows;
 the other thirteen have no accepted sample. No new cover is promoted by this
@@ -181,12 +221,12 @@ Ignored local evidence:
 
 ## Before publication
 
-1. Finish the October consolidation's current-fixture hydration and six-node
-   CPU cases, inspect their previews, and replay the repaired sprite path.
-   Keep the external VNCCS requirement explicit. Retain the remaining live
-   Standard/HD execution and optional-node/checkpoint availability checks
-   required by the advertised scope; the historical catalogue browser pass
-   does not certify these generation paths.
+1. Keep the external VNCCS requirement explicit in the release/install story;
+   the tested local fix does not travel with an LF Nodes package. Retain the
+   remaining Standard/HD motion/audio acceptance and model/provider/editor
+   checks required by the advertised scope. The October consolidation above
+   is complete for its named branches, not an exhaustive release of every
+   installed third-party dependency or Titanic branch.
 2. Complete whichever remaining model/provider/editor live cases are required
    for the release's advertised scope; record unavailable prerequisites as such.
 3. Have Luca select the next version and accept the candidate. Update runtime,
