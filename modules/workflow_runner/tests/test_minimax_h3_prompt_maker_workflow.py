@@ -73,7 +73,8 @@ def test_card_is_registered_and_exposes_the_small_standalone_contract() -> None:
     assert WORKFLOW.value == "MiniMax H3 / Prompt Maker"
     assert WORKFLOW.category == "MiniMax H3"
     assert WORKFLOW.card is not None
-    assert WORKFLOW.card.hero is None
+    assert WORKFLOW.card.hero is not None
+    assert WORKFLOW.card.hero.asset == "minimax-h3/prompt-maker.webp"
     assert [cell.id for cell in WORKFLOW.inputs] == [
         "mode",
         "intent",

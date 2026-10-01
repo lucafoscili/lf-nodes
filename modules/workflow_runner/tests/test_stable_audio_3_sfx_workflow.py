@@ -21,7 +21,9 @@ def test_small_generic_block_is_registered_and_every_knob_has_help():
         ("prompt", True), ("duration", False), ("seed", False),
     ]
     assert all(cell.props["lfHelper"]["value"] for cell in WORKFLOW.inputs)
-    assert WORKFLOW.card.hero is None  # No unproven showcase.
+    assert WORKFLOW.card is not None
+    assert WORKFLOW.card.hero is not None
+    assert WORKFLOW.card.hero.asset == "audio/hearth.webp"
 
 
 def test_medium_recipe_stays_native_and_locked():
