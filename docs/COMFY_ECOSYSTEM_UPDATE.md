@@ -30,7 +30,10 @@ untouched. LF's local candidate was not replaced by its published remote.
 
 VNCCS upstream still needs the local `b843cc0` decoder repair. It remains
 installed and clean, one commit ahead of upstream; no reset or replacement
-was performed. This fix still does not travel with an LF release.
+was performed. This fix was not published upstream. **Subsequent 2026-10-02
+change:** shipped LF sprite/turnaround workflows now use
+[native RMBG-2.0](BACKGROUND_REMOVER.md), so this external repair is relevant
+only to older/custom consumers. The evidence below records the original update.
 
 ## Dependency boundaries
 

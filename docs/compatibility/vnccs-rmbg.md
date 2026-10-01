@@ -1,9 +1,13 @@
 # VNCCS / RMBG-2.0 compatibility
 
-Some LF Runner cards use the external `VNCCS_RMBG2` node for transparent
-sprites and character cutouts. LF Nodes does not bundle or automatically patch
-VNCCS. Installing the node and its model files alone does not resolve the
-decoder bug below.
+**Historical/custom-workflow compatibility.** Current shipped LF sprite and
+turnaround cards use [native `LF_BackgroundRemover` support](../BACKGROUND_REMOVER.md)
+and do not require VNCCS. Previously downloaded graphs and custom workflows
+may still contain `VNCCS_RMBG2`; they are not automatically migrated.
+
+LF Nodes does not bundle or automatically patch VNCCS. For those older/custom
+graphs, installing VNCCS and its model files alone does not resolve the decoder
+bug below.
 
 ## Affected source and symptom
 

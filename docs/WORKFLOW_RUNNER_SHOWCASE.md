@@ -433,6 +433,10 @@ record needs review before activation; the cover and acceptance are saved.
 
 ### Sprite decoder repair — 2026-10-01
 
+Historical evidence: on 2026-10-02 the shipped sprite/turnaround paths moved
+to [native LF RMBG-2.0](BACKGROUND_REMOVER.md), removing their VNCCS dependency.
+This repair remains relevant to older/custom graphs that still use VNCCS.
+
 The failed cut stage was traced to the external `VNCCS_RMBG2` implementation,
 not LF's background-removal node or the downloaded model. Its vendored
 `Decoder.__init__` eagerly referenced an undefined `HierarAttDecBlk` while

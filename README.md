@@ -114,7 +114,9 @@ The compiled frontend ships with LF Nodes; Node.js/Yarn are only needed to rebui
 Runner cards can additionally require external nodes, model files or provider
 credentials; installing LF Nodes does not install all of those. For cards using
 RMBG-2.0 background removal, see the
-[VNCCS compatibility note and temporary decoder repair](docs/compatibility/vnccs-rmbg.md).
+[native Background Remover setup](docs/BACKGROUND_REMOVER.md). Shipped sprite
+and turnaround cards no longer require VNCCS; their local model files remain
+separate prerequisites.
 
 ## Workflow Runner
 

@@ -116,8 +116,8 @@ image as the ending reference makes excluding that conditioned endpoint
 appropriate for a visually closed cycle; H3 generation does not guarantee that
 the decoded first and last frames are pixel-identical. With different endpoints,
 the ending keyframe remains in the MP4 but not the sprite export. The card then
-uses the installed `VNCCS_RMBG2` node in Alpha mode and passes the RGBA batch
-through `LF_NormalizeSpriteBatch`. The normalizer measures one selected
+uses `LF_BackgroundRemover` with model `RMBG-2.0` and transparency enabled,
+then passes the RGBA batch through `LF_NormalizeSpriteBatch`. The normalizer measures one selected
 reference frame, derives one uniform scale and one horizontal pivot, and applies
 both to the entire batch. It varies only the vertical translation needed to
 place every frame's lowest alpha pixel on the requested baseline. The default is
@@ -135,9 +135,9 @@ opaque sprites.
 
 RMBG-2.0's four-file local package is an explicit Runner model prerequisite;
 the card remains **Setup required** when it cannot be verified and never falls
-through to the wrapper's automatic download. Affected VNCCS versions also need
-the [decoder repair](compatibility/vnccs-rmbg.md); model-file readiness does not
-check that external source defect. Alpha is inferred independently
+through to an automatic download. VNCCS is no longer required by these shipped
+cards; see [native RMBG-2.0 setup](BACKGROUND_REMOVER.md) for the trusted local
+package, licensing and model lifetime. Alpha is inferred independently
 per frame, and the first vertical slice does not stabilize that matte.
 Normalization uses every alpha pixel above 1/255 as geometry: equipment,
 effects, and shadows count, so the requested height is an alpha-content height

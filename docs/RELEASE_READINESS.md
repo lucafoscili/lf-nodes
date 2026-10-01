@@ -1,10 +1,68 @@
-# Release readiness — 2026-10-01
+# Release readiness — 2026-10-02
 
 **Candidate preparation; no release published.** Optional four-step H3 HD is
 wired, Standard remains the default, and publication contracts cover the new
 capabilities. The next version has intentionally not been selected or stamped.
 The current `3.0.0` version already has a release tag: publishing this checkout
 under that identity is not a valid next-release operation.
+
+## Direct RMBG-2.0 — 2026-10-02
+
+**Keep — existing public node extended, shipped consumers migrated.**
+`LF_BackgroundRemover` now offers RMBG-2.0 without VNCCS. The default `u2net`,
+six old model choices, required inputs and all seven output indices are
+unchanged. One locally loaded model serves the complete image list and is
+released afterward; source alpha is intersected with inferred coverage.
+See [setup and implementation](BACKGROUND_REMOVER.md).
+
+The four-file local model package is reused without download or modification.
+Its native class plus strict safetensors loading works on the installed
+Transformers 5.10.1, where automatic pretrained loading failed with
+`Config.model_type`. No dependency downgrade or model-code patch was made.
+The external VNCCS installation and all custom project graphs are untouched.
+Its repair is now a legacy/custom-consumer concern, **not a prerequisite for
+current shipped LF sprite/turnaround cards**. This supersedes that requirement
+in the dated rehearsal and consolidation records below.
+
+Fresh evidence, with the workstation and services authorized by Luca:
+
+- CPU publication gate: **1,894 pytest passes**, four existing Windows
+  symlink-permission skips, twelve gate unit tests, compilation and all 154
+  public mappings passed. Then the two migrated sprite/cardinal suites were
+  added to that gate: **29 additional passes**, plus a passing rerun of its
+  twelve unit tests. The current manifest therefore covers 1,923 passing
+  pytest cases; unchanged groups were not rerun for a manifest-only edit.
+  Twelve existing Pillow deprecation warnings remain non-blocking.
+- Native browser: `u2net` still selected by default, RMBG-2.0 appended to the
+  actual dropdown, all seven sockets retained. Canonical Titanic **hydration
+  passed** (390 nodes / 515 links, unchanged fixture). This is not a full
+  Titanic execution claim.
+- Fresh same-frame A/B: Core prompt
+  `6a0450df-60ad-4961-b202-ce9f17e3fba3`, no cached nodes. Three 1920×1088 RGB
+  frames through LF and repaired VNCCS: identical RGB, maximum alpha delta
+  **1/255**, foreground IoU above **0.99998** on every frame. Checkerboard
+  comparison and native-pixel detail were visually inspected; no visible
+  edge regression on this specimen. This is bounded equivalence evidence,
+  not a promise of perfect matting for every subject.
+- Runner `sprite_loop_cut` passed as
+  `b9ef35a1-8147-4654-882a-a9a9ebea67f0`, about 27 seconds observed. Only saved
+  video decoding was cached; loop selection, direct LF matting, registration
+  and saving executed. It produced 24 RGBA 256×256 frames and a transparent
+  1536×1024 atlas (`atlas-6x4_00004_.png`). The atlas was visually inspected;
+  hands/boots fit, backgrounds are transparent and grounding is consistent.
+  H3 generation was not repeated for this downstream-only change.
+- Fresh mixed-size execution `e7d6da0f-4f51-4568-987d-e8c80a806836` retained
+  640×368, 512×288, 640×368 order; the primary batch contains exactly the two
+  matching-size items. All nine distinct durable preview URLs remained readable.
+- Independent code review found no must-fix. CPU tests cover cleanup after
+  inference/consumer failure and an escaped predictor not retaining weights.
+  Exact peak GPU allocation was not measured; CPU-only inference and arbitrary
+  third-party model packages were not live-certified.
+
+Evidence: `output/rmbg2-20261002/`,
+`output/playwright/rmbg2-20261002/`, and
+`output/titanic-e2e/rmbg2-20261002-hydration/`.
+No version, tag, push, upstream PR or release was published.
 
 ## Fresh-package rehearsal — 2026-10-01
 
@@ -46,8 +104,9 @@ Evidence: `output/fresh-install-20261001/` contains the package rehearsal
 summary, candidate archive and upstream/repaired decoder snapshots. The
 disposable extracted/build tree remains at
 `C:/Users/Luca/AppData/Local/Temp/lf-release-rehearsal-6852a9c2621042e6a93b526e2ae0c1aa/`.
-The [VNCCS note](compatibility/vnccs-rmbg.md) is the user-facing setup/recovery
-entry point. Upstream distribution is still pending; the temporary patch is
+At that rehearsal, the [VNCCS note](compatibility/vnccs-rmbg.md) was the
+setup/recovery entry point; it now covers older/custom consumers only.
+Upstream distribution is still pending; the temporary patch is
 not silently installed. No version, tag, push, PR or release was published.
 
 ## Updated host compatibility — 2026-10-01
@@ -99,9 +158,10 @@ the **external** VNCCS package. Local owner commit
 `b843cc0caf1671e917f4567605b21269a03fc9cc` removes that unsupported mapping
 entry without changing weights, preprocessing or the selected decoder. Three
 CPU regression tests pass, followed by successful live cut and orchestra runs.
-LF Nodes does not automatically repair the external installation: fresh installs
-still need that owner fix or an equivalent upstream fix. The candidate now ships
-an [explicit patch with preview and rollback](compatibility/vnccs-rmbg.md), so
+LF Nodes does not automatically repair the external installation: at this
+checkpoint, fresh installs still needed that owner fix or an equivalent upstream
+fix (superseded for current shipped cards by direct RMBG-2.0 above). The candidate
+ships an [explicit patch with preview and rollback](compatibility/vnccs-rmbg.md), so
 applying the repair does not require access to this workstation's local commit.
 See the [repair record](WORKFLOW_RUNNER_SHOWCASE.md#sprite-decoder-repair--2026-10-01).
 
@@ -277,9 +337,9 @@ Ignored local evidence:
 
 ## Before publication
 
-1. Keep the external VNCCS requirement explicit in the release/install story;
-   the bundled opt-in patch is not an upstream release or an automatic repair.
-   Upstream distribution remains pending. Retain the
+1. Keep native RMBG-2.0's trusted local model package and licensing explicit in
+   the install story. Older/custom VNCCS graphs remain separate; the bundled
+   opt-in patch is not an upstream release or an automatic repair. Retain the
    remaining Standard/HD motion/audio acceptance and model/provider/editor
    checks required by the advertised scope. The October consolidation above
    is complete for its named branches, not an exhaustive release of every

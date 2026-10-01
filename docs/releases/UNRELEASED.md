@@ -31,6 +31,10 @@ remaining prerequisites; this draft does not declare a full E2E pass.
 - **Sprite, tile and media tools:** settled-frame selection, loop-segment
   selection, seamless textures, isometric diamond tiles, audio saving/preview,
   and JSON key lookup by index.
+- **Native RMBG-2.0:** the existing Background Remover gains a local RMBG-2.0
+  choice, invocation-scoped model loading and source-alpha preservation.
+  Shipped sprite/turnaround cards no longer depend on VNCCS. The default
+  `u2net` choice, ordered mixed-size lists and all seven sockets are preserved.
 - **Runner assemblies and history:** reusable multi-block orchestras, named
   artifact/text handoffs and durable child-run outputs, alongside proxy/auth
   hardening and phone-oriented controls.
@@ -54,11 +58,12 @@ Sixteen public nodes have been added since v3.0.0. This batch changes no existin
 public output socket order. Existing H3 workflows keep Standard output unless HD
 is explicitly selected. HD does not combine with Turbo; select Kitchen 20.
 
-Cards using `VNCCS_RMBG2` need a working external VNCCS installation as well as
-RMBG-2.0 model assets. An affected upstream decoder references an undefined
-class; LF includes an [explicit temporary repair](../compatibility/vnccs-rmbg.md)
-with preview and rollback instructions. It is not applied automatically, and
-installing/updating LF alone does not repair VNCCS.
+RMBG-2.0 now runs through LF's public Background Remover. Shipped sprite and
+turnaround cards need its trusted four-file local model package, not VNCCS.
+See [setup, licensing and output contracts](../BACKGROUND_REMOVER.md).
+Older/downloaded/custom graphs containing `VNCCS_RMBG2` are not rewritten;
+the [explicit temporary repair](../compatibility/vnccs-rmbg.md) remains available
+for affected external versions. Nothing patches or uninstalls VNCCS automatically.
 
 For users of the unreleased compiler-era Prompt Maker: `validation_report` now
 reports authoring/review status, **not schema validation** (`valid: null`,
