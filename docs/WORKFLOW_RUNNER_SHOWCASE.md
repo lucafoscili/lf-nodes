@@ -430,3 +430,27 @@ before stopping Comfy. The service remained ready/idle, and its live Sound
 Effects metadata still lacked the new hero. No manual stop, second restart,
 dependency downgrade, or guard change was attempted. The installed dependency
 record needs review before activation; the cover and acceptance are saved.
+
+### Sprite decoder repair — 2026-10-01
+
+The failed cut stage was traced to the external `VNCCS_RMBG2` implementation,
+not LF's background-removal node or the downloaded model. Its vendored
+`Decoder.__init__` eagerly referenced an undefined `HierarAttDecBlk` while
+building its lookup table, even though the selected default is `BasicDecBlk`.
+
+**Keep — local source fix:** `ComfyUI_VNCCS` commit
+`b843cc0caf1671e917f4567605b21269a03fc9cc` removes that one unsupported lookup
+entry. Model weights, image preprocessing, node defaults and sockets are
+unchanged; selecting an unsupported configuration retains the existing readable
+error. The CPU regression failed on the original source and all three tests
+passed after the fix. The owner security scan and focused compilation passed.
+
+This is a separately committed local dependency repair, **not bundled in an
+LF Nodes release or published upstream**. A fresh installation still needs a
+VNCCS version containing the equivalent fix. No checkpoint replacement,
+download, dependency upgrade or LF-side monkeypatch was used.
+
+**Defer — live acceptance:** no new model inference, transparent atlas or cover
+is claimed by these source checks. The smallest next check is `sprite_loop_cut`
+against the already saved successful restage video from the original run, then
+the complete orchestra. Preserve the earlier failed parent as failure evidence.
