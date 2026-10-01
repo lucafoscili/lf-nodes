@@ -8,3 +8,6 @@ scripts/quality/titanic_cases.json text eol=lf
 
 # Shipped examples are deterministically sanitized and byte-checked in CI.
 example_workflows/*.json text eol=lf
+
+# Compatibility patches must also apply to LF-only source archives on Windows.
+docs/compatibility/*.patch text eol=lf

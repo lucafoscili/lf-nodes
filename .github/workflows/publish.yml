@@ -43,6 +43,14 @@ jobs:
         run: corepack yarn install --immutable
       - name: Validate frontend, Titanic units, and production build
         run: corepack yarn check:release
+      - name: Verify compiled frontend is committed
+        run: |
+          BUILD_CHANGES=$(git status --short --untracked-files=all -- web/deploy)
+          if [ -n "$BUILD_CHANGES" ]; then
+            printf '%s\n' "$BUILD_CHANGES"
+            echo "Compiled frontend differs from the release commit. Run corepack yarn build, stage web/deploy, and commit the generated files before publishing." >&2
+            exit 1
+          fi
       - name: Fetch all history and branches
         run: |
           # Only attempt to unshallow if this is a shallow clone. On a complete

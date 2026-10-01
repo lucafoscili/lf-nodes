@@ -1,0 +1,11 @@
+diff --git a/nodes/_vendored_birefnet.py b/nodes/_vendored_birefnet.py
+--- a/nodes/_vendored_birefnet.py
++++ b/nodes/_vendored_birefnet.py
+@@ -2115,7 +2115,6 @@ class Decoder(nn.Module):
+         decoder_types = {
+             'BasicDecBlk': BasicDecBlk,
+             'ResBlk': ResBlk,
+-            'HierarAttDecBlk': HierarAttDecBlk,
+         }
+         lateral_types = {'BasicLatBlk': BasicLatBlk}
+         DecoderBlock = decoder_types.get(self.config.dec_blk)

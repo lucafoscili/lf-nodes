@@ -59,6 +59,7 @@ current visual-novel node inputs and identity contract, see
     - [Manual](#manual)
       - [Method 1: Download ZIP](#method-1-download-zip)
       - [Method 2: Git Clone](#method-2-git-clone)
+      - [Install Python dependencies](#install-python-dependencies-both-manual-methods)
   - [Workflow Runner](#workflow-runner)
     - [Adding New Workflows](#adding-new-workflows)
   - [Image editor](#image-editor)
@@ -81,14 +82,39 @@ current visual-novel node inputs and identity contract, see
 
 - Go to the [releases page](https://github.com/lucafoscili/lf-nodes/releases).
 - Download the latest release ZIP file.
-- Extract the contents of the ZIP file into the `ComfyUI/custom_nodes` folder.
-- Restart ComfyUI.
+- Extract it as `ComfyUI/custom_nodes/lf-nodes` (the folder containing `__init__.py`, not an extra nested folder).
+- Complete the dependency step below, then restart ComfyUI.
 
 #### Method 2: Git Clone
 
 - Go to the `ComfyUI/custom_nodes` folder.
 - Open a terminal.
 - Copy and paste this command `git clone https://github.com/lucafoscili/lf-nodes.git`.
+- Complete the dependency step below, then restart ComfyUI.
+
+#### Install Python dependencies (both manual methods)
+
+Use **the Python interpreter that runs ComfyUI**, not an unrelated system Python.
+From the ComfyUI folder, for a Windows virtual environment named `venv`:
+
+```powershell
+.\venv\Scripts\python.exe -m pip install -r .\custom_nodes\lf-nodes\requirements.txt
+```
+
+For Windows portable, run from the portable folder containing `python_embeded`:
+
+```powershell
+.\python_embeded\python.exe -m pip install -r .\ComfyUI\custom_nodes\lf-nodes\requirements.txt
+```
+
+On other installations, activate ComfyUI's environment and run
+`python -m pip install -r custom_nodes/lf-nodes/requirements.txt` from its root.
+The compiled frontend ships with LF Nodes; Node.js/Yarn are only needed to rebuild it.
+
+Runner cards can additionally require external nodes, model files or provider
+credentials; installing LF Nodes does not install all of those. For cards using
+RMBG-2.0 background removal, see the
+[VNCCS compatibility note and temporary decoder repair](docs/compatibility/vnccs-rmbg.md).
 
 ## Workflow Runner
 

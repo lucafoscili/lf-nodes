@@ -54,6 +54,12 @@ Sixteen public nodes have been added since v3.0.0. This batch changes no existin
 public output socket order. Existing H3 workflows keep Standard output unless HD
 is explicitly selected. HD does not combine with Turbo; select Kitchen 20.
 
+Cards using `VNCCS_RMBG2` need a working external VNCCS installation as well as
+RMBG-2.0 model assets. An affected upstream decoder references an undefined
+class; LF includes an [explicit temporary repair](../compatibility/vnccs-rmbg.md)
+with preview and rollback instructions. It is not applied automatically, and
+installing/updating LF alone does not repair VNCCS.
+
 For users of the unreleased compiler-era Prompt Maker: `validation_report` now
 reports authoring/review status, **not schema validation** (`valid: null`,
 `validation: not_performed`). `visual_inventory` keeps its socket for compatibility

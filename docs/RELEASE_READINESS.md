@@ -55,8 +55,10 @@ the **external** VNCCS package. Local owner commit
 `b843cc0caf1671e917f4567605b21269a03fc9cc` removes that unsupported mapping
 entry without changing weights, preprocessing or the selected decoder. Three
 CPU regression tests pass, followed by successful live cut and orchestra runs.
-This repair is not bundled by LF Nodes: fresh installations still need that
-owner fix or an equivalent upstream fix.
+LF Nodes does not automatically repair the external installation: fresh installs
+still need that owner fix or an equivalent upstream fix. The candidate now ships
+an [explicit patch with preview and rollback](compatibility/vnccs-rmbg.md), so
+applying the repair does not require access to this workstation's local commit.
 See the [repair record](WORKFLOW_RUNNER_SHOWCASE.md#sprite-decoder-repair--2026-10-01).
 
 Fresh live verification, after Luca authorized the shared runtime:
@@ -232,7 +234,8 @@ Ignored local evidence:
 ## Before publication
 
 1. Keep the external VNCCS requirement explicit in the release/install story;
-   the tested local fix does not travel with an LF Nodes package. Retain the
+   the bundled opt-in patch is not an upstream release or an automatic repair.
+   Upstream distribution remains pending. Retain the
    remaining Standard/HD motion/audio acceptance and model/provider/editor
    checks required by the advertised scope. The October consolidation above
    is complete for its named branches, not an exhaustive release of every

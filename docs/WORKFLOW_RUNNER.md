@@ -135,7 +135,9 @@ opaque sprites.
 
 RMBG-2.0's four-file local package is an explicit Runner model prerequisite;
 the card remains **Setup required** when it cannot be verified and never falls
-through to the wrapper's automatic download. Alpha is inferred independently
+through to the wrapper's automatic download. Affected VNCCS versions also need
+the [decoder repair](compatibility/vnccs-rmbg.md); model-file readiness does not
+check that external source defect. Alpha is inferred independently
 per frame, and the first vertical slice does not stabilize that matte.
 Normalization uses every alpha pixel above 1/255 as geometry: equipment,
 effects, and shadows count, so the requested height is an alpha-content height

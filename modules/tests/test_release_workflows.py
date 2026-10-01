@@ -38,6 +38,22 @@ def test_recorded_node_count_matches_unique_published_mappings():
     assert recorded == len(mappings) == 154
 
 
+def test_publication_rejects_uncommitted_build_outputs_before_registry_checkout():
+    workflow = (REPO_ROOT / ".github" / "workflows" / "publish.yml").read_text(
+        encoding="utf-8"
+    )
+
+    gate = "- name: Verify compiled frontend is committed"
+    assert workflow.index("run: corepack yarn check:release") < workflow.index(gate)
+    assert workflow.index(gate) < workflow.index("- name: Publish Custom Node")
+    assert (
+        "BUILD_CHANGES=$(git status --short --untracked-files=all -- web/deploy)"
+        in workflow
+    )
+    assert 'if [ -n "$BUILD_CHANGES" ]; then' in workflow
+    assert "Run corepack yarn build, stage web/deploy, and commit" in workflow
+
+
 def test_canonical_titanic_covers_exactly_the_published_lf_node_types():
     from modules.workflow_runner.scripts.workflow_preflight import discover_lf_node_types
 
