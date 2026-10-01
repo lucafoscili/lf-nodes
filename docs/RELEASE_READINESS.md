@@ -6,6 +6,50 @@ capabilities. The next version has intentionally not been selected or stamped.
 The current `3.0.0` version already has a release tag: publishing this checkout
 under that identity is not a valid next-release operation.
 
+## Fresh-package rehearsal — 2026-10-01
+
+**Keep — clean source/frontend installation passed; not a blank-machine GPU
+installation or a registry publication.** The manual-install instructions now
+name the dependency step using ComfyUI's own Python. No public node contract,
+runtime default, installed model or running service changed in this rehearsal.
+
+- A clean archive of `db0dcb0` contained 1,334 files and all 253 compiled
+  frontend files, with no private runtime/dependency/credential-file paths.
+  Extraction checks parsed 646 Python sources and resolved all six relative
+  JavaScript imports. Eight focused contracts passed, including an actual
+  headless Visual Novel import through the inert Comfy host boundary.
+- Fresh `corepack yarn install --immutable` and `corepack yarn build` passed
+  using Node 22.13.0 / Yarn 4.6.0. All 253 shipped frontend files matched the
+  rebuilt files after line-ending normalization; seven extra JS source maps
+  are ignored build intermediates. Python checks reused the installed 3.11.9
+  environment; no fresh Python dependency installation or full live node
+  registration was performed.
+- The inspected `Comfy-Org/publish-node-action@v1` checks out the repository
+  again before publishing, while comfy-cli 1.22.0 packages tracked files.
+  A narrow check now requires the compiled frontend to be committed after the
+  build and before publication. Its exact shell body passed for the clean
+  build and independently failed for modified tracked JS and new untracked JS;
+  ignored source maps do not fail it. No registry publish command was invoked.
+- The unaffected LF frontend needs no artifact repair. The external VNCCS
+  decoder bug reproduced against an untouched upstream archive; its corrected
+  snapshot passed all three CPU regressions. The shipped opt-in patch was
+  applied and reversed in isolation, matching the repaired and original bytes
+  exactly. ZIP/nested-checkout targeting and the existing Windows Git checkout
+  were checked without modifying the live VNCCS installation.
+- Final candidate `95c6b61` contains the installation guidance, patch and
+  publication check. Its archive has 1,336 files, including all 253 frontend
+  files and the exact patch bytes, with no private runtime directories. Thirteen
+  release-workflow, version and release-note contracts passed independently.
+  Prior live behavior evidence is reused because runtime code is unchanged.
+
+Evidence: `output/fresh-install-20261001/` contains the package rehearsal
+summary, candidate archive and upstream/repaired decoder snapshots. The
+disposable extracted/build tree remains at
+`C:/Users/Luca/AppData/Local/Temp/lf-release-rehearsal-6852a9c2621042e6a93b526e2ae0c1aa/`.
+The [VNCCS note](compatibility/vnccs-rmbg.md) is the user-facing setup/recovery
+entry point. Upstream distribution is still pending; the temporary patch is
+not silently installed. No version, tag, push, PR or release was published.
+
 ## Updated host compatibility — 2026-10-01
 
 The [Comfy ecosystem update](COMFY_ECOSYSTEM_UPDATE.md) is complete: Core
