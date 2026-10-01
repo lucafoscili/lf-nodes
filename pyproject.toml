@@ -6,6 +6,7 @@ requires-python = ">=3.10"
 license = {file = "LICENSE"}
 dependencies = [
     "GPUtil",
+    "kornia",
     "numpy",
     "nvidia-ml-py",
     "onnxruntime",
@@ -17,6 +18,7 @@ dependencies = [
     "psutil",
     "rembg",
     "requests",
+    "safetensors",
     "svgwrite",
     "timm",
     "torch",

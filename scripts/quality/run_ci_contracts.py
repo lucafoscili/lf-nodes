@@ -29,6 +29,8 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "tests/test_durable_final_preview_history.py",
     "tests/test_blend_contracts.py",
     "tests/test_background_remover_contract.py",
+    "modules/tests/nodes/filters/test_background_remover_rmbg2.py",
+    "modules/tests/utils/helpers/test_rmbg2.py",
     "modules/tests/helpers/test_generated_preview.py",
     "modules/tests/helpers/test_process_and_save_image_contract.py",
     "modules/tests/helpers/test_parallel_list_contract.py",

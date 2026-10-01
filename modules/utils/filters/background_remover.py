@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Dict, Tuple
+from typing import Any, Callable, Dict, Iterator, Tuple
 
 import numpy as np
 import torch
@@ -17,6 +18,33 @@ from ...utils.helpers.conversion import (
 )
 from ...utils.helpers.detection.rembg import get_rembg_session
 from ...utils.helpers.ui import cache_generated_preview
+
+RemoveImage = Callable[[Image.Image], Image.Image | bytes]
+
+
+@contextmanager
+def background_removal_session(model_name: str) -> Iterator[RemoveImage]:
+    """Own one backend for a complete node execution, including mixed image sizes."""
+    if model_name == "RMBG-2.0":
+        from ...utils.helpers.detection.rmbg2 import rmbg2_session
+
+        with rmbg2_session() as predict_mask:
+            def remove_image(image: Image.Image) -> Image.Image:
+                mask = predict_mask(image.convert("RGB"))
+                if "A" in image.getbands():
+                    alpha = np.asarray(image.getchannel("A"), dtype=np.float32) / 255.0
+                    mask = Image.fromarray(
+                        np.rint(np.asarray(mask, dtype=np.float32) * alpha).astype(np.uint8)
+                    )
+                cutout = image.convert("RGBA")
+                cutout.putalpha(mask)
+                return cutout
+
+            yield remove_image
+    else:
+        session = get_rembg_session(model_name)
+        yield lambda image: remove(image, session=session)
+
 
 @dataclass
 class BackgroundRemovalResult:
@@ -104,6 +132,7 @@ def apply_background_removal(
     transparent_background: bool,
     background_color: str,
     model_name: str,
+    remover: RemoveImage | None = None,
 ) -> BackgroundRemovalResult:
     """
     Removes the background from an input image tensor using a specified model, and returns the processed results.
@@ -124,9 +153,9 @@ def apply_background_removal(
     """
     normalized_color = normalize_hex_color(background_color)
     pil_image = tensor_to_pil(image)
-    session = get_rembg_session(model_name)
-
-    removed = remove(pil_image, session=session)
+    context = nullcontext(remover) if remover is not None else background_removal_session(model_name)
+    with context as remove_image:
+        removed = remove_image(pil_image)
     cutout_image = _ensure_rgba_image(removed)
 
     alpha = np.array(cutout_image.getchannel("A"), dtype=np.float32) / 255.0
@@ -165,6 +194,7 @@ def background_remover_effect(
     transparent_background: bool,
     background_color: str,
     model_name: str,
+    remover: RemoveImage | None = None,
 ) -> Tuple[torch.Tensor, Dict[str, Any]]:
     """Apply background removal and prepare auxiliary artifacts for UI consumption."""
 
@@ -173,6 +203,7 @@ def background_remover_effect(
         transparent_background=transparent_background,
         background_color=background_color,
         model_name=model_name,
+        remover=remover,
     )
 
     cutout_url = cache_generated_preview(result.cutout).url
@@ -192,6 +223,7 @@ def background_remover_effect(
 
 __all__ = [
     "BackgroundRemovalResult",
+    "background_removal_session",
     "apply_background_removal",
     "background_remover_effect",
 ]

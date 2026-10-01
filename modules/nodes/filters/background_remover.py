@@ -6,7 +6,7 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.filters import apply_background_remover_filter
+from ...utils.filters import background_removal_session, background_remover_effect
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import (
     normalize_input_image,
@@ -27,6 +27,7 @@ class LF_BackgroundRemover:
             "silueta",
             "isnet-general-use",
             "isnet-anime",
+            "RMBG-2.0",
         ]
         return {
             "required": {
@@ -52,7 +53,7 @@ class LF_BackgroundRemover:
                     models,
                     {
                         "default": "u2net",
-                        "tooltip": "rembg ONNX model to use for matting.",
+                        "tooltip": "Background removal model. RMBG-2.0 uses the trusted local model package in models/RMBG/RMBG-2.0; no automatic download.",
                     },
                 ),
             },
@@ -112,12 +113,6 @@ class LF_BackgroundRemover:
         background_color = normalize_list_to_value(kwargs.get("background_color")) or "#000000"
         model = str(normalize_list_to_value(kwargs.get("model")) or "u2net")
 
-        settings = {
-            "transparent_background": transparent,
-            "color": background_color,
-            "model": model,
-        }
-
         nodes: List[dict] = []
         dataset: Dict[str, Any] = {"nodes": nodes}
 
@@ -126,34 +121,41 @@ class LF_BackgroundRemover:
         mask_images: List[torch.Tensor] = []
         stats_rows: List[dict] = []
 
-        for index, image in enumerate(images):
-            composite, payload = apply_background_remover_filter(image, settings)
-
-            cutout_tensor = payload.get("cutout_tensor")
-            mask_tensor = payload.get("mask_tensor")
-            if cutout_tensor is None or mask_tensor is None:
-                raise RuntimeError("Background remover filter response missing required tensors.")
-
-            composite_images.append(composite)
-            cutout_images.append(cutout_tensor)
-            mask_images.append(mask_tensor)
-
-            stats = dict(payload.get("stats", {})) if payload.get("stats") else {}
-            stats["index"] = index
-            stats_rows.append(stats)
-
-            nodes.append(
-                create_cached_compare_node(
+        with background_removal_session(model) as remover:
+            for index, image in enumerate(images):
+                composite, payload = background_remover_effect(
                     image,
-                    composite,
-                    index=len(nodes),
+                    transparent_background=transparent,
+                    background_color=background_color,
+                    model_name=model,
+                    remover=remover,
                 )
-            )
 
-            cutout_url = payload.get("cutout")
-            mask_url = payload.get("mask")
-            if cutout_url and mask_url:
-                nodes.append(create_compare_node(cutout_url, mask_url, len(nodes)))
+                cutout_tensor = payload.get("cutout_tensor")
+                mask_tensor = payload.get("mask_tensor")
+                if cutout_tensor is None or mask_tensor is None:
+                    raise RuntimeError("Background remover filter response missing required tensors.")
+
+                composite_images.append(composite)
+                cutout_images.append(cutout_tensor)
+                mask_images.append(mask_tensor)
+
+                stats = dict(payload.get("stats", {})) if payload.get("stats") else {}
+                stats["index"] = index
+                stats_rows.append(stats)
+
+                nodes.append(
+                    create_cached_compare_node(
+                        image,
+                        composite,
+                        index=len(nodes),
+                    )
+                )
+
+                cutout_url = payload.get("cutout")
+                mask_url = payload.get("mask")
+                if cutout_url and mask_url:
+                    nodes.append(create_compare_node(cutout_url, mask_url, len(nodes)))
 
         payload = {"dataset": dataset}
         safe_send_sync("backgroundremover", payload, node_id)
