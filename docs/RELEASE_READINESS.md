@@ -6,6 +6,16 @@ capabilities. The next version has intentionally not been selected or stamped.
 The current `3.0.0` version already has a release tag: publishing this checkout
 under that identity is not a valid next-release operation.
 
+## Updated host compatibility — 2026-10-01
+
+The [Comfy ecosystem update](COMFY_ECOSYSTEM_UPDATE.md) is complete: Core
+`651ca296` (0.38.0), frontend 1.53.10, Manager, ControlNet Aux and Ultimate SD
+Upscale were updated with local changes preserved. Post-update Titanic
+hydration/six-node targeted execution, a fresh full HD sprite orchestra, and
+bounded Ultimate/Aux inference passed. All 154 LF schemas are unchanged.
+The update record names recovery refs, exact evidence and upstream caveats;
+it does not expand the release's acceptance scope or resolve VNCCS distribution.
+
 ## Consolidation checkpoint — 2026-10-01
 
 **Keep — this consolidation's live checks passed; candidate acceptance and
