@@ -64,6 +64,18 @@ Evidence: `output/rmbg2-20261002/`,
 `output/titanic-e2e/rmbg2-20261002-hydration/`.
 No version, tag, push, upstream PR or release was published.
 
+The final cache-cleanup restart exposed a stale service-owner Kitchen pin
+(0.2.35 versus Core's required/installed 0.2.36). The first J.O.C. attempt
+stopped at the dependency check without replacing the running service.
+Velora owner commit `25c900a5` aligns that one pin and its regression test;
+66 operation tests passed with one existing reparse-permission skip, followed
+by the real GPU-hidden dependency probe. Identity, storage and idle guards
+are unchanged. The subsequent named J.O.C. restart succeeded at
+2026-10-01 23:30:37 UTC (October 2 locally), leaving Comfy and Runner ready/idle.
+Afterward the public schema was unchanged, all nine saved preview URLs returned
+HTTP 200, and Runner restored the sprite run's persisted succeeded status.
+Unrelated Velora working changes were preserved.
+
 ## Fresh-package rehearsal — 2026-10-01
 
 **Keep — clean source/frontend installation passed; not a blank-machine GPU
