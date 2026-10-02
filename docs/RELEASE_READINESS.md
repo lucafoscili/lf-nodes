@@ -28,6 +28,12 @@ isolated groups were reviewed together for missing imports. This is CI setup,
 not a change to installed-node behavior; this attempt also stopped before
 publication.
 
+Run `36965716007` passed all CPU/frontend tests and the production build, then
+stopped at the compiled-file guard on four copied SVGs. Those package assets
+use CRLF while the tracked snapshot is LF. The copy step now emits canonical
+LF SVG bytes on every host, with a focused real-copy regression retaining
+source bytes and binary fonts. The compiled-file guard remains unchanged.
+
 ## 4.0.0 candidate checks — 2026-10-02
 
 **Keep — prepared locally, not published.** Commit `1eec2d6` stamps the three

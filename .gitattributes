@@ -1,5 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+web/deploy/assets/svg/*.svg text eol=lf
 
 # Titanic's manifest pins the canonical workflow's exact working-tree bytes.
 # Keep both authority files stable across Windows/macOS/Linux clones.
