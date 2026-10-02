@@ -1,11 +1,16 @@
 # Release readiness — 2026-10-02
 
-**4.0.0 candidate preparation; no release published.** Optional four-step H3 HD is
+**4.0.0 accepted; publication authorized on 2026-10-02.** Optional four-step H3 HD is
 wired, Standard remains the default, and publication contracts cover the new
-capabilities. Luca authorized preparing the 4.0.0 candidate locally. Runtime,
-Python and package metadata now use `4.0.0`; publication remains a separate
-decision. The [versioned notes](releases/4.0.0.md) explain the breaking TRELLIS.2
+capabilities. Luca approved the HD motion/audio sign-off and explicitly authorized
+publication to the Comfy registry and GitHub. Runtime, Python and package metadata
+use `4.0.0`. The [versioned notes](releases/4.0.0.md) explain the breaking TRELLIS.2
 Runner migration. The existing `3.0.0` release identity must not be reused.
+
+This publication commit records acceptance, not a completed external upload.
+The publication workflow must finish successfully before reporting the release
+as live. Earlier dated pending-sign-off statements below are historical and are
+superseded by this acceptance; their test and coverage limits still apply.
 
 ## 4.0.0 candidate checks — 2026-10-02
 
@@ -44,11 +49,10 @@ preview remain local and ignored. The subsequent readiness-record commit
 changes documentation only. Existing live node/browser/media evidence below
 is reused; no services, models or workflow executions changed in this pass.
 
-Pending: Luca's continuous-motion/audio acceptance for optional HD and explicit
-publication approval. Publication must replace candidate-only status wording
-with the accepted release status before pushing. The version-changing push to
-`main` can publish the registry package and create the tag/GitHub release;
-none of those external actions has been taken.
+At candidate handoff, HD acceptance and publication approval were pending.
+Both were supplied by Luca on 2026-10-02, as recorded above. The version-changing
+push to `main` publishes through the existing registry/tag/GitHub pipeline.
+No runtime or dependency change is part of this final publication pass.
 
 ## Direct RMBG-2.0 — 2026-10-02
 
@@ -396,20 +400,20 @@ Ignored local evidence:
 1. Keep native RMBG-2.0's trusted local model package and licensing explicit in
    the install story. Older/custom VNCCS graphs remain separate; the bundled
    opt-in patch is not an upstream release or an automatic repair. Retain the
-   remaining Standard/HD motion/audio acceptance and model/provider/editor
-   checks required by the advertised scope. The October consolidation above
+   recorded HD acceptance and limits of model/provider/editor checks required
+   by the advertised scope. The October consolidation above
    is complete for its named branches, not an exhaustive release of every
    installed third-party dependency or Titanic branch.
 2. Complete whichever remaining model/provider/editor live cases are required
    for the release's advertised scope; record unavailable prerequisites as such.
 3. The 4.0.0 candidate is selected and stamped across runtime, Python and package
    metadata, with the version-specific contract and migration notes updated.
-   Obtain Luca's final candidate acceptance, including the remaining optional
-   HD motion/audio judgment; preparation is not publication approval.
+   Luca accepted the candidate and optional HD motion/audio judgment, then
+   separately authorized publication on 2026-10-02.
 4. Inspect the final publication diff and run its metadata checks. Pushing the
    relevant release change to `main` can trigger registry publication; keep that
-   as an explicit, separately authorized action. No push, tag or publication was
-   performed during this preparation.
+   as an explicit, separately authorized action. This authorization is now
+   supplied; verify registry upload, tag identity and GitHub release completion.
 
 ## Final focused-execution update — 2026-09-26
 

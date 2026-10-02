@@ -80,6 +80,9 @@ frame ordering are not resized into a shared image batch.
 The actual uncached four-step render and comparison are recorded separately in
 the paired trial. Full creative acceptance across all aspect ratios, long clips,
 different endpoint anchors, intermediate guides and sprite/turnaround branches
-remains outside these two short-clip checks. Continuous-motion judgment and
-human audio listening remain for Luca; frame inspection and playback completion
-alone do not certify those qualities.
+remains outside these two short-clip checks. Frame inspection and playback
+completion alone do not certify continuous-motion or audio quality.
+
+On 2026-10-02 Luca approved the outstanding motion/audio sign-off for shipping
+this optional mode in LF Nodes 4.0.0. That acceptance covers the reviewed
+experience, not every input, aspect ratio or branch listed above.

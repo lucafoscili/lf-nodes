@@ -54,3 +54,16 @@ def test_previous_major_version_keeps_its_socket_migration_note() -> None:
     assert "LF_ExtractPromptFromLoraTag" in text
     assert "Sockets 0" in text and "Sockets 2" in text
     assert "keywords_list" in text and "keywords_count_list" in text
+
+
+def test_current_release_note_links_work_in_copied_github_body() -> None:
+    note = REPO_ROOT / "docs" / "releases" / f"{EXPECTED_VERSION}.md"
+    text = note.read_text(encoding="utf-8")
+    links = re.findall(r"\]\(([^)]+)\)", text)
+    prefix = f"https://github.com/lucafoscili/lf-nodes/blob/v{EXPECTED_VERSION}/"
+
+    assert links
+    for link in links:
+        assert link.startswith(prefix), f"Release link must pin its repository/tag: {link}"
+        target = link.removeprefix(prefix).split("#", 1)[0]
+        assert (REPO_ROOT / target).is_file(), f"Missing release link target: {target}"
