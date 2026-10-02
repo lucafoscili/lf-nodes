@@ -31,6 +31,7 @@ class GenerateReleaseNotesTests(unittest.TestCase):
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
         ).stdout.strip()
 
     def _commit(self, subject):
@@ -130,6 +131,24 @@ class GenerateReleaseNotesTests(unittest.TestCase):
         self.assertIn("Use sockets 2 and 3 for per-tag values.", notes)
         self.assertNotIn("working-tree mutation", notes)
         self.assertLess(notes.index("## Migration"), notes.index("## Commits"))
+
+    def test_unicode_notes_and_commit_subjects_survive_host_encoding(self):
+        self._commit("previous release")
+        self._git("tag", "v3.0.0")
+        note = self.repo / "docs" / "releases" / "4.0.0.md"
+        note.parent.mkdir(parents=True)
+        text = "# LF Nodes 4.0.0 — migration\n\nKeep 1920×1088 output and café labels.\n"
+        note.write_text(text, encoding="utf-8")
+        self._git("add", "docs/releases/4.0.0.md")
+        self._git("commit", "-m", "Document migration — preserve café labels")
+
+        notes, previous_tag, commits = release_notes.generate_release_notes(
+            self.repo, "HEAD", "v4.0.0", "4.0.0"
+        )
+
+        self.assertEqual("v3.0.0", previous_tag)
+        self.assertIn(text.strip(), notes)
+        self.assertIn("Document migration — preserve café labels", commits[0])
 
     def test_repository_without_tags_lists_full_history(self):
         self._commit("initial feature")
