@@ -1,16 +1,41 @@
 # Release readiness — 2026-10-02
 
-**4.0.0 accepted; publication authorized on 2026-10-02.** Optional four-step H3 HD is
+**4.0.0 published on GitHub; registry scan pending on 2026-10-02.** Optional four-step H3 HD is
 wired, Standard remains the default, and publication contracts cover the new
 capabilities. Luca approved the HD motion/audio sign-off and explicitly authorized
 publication to the Comfy registry and GitHub. Runtime, Python and package metadata
 use `4.0.0`. The [versioned notes](releases/4.0.0.md) explain the breaking TRELLIS.2
 Runner migration. The existing `3.0.0` release identity must not be reused.
 
-This publication commit records acceptance, not a completed external upload.
-The publication workflow must finish successfully before reporting the release
-as live. Earlier dated pending-sign-off statements below are historical and are
-superseded by this acceptance; their test and coverage limits still apply.
+The [publication workflow](https://github.com/lucafoscili/lf-nodes/actions/runs/36966576885)
+completed successfully. The [GitHub release](https://github.com/lucafoscili/lf-nodes/releases/tag/v4.0.0)
+is public, neither draft nor prerelease, and `v4.0.0` points to
+`e920c50972a343f00c29d717ddb32efe5b3f2a66`. The registry accepted version 4.0.0,
+but its API still reports `NodeVersionStatusPending` at 05:00 UTC; upload success
+does not yet establish availability through Manager. The older 3.0.0 remains
+flagged, while the registry's advertised latest active version is 2.9.0. No
+scanner result has been bypassed or inferred. Earlier pending-sign-off and
+unpublished statements below are historical; their coverage limits still apply.
+
+Publication verification:
+
+- The clean Linux runner passed **1,927 pytest tests** (four skips, twelve
+  warnings), **609 frontend tests in 72 files**, 32 Titanic unit contracts,
+  three example-sanitizer tests, and the production build. The unchanged
+  compiled-file guard passed after the SVG line-ending fix below.
+- The registry ZIP contains exactly the **1,342 tagged files**, including all
+  **253 compiled frontend files**. Every file is byte-identical to a canonical
+  LF archive of `v4.0.0`; directory-only ZIP entries are not package files.
+  No local output, environment, dependency cache, or Git runtime paths appear.
+  This verifies published package identity, not a fresh GPU installation.
+- Registry ZIP SHA-256:
+  `0c2bf8529622dcc3b986b16805f041e26e639c0feab36efe984101ee5468220b`.
+  The downloaded package and tagged comparison archive are retained locally
+  under `output/release-4.0.0-20261002/` (ignored).
+
+The tagged release notes retain their migration links and bounded live-test
+claims. This post-publication receipt changes documentation only; it does not
+move the release tag or republish the immutable registry version.
 
 The first publication run (`36964880923`) stopped before upload because the clean
 CPU environment lacked PyAV, imported by the audio encoder and its tests. PyAV
@@ -74,7 +99,9 @@ is reused; no services, models or workflow executions changed in this pass.
 At candidate handoff, HD acceptance and publication approval were pending.
 Both were supplied by Luca on 2026-10-02, as recorded above. The version-changing
 push to `main` publishes through the existing registry/tag/GitHub pipeline.
-No runtime or dependency change is part of this final publication pass.
+The subsequent publication fixes above made PyAV explicit in the package
+dependencies and completed the clean CI environment. They did not alter the
+running workstation's services, models, or installed dependencies.
 
 ## Direct RMBG-2.0 — 2026-10-02
 
