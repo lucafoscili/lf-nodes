@@ -7,6 +7,49 @@ Python and package metadata now use `4.0.0`; publication remains a separate
 decision. The [versioned notes](releases/4.0.0.md) explain the breaking TRELLIS.2
 Runner migration. The existing `3.0.0` release identity must not be reused.
 
+## 4.0.0 candidate checks — 2026-10-02
+
+**Keep — prepared locally, not published.** Commit `1eec2d6` stamps the three
+version fields, retains the historical 3.0.0 socket migration and promotes the
+draft into explicit 4.0.0 notes. Commit `8ff11b8` fixes a Windows release-tool
+encoding defect found while inspecting the generated body: Git output is now
+decoded as UTF-8, preserving Unicode notes and commit subjects.
+
+- Full CPU publication command passed on the stamped candidate: **1,924 pytest
+  passes**, four existing Windows symlink-permission skips, twelve gate unit
+  tests, compilation and all 154 public node mappings. After the encoding-only
+  fix, the focused metadata/generator/publication-workflow batch passed all
+  **15 tests**, including the new Unicode regression. Unchanged groups were
+  not rerun for that tooling-only fix.
+- `corepack yarn check:release` passed: **608 frontend tests in 71 files**,
+  32 Titanic unit contracts, three example-sanitizer tests, all 17 shipped
+  examples unchanged, and the complete TypeScript/CSS/production build.
+  The initial invocation stalled before collecting tests and was stopped;
+  an identical retry completed without configuration or dependency changes.
+  The cause is unproven; that interrupted invocation is not a pass.
+- Rebuilt `web/deploy` has no tracked or untracked publication drift. Its
+  253 tracked compiled files remain unchanged.
+- The tracked archive of `8ff11b8` contains **1,341 files**, including all 253
+  compiled frontend files. Archived runtime/Python/package versions are
+  consistently `4.0.0`; release-note file links resolve inside the archive.
+  No dotenv, local output, dependency environment or Git runtime paths were
+  included. This is a source-package check, not a fresh GPU installation.
+- The real release-note command generated the expected `v3.0.0` to candidate
+  range and the TRELLIS migration text; Unicode was inspected after the fix.
+  A read-only remote check found no `v4.0.0` tag at preparation time.
+
+Evidence and the replayable package check are in
+`output/release-4.0.0-20261002/`; generated archives, logs and the GitHub-body
+preview remain local and ignored. The subsequent readiness-record commit
+changes documentation only. Existing live node/browser/media evidence below
+is reused; no services, models or workflow executions changed in this pass.
+
+Pending: Luca's continuous-motion/audio acceptance for optional HD and explicit
+publication approval. Publication must replace candidate-only status wording
+with the accepted release status before pushing. The version-changing push to
+`main` can publish the registry package and create the tag/GitHub release;
+none of those external actions has been taken.
+
 ## Direct RMBG-2.0 — 2026-10-02
 
 **Keep — existing public node extended, shipped consumers migrated.**
