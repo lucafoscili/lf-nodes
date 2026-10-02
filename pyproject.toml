@@ -5,6 +5,7 @@ version = "4.0.0"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 dependencies = [
+    "av>=17.0.0",
     "GPUtil",
     "kornia",
     "numpy",

@@ -12,6 +12,14 @@ The publication workflow must finish successfully before reporting the release
 as live. Earlier dated pending-sign-off statements below are historical and are
 superseded by this acceptance; their test and coverage limits still apply.
 
+The first publication run (`36964880923`) stopped before upload because the clean
+CPU environment lacked PyAV, imported by the audio encoder and its tests. PyAV
+is now explicit in both installation manifests and pinned to the locally tested
+17.0.1 in the CI lock; Core already requires 17.0 or newer. The same dependency
+review found the real SVG palette tests would skip without `vtracer`/`svgwrite`;
+their locally tested versions are now pinned in CI too. The upload, tag and
+GitHub release steps did not execute in that failed attempt.
+
 ## 4.0.0 candidate checks — 2026-10-02
 
 **Keep — prepared locally, not published.** Commit `1eec2d6` stamps the three

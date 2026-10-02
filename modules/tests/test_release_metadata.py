@@ -67,3 +67,11 @@ def test_current_release_note_links_work_in_copied_github_body() -> None:
         assert link.startswith(prefix), f"Release link must pin its repository/tag: {link}"
         target = link.removeprefix(prefix).split("#", 1)[0]
         assert (REPO_ROOT / target).is_file(), f"Missing release link target: {target}"
+
+
+def test_audio_encoder_dependency_is_declared_for_both_install_paths() -> None:
+    pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    requirements = (REPO_ROOT / "requirements.txt").read_text(encoding="utf-8")
+
+    assert '"av>=17.0.0"' in pyproject
+    assert "av>=17.0.0" in requirements.splitlines()

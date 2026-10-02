@@ -1,4 +1,5 @@
 ﻿GPUtil
+av>=17.0.0
 kornia
 numpy
 nvidia-ml-py
