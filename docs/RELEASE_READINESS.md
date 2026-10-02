@@ -20,6 +20,14 @@ review found the real SVG palette tests would skip without `vtracer`/`svgwrite`;
 their locally tested versions are now pinned in CI too. The upload, tag and
 GitHub release steps did not execute in that failed attempt.
 
+The next clean run (`36965284717`) passed the main and H3 CPU cohorts, then
+exposed a missing `pytest-asyncio` plugin in the isolated orchestra tests. The
+CI lock now uses the same pytest 9.1.1 / pytest-asyncio 1.4.0 pair as the accepted
+local rehearsal, plus its direct AnyIO and SQLite test dependencies. The remaining
+isolated groups were reviewed together for missing imports. This is CI setup,
+not a change to installed-node behavior; this attempt also stopped before
+publication.
+
 ## 4.0.0 candidate checks — 2026-10-02
 
 **Keep — prepared locally, not published.** Commit `1eec2d6` stamps the three
