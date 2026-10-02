@@ -1,10 +1,11 @@
 # Release readiness — 2026-10-02
 
-**Candidate preparation; no release published.** Optional four-step H3 HD is
+**4.0.0 candidate preparation; no release published.** Optional four-step H3 HD is
 wired, Standard remains the default, and publication contracts cover the new
-capabilities. The next version has intentionally not been selected or stamped.
-The current `3.0.0` version already has a release tag: publishing this checkout
-under that identity is not a valid next-release operation.
+capabilities. Luca authorized preparing the 4.0.0 candidate locally. Runtime,
+Python and package metadata now use `4.0.0`; publication remains a separate
+decision. The [versioned notes](releases/4.0.0.md) explain the breaking TRELLIS.2
+Runner migration. The existing `3.0.0` release identity must not be reused.
 
 ## Direct RMBG-2.0 — 2026-10-02
 
@@ -358,9 +359,10 @@ Ignored local evidence:
    installed third-party dependency or Titanic branch.
 2. Complete whichever remaining model/provider/editor live cases are required
    for the release's advertised scope; record unavailable prerequisites as such.
-3. Have Luca select the next version and accept the candidate. Update runtime,
-   Python and package metadata together, adjust the version-specific contract,
-   and promote the draft into the selected version's release notes.
+3. The 4.0.0 candidate is selected and stamped across runtime, Python and package
+   metadata, with the version-specific contract and migration notes updated.
+   Obtain Luca's final candidate acceptance, including the remaining optional
+   HD motion/audio judgment; preparation is not publication approval.
 4. Inspect the final publication diff and run its metadata checks. Pushing the
    relevant release change to `main` can trigger registry publication; keep that
    as an explicit, separately authorized action. No push, tag or publication was

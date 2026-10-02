@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_VERSION = "3.0.0"
+EXPECTED_VERSION = "4.0.0"
 
 
 def _runtime_version() -> str:
@@ -37,6 +37,18 @@ def test_release_versions_are_coherent() -> None:
 
 def test_current_version_has_a_user_facing_migration_note() -> None:
     note = REPO_ROOT / "docs" / "releases" / f"{EXPECTED_VERSION}.md"
+    text = " ".join(note.read_text(encoding="utf-8").split())
+
+    assert "trellis2_multiview_to_textured_mesh" in text
+    assert "trellis2_image_to_textured_mesh" in text
+    assert "no shipped multi-view replacement" in text
+    assert "trellis_2_int8_convrot.safetensors" in text
+    assert "dino_v3_vit_l.safetensors" in text
+    assert "does not rewrite" in text
+
+
+def test_previous_major_version_keeps_its_socket_migration_note() -> None:
+    note = REPO_ROOT / "docs" / "releases" / "3.0.0.md"
     text = note.read_text(encoding="utf-8")
 
     assert "LF_ExtractPromptFromLoraTag" in text
