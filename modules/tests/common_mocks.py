@@ -39,7 +39,6 @@ _COMMON_MOCK_MODULE_NAMES = (
     'modules.utils.filters.processors',
     'comfy',
     'comfy.model_management',
-    'comfy.samplers',
     'comfy.lora',
     'comfy.hooks',
     'comfy.model_patcher',
@@ -243,7 +242,6 @@ def setup_common_mocks(torch_enabled=False):
     # Mock comfy modules that depend on torch
     sys.modules['comfy'] = MagicMock()
     sys.modules['comfy.model_management'] = MagicMock()
-    sys.modules['comfy.samplers'] = MagicMock()
     sys.modules['comfy.lora'] = MagicMock()
     sys.modules['comfy.hooks'] = MagicMock()
     sys.modules['comfy.model_patcher'] = MagicMock()
