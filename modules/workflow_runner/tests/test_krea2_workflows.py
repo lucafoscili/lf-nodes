@@ -344,6 +344,7 @@ def test_local_scalar_controls_map_to_the_prompt() -> None:
             workflow_module.resolve_load_image_reference = original_resolver
 
         assert prompt["unet"]["inputs"]["unet_name"] == inputs["model_name"]
+        assert prompt["vae"]["inputs"]["vae_name"] == workflow_module._OFFICIAL_VAE
         assert prompt["latent"]["inputs"] == {
             "width": ["resolution", 0],
             "height": ["resolution", 1],
@@ -612,6 +613,46 @@ def test_style_and_identity_cards_default_to_the_documented_adapter_profile() ->
         assert options[0]["workflowValue"] == workflow_module._OFFICIAL_KREA2_MODEL
         assert "default" in options[0]["value"].lower()
         assert all("experimental" in option["value"].lower() for option in options[1:])
+
+
+def test_local_cards_offer_the_official_vae_first_then_installed_vaes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import folder_paths
+
+    installed = ["b_custom.safetensors", workflow_module._OFFICIAL_VAE, "a_custom.pt"]
+    monkeypatch.setattr(
+        folder_paths,
+        "get_filename_list",
+        lambda kind: installed if kind == "vae" else [],
+        raising=False,
+    )
+    vaes = workflow_module._installed_vaes()
+    assert vaes == (workflow_module._OFFICIAL_VAE, "a_custom.pt", "b_custom.safetensors")
+    monkeypatch.setattr(workflow_module, "_KREA2_VAES", vaes)
+
+    cell = workflow_module._vae_cell()
+    assert cell.node_id == "vae"
+    assert cell.props["lfValue"] == workflow_module._OFFICIAL_VAE
+    options = cell.props["lfDataset"]["nodes"]
+    assert [option["workflowValue"] for option in options] == list(vaes)
+    assert "default" in options[0]["value"].lower()
+    assert all("experimental" in option["value"].lower() for option in options[1:])
+
+    for workflow_id in EXPECTED_IDS - REID_IDS:
+        workflow = _workflows()[workflow_id]
+        cells = {cell.id: cell for cell in workflow.inputs}
+        assert cells["vae_name"].props["lfValue"] == workflow_module._OFFICIAL_VAE
+        prompt = workflow.load_prompt()
+        workflow.configure_download(
+            prompt, {**_default_inputs(workflow), "vae_name": "a_custom.pt"}
+        )
+        assert prompt["vae"]["inputs"]["vae_name"] == "a_custom.pt"
+        with pytest.raises(InputValidationError):
+            workflow.configure_download(
+                workflow.load_prompt(),
+                {**_default_inputs(workflow), "vae_name": "not-a-vae"},
+            )
 
 
 def test_style_cards_pin_cfg_one_instead_of_exposing_an_invalid_cfg_sweep() -> None:

@@ -60,6 +60,28 @@ def _installed_krea2_models() -> tuple[str, ...]:
 
 
 _KREA2_MODELS = _installed_krea2_models()
+_OFFICIAL_VAE = "qwen_image_vae.safetensors"
+
+
+def _installed_vaes() -> tuple[str, ...]:
+    """Return the official Qwen Image VAE first, then every other installed VAE.
+
+    Choices come from ComfyUI's ``vae`` folder, read once when the catalogue
+    loads like the checkpoint list. The official VAE stays the first choice and
+    the default even before it is downloaded.
+    """
+
+    import folder_paths
+
+    installed = sorted(
+        name
+        for name in folder_paths.get_filename_list("vae")
+        if name != _OFFICIAL_VAE
+    )
+    return (_OFFICIAL_VAE, *installed)
+
+
+_KREA2_VAES = _installed_vaes()
 _LOCAL_MAX_SEED = (1 << 53) - 1
 _LOCAL_CANVAS_MULTIPLE = 16
 _LOCAL_MAX_EDGE = 2048
@@ -175,12 +197,12 @@ _IDENTITY_EDIT_STEP_OPTIONS = (
 _STYLE_LORA = os.path.join("KR2", "krea2_style_reference.safetensors")
 _IDENTITY_LORA = os.path.join("KR2", "krea2_identity_edit_v1_2.safetensors")
 _REID_LORA = os.path.join("KR2", "krea2_reid_rank32.safetensors")
-_OFFICIAL_VAE = "qwen_image_vae.safetensors"
 
 
 class _LocalSettings(NamedTuple):
     prompt_text: str
     model_name: str
+    vae_name: str
     aspect_ratio: str
     megapixels: float
     seed: int
@@ -262,6 +284,7 @@ def _local_settings(
     model_name = _choice(
         inputs, "model_name", _OFFICIAL_KREA2_MODEL, _KREA2_MODELS
     )
+    vae_name = _choice(inputs, "vae_name", _OFFICIAL_VAE, _KREA2_VAES)
     aspect_ratio = _choice(
         inputs,
         "aspect_ratio",
@@ -295,6 +318,7 @@ def _local_settings(
     return _LocalSettings(
         prompt_text=prompt_text,
         model_name=model_name,
+        vae_name=vae_name,
         aspect_ratio=aspect_ratio,
         megapixels=megapixels,
         seed=seed,
@@ -311,7 +335,7 @@ def _apply_local_settings(
     output_folder: str,
 ) -> None:
     prompt["unet"]["inputs"]["unet_name"] = settings.model_name
-    prompt["vae"]["inputs"]["vae_name"] = _OFFICIAL_VAE
+    prompt["vae"]["inputs"]["vae_name"] = settings.vae_name
     prompt_input_name = (
         "prompt" if "prompt" in prompt["positive"]["inputs"] else "text"
     )
@@ -410,7 +434,7 @@ def _apply_identity_edit_settings(
     )
 
     prompt["unet"]["inputs"]["unet_name"] = settings.model_name
-    prompt["vae"]["inputs"]["vae_name"] = _OFFICIAL_VAE
+    prompt["vae"]["inputs"]["vae_name"] = settings.vae_name
     prompt["lora"]["inputs"]["lora_name"] = _IDENTITY_LORA
     _apply_resolution(prompt, settings.aspect_ratio, settings.megapixels)
     prompt["patch"]["inputs"]["ref_boost"] = identity_fidelity
@@ -715,6 +739,32 @@ def _model_cell(
     )
 
 
+def _vae_cell() -> WorkflowCell:
+    return _select_cell(
+        node_id="vae",
+        cell_id="vae_name",
+        label="VAE",
+        default=_OFFICIAL_VAE,
+        description="Choose the VAE that decodes the image. The official Qwen Image VAE is the documented pairing.",
+        options=(
+            (
+                _OFFICIAL_VAE,
+                "Official Qwen Image VAE — default",
+                "The VAE Krea 2's official base is published with.",
+            ),
+            *(
+                (
+                    vae,
+                    f"{Path(vae).stem} — experimental",
+                    "An installed VAE from ComfyUI's vae folder; compare it with "
+                    "the official VAE at the same seed.",
+                )
+                for vae in _KREA2_VAES[1:]
+            ),
+        ),
+    )
+
+
 def _generation_model_cell() -> WorkflowCell:
     return _model_cell(
         label="Checkpoint",
@@ -877,6 +927,7 @@ def _local_common_inputs(
 ) -> list[WorkflowCell]:
     return [
         _adapter_model_cell() if adapter_profile else _generation_model_cell(),
+        _vae_cell(),
         _aspect_ratio_cell(default_aspect_ratio),
         *_sampling_cells(
             default_steps=default_steps,
