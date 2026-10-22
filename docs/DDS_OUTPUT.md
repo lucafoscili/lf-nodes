@@ -64,7 +64,7 @@ The receipt records one of `none`, `opaque_required`, `preserve`, or
 dimension, clamped to one, until `1×1`. For example, `1920×1080` produces 11
 levels.
 
-Mip resampling is pinned to Pillow 12.2.0 `LANCZOS`, with no reducing-gap
+Mip resampling uses Pillow `LANCZOS`, with no reducing-gap
 optimization. Color channels are filtered in their encoded sRGB byte space.
 Pillow filters RGBA through its premultiplied-alpha path before converting back
 to straight RGBA. These choices are serialized in every receipt; they are not
@@ -128,7 +128,6 @@ Execution fails closed with a canonical JSON exception string:
 Stable v1 codes are:
 
 - `unsupported_format`: unknown pixel format or mip policy.
-- `unsupported_backend`: the pinned codec/resampler revision is unavailable.
 - `invalid_alpha`: a non-alpha format received meaningful alpha.
 - `invalid_dimensions`: the batch item is not a positive RGB/RGBA image.
 - `encode_failure`: normalization, compression, or publication failed.
@@ -143,11 +142,11 @@ Pillow's bundled `DXT1`/`DXT5` encoder only; Pillow's one-level DDS header is no
 reused because it does not author a complete mip chain and does not report the
 correct compressed linear size for this contract.
 
-Pillow is pinned to `12.2.0` in both Python dependency declarations and is
-licensed under MIT-CMU. Its normal cross-platform Python wheels avoid requiring
-a downloaded executable. The node checks the runtime revision before any BCn
-compression or mip generation, so an environment that overrides the pin fails
-closed instead of claiming reproducible bytes.
+Both Python dependency declarations require Pillow `12.2.0` or newer; Pillow
+is licensed under MIT-CMU, and its normal cross-platform Python wheels avoid
+requiring a downloaded executable. Every receipt records the running Pillow
+version as the backend revision, so bytes made under another Pillow release can
+be told apart instead of being refused.
 
 DirectXTex/`texconv` remains a useful Windows reference implementation, but it
 is not an LF runtime dependency: its command-line workflow is platform-oriented

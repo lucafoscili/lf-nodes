@@ -15,7 +15,7 @@ dependencies = [
     "opencv-python",
     "pandas",
     "piexif",
-    "Pillow==12.2.0",
+    "Pillow>=12.2.0",
     "psutil",
     "rembg",
     "requests",

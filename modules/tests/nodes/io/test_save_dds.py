@@ -339,18 +339,12 @@ def test_errors_are_machine_readable(operation, code: str) -> None:
     assert f'"code":"{code}"' in str(raised.value)
 
 
-def test_backend_revision_drift_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_receipt_records_the_running_pillow_revision(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(dds_codec.PIL, "__version__", "99.0.0")
 
-    with pytest.raises(DDSOutputError) as raised:
-        encode_dds(pattern(4, 4, 3), "BC1", "none")
+    _payload, receipt = encode_dds(pattern(4, 4, 3), "BC1", "none")
 
-    assert raised.value.code == "unsupported_backend"
-    assert raised.value.payload["error"]["details"] == {
-        "backend": "Pillow",
-        "expected_revision": "12.2.0",
-        "actual_revision": "99.0.0",
-    }
+    assert "99.0.0" in repr(receipt)
 
 
 def test_codec_failure_is_wrapped_in_stable_error(monkeypatch: pytest.MonkeyPatch) -> None:

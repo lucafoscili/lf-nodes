@@ -21,7 +21,6 @@ DDS_ERROR_SCHEMA = "lf.dds.error.v1"
 DDS_RECEIPT_SCHEMA = "lf.dds.receipt.v1"
 DDS_WRITER_NAME = "lf.dds.writer"
 DDS_WRITER_REVISION = "1"
-PINNED_PILLOW_REVISION = "12.2.0"
 
 _DDS_MAGIC = b"DDS "
 _DDS_HEADER_BYTES = 128
@@ -121,17 +120,6 @@ def _error(
     **details: Any,
 ) -> DDSOutputError:
     return DDSOutputError(code, message, details)
-
-
-def _require_backend() -> None:
-    if PIL.__version__ != PINNED_PILLOW_REVISION:
-        raise _error(
-            "unsupported_backend",
-            "The deterministic DDS codec backend revision is unavailable.",
-            backend="Pillow",
-            expected_revision=PINNED_PILLOW_REVISION,
-            actual_revision=PIL.__version__,
-        )
 
 
 def normalize_tensor_image(image: torch.Tensor) -> np.ndarray:
@@ -257,7 +245,6 @@ def _generate_levels(pixels: np.ndarray, mip_policy: str) -> list[np.ndarray]:
     if mip_policy == "none":
         return levels
 
-    _require_backend()
     while levels[-1].shape[0] > 1 or levels[-1].shape[1] > 1:
         previous = levels[-1]
         next_width = max(1, int(previous.shape[1]) // 2)
@@ -286,7 +273,6 @@ def _compressed_level_size(width: int, height: int, pixel_format: str) -> int:
 
 
 def _encode_bcn_level(level: np.ndarray, pixel_format: str) -> bytes:
-    _require_backend()
     pillow_format = "DXT1" if pixel_format == "BC1" else "DXT5"
     expected_fourcc = _FOURCC_DXT1 if pixel_format == "BC1" else _FOURCC_DXT5
     try:
@@ -622,14 +608,14 @@ def encode_dds(
             payload = b"".join(_encode_bcn_level(level, pixel_format) for level in levels)
             backend = {
                 "name": "Pillow BCN",
-                "revision": PINNED_PILLOW_REVISION,
+                "revision": PIL.__version__,
             }
         else:
             payload = b"".join(_encode_raw_level(level, pixel_format) for level in levels)
             backend = (
                 {
                     "name": "Pillow resampler",
-                    "revision": PINNED_PILLOW_REVISION,
+                    "revision": PIL.__version__,
                 }
                 if len(levels) > 1
                 else {"name": "LF raw", "revision": DDS_WRITER_REVISION}
@@ -798,7 +784,6 @@ __all__ = [
     "DDSFileCustody",
     "DDSOutputError",
     "MIP_POLICIES",
-    "PINNED_PILLOW_REVISION",
     "PIXEL_FORMATS",
     "encode_dds",
     "normalize_tensor_image",
