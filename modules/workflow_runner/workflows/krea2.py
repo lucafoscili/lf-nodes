@@ -42,8 +42,9 @@ def _installed_krea2_models() -> tuple[str, ...]:
 
     Choices come from ``diffusion_models/KR2`` so community checkpoints a host
     installs there appear without being named in this file. The official base
-    stays the first choice and the default even before it is downloaded; the
-    readiness check reports a missing file.
+    stays the first choice and the default even before it is downloaded. The
+    folder is read once when the catalogue loads, so a newly installed model
+    appears after ComfyUI restarts.
     """
 
     import folder_paths
