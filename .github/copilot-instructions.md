@@ -37,8 +37,11 @@
 - Final previews use `cache_generated_preview` or cached masonry/compare
   builders. `TempFileCache` is only for in-flight editing/progress state; its
   URLs and base64 previews do not belong in durable history.
-- Add every node to the exhaustive frontend `NodeName` and `NODE_WIDGET_MAP`;
-  use `[]` intentionally when native Comfy UI is sufficient.
+- Add every node to the exhaustive frontend `NodeName` and `NODE_WIDGET_MAP`.
+  A new node is not released until it has a real widget that shows its result
+  (not `[]`) and a place in `scripts/quality/fixtures/E2E.json` with its case in
+  `scripts/quality/titanic_cases.json`. `[]` stays only on existing nodes where
+  native Comfy UI is sufficient.
 
 ## Shared implementation
 
