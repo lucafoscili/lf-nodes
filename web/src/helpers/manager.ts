@@ -31,6 +31,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_TextRegionMasks: [],
   LF_RegionColorStats: [CustomWidgetName.compare],
   LF_RegionFeatureSimilarity: [],
+  LF_VisionPatchEncode: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],

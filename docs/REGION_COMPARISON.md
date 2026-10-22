@@ -1,8 +1,8 @@
 # Region-by-region render comparison
 
-These three project-independent nodes compare registered renders of the same
-subject. Core ComfyUI nodes own model loading and inference. LF Nodes consumes
-their masks and encoded features; it does not download or load weights. No
+These four project-independent nodes compare registered renders of the same
+subject. Core ComfyUI nodes own model loading and SAM inference; Vision Patch
+Encode runs a core-loaded vision model. LF Nodes does not download or load weights. No
 Workflow Runner catalogue entry is needed: workflows consume the JSON and IMAGE
 outputs normally, and the colour preview is also available in `ui.lf_output`.
 
@@ -115,10 +115,12 @@ the final dataset and stats are shared between `safe_send_sync` and
 ## Region Feature Similarity (`LF_RegionFeatureSimilarity`)
 
 Load `dino_v3_vit_h.safetensors` with core `CLIPVisionLoader` and encode A and B
-separately with `CLIPVisionEncode`. Connect their `CLIP_VISION_OUTPUT`s to
-`features_a` and `features_b`, plus the same `masks` and `metadata` used above.
-Set both core encoders and this node's `crop` to `none` to retain the full
-image, or set all three to `center` for matching centre-crop geometry.
+separately with [Vision Patch Encode](#vision-patch-encode-lf_visionpatchencode)
+(core `CLIPVisionEncode` raises with DINOv3; see below). Connect their
+`CLIP_VISION_OUTPUT`s to `features_a` and `features_b`, plus the same `masks` and
+`metadata` used above. Set both encoders and this node's `crop` to `none` to
+retain the full image, or set all three to `center` for matching centre-crop
+geometry.
 `model_file` records the filename selected by the workflow. Core's output does
 not include model identity, so JSON marks this name as `workflow_input` rather
 than claiming to have inspected the model file.
@@ -155,27 +157,53 @@ warning, including a nonempty region entirely removed by the centre crop. A
 zero-norm feature raises because cosine is undefined. This node has no widget
 or file outputs.
 
-### Core compatibility finding
+## Vision Patch Encode (`LF_VisionPatchEncode`)
 
-In the inspected ComfyUI revision `651ca296a`, `comfy/image_encoders/dino3.py`
-returns `(sequence_output, None, pooled_output, None)`, while
+A drop-in for core `CLIPVisionEncode`: the same inputs `clip_vision` (core
+`CLIP_VISION` from `CLIPVisionLoader`), `image` and `crop` (`center` | `none`),
+and one `CLIP_VISION_OUTPUT`. Use it in place of `CLIPVisionEncode` whenever the
+loaded model is DINOv3:
+
+```text
+CLIPVisionLoader (dino_v3_vit_h) -> Vision Patch Encode (image A, crop none) -> features_a
+                                 -> Vision Patch Encode (image B, crop none) -> features_b
+```
+
+Why: in ComfyUI revision `651ca296a`, `comfy/image_encoders/dino3.py` returns
+`(sequence_output, None, pooled_output, None)`, while
 `comfy/clip_vision.py:ClipVisionModel.encode_image` unconditionally calls
-`out[1].to(...)` for `penultimate_hidden_states`. Thus that core path appears
-to raise before delivering a DINOv3 `CLIP_VISION_OUTPUT`. The LF node does not
-patch Core or substitute another model. Core must supply a working encode
-output before a real DINOv3 graph can run. Model load errors likewise remain
-the upstream loader's responsibility. The pooled-crop path does not bypass an
-upstream encode failure.
+`out[1].to(...)` for `penultimate_hidden_states`, so `CLIPVisionEncode` raises
+on that `None` before delivering an output. Core's own DINOv3 consumer
+(`comfy_extras/nodes_triposplat.py`) skips `encode_image` and calls the model
+directly; this node does the same while keeping `encode_image`'s output.
+
+It never loads a model itself: it asks core to put the given `CLIP_VISION` on
+its device (`load_model_gpu`), preprocesses exactly as `encode_image` does
+(`clip_preprocess` with the model's `image_size`, `image_mean`, `image_std`, and
+crop `center` as true), runs the model with `intermediate_output=-2` (`all` for
+models that return every hidden state), and returns core's `Output` on the
+intermediate device. `last_hidden_state` is the sequence (for DINOv3: CLS, four
+registers, then row-major 16-pixel patches), `image_embeds` the pooled output,
+`image_sizes` one `[C,H,W]` per image, and `mm_projected` as core sets it.
+`penultimate_hidden_states` is set only when the model returns that tensor, so
+DINOv3 outputs omit it. Other CLIP-family models encode as with core.
+
+It fails loud, naming the input: a missing `clip_vision`, a non-`[B,H,W,C]`
+`image`, an unknown `crop`, a `siglip2_vision_model` (its preprocessing
+differs; use core `CLIPVisionEncode`), or a model output without a sequence
+tensor at index 0 or a pooled tensor at index 2.
 
 ## CPU checks
 
 ```text
-python -I scripts/quality/run_pytests.py -q -p no:cacheprovider modules/tests/nodes/regions/test_text_region_masks.py modules/tests/nodes/analytics/test_region_color_stats.py modules/tests/nodes/analytics/test_region_feature_similarity.py modules/tests/test_frontend_widget_registry.py modules/tests/nodes/test_output_metadata_contract.py
+python -I scripts/quality/run_pytests.py -q -p no:cacheprovider modules/tests/nodes/regions/test_text_region_masks.py modules/tests/nodes/analytics/test_region_color_stats.py modules/tests/nodes/analytics/test_region_feature_similarity.py modules/tests/nodes/analytics/test_vision_patch_encode.py modules/tests/test_frontend_widget_registry.py modules/tests/nodes/test_output_metadata_contract.py
 python -I scripts/quality/check_node_contracts.py
 ```
 
 Fixtures are generated images, masks and deterministic tensors only. Feature
 tests use an attribute object with the exact fields read from Core's output;
-importing Core's output module also imports its GPU stack. These tests exercise
+importing Core's output module also imports its GPU stack. The encoder test uses
+a tiny model returning DINOv3's tuple shape and stubs Core's `Output`,
+`clip_preprocess` and `load_model_gpu`. These tests exercise
 LF's numerical and node contracts, not SAM detection or DINO inference.
 Real model execution and live widget hydration require a separate runtime test.

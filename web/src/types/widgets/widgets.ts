@@ -65,6 +65,7 @@ export enum NodeName {
   textRegionMasks = 'LF_TextRegionMasks',
   regionColorStats = 'LF_RegionColorStats',
   regionFeatureSimilarity = 'LF_RegionFeatureSimilarity',
+  visionPatchEncode = 'LF_VisionPatchEncode',
   backgroundRemover = 'LF_BackgroundRemover',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
