@@ -288,6 +288,78 @@ the resolved host path private in the run snapshot and later remixes reuse it
 through the same owner-bound opaque upload reference. Legacy temp uploads that
 have already disappeared remain unavailable and require reselection.
 
+### HTTP API
+
+The Runner's routes live under `/lf-nodes`; ComfyUI also serves each one under
+`/api`, so `/api/lf-nodes/run` works too, and the `links` a submission returns
+use that form. With Google sign-in enabled, every route requires an
+authenticated session, and a submission is visible only to its owner.
+
+**Start a run: `POST /lf-nodes/run`.** The JSON body names the workflow and its
+inputs:
+
+```json
+{
+  "workflowId": "remove_bg",
+  "inputs": { "image": "example.png" },
+  "submissionId": "my-app:remove-bg:0001"
+}
+```
+
+- `workflowId` (required) is a catalogue ID; `inputs` maps the card's input IDs
+  to values.
+- `submissionId` (optional; `submission_id` is accepted too) makes the call
+  idempotent. It is 1 to 128 characters of letters, digits, `.`, `_`, `:` and
+  `-`, starting with a letter or digit; `lfseq:<32 hex digits>:0N` IDs are
+  reserved for orchestra stages.
+  Repeating the same body with the same ID returns the stored submission instead
+  of queueing again (`idempotent_replay: true`); reusing the ID for a different
+  body, or another owner, answers `409` with `submission_id_conflict`.
+- `extraData` (optional) is passed to ComfyUI's `extra_data`; LF writes its own
+  `lf_nodes.workflow_id` into it last.
+
+A queued run answers `202`. Without a `submissionId` the body is
+`{"run_id": "<ComfyUI prompt id>"}`; with one it is:
+
+```json
+{
+  "run_id": "<ComfyUI prompt id>",
+  "submission_id": "my-app:remove-bg:0001",
+  "status": "pending",
+  "idempotent_replay": false,
+  "links": {
+    "status": "/api/lf-nodes/submissions/my-app:remove-bg:0001",
+    "events": "/api/lf-nodes/submissions/my-app:remove-bg:0001/events",
+    "cancel": "/api/lf-nodes/submissions/my-app:remove-bg:0001/cancel"
+  }
+}
+```
+
+A request that fails validation answers `400` with the run payload's `detail`
+and `error`; a workflow whose declared models or nodes are missing answers `409`
+with `workflow_setup_required`. Neither queues anything.
+
+**Follow a run.** `GET /lf-nodes/run/{run_id}/status` returns the job record by
+ComfyUI prompt ID, with base64 image data under `data` once it has succeeded.
+`GET /lf-nodes/run/events` is the server-sent event stream the Runner page uses.
+
+**Submissions.** These routes take the stable submission ID:
+
+- `GET /lf-nodes/submissions/{submission_id}` returns the
+  `lf.workflow-submission.v1` snapshot: `submission_id`, `run_id`,
+  `workflow_id`, `status`, `cancel_requested`, `error`, `output_manifest`,
+  `links`, timestamps, and the event count with the latest event.
+- `GET /lf-nodes/submissions/{submission_id}/events` returns
+  `{"schema": "lf.workflow-events.v1", "submission_id": ..., "events": [...]}`,
+  every lifecycle event in order.
+- `POST /lf-nodes/submissions/{submission_id}/cancel` cancels that exact run and
+  answers `202` with the updated snapshot.
+
+A submission moves through `accepted`, `pending` and `running` to `succeeded`,
+`failed`, `cancelled` or `timeout`. `reconciling` means the queue call failed
+after ComfyUI may already have accepted the prompt, so the outcome is unknown.
+An unknown submission ID answers `404` with `submission_not_found`.
+
 ### In-session workflow drafts
 
 Runner keeps one unfinished form draft per workflow while the current browser
