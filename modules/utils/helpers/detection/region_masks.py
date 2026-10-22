@@ -1,9 +1,212 @@
 import math
+from copy import deepcopy
+import logging
 import torch
 
 from typing import Any, Dict, Tuple
 
 from ...filters._common import apply_gaussian_blur
+from ..logic.normalize_json_input import normalize_json_input
+from ..logic.normalize_output_mask import normalize_output_mask
+
+TEXT_REGION_MASK_SCHEMA = 'lf.text-region-masks.v1'
+
+
+def _text_regions(value):
+    """Retain the semantic row array while removing Comfy's list wrapper."""
+    value = normalize_json_input(value)
+    while isinstance(value, (list, tuple)) and len(value) == 1 and isinstance(value[0], (list, tuple)):
+        value = value[0]
+    if not isinstance(value, list) or not value:
+        raise ValueError('regions must be a non-empty JSON array of {id,prompt,priority}.')
+    rows, identifiers = [], set()
+    for row in value:
+        if not isinstance(row, dict):
+            raise ValueError('Each region must be an object with id, prompt and priority.')
+        identifier, prompt, priority = row.get('id'), row.get('prompt'), row.get('priority')
+        if not isinstance(identifier, str) or not identifier.strip() or identifier in identifiers:
+            raise ValueError('Region IDs must be non-empty and unique.')
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise ValueError('Each region prompt must be non-empty text.')
+        if isinstance(priority, bool) or not isinstance(priority, (int, float)) or not math.isfinite(priority):
+            raise ValueError('Each region priority must be a finite number.')
+        identifiers.add(identifier)
+        rows.append({'id': identifier, 'prompt': prompt, 'priority': priority})
+    return rows
+
+
+def _region_mask_items(value, *, binary=False):
+    candidates = []
+
+    def collect(item):
+        if isinstance(item, (list, tuple)):
+            for child in item:
+                collect(child)
+        elif torch.is_tensor(item):
+            if item.is_complex() or not torch.isfinite(item).all():
+                raise ValueError('Region masks must contain finite real values in 0..1.')
+            if item.numel() == 0 or item.min() < 0 or item.max() > 1:
+                raise ValueError('Region masks must contain non-empty values in 0..1.')
+            if binary and not ((item == 0) | (item == 1)).all():
+                raise ValueError('Region metadata requires binary masks containing only 0 and 1.')
+            # Threshold in the original dtype before normalization casts to
+            # float32: values just below 0.5 must not round up into the region.
+            candidates.append(item if binary else item >= 0.5)
+        else:
+            raise ValueError('Region masks must be MASK tensors.')
+
+    collect(value)
+    _, items = normalize_output_mask(candidates)
+    shapes = {tuple(item.shape[1:]) for item in items}
+    if len(shapes) != 1:
+        raise ValueError('Region masks must all have the same spatial size.')
+    return [item.detach().to(device='cpu', dtype=torch.float32) for item in items]
+
+
+def resolve_region_overlaps(masks, regions):
+    """Resolve one ordered region set; attribute losses to the final pixel owner."""
+    regions = _text_regions(regions)
+    items = _region_mask_items(masks)
+    if len(items) != len(regions):
+        raise ValueError('Expected exactly one mask per region.')
+    raw = torch.cat(items, dim=0) >= 0.5
+    owner = torch.full(raw.shape[1:], -1, dtype=torch.int64)
+    for index in sorted(range(len(regions)), key=lambda i: (-regions[i]['priority'], i)):
+        owner[raw[index] & (owner < 0)] = index
+    resolved = torch.stack([owner == i for i in range(len(regions))])
+    records = []
+    for index, region in enumerate(regions):
+        area, raw_area = int(resolved[index].sum()), int(raw[index].sum())
+        record = {'id': region['id'], 'area': area, 'raw_area': raw_area, 'empty': area == 0,
+                  'overlap_lost': []}
+        for winner, winner_region in enumerate(regions):
+            lost = int((raw[index] & resolved[winner]).sum()) if winner != index else 0
+            if lost:
+                record['overlap_lost'].append({'id': winner_region['id'], 'area': lost})
+        if not area:
+            record['warning'] = ('No pixels detected for this region.' if not raw_area
+                                 else 'Region is empty after overlap resolution.')
+        records.append(record)
+    return resolved.to(dtype=torch.float32), records
+
+
+def text_region_masks(image, masks, regions):
+    """Turn region-major detector masks into image-major, disjoint mask sets."""
+    # Lazy import avoids the helpers package's image_regions import cycle.
+    from ...image_regions import image_items
+
+    images = image_items(image, 'image')
+    if not images:
+        raise ValueError('image requires at least one image.')
+    sizes = {tuple(item.shape[1:3]) for item in images}
+    if len(sizes) != 1:
+        raise ValueError('image must use one shared spatial size.')
+    height, width = images[0].shape[1:3]
+    rows = _text_regions(regions)
+    items = _region_mask_items(masks)
+    if len(items) != len(images) * len(rows):
+        raise ValueError('Expected exactly image_count * region_count masks in region-major order.')
+    if tuple(items[0].shape[1:]) != (height, width):
+        raise ValueError('Region mask size must match the source image size.')
+    outputs, mask_sets = [], []
+    for image_index in range(len(images)):
+        result, records = resolve_region_overlaps(
+            [items[region_index * len(images) + image_index] for region_index in range(len(rows))], rows)
+        outputs.append(result)
+        mask_sets.append({'image_index': image_index, 'regions': records})
+        for record in records:
+            if 'warning' in record:
+                logging.getLogger(__name__).warning('Image %s region %s: %s', image_index,
+                                                    record['id'], record['warning'])
+    document = {'schema': TEXT_REGION_MASK_SCHEMA, 'source_size': [width, height],
+                'image_count': len(images), 'regions': rows, 'ordering': 'image-major',
+                'mask_sets': mask_sets}
+    batches, mask_list = normalize_output_mask(outputs)
+    return batches[0], document, mask_list
+
+
+def region_mask_sets(masks, metadata):
+    """Validate region mask sets and return CPU [N,R,H,W].
+
+    Accept either a single document or two single-image documents. Flat masks
+    always follow image-major order, then the original region table order.
+    Recorded areas establish structural consistency, not source-image identity.
+    """
+    metadata = normalize_json_input(metadata)
+    while isinstance(metadata, (list, tuple)) and len(metadata) == 1:
+        metadata = normalize_json_input(metadata[0])
+    documents = metadata if isinstance(metadata, list) else [metadata]
+    if not 1 <= len(documents) <= 2 or not all(isinstance(doc, dict) for doc in documents):
+        raise ValueError('metadata requires one document or two single-image documents.')
+    items = _region_mask_items(masks, binary=True)
+    combined = None
+    sets = []
+    for document in documents:
+        if document.get('schema') != TEXT_REGION_MASK_SCHEMA:
+            raise ValueError('metadata schema must be lf.text-region-masks.v1.')
+        size = document.get('source_size')
+        if (not isinstance(size, list) or len(size) != 2
+                or any(type(v) is not int or v <= 0 for v in size)):
+            raise ValueError('metadata source_size must be positive integer [width,height].')
+        rows = _text_regions(document.get('regions'))
+        count, entries = document.get('image_count'), document.get('mask_sets')
+        if (type(count) is not int or count < 1 or not isinstance(entries, list)
+                or len(entries) != count or (len(documents) == 2 and count != 1)):
+            raise ValueError('metadata image_count and mask_sets must agree; paired documents require one set each.')
+        if document.get('ordering') != 'image-major':
+            raise ValueError('metadata ordering must be image-major.')
+        if combined is None:
+            combined = deepcopy(document)
+            combined['regions'] = rows
+        elif (size != combined['source_size']
+              or [row['id'] for row in rows] != [row['id'] for row in combined['regions']]):
+            raise ValueError('metadata documents must share source_size and identical ordered region IDs.')
+        for image_index, entry in enumerate(entries):
+            if (not isinstance(entry, dict) or type(entry.get('image_index')) is not int
+                    or entry['image_index'] != image_index):
+                raise ValueError('metadata mask_sets must retain image_index order.')
+            records = entry.get('regions')
+            if not isinstance(records, list) or len(records) != len(rows):
+                raise ValueError('metadata mask_sets must contain one record per region.')
+            if any(not isinstance(record, dict) or record.get('id') != row['id']
+                   for record, row in zip(records, rows)):
+                raise ValueError('metadata mask set region IDs/order do not match the region table.')
+            copied = deepcopy(entry)
+            copied['image_index'] = len(sets)
+            sets.append(copied)
+    expected_count = len(sets) * len(combined['regions'])
+    if len(items) != expected_count:
+        raise ValueError('Mask count does not match metadata image_count * region_count.')
+    width, height = combined['source_size']
+    if tuple(items[0].shape[1:]) != (height, width):
+        raise ValueError('Mask size does not match metadata source_size.')
+    tensor = torch.cat(items).reshape(len(sets), len(combined['regions']), height, width)
+    if (tensor.sum(dim=1) > 1).any():
+        raise ValueError('Region masks must be disjoint within each image set.')
+    identifiers = {row['id'] for row in combined['regions']}
+    for set_index, entry in enumerate(sets):
+        for region_index, record in enumerate(entry['regions']):
+            area = int(tensor[set_index, region_index].sum(dtype=torch.int64))
+            if type(record.get('area')) is not int or record['area'] != area:
+                raise ValueError('metadata region area does not match the actual mask.')
+            if type(record.get('empty')) is not bool or record['empty'] != (area == 0):
+                raise ValueError('metadata region empty does not match the actual mask.')
+            raw_area, losses = record.get('raw_area'), record.get('overlap_lost')
+            if (type(raw_area) is not int or not area <= raw_area <= width * height
+                    or not isinstance(losses, list)):
+                raise ValueError('metadata raw_area/overlap_lost must describe valid region areas.')
+            lost_ids, lost_area = set(), 0
+            for loss in losses:
+                if (not isinstance(loss, dict) or loss.get('id') not in identifiers
+                        or loss['id'] == record['id'] or loss['id'] in lost_ids
+                        or type(loss.get('area')) is not int or loss['area'] <= 0):
+                    raise ValueError('metadata overlap_lost must contain unique winning region IDs and positive areas.')
+                lost_ids.add(loss['id'])
+                lost_area += loss['area']
+            if raw_area - area != lost_area:
+                raise ValueError('metadata raw_area must equal area plus overlap_lost areas.')
+    combined['mask_sets'], combined['image_count'] = sets, len(sets)
+    return tensor, combined
 
 # region Helpers
 def _gaussian_blur_2d(tensor: torch.Tensor, kernel_size: Tuple[int, int], sigma: float) -> torch.Tensor:

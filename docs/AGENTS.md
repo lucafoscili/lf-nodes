@@ -1,3 +1,3 @@
 # Agents
 
-Refer to => \lf-nodes\.github\instructions\copilot.instructions.md
+Refer to [the contributor guide](../.github/copilot-instructions.md).

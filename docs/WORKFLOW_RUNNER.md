@@ -364,7 +364,6 @@ modules/workflow_runner/
 │   ├── __init__.py          # Lazy forwarding layer
 │   ├── api_controllers.py   # Core API endpoints
 │   ├── api_routes.py        # Route registration decorators
-│   ├── routes.py            # Compatibility shim for imports
 │   ├── page_controller.py   # Page serving
 │   ├── assets_controller.py # Static asset serving
 │   ├── proxy_controller.py  # API proxying
@@ -372,9 +371,17 @@ modules/workflow_runner/
 ├── models/                  # Data structures
 │   ├── __init__.py
 │   └── schemas.py           # Request/response schemas
+├── nodes/                   # Private Runner graph-node namespace
+│   └── __init__.py
+├── prompts/                 # Shared H3 prompt composition and audit logic
+│   ├── minimax_h3.py
+│   ├── minimax_h3_audit.py
+│   └── minimax_h3_pipeline.py
 ├── services/                # Business logic
 │   ├── __init__.py
 │   ├── auth_service.py      # Authentication & authorization
+│   ├── admission.py         # Submission provider admission
+│   ├── definition_inputs.py # Workflow input definitions
 │   ├── run_service.py       # Workflow execution orchestration
 │   ├── job_service.py       # Job status tracking
 │   ├── workflow_service.py  # Workflow metadata management
@@ -382,35 +389,45 @@ modules/workflow_runner/
 │   ├── background.py        # Background task management
 │   ├── google_oauth.py      # OAuth token verification
 │   ├── history_cleanup.py   # Conservative missing-artifact history pruning
+│   ├── input_snapshot.py    # Retained run inputs
+│   ├── job_contracts.py     # Shared job-store contracts
+│   ├── lifecycle.py         # Submission identity and cancellation lifecycle
+│   ├── model_service.py     # Model requirements
 │   ├── readiness.py         # Non-executing catalogue readiness checks
 │   ├── remix_inputs.py      # Owner-bound upload and output-artifact reuse
 │   ├── job_store.py         # In-memory job storage
 │   ├── job_store_sqlite.py  # SQLite-based persistent job storage
 │   ├── proxy_service.py     # API proxy logic
-│   └── registry.py          # Workflow registry
+│   ├── registry.py          # Workflow registry
+│   ├── sequence_runtime.py  # Ordered block execution and bindings
+│   └── sequence_store.py    # Orchestra state persistence
 ├── utils/                   # Shared utilities
 │   ├── __init__.py
 │   ├── errors.py            # Custom exception types
-│   ├── helpers.py           # Common helper functions
 │   ├── media.py             # Shared artifact media-type mapping
+│   ├── prompt.py            # Prompt graph utilities
 │   └── serialize.py         # Job serialization utilities
 ├── scripts/                 # Utility scripts
-│   └── frontend_proxy.py    # Reverse proxy for development
-├── tests/                   # Unit tests
-│   ├── test_routes.py
+│   ├── frontend_proxy.py    # Reverse proxy for development
+│   └── workflow_preflight.py # Portable workflow checks
+├── tests/                   # Service, route, workflow and runtime contracts
+│   ├── helpers/             # Focused HTTP/storage helper tests
+│   ├── filters/inpaint/     # Inpaint geometry tests
+│   ├── test_api_controllers.py
 │   ├── test_run_service.py
-│   └── test_workflow_conversion.py
-└── workflows/               # Workflow definitions
-    ├── __init__.py
-    ├── caption_image_vision.py/.json  # Image captioning with vision LLM
-    ├── image_to_svg.py/.json          # Convert images to SVG
-    ├── load_metadata.py/.json         # Extract image metadata
-    ├── remove_bg.py/.json             # Background removal
-    ├── simple_chat.py/.json           # Simple LLM chat interface
-    ├── sort_json_keys.py/.json        # Sort JSON keys alphabetically
-    ├── svg_generation_gemini.py/.json # Generate SVG with Gemini
-    ├── t2i_15_lcm.py/.json            # Text-to-image with LCM
-    └── utils.py                       # Shared workflow utilities
+│   ├── test_sequence_runtime.py
+│   └── ...                  # Other focused test_*.py modules
+└── workflows/               # Block/orchestra declarations and Comfy graphs
+    ├── __init__.py          # Declaration discovery
+    ├── custom/              # Local custom declaration namespace
+    ├── orchestration.py     # Shipped orchestra declarations
+    ├── minimax_h3*.py       # H3 families, profiles and prompt workflows
+    ├── krea2.py             # Shared family declaration, multiple JSON graphs
+    ├── trellis2.py          # TRELLIS.2 declaration and separate JSON graph
+    ├── triposplat.py        # TripoSplat declaration and separate JSON graph
+    ├── caption_image_vision.py/.json # Example paired declaration and graph
+    ├── ...                  # Other declarations and their JSON graphs
+    └── utils.py             # Shared workflow utilities
 ```
 
 ## Key Components

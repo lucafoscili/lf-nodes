@@ -3,8 +3,22 @@ from typing import Iterable
 
 import cv2
 import torch
+import torch.nn.functional as F
 
 from ..conversion import tensor_to_numpy
+
+
+def outline_region_masks(image: torch.Tensor, masks: torch.Tensor) -> torch.Tensor:
+    """Draw one-pixel inner mask boundaries, retaining image alpha exactly."""
+    result = image.detach().to(device="cpu", dtype=torch.float32).clone()
+    palette = [(1.0, 0.65, 0.0), (0.0, 0.8, 1.0), (1.0, 0.25, 0.7),
+               (0.4, 1.0, 0.25), (0.7, 0.5, 1.0)]
+    for index, mask in enumerate(masks > 0.5):
+        padded = F.pad(mask, (1, 1, 1, 1), value=False)
+        interior = (padded[1:-1, :-2] & padded[1:-1, 2:]
+                    & padded[:-2, 1:-1] & padded[2:, 1:-1])
+        result[0, ..., :3][mask & ~interior] = result.new_tensor(palette[index % len(palette)])
+    return result
 
 # region build_overlay
 def build_overlay(image: torch.Tensor, regions: Iterable[dict]) -> torch.Tensor:
