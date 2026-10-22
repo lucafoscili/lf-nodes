@@ -94,5 +94,4 @@ the same mask-output index.
   `modules/tests/utils/helpers/test_rmbg2.py`.
 - Run `python -I scripts/quality/run_ci_contracts.py` from LF's root for the
   CPU publication gate, using ComfyUI's Python. It does not load models or
-  certify GPU/matte quality. Live comparison and Runner evidence are recorded
-  in [release readiness](RELEASE_READINESS.md#direct-rmbg-20--2026-10-02).
+  certify GPU/matte quality.

@@ -63,7 +63,7 @@ REID_IDS = {
 }
 SAMPLING_CONTROL_IDS = EXPECTED_IDS - REID_IDS
 FORBIDDEN_NODE_TYPES = {"Krea2ImageNode", "Krea2StyleReferenceNode"}
-FORBIDDEN_VOCABULARY = ("velora", "stellaris", "azeroth", "sentinel", "sprite")
+FORBIDDEN_VOCABULARY = ("sprite",)
 
 
 def _workflows() -> dict[str, Any]:
@@ -105,7 +105,7 @@ def _references(value: Any, target: str) -> bool:
 def _common_inputs() -> dict[str, Any]:
     return {
         "prompt": "A graphic portrait with deliberate ink lines and moonlit colors",
-        "model_name": workflow_module._LOCAL_MODELS[1],
+        "model_name": workflow_module._OFFICIAL_KREA2_MODEL,
         "aspect_ratio": "4:3 (Standard)",
         "seed": 1234,
         "steps": 9,
@@ -262,8 +262,8 @@ def test_reid_recipes_match_the_published_engine_contract(workflow_id: str) -> N
         prompt, "FluxKontextMultiReferenceLatentMethod"
     )
 
-    assert prompt["unet"]["inputs"]["unet_name"] == workflow_module._REID_MODEL
-    assert prompt["vae"]["inputs"]["vae_name"] == workflow_module._REID_VAE
+    assert prompt["unet"]["inputs"]["unet_name"] == workflow_module._OFFICIAL_KREA2_MODEL
+    assert prompt["vae"]["inputs"]["vae_name"] == workflow_module._OFFICIAL_VAE
     assert lora["inputs"] == {
         "lora_name": workflow_module._REID_LORA,
         "strength_model": 1.0,
@@ -398,7 +398,7 @@ def test_character_restage_maps_only_the_creative_controls(
     assert prompt["reference"]["inputs"]["image"].endswith(
         "character.png [input]"
     )
-    assert prompt["unet"]["inputs"]["unet_name"] == workflow_module._REID_MODEL
+    assert prompt["unet"]["inputs"]["unet_name"] == workflow_module._OFFICIAL_KREA2_MODEL
     assert prompt["positive_encode"]["inputs"]["prompt"].endswith(
         "holding a cocktail"
     )
@@ -589,10 +589,10 @@ def test_reid_cards_surface_validated_and_experimental_base_profiles() -> None:
     for workflow_id in REID_IDS:
         cells = {cell.id: cell for cell in _workflows()[workflow_id].inputs}
         model = cells["model_name"]
-        assert model.props["lfValue"] == workflow_module._REID_MODEL
+        assert model.props["lfValue"] == workflow_module._OFFICIAL_KREA2_MODEL
         options = model.props["lfDataset"]["nodes"]
         assert [option["workflowValue"] for option in options] == list(
-            workflow_module._REID_MODELS
+            workflow_module._KREA2_MODELS
         )
         assert "validated" in options[0]["value"].lower()
         assert all("experimental" in option["value"].lower() for option in options[1:])
@@ -606,35 +606,12 @@ def test_style_and_identity_cards_default_to_the_documented_adapter_profile() ->
     ):
         cells = {cell.id: cell for cell in _workflows()[workflow_id].inputs}
         model = cells["model_name"]
-        assert model.props["lfValue"] == workflow_module._ADAPTER_DEFAULT_MODEL
+        assert model.props["lfValue"] == workflow_module._OFFICIAL_KREA2_MODEL
         assert model.props["lfTextfieldProps"]["lfHelper"]["value"]
         options = model.props["lfDataset"]["nodes"]
         assert options[0]["workflowValue"] == workflow_module._OFFICIAL_KREA2_MODEL
         assert "default" in options[0]["value"].lower()
         assert all("experimental" in option["value"].lower() for option in options[1:])
-
-
-def test_generation_cards_surface_all_local_checkpoint_profiles() -> None:
-    for workflow_id in ("krea2_generate", "krea2_style_reference", "krea2_style_blend"):
-        cells = {cell.id: cell for cell in _workflows()[workflow_id].inputs}
-        model = cells["model_name"]
-        expected_models = (
-            workflow_module._LOCAL_MODELS
-            if workflow_id == "krea2_generate"
-            else workflow_module._ADAPTER_MODELS
-        )
-        assert [
-            option["workflowValue"] for option in model.props["lfDataset"]["nodes"]
-        ] == list(expected_models)
-        assert model.props["lfValue"] == (
-            workflow_module._ADAPTER_DEFAULT_MODEL
-            if workflow_id != "krea2_generate"
-            else workflow_module._LOCAL_DEFAULT_MODEL
-        )
-        assert any(
-            "lustify" in option["value"].lower()
-            for option in model.props["lfDataset"]["nodes"]
-        )
 
 
 def test_style_cards_pin_cfg_one_instead_of_exposing_an_invalid_cfg_sweep() -> None:
@@ -652,6 +629,12 @@ def test_reid_alternate_base_is_explicitly_mapped(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     workflow = _workflows()["krea2_character_restage"]
+    community = os.path.join("KR2", "community_merge.safetensors")
+    monkeypatch.setattr(
+        workflow_module,
+        "_KREA2_MODELS",
+        (workflow_module._OFFICIAL_KREA2_MODEL, community),
+    )
     monkeypatch.setattr(
         workflow_module,
         "resolve_load_image_reference",
@@ -664,11 +647,12 @@ def test_reid_alternate_base_is_explicitly_mapped(
         {
             "reference_image": [Path("C:/uploads/character.png")],
             "prompt": "The same character in a controlled portrait test",
-            "model_name": workflow_module._REID_MODELS[1],
+            "model_name": community,
         },
     )
 
-    assert prompt["unet"]["inputs"]["unet_name"] == workflow_module._REID_MODELS[1]
+    assert prompt["unet"]["inputs"]["unet_name"] == community
+    assert prompt["vae"]["inputs"]["vae_name"] == workflow_module._OFFICIAL_VAE
 
 
 @pytest.mark.parametrize(
@@ -973,9 +957,6 @@ def test_krea_model_and_adapter_paths_follow_the_host_separator() -> None:
     assert workflow_module._REID_LORA == os.path.join(
         "KR2", "krea2_reid_rank32.safetensors"
     )
-    assert workflow_module._LUSTIFY_MODEL == os.path.join(
-        "KR2", "lustifyNSFWCheckpoint_v10Krea2.safetensors"
-    )
 
     for workflow in _workflows().values():
         if workflow.configure_download is None:
@@ -984,7 +965,7 @@ def test_krea_model_and_adapter_paths_follow_the_host_separator() -> None:
         prompt = workflow.load_prompt()
         workflow.configure_download(prompt, defaults)
         assert prompt["unet"]["inputs"]["unet_name"] in (
-            workflow_module._LOCAL_MODELS
+            workflow_module._KREA2_MODELS
         )
         if "lora" in prompt:
             assert os.path.dirname(prompt["lora"]["inputs"]["lora_name"]) == "KR2"

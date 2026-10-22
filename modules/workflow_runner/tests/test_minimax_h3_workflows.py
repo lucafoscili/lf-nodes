@@ -124,13 +124,6 @@ EXPECTED_PREFIXES = {
         "LF_Nodes/MiniMaxH3/SceneSheetExperimental/kitchen_quality/seed-73-refs1-f124"
     ),
 }
-FORBIDDEN_DOMAIN_WORDS = (
-    "velora",
-    "garage",
-    "stellaris",
-    "azeroth",
-    "sentinel",
-)
 FORBIDDEN_HOSTED_NODE_TYPES = {
     "MinimaxVideoGeneration",
     "MiniMaxVideoGeneration",
@@ -214,27 +207,6 @@ def test_catalogue_is_generic_concise_and_category_aware() -> None:
             assert cell.id
             assert cell.node_id
             assert cell.description
-
-
-def test_public_cards_have_no_velora_or_other_project_domain_vocabulary() -> None:
-    public_text = ""
-    for workflow in _workflows().values():
-        public_text += json.dumps(
-            {
-                "id": workflow.id,
-                "value": workflow.value,
-                "description": workflow.description,
-                "category": workflow.category,
-                "inputs": [cell.to_dict() for cell in workflow.inputs],
-                "outputs": [cell.to_dict() for cell in workflow.outputs],
-            },
-            ensure_ascii=False,
-        ).lower()
-        public_text += workflow.workflow_path.read_text(encoding="utf-8").lower()
-
-    for forbidden in FORBIDDEN_DOMAIN_WORDS:
-        assert forbidden not in public_text
-    assert re.search(r"\bden\b", public_text) is None
 
 
 def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:

@@ -248,7 +248,3 @@ def test_public_schema_and_mapping_remain_generic() -> None:
     assert side_by_side_module.NODE_DISPLAY_NAME_MAPPINGS == {
         "LF_SideBySide": "Side by side",
     }
-    public_contract = repr(schema).lower()
-    assert "velora" not in public_contract
-    assert "stellaris" not in public_contract
-    assert "azeroth" not in public_contract

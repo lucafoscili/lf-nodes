@@ -666,5 +666,3 @@ def test_receipt_and_public_node_contract_are_deterministic_and_generic() -> Non
     assert normalizer_module.NODE_CLASS_MAPPINGS == {
         "LF_NormalizeSpriteBatch": normalizer_module.LF_NormalizeSpriteBatch,
     }
-    assert "garage" not in repr(schema).lower()
-    assert "velora" not in repr(schema).lower()

@@ -142,5 +142,5 @@ def test_public_workflow_copy_has_no_consumer_specific_vocabulary() -> None:
     ).lower()
     public_text += WORKFLOW.workflow_path.read_text(encoding="utf-8").lower()
 
-    for forbidden in ("velora", "stellaris", "azeroth", "portrait", "sprite"):
+    for forbidden in ("portrait", "sprite"):
         assert forbidden not in public_text

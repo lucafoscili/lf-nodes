@@ -71,44 +71,13 @@ matching instance. Authoring failure can leave the writer loaded; this is an
 ordered graph handoff, not a guaranteed cleanup handler. Portable preparation
 validates settings and reference order without staging uploads or contacting LMS.
 
-## Checks and live evidence
-
-Prose-only revision: 63 focused node/instruction/registry/metadata tests and 50
-Runner tests passed, along with syntax compilation and the static node contract
-check. These verify unchanged sockets, ordered image inputs, one/two provider
-calls, verbatim output/history, and honest unvalidated status. The subsequent
-[six prose-only live trials](h3-prose-trials.md) exercised this revision against
-Qwen3.5 4B through LMS: five returned prose and one returned no answer. Reference
-handling, history, and exact-instance unloading worked, but prompt quality and
-review were inconsistent; this is not authoring-quality acceptance. No Comfy
-hydration or video render was performed. Frontend code is unchanged, so the
-earlier frontend build evidence still applies.
-
-The [worked-example comparison](h3-example-trials.md) records the subsequent
-mode-specific teaching examples and explicit-brief revision against the same
-ideas and Qwen settings. It separates improvements in format/action coverage from
-remaining scene-coherence and review weaknesses.
-
-Offline checkpoint, 2026-09-26: 257 focused Python contracts and 241 related
-Runner/pipeline contracts passed; the final node-only recheck passed all 38 tests.
-The frontend suite passed 590 tests, with 25 focused socket/widget tests rechecked
-after type-only adjustments. The full frontend build and static node contracts
-passed. At that offline checkpoint, live provider quality and Comfy/Titanic
-hydration were untested. The subsequent [Qwen live trial](h3-live-trial.md)
-exercised the earlier compiler-backed Python nodes against LMS without starting
-Comfy; it is not live acceptance of this later prose-only revision.
+## Checks
 
 ```powershell
 python -I scripts/quality/run_pytests.py -q modules/tests/nodes/llm/test_h3_prompt_maker.py modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py modules/tests/utils/helpers/llm/test_h3_prompt_skill.py
 corepack yarn exec vitest run web/src/helpers/h3PromptMaker.test.ts --pool=threads
 ```
 
-The September 26 phone-to-video orchestra is now an accepted milestone following
-Luca's successful trial; see [H3 accepted checkpoints](../H3_CHECKPOINT.md).
-The separate September 7 compiler-backed video baseline remains preserved there
-as historical evidence, not proof of the new authoring path.
-The prose-only trials cover the short walking idea, differently sized references,
-review opt-out, exact speech, fixed first-frame intent, and exact-instance release.
-Authoring-quality follow-up remains necessary; see the trial's keep/defer judgment.
-Saved-node reload and growing sockets still need live Comfy/Titanic inspection,
-and prompt observations do not establish rendered-video quality.
+These cover unchanged sockets, ordered image inputs, one or two provider calls,
+verbatim output and history, and the honest unvalidated status. They do not
+measure prompt quality: review is a second model opinion, not a validator.

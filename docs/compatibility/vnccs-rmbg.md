@@ -77,8 +77,6 @@ and the reverse patch restores the upstream bytes.
 
 The same repaired implementation passed fresh saved-video cutting and full H3
 sprite orchestras, including the updated Comfy ecosystem's four-step HD run.
-See [release readiness](../RELEASE_READINESS.md) and the
-[ecosystem update](../COMFY_ECOSYSTEM_UPDATE.md) for exact execution scope.
 This does not certify every VNCCS node or a future upstream revision.
 
 RMBG-2.0 model assets and their license remain separate prerequisites. This

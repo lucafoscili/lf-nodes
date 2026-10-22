@@ -249,7 +249,3 @@ def test_public_contract_is_generic_and_uses_tree_widget() -> None:
     assert register_output_file.NODE_CLASS_MAPPINGS == {
         "LF_RegisterOutputFile": register_output_file.LF_RegisterOutputFile,
     }
-    contract = repr(inputs).lower()
-    assert "velora" not in contract
-    assert "stellaris" not in contract
-    assert "azeroth" not in contract

@@ -4,8 +4,7 @@ Question: can the accepted Kitchen/res_multistep 20-step reference recipe delive
 useful ~2 MP detail faster by generating a smaller latent, learning its spatial
 upscale, then refining briefly? This is a local candidate, not production wiring.
 Decision: **keep as a candidate**, defer promotion to the default renderer.
-The [2026-09-26 paired trial](../../docs/llm/h3-latent-upscale-trial.md) succeeded
-and added subject detail, but also redrew small facial/jewelry features. The
+A paired trial succeeded and added subject detail, but also redrew small facial/jewelry features. The
 accepted phone orchestra remains unchanged.
 
 `h3_latent_upscale.py` accepts a configured Runner reference API graph and creates
@@ -59,8 +58,7 @@ python scripts/experiments/h3_latent_upscale.py accepted-api.json comparison-api
 This uses the updated Core SaveVideo nested encoding controls. No runtime restart
 or production renderer change is required; submit only when the queue is idle.
 
-The [2026-09-26 follow-up](../../docs/llm/h3-latent-upscale-trial.md#follow-up-foureight-steps-and-export-quality)
-found no convincing eight-step visual win in the accepted clip despite roughly
+A follow-up found no convincing eight-step visual win in the accepted clip despite roughly
 double the refinement sampling time. Keep four steps as the candidate; defer
 eight-step promotion. CRF 18 gives minor fine-texture improvement at roughly
 double the file size. All four outputs retain identical audio and timing.

@@ -369,5 +369,3 @@ def test_public_schema_and_mapping_use_lf_dataset_vocabulary() -> None:
     }
     public_contract = repr(schema).lower()
     assert "lora" not in public_contract
-    assert "velora" not in public_contract
-    assert "stellaris" not in public_contract

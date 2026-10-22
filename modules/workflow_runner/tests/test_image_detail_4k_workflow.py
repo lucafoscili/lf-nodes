@@ -26,7 +26,7 @@ from modules.workflow_runner.workflows import _WORKFLOW_MODULES
 from modules.workflow_runner.workflows import image_detail_4k as workflow_module
 
 
-FORBIDDEN_VOCABULARY = ("velora", "stellaris", "azeroth", "sentinel", "sprite")
+FORBIDDEN_VOCABULARY = ("sprite",)
 
 
 def _classes(prompt: dict[str, Any]) -> set[str]:

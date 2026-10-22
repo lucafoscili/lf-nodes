@@ -237,6 +237,15 @@ const requireNode = (workflow: JsonRecord, id: number, type: string): JsonRecord
   return node;
 };
 
+/**
+ * The maintainer's name and private project vocabulary. No public file may
+ * contain these words: both workflow sanitizers audit with this pattern, and
+ * tests/public_vocabulary.test.ts scans docs, scripts, nodes and the Runner
+ * catalogue with it.
+ */
+export const PRIVATE_VOCABULARY =
+  /\b(?:luca|foscili|velora|eden|azeroth|sentinel|stellaris|garage)\b/i;
+
 export const auditSanitizedTitanic = (workflow: JsonRecord): string[] => {
   const findings: string[] = [];
   const blockedStrings: Array<[string, RegExp]> = [
@@ -251,10 +260,7 @@ export const auditSanitizedTitanic = (workflow: JsonRecord): string[] => {
       'private character vocabulary',
       /\b(?:morana|redxiii|shadowheart)\b|m0r4n4|5h4rt/i,
     ],
-    [
-      'private project or personal vocabulary',
-      /\b(?:luca|foscili|velora|eden|azeroth|sentinel|stellaris|garage)\b/i,
-    ],
+    ['private project or personal vocabulary', PRIVATE_VOCABULARY],
     [
       'email address',
       /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,

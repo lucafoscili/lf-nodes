@@ -408,6 +408,3 @@ def test_public_node_schema_and_registration_are_generic() -> None:
     assert sampler_module.NODE_DISPLAY_NAME_MAPPINGS == {
         "LF_PeriodicImageBatchSampler": "Periodic image batch sampler",
     }
-    public_contract = repr(schema).lower()
-    assert "garage" not in public_contract
-    assert "velora" not in public_contract

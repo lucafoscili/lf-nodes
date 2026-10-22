@@ -8,7 +8,7 @@ from ...utils.helpers.logic import is_none, normalize_list_to_value, register_se
 
 
 def _with_none(options) -> list[str]:
-    """Add the serialized no-selection sentinel to an optional combo."""
+    """Add the serialized no-selection marker to an optional combo."""
 
     return ["None", *(option for option in options if option != "None")]
 

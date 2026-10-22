@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import json
 from pathlib import Path
 import sys
 import types
@@ -373,18 +372,3 @@ def test_graph_links_model_assets_and_copy_are_portable() -> None:
         "RMBG/RMBG-2.0/birefnet.py",
         "RMBG/RMBG-2.0/BiRefNet_config.py",
     }
-
-    public = json.dumps(
-        {
-            "id": WORKFLOW.id,
-            "value": WORKFLOW.value,
-            "description": WORKFLOW.description,
-            "category": WORKFLOW.category,
-            "inputs": [cell.to_dict() for cell in WORKFLOW.inputs],
-            "outputs": [cell.to_dict() for cell in WORKFLOW.outputs],
-        },
-        ensure_ascii=False,
-    ).lower()
-    public += WORKFLOW.workflow_path.read_text(encoding="utf-8").lower()
-    for forbidden in ("velora", "eden", "sentinel", "azeroth", "stellaris"):
-        assert forbidden not in public

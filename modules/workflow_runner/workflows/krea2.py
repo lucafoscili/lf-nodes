@@ -35,27 +35,30 @@ from .utils import (
 _OFFICIAL_KREA2_MODEL = os.path.join(
     "KR2", "krea2_turbo_int8_convrot.safetensors"
 )
-_DARKBEAST_MODEL = os.path.join(
-    "KR2", "darkBeast30BF16INT8_darkBeastKREA2FP8.safetensors"
-)
-_MOODY_MODEL = os.path.join("KR2", "moodyKrea2Mix_v60.safetensors")
-_LUSTIFY_MODEL = os.path.join(
-    "KR2", "lustifyNSFWCheckpoint_v10Krea2.safetensors"
-)
-_LOCAL_MODELS = (
-    _DARKBEAST_MODEL,
-    _MOODY_MODEL,
-    _LUSTIFY_MODEL,
-    _OFFICIAL_KREA2_MODEL,
-)
-_LOCAL_DEFAULT_MODEL = _LOCAL_MODELS[0]
-_ADAPTER_MODELS = (
-    _OFFICIAL_KREA2_MODEL,
-    _DARKBEAST_MODEL,
-    _MOODY_MODEL,
-    _LUSTIFY_MODEL,
-)
-_ADAPTER_DEFAULT_MODEL = _OFFICIAL_KREA2_MODEL
+
+
+def _installed_krea2_models() -> tuple[str, ...]:
+    """Return the official base first, then every other model in ``KR2``.
+
+    Choices come from ``diffusion_models/KR2`` so community checkpoints a host
+    installs there appear without being named in this file. The official base
+    stays the first choice and the default even before it is downloaded; the
+    readiness check reports a missing file.
+    """
+
+    import folder_paths
+
+    installed = sorted(
+        name
+        for name in folder_paths.get_filename_list("diffusion_models")
+        if os.path.dirname(name) == "KR2"
+        and name.endswith(".safetensors")
+        and name != _OFFICIAL_KREA2_MODEL
+    )
+    return (_OFFICIAL_KREA2_MODEL, *installed)
+
+
+_KREA2_MODELS = _installed_krea2_models()
 _LOCAL_MAX_SEED = (1 << 53) - 1
 _LOCAL_CANVAS_MULTIPLE = 16
 _LOCAL_MAX_EDGE = 2048
@@ -168,25 +171,10 @@ _IDENTITY_EDIT_STEP_OPTIONS = (
         None,
     ),
 )
-_REID_MODEL = _OFFICIAL_KREA2_MODEL
-_REID_MODELS = (
-    _REID_MODEL,
-    _DARKBEAST_MODEL,
-    _MOODY_MODEL,
-    _LUSTIFY_MODEL,
-)
 _STYLE_LORA = os.path.join("KR2", "krea2_style_reference.safetensors")
 _IDENTITY_LORA = os.path.join("KR2", "krea2_identity_edit_v1_2.safetensors")
 _REID_LORA = os.path.join("KR2", "krea2_reid_rank32.safetensors")
 _OFFICIAL_VAE = "qwen_image_vae.safetensors"
-_LOCAL_VAE = "krea2RealVae_v10.safetensors"
-_REID_VAE = _OFFICIAL_VAE
-_GENERATION_VAE_BY_MODEL = {
-    _DARKBEAST_MODEL: _LOCAL_VAE,
-    _MOODY_MODEL: _LOCAL_VAE,
-    _LUSTIFY_MODEL: _OFFICIAL_VAE,
-    _OFFICIAL_KREA2_MODEL: _OFFICIAL_VAE,
-}
 
 
 class _LocalSettings(NamedTuple):
@@ -265,15 +253,13 @@ def _local_settings(
     inputs: Dict[str, Any],
     *,
     default_aspect_ratio: str = _SQUARE_ASPECT_RATIO,
-    default_model: str = _LOCAL_DEFAULT_MODEL,
-    model_choices: tuple[str, ...] = _LOCAL_MODELS,
     default_steps: int = 8,
     min_steps: int = 4,
     max_steps: int = 20,
 ) -> _LocalSettings:
     prompt_text = _required_text(inputs, "prompt")
     model_name = _choice(
-        inputs, "model_name", default_model, model_choices
+        inputs, "model_name", _OFFICIAL_KREA2_MODEL, _KREA2_MODELS
     )
     aspect_ratio = _choice(
         inputs,
@@ -322,13 +308,9 @@ def _apply_local_settings(
     prompt: Dict[str, Any],
     settings: _LocalSettings,
     output_folder: str,
-    *,
-    vae_name: str | None = None,
 ) -> None:
     prompt["unet"]["inputs"]["unet_name"] = settings.model_name
-    prompt["vae"]["inputs"]["vae_name"] = vae_name or _GENERATION_VAE_BY_MODEL[
-        settings.model_name
-    ]
+    prompt["vae"]["inputs"]["vae_name"] = _OFFICIAL_VAE
     prompt_input_name = (
         "prompt" if "prompt" in prompt["positive"]["inputs"] else "text"
     )
@@ -367,22 +349,13 @@ def _apply_style_adapter_settings(
             raise ValueError("cfg must be 1 for Krea 2 style-reference workflows.")
     settings_inputs = dict(inputs)
     settings_inputs["cfg"] = 1.0
-    settings = _local_settings(
-        settings_inputs,
-        default_model=_ADAPTER_DEFAULT_MODEL,
-        model_choices=_ADAPTER_MODELS,
-    )
+    settings = _local_settings(settings_inputs)
     strength = _number(
         inputs, "style_strength", 1.0, minimum=0.0, maximum=2.0
     )
     prompt["lora"]["inputs"]["lora_name"] = _STYLE_LORA
     prompt["lora"]["inputs"]["strength_model"] = strength
-    _apply_local_settings(
-        prompt,
-        settings,
-        output_folder,
-        vae_name=_OFFICIAL_VAE,
-    )
+    _apply_local_settings(prompt, settings, output_folder)
 
 
 def _configure_style_reference(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -424,8 +397,6 @@ def _apply_identity_edit_settings(
     settings = _local_settings(
         inputs,
         default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
-        default_model=_ADAPTER_DEFAULT_MODEL,
-        model_choices=_ADAPTER_MODELS,
         default_steps=10,
         min_steps=8,
         max_steps=12,
@@ -507,7 +478,7 @@ def _apply_reid_settings(
     output_folder: str,
 ) -> None:
     prompt_text = _required_text(inputs, "prompt")
-    model_name = _choice(inputs, "model_name", _REID_MODEL, _REID_MODELS)
+    model_name = _choice(inputs, "model_name", _OFFICIAL_KREA2_MODEL, _KREA2_MODELS)
     aspect_ratio = _choice(
         inputs,
         "aspect_ratio",
@@ -520,7 +491,7 @@ def _apply_reid_settings(
     )
 
     prompt["unet"]["inputs"]["unet_name"] = model_name
-    prompt["vae"]["inputs"]["vae_name"] = _REID_VAE
+    prompt["vae"]["inputs"]["vae_name"] = _OFFICIAL_VAE
     prompt["lora"]["inputs"]["lora_name"] = _REID_LORA
     prompt["positive_encode"]["inputs"]["prompt"] = prompt_text
     _apply_resolution(prompt, aspect_ratio, megapixels)
@@ -715,112 +686,63 @@ def _upload_cell(
     )
 
 
-def _generation_model_cell() -> WorkflowCell:
+def _model_cell(
+    *, label: str, description: str, official_label: str
+) -> WorkflowCell:
     return _select_cell(
         node_id="unet",
         cell_id="model_name",
-        label="Checkpoint",
-        default=_LOCAL_DEFAULT_MODEL,
-        description="Choose an installed Krea 2-compatible checkpoint.",
+        label=label,
+        default=_OFFICIAL_KREA2_MODEL,
+        description=description,
         options=(
             (
-                _DARKBEAST_MODEL,
-                "DarkBeast Krea 2 FP8 — default",
-                "The established default for balanced character and scene work.",
-            ),
-            (
-                _MOODY_MODEL,
-                "Moody Krea 2 Mix v6",
-                "An alternate checkpoint with a more stylized visual bias.",
-            ),
-            (
-                _LUSTIFY_MODEL,
-                "Lustify v10 Krea 2 INT8 ConvRot — experimental",
-                "Community checkpoint with a photoreal bias, available for "
-                "same-seed visual comparisons.",
-            ),
-            (
                 _OFFICIAL_KREA2_MODEL,
-                "Official Krea 2 Turbo INT8 ConvRot",
-                "The pinned official Comfy-Org Turbo base and neutral compatibility reference.",
+                official_label,
+                "The pinned official Comfy-Org Turbo base, paired with the Qwen Image VAE.",
+            ),
+            *(
+                (
+                    model,
+                    f"{Path(model).stem} — experimental",
+                    "An installed community checkpoint from diffusion_models/KR2; "
+                    "compare it with the official base at the same seed.",
+                )
+                for model in _KREA2_MODELS[1:]
             ),
         ),
     )
 
 
+def _generation_model_cell() -> WorkflowCell:
+    return _model_cell(
+        label="Checkpoint",
+        description="Choose an installed Krea 2-compatible checkpoint.",
+        official_label="Official Krea 2 Turbo INT8 ConvRot — default",
+    )
+
+
 def _adapter_model_cell() -> WorkflowCell:
-    return _select_cell(
-        node_id="unet",
-        cell_id="model_name",
+    return _model_cell(
         label="Adapter base",
-        default=_ADAPTER_DEFAULT_MODEL,
         description=(
             "The official Turbo base and Qwen Image VAE are the documented adapter "
             "pairing. Community checkpoints remain explicit same-seed experiments; "
             "successful loading alone does not establish style or identity fidelity."
         ),
-        options=(
-            (
-                _OFFICIAL_KREA2_MODEL,
-                "Official Krea 2 Turbo INT8 — adapter default",
-                "Pinned Comfy-Org Turbo base paired with the official Qwen Image VAE.",
-            ),
-            (
-                _DARKBEAST_MODEL,
-                "DarkBeast Krea 2 FP8 — experimental",
-                "Community derivative available for controlled visual A/B comparison.",
-            ),
-            (
-                _MOODY_MODEL,
-                "Moody Krea 2 Mix v6 — experimental",
-                "Community derivative whose adapter fidelity has not been characterized.",
-            ),
-            (
-                _LUSTIFY_MODEL,
-                "Lustify v10 Krea 2 INT8 ConvRot — experimental",
-                "Structurally compatible community checkpoint; adapter fidelity "
-                "still requires a visual A/B.",
-            ),
-        ),
+        official_label="Official Krea 2 Turbo INT8 — adapter default",
     )
 
 
 def _reid_model_cell() -> WorkflowCell:
-    return _select_cell(
-        node_id="unet",
-        cell_id="model_name",
+    return _model_cell(
         label="ReID base",
-        default=_REID_MODEL,
         description=(
             "The official INT8 ConvRot base is the validated ReID pairing. Community "
             "checkpoints are structurally compatible experiments whose ReID fidelity "
             "varies independently of loading compatibility."
         ),
-        options=(
-            (
-                _REID_MODEL,
-                "Official Krea 2 Turbo INT8 — validated",
-                "Pinned Comfy-Org base used by the published ReID workflow contract.",
-            ),
-            (
-                _DARKBEAST_MODEL,
-                "DarkBeast Krea 2 FP8 — experimental",
-                "Community derivative; structurally compatible, with ReID behavior "
-                "best compared at the same seed.",
-            ),
-            (
-                _MOODY_MODEL,
-                "Moody Krea 2 Mix v6 — experimental",
-                "Community derivative with unqualified ReID fidelity, available "
-                "as a controlled visual probe.",
-            ),
-            (
-                _LUSTIFY_MODEL,
-                "Lustify v10 Krea 2 INT8 ConvRot — experimental",
-                "Structurally compatible community checkpoint; ReID fidelity still "
-                "requires a visual A/B.",
-            ),
-        ),
+        official_label="Official Krea 2 Turbo INT8 — validated",
     )
 
 

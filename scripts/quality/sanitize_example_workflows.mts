@@ -3,6 +3,8 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { PRIVATE_VOCABULARY } from './sanitize_titanic.mts';
+
 type JsonRecord = Record<string, any>;
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -364,7 +366,7 @@ export const auditSanitizedExample = (workflow: JsonRecord): string[] => {
     ['editing-session residue', /_edit_dataset\.json/i],
     ['embedded image data URI', /data:image\//i],
     ['cache-busting nonce', /(?:[?&]|\b)nonce=/i],
-    ['private username', /\b(?:luca|foscili)\b/i],
+    ['private project or personal vocabulary', PRIVATE_VOCABULARY],
     ['execution-history timestamp', /Execution (?:date|time):/i],
   ];
 

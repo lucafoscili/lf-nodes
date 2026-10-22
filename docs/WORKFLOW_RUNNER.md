@@ -82,8 +82,7 @@ Covers are curated **actual workflow outputs**, with a labelled before/after
 composition when an input transformation matters. An orchestra cover must come
 from its complete execution, not an unrelated run of its final block. Coverage
 expands only as suitable outputs are reviewed; cards without accepted examples
-remain text-only. See the [showcase coverage and review limits](WORKFLOW_RUNNER_SHOWCASE.md)
-for all shipped workflows, including pending runs and rejected samples.
+remain text-only.
 
 `asset` is a relative PNG, JPEG, WebP, or AVIF path below
 `web/deploy/assets/workflow-runner/heroes/`. Keep covers small, strip embedded

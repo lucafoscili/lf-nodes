@@ -1,7 +1,7 @@
 {
   "unet": {
     "inputs": {
-      "unet_name": "KR2/darkBeast30BF16INT8_darkBeastKREA2FP8.safetensors",
+      "unet_name": "KR2/krea2_turbo_int8_convrot.safetensors",
       "weight_dtype": "default"
     },
     "class_type": "UNETLoader",
@@ -16,7 +16,7 @@
     "_meta": {"title": "Load Krea 2 Qwen3-VL encoder"}
   },
   "vae": {
-    "inputs": {"vae_name": "krea2RealVae_v10.safetensors"},
+    "inputs": {"vae_name": "qwen_image_vae.safetensors"},
     "class_type": "VAELoader",
     "_meta": {"title": "Load Krea 2 VAE"}
   },

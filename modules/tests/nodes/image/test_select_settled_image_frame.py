@@ -345,8 +345,6 @@ def test_node_schema_and_public_mappings_are_exact_and_domain_neutral() -> None:
         "LF_SelectSettledImageFrame": "Select settled image frame",
     }
     public_contract = repr(schema).lower()
-    assert "velora" not in public_contract
-    assert "eden" not in public_contract
     assert "h3" not in public_contract
 
 

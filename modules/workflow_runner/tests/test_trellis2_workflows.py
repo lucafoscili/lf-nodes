@@ -397,12 +397,6 @@ def test_public_copy_and_graph_are_domain_neutral() -> None:
     public += SINGLE.workflow_path.read_text(encoding="utf-8").casefold()
 
     for forbidden in (
-        "velora",
-        "stellaris",
-        "azeroth",
-        "sentinel",
-        "kaldorei",
-        "portrait foundry",
         "tripo",
         "trellis-image-large",
     ):

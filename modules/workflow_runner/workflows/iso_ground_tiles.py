@@ -149,7 +149,7 @@ inputs = [
     ),
     _number_cell(
         "diamonds", "tile_width", "Tile width", _DEFAULT_TILE_WIDTH, 8, _MAX_TILE_EDGE, 2,
-        "Diamond tile width in pixels. Den draws 64 px cells from 128 px tiles.",
+        "Diamond tile width in pixels.",
     ),
     _number_cell(
         "diamonds", "tile_height", "Tile height", _DEFAULT_TILE_HEIGHT, 4, _MAX_TILE_EDGE, 2,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import json
 from pathlib import Path
 import sys
 import types
@@ -263,28 +262,3 @@ def test_download_graph_is_self_contained_and_uses_visible_defaults() -> None:
     assert prompt["mask_source"]["inputs"]["switch"] is True
     assert prompt["decode"]["inputs"]["num_gaussians"] == 262144
     assert prompt["splat_file"]["inputs"]["format"] == "spz"
-
-
-def test_public_copy_and_graph_are_domain_neutral() -> None:
-    public = json.dumps(
-        {
-            "id": WORKFLOW.id,
-            "value": WORKFLOW.value,
-            "description": WORKFLOW.description,
-            "category": WORKFLOW.category,
-            "inputs": [cell.to_dict() for cell in WORKFLOW.inputs],
-            "outputs": [cell.to_dict() for cell in WORKFLOW.outputs],
-        },
-        ensure_ascii=False,
-    ).casefold()
-    public += WORKFLOW.workflow_path.read_text(encoding="utf-8").casefold()
-
-    for forbidden in (
-        "velora",
-        "stellaris",
-        "azeroth",
-        "sentinel",
-        "kaldorei",
-        "portrait foundry",
-    ):
-        assert forbidden not in public
