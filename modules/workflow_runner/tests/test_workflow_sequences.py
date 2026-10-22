@@ -249,7 +249,6 @@ def test_sequence_declarations_are_immutable_and_own_no_workflow_graph() -> None
         "configure_prompt",
         "configure_download",
         "required_model_assets",
-        "submission_policy",
     ):
         assert not hasattr(sequence, forbidden)
 

@@ -47,7 +47,6 @@ def _definition(*, optional: bool = False) -> SimpleNamespace:
             WorkflowCell(id="svg_data", node_id="20"),
             WorkflowCell(id="png", node_id="61", required=not optional),
         ),
-        submission_policy=None,
     )
 
 
@@ -87,7 +86,6 @@ def test_all_required_outputs_allow_submission(validation_boundary, validated):
 def test_validated_output_root_covers_required_upstream_result(validation_boundary):
     definition = SimpleNamespace(
         outputs=(WorkflowCell(id="preview", node_id="20"),),
-        submission_policy=None,
     )
     prompt = {
         "20": {"class_type": "PreviewValue", "inputs": {}},
@@ -112,7 +110,6 @@ def test_validated_output_root_covers_required_upstream_result(validation_bounda
 def test_validated_output_root_does_not_cover_disconnected_result(validation_boundary):
     definition = SimpleNamespace(
         outputs=(WorkflowCell(id="preview", node_id="20"),),
-        submission_policy=None,
     )
     prompt = {
         "20": {"class_type": "PreviewValue", "inputs": {}},
@@ -181,7 +178,7 @@ def test_legacy_definition_without_outputs_is_still_prepared(validation_boundary
 
     request = asyncio.run(
         executor.prepare_workflow_submission(
-            {"workflowId": "legacy"}, (SimpleNamespace(submission_policy=None), {})
+            {"workflowId": "legacy"}, (SimpleNamespace(), {})
         )
     )
 

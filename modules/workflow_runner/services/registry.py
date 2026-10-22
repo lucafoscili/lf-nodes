@@ -32,7 +32,6 @@ class InputValidationError(ValueError):
 # endregion
 
 # region Dataset
-_PROVIDER_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _INPUT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _HERO_ASSET_PATTERN = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9][A-Za-z0-9._-]*)*$"
@@ -113,45 +112,6 @@ class WorkflowCardPresentation:
         object.__setattr__(self, "summary", summary)
         if self.hero is not None and not isinstance(self.hero, WorkflowHeroImage):
             raise TypeError("card hero must be a WorkflowHeroImage or None")
-
-
-@dataclass(frozen=True, slots=True)
-class WorkflowSubmissionPolicy:
-    """Resource metadata a workflow definition may declare for its host.
-
-    LF's Runner submits every workflow directly and does not act on this
-    policy; the type stays so existing definitions keep constructing. It is
-    never serialized into the browser-facing workflow catalogue.
-    """
-
-    provider_id: str
-    expected_vram_mb: int
-    max_duration_seconds: int
-    required: bool = True
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.provider_id, str) or not _PROVIDER_ID_PATTERN.fullmatch(
-            self.provider_id
-        ):
-            raise ValueError(
-                "provider_id must be a non-empty identifier of at most 128 "
-                "ASCII letters, digits, dots, underscores, or hyphens"
-            )
-        if type(self.expected_vram_mb) is not int or self.expected_vram_mb <= 0:
-            raise ValueError("expected_vram_mb must be a positive integer")
-        if (
-            type(self.max_duration_seconds) is not int
-            or self.max_duration_seconds <= 0
-        ):
-            raise ValueError("max_duration_seconds must be a positive integer")
-        if type(self.required) is not bool:
-            raise TypeError("required must be a boolean")
-
-    @property
-    def fail_closed(self) -> bool:
-        """Whether provider failure must prevent direct queue submission."""
-
-        return self.required
 
 
 @dataclass(frozen=True, slots=True)
@@ -459,7 +419,7 @@ class WorkflowSequenceNode:
     """A graph-free, linear assembly of registered ordinary workflows.
 
     A sequence deliberately owns no prompt graph, model declarations,
-    configuration callback, download callback, or submission policy. Each
+    configuration callback, or download callback. Each
     stage keeps those responsibilities in its referenced workflow block.
     """
 
@@ -565,7 +525,6 @@ class WorkflowNode:
     configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
     workflow_path: Path
     category: str
-    submission_policy: WorkflowSubmissionPolicy | None = None
     origin: str = "custom"
     collection: str = "Custom"
     configure_download: Callable[[Dict[str, Any], Dict[str, Any]], None] | None = None
@@ -576,13 +535,6 @@ class WorkflowNode:
     def __post_init__(self) -> None:
         if self.card is not None and not isinstance(self.card, WorkflowCardPresentation):
             raise TypeError("card must be a WorkflowCardPresentation or None")
-        if self.submission_policy is not None and not isinstance(
-            self.submission_policy,
-            WorkflowSubmissionPolicy,
-        ):
-            raise TypeError(
-                "submission_policy must be a WorkflowSubmissionPolicy or None"
-            )
         if isinstance(self.required_model_assets, (str, bytes)):
             raise TypeError("required_model_assets must be a sequence")
         assets = tuple(self.required_model_assets)
@@ -1174,18 +1126,6 @@ class WorkflowRegistry:
     def get(self, id: str) -> WorkflowNode | WorkflowSequenceNode | None:
         return self._definitions.get(id)
 
-    def get_submission_policy(self, id: str) -> WorkflowSubmissionPolicy | None:
-        definition = self.get(id)
-        if definition is None:
-            return None
-
-        policy = getattr(definition, "submission_policy", None)
-        if policy is not None and not isinstance(policy, WorkflowSubmissionPolicy):
-            raise TypeError(
-                f"Workflow definition '{id}' has an invalid submission policy."
-            )
-        return policy
-
 REGISTRY = WorkflowRegistry()
 
 def _is_workflow_definition(definition: object) -> bool:
@@ -1271,9 +1211,4 @@ def get_workflow(id: str) -> WorkflowNode | WorkflowSequenceNode | None:
     _ensure_registered()
     return REGISTRY.get(id)
 
-def get_workflow_submission_policy(id: str) -> WorkflowSubmissionPolicy | None:
-    """Return the declared resource metadata for a registered workflow, if any."""
-
-    _ensure_registered()
-    return REGISTRY.get_submission_policy(id)
 # endregion

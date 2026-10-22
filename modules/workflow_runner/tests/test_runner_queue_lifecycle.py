@@ -141,7 +141,7 @@ async def test_prepare_preserves_ordinary_extra_data_but_seals_lf_provenance(
 
     request = await executor.prepare_workflow_submission(
         payload,
-        (SimpleNamespace(submission_policy=None), prompt),
+        (SimpleNamespace(), prompt),
         owner_id="owner-extra",
     )
 

@@ -13,7 +13,6 @@ from modules.workflow_runner.services.registry import (
     WorkflowRegistry,
     WorkflowSequenceNode,
     WorkflowSequenceStage,
-    WorkflowSubmissionPolicy,
 )
 from modules.workflow_runner.workflows import _WorkflowDefinitionWithProvenance
 
@@ -197,7 +196,6 @@ def test_card_field_appends_to_every_existing_declaration_slot() -> None:
         "configure_prompt",
         "workflow_path",
         "category",
-        "submission_policy",
         "origin",
         "collection",
         "configure_download",
@@ -217,14 +215,13 @@ def test_card_field_appends_to_every_existing_declaration_slot() -> None:
         "collection",
         "card",
     ]
-    policy = WorkflowSubmissionPolicy("legacy", 1, 1)
     configure = lambda _prompt, _inputs: None
     block = WorkflowNode(
         "legacy", "Legacy", "Legacy description", (), (), configure,
-        Path("unused.json"), "Tests", policy, "custom", "Legacy collection",
+        Path("unused.json"), "Tests", "custom", "Legacy collection",
         configure, (), (),
     )
-    assert block.submission_policy is policy
+    assert block.origin == "custom"
     assert block.collection == "Legacy collection"
     assert block.configure_download is configure
     assert block.card is None
