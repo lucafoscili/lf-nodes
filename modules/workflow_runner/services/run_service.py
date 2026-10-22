@@ -5,13 +5,6 @@ from typing import Any, Coroutine, Dict, Mapping
 
 from server import PromptServer
 
-from .admission import (
-    AcquiredWorkflowAdmission,
-    WorkflowAdmissionOutcome,
-    WorkflowSubmissionRejectedBeforeQueue,
-    acquire_workflow_admission,
-    retain_workflow_admission,
-)
 from .job_store import (
     JobStatus,
     create_job,
@@ -94,19 +87,6 @@ def _emit_run_progress(prompt_id: str, message: str, **extra: Any) -> None:
         safe_send_sync("lf-runner:progress", payload, prompt_id)
     except Exception:
         LOG.exception("Failed to send progress event for prompt %s", prompt_id)
-
-
-async def _release_admission(
-    admission: AcquiredWorkflowAdmission,
-    outcome: WorkflowAdmissionOutcome,
-) -> None:
-    try:
-        await admission.release(outcome)
-    except BaseException:
-        LOG.exception(
-            "Workflow admission provider failed to release prompt %s",
-            outcome.prompt_id,
-        )
 
 
 async def _publish_proven_pending_cancellation(prompt_id: str) -> Dict[str, Any] | None:
@@ -440,20 +420,18 @@ async def _run_sequence_workflow(
     return _submission_response(lifecycle_snapshot, replayed=False)
 
 
-async def _finalize_admitted_workflow(
+async def _finalize_queued_workflow(
     *,
     prompt_id: str,
     client_id: str,
     comfy_url: str,
     validation: tuple[Any, ...],
-    admission: AcquiredWorkflowAdmission,
     submission_id: str | None = None,
     persist_job: bool = True,
 ) -> None:
-    """Finalize one prompt and release admission only after terminal proof."""
+    """Supervise one queued prompt and record its terminal state."""
 
     terminal_proven = False
-    outcome = WorkflowAdmissionOutcome(prompt_id, JobStatus.FAILED.value)
 
     try:
         final_status, response_body, http_status = await finalize_workflow(
@@ -468,7 +446,6 @@ async def _finalize_admitted_workflow(
         # A recorded cancellation request proves caller intent, while the
         # final status still comes from exact Core cancellation proof or exact
         # terminal history. Preserve a genuine failure/success race.
-        outcome = WorkflowAdmissionOutcome(prompt_id, final_status.value)
         job_result = {"http_status": http_status, "body": response_body}
         if persist_job:
             current_job = await get_job(prompt_id)
@@ -490,10 +467,9 @@ async def _finalize_admitted_workflow(
         if prompt_id in _PROVEN_PENDING_CANCELLATIONS:
             # The exact Core/fallback operation already proved this pending
             # prompt was dequeued and published its cancelled job/lifecycle
-            # state. Cancellation only wakes this supervisor so it can release
-            # admission authority; no history entry exists for a dequeue.
+            # state. Cancellation only wakes this supervisor; no history entry
+            # exists for a dequeue.
             terminal_proven = True
-            outcome = WorkflowAdmissionOutcome(prompt_id, JobStatus.CANCELLED.value)
             try:
                 # The endpoint normally publishes first, but the exact dequeue
                 # is already terminal authority. Retry both stores here so a
@@ -512,21 +488,15 @@ async def _finalize_admitted_workflow(
             )
             return
         # Cancellation of LF bookkeeping is not proof that ComfyUI stopped.
-        # Drain this exact prompt before releasing external admission authority.
+        # Drain this exact prompt before recording it as cancelled.
         try:
             await drain_workflow(prompt_id, comfy_url=comfy_url)
             terminal_proven = True
         except BaseException:
             LOG.exception(
-                "Could not prove terminal state for cancelled prompt %s; "
-                "admission will remain held",
+                "Could not prove terminal state for cancelled prompt %s",
                 prompt_id,
             )
-        outcome = WorkflowAdmissionOutcome(
-            prompt_id,
-            JobStatus.CANCELLED.value,
-            error=str(exc) or "cancelled",
-        )
         if terminal_proven and persist_job:
             await set_job_status(prompt_id, JobStatus.CANCELLED, error="cancelled")
         if terminal_proven:
@@ -541,15 +511,9 @@ async def _finalize_admitted_workflow(
                 terminal_proven = True
             except BaseException:
                 LOG.exception(
-                    "Could not prove terminal state for failed prompt %s; "
-                    "admission will remain held",
+                    "Could not prove terminal state for failed prompt %s",
                     prompt_id,
                 )
-        outcome = WorkflowAdmissionOutcome(
-            prompt_id,
-            JobStatus.FAILED.value,
-            error=str(exc),
-        )
         if terminal_proven and persist_job:
             error_payload = _make_run_payload(
                 detail=str(exc),
@@ -572,17 +536,6 @@ async def _finalize_admitted_workflow(
         _emit_run_progress(prompt_id, "workflow_failed", error=str(exc))
     finally:
         _PROVEN_PENDING_CANCELLATIONS.discard(prompt_id)
-        if terminal_proven:
-            await _release_admission(admission, outcome)
-        else:
-            retain_workflow_admission(
-                admission,
-                outcome.error or "exact terminal state was not proven",
-            )
-            LOG.critical(
-                "Admission retained for prompt %s because terminal state was not proven",
-                prompt_id,
-            )
 
 
 async def _finalize_after_registration_failure(
@@ -591,15 +544,13 @@ async def _finalize_after_registration_failure(
     client_id: str,
     comfy_url: str,
     validation: tuple[Any, ...],
-    admission: AcquiredWorkflowAdmission,
     submission_id: str | None = None,
 ) -> None:
-    await _finalize_admitted_workflow(
+    await _finalize_queued_workflow(
         prompt_id=prompt_id,
         client_id=client_id,
         comfy_url=comfy_url,
         validation=validation,
-        admission=admission,
         submission_id=submission_id,
         persist_job=False,
     )
@@ -616,7 +567,7 @@ async def run_workflow(
     *,
     _sequence_child: bool = False,
 ) -> Dict[str, Any]:
-    """Admit, queue, register, and supervise one workflow execution.
+    """Queue, register, and supervise one workflow execution.
 
     Browser and headless callers intentionally share this exact lifecycle.  The
     ``is_api_call`` parameter remains for API compatibility but no longer skips
@@ -692,40 +643,23 @@ async def run_workflow(
             prepared,
             owner_id=owner_id,
         )
-        admission = await acquire_workflow_admission(submission)
     except BaseException as exc:
         await record_prequeue_failure(submission_id, str(exc) or type(exc).__name__)
         raise
 
     try:
-        prompt_context = await admission.submit(post_workflow_submission)
-    except WorkflowSubmissionRejectedBeforeQueue as exc:
-        await record_prequeue_failure(submission_id, str(exc) or type(exc).__name__)
-        await _release_admission(
-            admission,
-            WorkflowAdmissionOutcome(
-                None,
-                "submission_rejected",
-                error=str(exc) or type(exc).__name__,
-            ),
-        )
-        raise
+        prompt_context = await post_workflow_submission(submission)
     except BaseException as exc:
-        # A timeout, disconnect, malformed success response, or provider error
-        # can occur after ComfyUI accepted a prompt.  With no canonical
-        # prompt_id LF cannot safely drain it, so preserve the lease for the
-        # admission provider to reconcile instead of guessing and releasing.
-        retain_workflow_admission(
-            admission,
-            exc,
-        )
+        # A timeout, disconnect or malformed success response can occur after
+        # ComfyUI accepted a prompt; without its prompt_id LF cannot supervise
+        # it, so the failure is recorded as ambiguous.
         await record_prequeue_failure(
             submission_id,
             str(exc) or type(exc).__name__,
             ambiguous=True,
         )
-        LOG.critical(
-            "Admission retained for client %s after ambiguous submission failure",
+        LOG.error(
+            "Submission for client %s failed; ComfyUI may still have queued it",
             submission.client_id,
             exc_info=True,
         )
@@ -741,13 +675,12 @@ async def run_workflow(
     except BaseException:
         # Submission has already crossed the queue boundary.  Even if LF's
         # process-local lifecycle index cannot bind it, supervise the exact
-        # prompt through terminal history before releasing admission.
+        # prompt through terminal history.
         worker = _finalize_after_registration_failure(
             prompt_id=prompt_id,
             client_id=client_id,
             comfy_url=comfy_url,
             validation=validation,
-            admission=admission,
         )
         if not _schedule_worker(worker, prompt_id):
             await _await_worker_inline(worker, prompt_id)
@@ -774,13 +707,12 @@ async def run_workflow(
         await create_job(prompt_id, workflow_id, **create_job_kwargs)
     except BaseException:
         # The prompt is already queued.  Even if LF cannot persist its job, keep
-        # supervising the exact prompt so admission is not released early.
+        # supervising the exact prompt through terminal history.
         worker = _finalize_after_registration_failure(
             prompt_id=prompt_id,
             client_id=client_id,
             comfy_url=comfy_url,
             validation=validation,
-            admission=admission,
             submission_id=submission_id,
         )
         if not _schedule_worker(worker, prompt_id):
@@ -790,17 +722,16 @@ async def run_workflow(
     LOG.debug("Created job %s and published pending event", prompt_id)
     _emit_run_progress(prompt_id, "workflow_received")
 
-    worker = _finalize_admitted_workflow(
+    worker = _finalize_queued_workflow(
         prompt_id=prompt_id,
         client_id=client_id,
         comfy_url=comfy_url,
         validation=validation,
-        admission=admission,
         submission_id=submission_id,
     )
     if not _schedule_worker(worker, prompt_id):
-        # A scheduler failure must not strand the prompt or release its lease.
-        # The HTTP request may block, but lifecycle integrity wins here.
+        # A scheduler failure must not strand the prompt. The HTTP request may
+        # block, but lifecycle integrity wins here.
         await _await_worker_inline(worker, prompt_id)
 
     lifecycle_snapshot = await get_submission(submission_id, include_events=False)

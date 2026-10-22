@@ -117,11 +117,11 @@ class WorkflowCardPresentation:
 
 @dataclass(frozen=True, slots=True)
 class WorkflowSubmissionPolicy:
-    """Trusted resource policy for one workflow's queue submission.
+    """Resource metadata a workflow definition may declare for its host.
 
-    Policies live on server-registered workflow definitions. They are not
-    serialized into the browser-facing workflow catalogue, so request inputs
-    cannot alter admission authority or resource estimates.
+    LF's Runner submits every workflow directly and does not act on this
+    policy; the type stays so existing definitions keep constructing. It is
+    never serialized into the browser-facing workflow catalogue.
     """
 
     provider_id: str
@@ -1272,7 +1272,7 @@ def get_workflow(id: str) -> WorkflowNode | WorkflowSequenceNode | None:
     return REGISTRY.get(id)
 
 def get_workflow_submission_policy(id: str) -> WorkflowSubmissionPolicy | None:
-    """Return trusted admission metadata for a registered workflow, if any."""
+    """Return the declared resource metadata for a registered workflow, if any."""
 
     _ensure_registered()
     return REGISTRY.get_submission_policy(id)

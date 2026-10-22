@@ -12,10 +12,6 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from modules.workflow_runner.services import job_store, lifecycle
-from modules.workflow_runner.services.admission import (
-    WorkflowPromptContext,
-    WorkflowSubmissionRequest,
-)
 
 
 pytestmark = pytest.mark.anyio
@@ -77,9 +73,9 @@ def run_service_module():
             sys.modules.pop(module_name, None)
 
 
-def _submission() -> WorkflowSubmissionRequest:
+def _submission() -> SimpleNamespace:
     prompt = {"1": {"class_type": "Example"}}
-    return WorkflowSubmissionRequest(
+    return SimpleNamespace(
         workflow_id="remove_bg",
         owner_id=None,
         client_id="client-1",
@@ -184,7 +180,7 @@ async def test_external_call_cannot_claim_private_sequence_child_namespace(
 async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_module):
     run_service = run_service_module
     request = _submission()
-    context = WorkflowPromptContext(
+    context = SimpleNamespace(
         prompt_id="prompt-1",
         client_id=request.client_id,
         comfy_url=request.comfy_url,
@@ -192,7 +188,7 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
         validation=request.validation,
         workflow_id=request.workflow_id,
     )
-    admission = SimpleNamespace(submit=AsyncMock(return_value=context))
+    post = AsyncMock(return_value=context)
 
     def close_worker(worker, _prompt_id):
         worker.close()
@@ -215,8 +211,8 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
         new=AsyncMock(return_value=request),
     ), patch.object(
         run_service,
-        "acquire_workflow_admission",
-        new=AsyncMock(return_value=admission),
+        "post_workflow_submission",
+        new=post,
     ), patch.object(
         run_service,
         "create_job",
@@ -235,7 +231,7 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
     assert replay["run_id"] == "prompt-1"
     assert replay["idempotent_replay"] is True
     prepare.assert_called_once_with(payload)
-    admission.submit.assert_awaited_once()
+    post.assert_awaited_once()
     assert create_job.await_args.kwargs["submission_id"] == payload["submissionId"]
     assert create_job.await_args.kwargs["request_fingerprint"] == (
         lifecycle._fingerprint_payload(payload)
@@ -248,7 +244,7 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
 ):
     run_service = run_service_module
     request = _submission()
-    context = WorkflowPromptContext(
+    context = SimpleNamespace(
         prompt_id="prompt-replay",
         client_id=request.client_id,
         comfy_url=request.comfy_url,
@@ -256,7 +252,7 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
         validation=request.validation,
         workflow_id=request.workflow_id,
     )
-    admission = SimpleNamespace(submit=AsyncMock(return_value=context))
+    post = AsyncMock(return_value=context)
     payload = {
         "workflowId": "remove_bg",
         "submissionId": "example:remove-bg:mutable-001",
@@ -278,8 +274,8 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
         new=AsyncMock(return_value=request),
     ), patch.object(
         run_service,
-        "acquire_workflow_admission",
-        new=AsyncMock(return_value=admission),
+        "post_workflow_submission",
+        new=post,
     ), patch.object(
         run_service,
         "create_job",
@@ -293,7 +289,7 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
     assert replay["run_id"] == "prompt-replay"
     assert replay["idempotent_replay"] is True
     prepare.assert_called_once_with(payload)
-    admission.submit.assert_awaited_once()
+    post.assert_awaited_once()
 
 
 async def test_sequence_parent_uses_stable_replay_and_exact_cancel_seam(
@@ -529,7 +525,7 @@ async def test_stable_replay_does_not_revalidate_an_expired_upload_reference(
 ):
     run_service = run_service_module
     request = _submission()
-    context = WorkflowPromptContext(
+    context = SimpleNamespace(
         prompt_id="prompt-upload-replay",
         client_id=request.client_id,
         comfy_url=request.comfy_url,
@@ -537,7 +533,7 @@ async def test_stable_replay_does_not_revalidate_an_expired_upload_reference(
         validation=request.validation,
         workflow_id=request.workflow_id,
     )
-    admission = SimpleNamespace(submit=AsyncMock(return_value=context))
+    post = AsyncMock(return_value=context)
     payload = {
         "workflowId": "remove_bg",
         "submissionId": "example:remove-bg:upload-001",
@@ -574,8 +570,8 @@ async def test_stable_replay_does_not_revalidate_an_expired_upload_reference(
         new=AsyncMock(return_value=request),
     ), patch.object(
         run_service,
-        "acquire_workflow_admission",
-        new=AsyncMock(return_value=admission),
+        "post_workflow_submission",
+        new=post,
     ), patch.object(
         run_service,
         "create_job",
@@ -590,13 +586,13 @@ async def test_stable_replay_does_not_revalidate_an_expired_upload_reference(
     assert replay["idempotent_replay"] is True
     materialize.assert_awaited_once_with(payload, None)
     prepare.assert_called_once_with(effective_payload)
-    admission.submit.assert_awaited_once()
+    post.assert_awaited_once()
 
 
 async def test_bind_failure_still_schedules_terminal_supervision(run_service_module):
     run_service = run_service_module
     request = _submission()
-    context = WorkflowPromptContext(
+    context = SimpleNamespace(
         prompt_id="prompt-bind-failure",
         client_id=request.client_id,
         comfy_url=request.comfy_url,
@@ -604,7 +600,7 @@ async def test_bind_failure_still_schedules_terminal_supervision(run_service_mod
         validation=request.validation,
         workflow_id=request.workflow_id,
     )
-    admission = SimpleNamespace(submit=AsyncMock(return_value=context))
+    post = AsyncMock(return_value=context)
     scheduled = []
 
     def close_worker(worker, prompt_id):
@@ -622,8 +618,8 @@ async def test_bind_failure_still_schedules_terminal_supervision(run_service_mod
         new=AsyncMock(return_value=request),
     ), patch.object(
         run_service,
-        "acquire_workflow_admission",
-        new=AsyncMock(return_value=admission),
+        "post_workflow_submission",
+        new=post,
     ), patch.object(
         run_service,
         "bind_prompt",
@@ -918,7 +914,6 @@ async def test_pending_cancel_wakes_supervisor_when_status_publish_fails(
         started.set()
         await asyncio.Event().wait()
 
-    admission = SimpleNamespace(release=AsyncMock())
     real_cas_status = run_service.set_job_status_if_unchanged
     publish_calls = 0
 
@@ -943,12 +938,11 @@ async def test_pending_cancel_wakes_supervisor_when_status_publish_fails(
         new=AsyncMock(side_effect=fail_first_publish),
     ):
         supervisor = asyncio.create_task(
-            run_service._finalize_admitted_workflow(
+            run_service._finalize_queued_workflow(
                 prompt_id=prompt_id,
                 client_id="client-1",
                 comfy_url="http://comfy:8188",
                 validation=(True, "", [], []),
-                admission=admission,
                 submission_id="example:pending-write-failure:001",
             )
         )
@@ -969,7 +963,6 @@ async def test_pending_cancel_wakes_supervisor_when_status_publish_fails(
     job = await job_store.get_job(prompt_id)
     assert snapshot is not None and snapshot["status"] == "cancelled"
     assert job is not None and job.status == job_store.JobStatus.CANCELLED
-    assert admission.release.await_args.args[0].status == "cancelled"
 
 
 async def test_terminal_cancel_race_is_idempotent_without_relabelling_intent(run_service_module):
@@ -1015,7 +1008,6 @@ async def test_cancel_request_does_not_relabel_proven_failure(run_service_module
     await lifecycle.record_running("prompt-cancel-race")
     await lifecycle.record_cancel_requested("example:cancel-race:001")
 
-    admission = SimpleNamespace(release=AsyncMock())
     with patch.object(
         run_service,
         "finalize_workflow",
@@ -1034,12 +1026,11 @@ async def test_cancel_request_does_not_relabel_proven_failure(run_service_module
         run_service,
         "_emit_run_progress",
     ):
-        await run_service._finalize_admitted_workflow(
+        await run_service._finalize_queued_workflow(
             prompt_id="prompt-cancel-race",
             client_id="client-1",
             comfy_url="http://comfy:8188",
             validation=(True, "", [], []),
-            admission=admission,
             submission_id="example:cancel-race:001",
         )
 
@@ -1051,4 +1042,3 @@ async def test_cancel_request_does_not_relabel_proven_failure(run_service_module
     )
     assert snapshot is not None
     assert snapshot["status"] == "failed"
-    assert admission.release.await_args.args[0].status == "failed"

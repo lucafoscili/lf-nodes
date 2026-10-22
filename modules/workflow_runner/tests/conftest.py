@@ -25,13 +25,8 @@ for import_root in (comfy_root, pkg_root):
 def fast_mode_env(monkeypatch):
 	"""Enable fast-mode for executor polling to keep tests snappy/deterministic."""
 	monkeypatch.setenv("LF_RUNNER_TEST_FAST", "1")
-	# Unit tests install synthetic providers explicitly when they exercise the
-	# admission ABI. Never make the host's production provider selection (or an
-	# installed private wheel) a prerequisite for the generic test suite.
-	monkeypatch.setenv("WORKFLOW_RUNNER_SUBMISSION_PROVIDER", "lf-default")
 	yield
 	monkeypatch.delenv("LF_RUNNER_TEST_FAST", raising=False)
-	monkeypatch.delenv("WORKFLOW_RUNNER_SUBMISSION_PROVIDER", raising=False)
 
 
 @pytest.fixture(autouse=True)

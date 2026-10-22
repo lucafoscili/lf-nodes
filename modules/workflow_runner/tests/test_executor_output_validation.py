@@ -33,12 +33,10 @@ def validation_boundary(monkeypatch: pytest.MonkeyPatch) -> SimpleNamespace:
         lambda: SimpleNamespace(COMFY_BACKEND_URL="http://127.0.0.1:8188"),
     )
     validate = AsyncMock()
-    acquire = AsyncMock(side_effect=AssertionError("must reject before admission"))
     post = AsyncMock(side_effect=AssertionError("must reject before queueing"))
     monkeypatch.setattr(executor.execution, "validate_prompt", validate)
-    monkeypatch.setattr(executor, "acquire_default_workflow_admission", acquire)
     monkeypatch.setattr(executor, "post_workflow_submission", post)
-    return SimpleNamespace(validate=validate, acquire=acquire, post=post)
+    return SimpleNamespace(validate=validate, post=post)
 
 
 def _definition(*, optional: bool = False) -> SimpleNamespace:
@@ -82,7 +80,7 @@ def test_all_required_outputs_allow_submission(validation_boundary, validated):
     )
 
     assert request.prompt == prompt
-    assert request.validation == (True, None, validated, {})
+    assert request.validation == validation
     validation_boundary.validate.assert_awaited_once()
 
 
@@ -108,7 +106,7 @@ def test_validated_output_root_covers_required_upstream_result(validation_bounda
     )
 
     assert set(request.prompt) == {"20", "61"}
-    assert request.validation[2] == ("61",)
+    assert request.validation[2] == ["61"]
 
 
 def test_validated_output_root_does_not_cover_disconnected_result(validation_boundary):
@@ -157,7 +155,6 @@ def test_partial_or_empty_acceptance_fails_before_queue(
     assert payload["error"]["message"] == "validation_failed"
     assert payload["detail"] == f"Required workflow outputs failed validation: {missing}."
     assert payload["history"] == {"outputs": {}, "node_errors": node_errors}
-    validation_boundary.acquire.assert_not_awaited()
     validation_boundary.post.assert_not_awaited()
 
 
@@ -176,15 +173,10 @@ def test_unrelated_or_optional_output_errors_do_not_block(
         )
     )
 
-    assert request.validation[:3] == (True, None, tuple(validated))
-    retained_error = request.validation[3]["source"]
-    assert retained_error["errors"][0] == node_errors["source"]["errors"][0]
-    assert retained_error["dependent_outputs"] == tuple(
-        node_errors["source"]["dependent_outputs"]
-    )
+    assert request.validation == validation
 
 
-def test_legacy_definition_without_outputs_keeps_existing_admission(validation_boundary):
+def test_legacy_definition_without_outputs_is_still_prepared(validation_boundary):
     validation_boundary.validate.return_value = (True, None, [], {})
 
     request = asyncio.run(
@@ -193,7 +185,7 @@ def test_legacy_definition_without_outputs_keeps_existing_admission(validation_b
         )
     )
 
-    assert request.validation == (True, None, (), {})
+    assert request.validation == (True, None, [], {})
 
 
 def test_core_rejection_preserves_its_original_error(validation_boundary):
@@ -224,5 +216,4 @@ def test_validation_crash_cannot_bypass_required_output_coverage(validation_boun
         )
 
     assert error.value.response_body["payload"]["error"]["message"] == "validation_failed"
-    validation_boundary.acquire.assert_not_awaited()
     validation_boundary.post.assert_not_awaited()

@@ -262,7 +262,7 @@ warning cards remain runnable.
 ### Run control and output handoff
 
 Each Run click owns a stable client-generated submission ID. The floating Run
-button locks while admission is ambiguous, then becomes an elapsed Stop control
+button locks while submission is ambiguous, then becomes an elapsed Stop control
 for that exact pending or running job. Cancellation is owner-bound and targets
 only the corresponding Comfy prompt; terminal races retain their real outcome.
 
@@ -270,9 +270,8 @@ Durable replay and Stop authority begin once the accepted Comfy prompt is bound
 to its SQLite job row. One narrow host-crash window remains: if the Runner
 process dies after Core accepts the prompt but before that row commits, a retry
 after restart cannot recover the original stable ID and may submit the work
-again. Closing that window requires a pre-queue durable reservation plus a
-preassigned Core prompt UUID across every admission provider; the current
-provider ABI deliberately does not claim that guarantee.
+again. Closing that window would need a pre-queue durable reservation plus a
+preassigned Core prompt UUID; Runner does not claim that guarantee.
 
 A succeeded Runner-owned run may expose bounded `lf.workflow-artifact.v1`
 descriptors in its detail response. **Use in…** offers available artifacts only
@@ -377,7 +376,6 @@ modules/workflow_runner/
 ├── services/                # Business logic
 │   ├── __init__.py
 │   ├── auth_service.py      # Authentication & authorization
-│   ├── admission.py         # Submission provider admission
 │   ├── definition_inputs.py # Workflow input definitions
 │   ├── run_service.py       # Workflow execution orchestration
 │   ├── job_service.py       # Job status tracking

@@ -47,7 +47,7 @@ def _install_host_stubs() -> None:
     nodes.__lf_nodes_test_stub__ = True
     sys.modules["nodes"] = nodes
 
-    # Runner admission tests import this host boundary at collection time too.
+    # Runner submission tests import this host boundary at collection time too.
     # Never import Core's GPU execution stack or silently pretend validation ran.
     execution = types.ModuleType("execution")
     execution.__lf_nodes_test_stub__ = True

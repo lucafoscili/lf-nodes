@@ -95,7 +95,7 @@ class TestRunServicePropagation:
     async def test_run_workflow_passes_owner_id_to_create_job(self):
         """run_workflow should pass owner_id to create_job"""
         from modules.workflow_runner.services.run_service import run_workflow
-        from modules.workflow_runner.services.admission import (
+        from modules.workflow_runner.services.executor import (
             WorkflowPromptContext,
             WorkflowSubmissionRequest,
         )
@@ -180,7 +180,7 @@ class TestRunServicePropagation:
     async def test_run_workflow_without_owner_id(self):
         """run_workflow should pass None owner_id when not provided"""
         from modules.workflow_runner.services.run_service import run_workflow
-        from modules.workflow_runner.services.admission import (
+        from modules.workflow_runner.services.executor import (
             WorkflowPromptContext,
             WorkflowSubmissionRequest,
         )

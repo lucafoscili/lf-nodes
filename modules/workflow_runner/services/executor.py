@@ -8,26 +8,17 @@ import time
 import uuid
 import os
 import sys
+from dataclasses import dataclass
 from urllib.parse import quote
 
 from typing import Any, Dict, Mapping, Tuple
 
-from .admission import (
-    WorkflowAdmissionOutcome,
-    WorkflowPromptContext,
-    WorkflowSubmissionRejectedBeforeQueue,
-    WorkflowSubmissionRequest,
-    acquire_default_workflow_admission,
-    acquire_workflow_admission,
-    retain_workflow_admission,
-)
 from .job_store import JobStatus, set_job_status
 from .registry import (
     InputValidationError,
     WorkflowNode,
     WorkflowSequenceNode,
     get_workflow,
-    get_workflow_submission_policy,
 )
 from .readiness import (
     READINESS_SETUP_REQUIRED,
@@ -49,6 +40,44 @@ class WorkflowPreparationError(Exception):
         super().__init__(response_body.get("detail") or "Workflow preparation failed.")
         self.response_body = response_body
         self.status = status
+
+
+@dataclass(frozen=True, slots=True)
+class WorkflowSubmissionRequest:
+    """One prepared ComfyUI queue envelope, serialized once."""
+
+    workflow_id: str | None
+    owner_id: str | None
+    client_id: str
+    comfy_url: str
+    prompt: Mapping[str, Any]
+    validation: tuple[Any, ...]
+    queue_body: Mapping[str, Any]
+    queue_body_json: str
+
+
+@dataclass(frozen=True, slots=True)
+class WorkflowPromptContext:
+    """The queued prompt returned by ComfyUI for one submission."""
+
+    prompt_id: str
+    client_id: str
+    comfy_url: str
+    prompt: Mapping[str, Any]
+    validation: tuple[Any, ...]
+    workflow_id: str | None
+
+    def as_legacy_tuple(
+        self,
+    ) -> tuple[str, str, str, Mapping[str, Any], tuple[Any, ...], str | None]:
+        return (
+            self.prompt_id,
+            self.client_id,
+            self.comfy_url,
+            self.prompt,
+            self.validation,
+            self.workflow_id,
+        )
 
 
 # endregion
@@ -468,9 +497,8 @@ async def drain_workflow(
     """Wait read-only for one exact prompt to reach a terminal history state.
 
     Draining deliberately has no execution timeout.  It is used after a caller
-    budget expires (or while unwinding an admitted lifecycle) so external
-    admission authority is not released while the prompt can still consume the
-    shared resource.
+    budget expires (or while unwinding a failed supervisor) so a run is not
+    recorded as terminal while its prompt can still execute.
     """
 
     return await _wait_for_completion(
@@ -853,26 +881,6 @@ async def prepare_workflow_submission(
         )
         raise WorkflowPreparationError(response, 400)
 
-    # A prepared definition has already crossed the trusted registry boundary.
-    # Read its policy directly so legacy blocking callers do not trigger a
-    # second, registry-wide import during submission.
-    policy = (
-        getattr(definition, "submission_policy", None)
-        if prepared is not None
-        else get_workflow_submission_policy(workflow_id or "")
-    )
-    admission_metadata: Dict[str, Any] = {}
-    required_provider_id = None
-    if policy is not None:
-        admission_metadata = {
-            "provider_id": policy.provider_id,
-            "expected_vram_mb": policy.expected_vram_mb,
-            "max_duration_seconds": policy.max_duration_seconds,
-            "required": policy.required,
-        }
-        if policy.required:
-            required_provider_id = policy.provider_id
-
     raw_extra_data = payload.get("extraData", {})
     if raw_extra_data is None:
         raw_extra_data = {}
@@ -882,32 +890,12 @@ async def prepare_workflow_submission(
             error_message="invalid_extra_data",
         )
         raise WorkflowPreparationError(response, 400)
-    if required_provider_id is not None and raw_extra_data:
-        # The guarded provider deliberately owns a narrower prompt+client_id
-        # transport.  Reject caller extras before admission rather than
-        # silently dropping them or retaining a lease for a known pre-queue
-        # incompatibility.
-        response = _make_run_payload(
-            detail="guarded workflows do not accept caller-provided extraData",
-            error_message="invalid_extra_data",
-        )
-        raise WorkflowPreparationError(response, 400)
 
-    if required_provider_id is not None:
-        # The guarded transport seals and posts this exact narrow envelope.
-        # Workflow identity remains trusted server-side request metadata; it is
-        # intentionally not placed in a field the guarded client would omit.
-        body = {"prompt": prompt, "client_id": client_id}
-    else:
-        # Caller metadata remains available for ordinary workflows, but trusted
-        # LF provenance is written last so it cannot be replaced by the request.
-        extra_data = dict(raw_extra_data)
-        extra_data["lf_nodes"] = {"workflow_id": workflow_id}
-        body = {"prompt": prompt, "client_id": client_id, "extra_data": extra_data}
-
-    # Serialize once.  Admission providers see this exact envelope and the
-    # default LF transport submits these same bytes, preserving extra_data.
-    body_json = json.dumps(body)
+    # Caller metadata stays available, but trusted LF provenance is written
+    # last so the request cannot replace it.
+    extra_data = dict(raw_extra_data)
+    extra_data["lf_nodes"] = {"workflow_id": workflow_id}
+    body = {"prompt": prompt, "client_id": client_id, "extra_data": extra_data}
     return WorkflowSubmissionRequest(
         workflow_id=workflow_id,
         owner_id=owner_id,
@@ -916,16 +904,14 @@ async def prepare_workflow_submission(
         prompt=prompt,
         validation=tuple(validation),
         queue_body=body,
-        queue_body_json=body_json,
-        required_provider_id=required_provider_id,
-        admission_metadata=admission_metadata,
+        queue_body_json=json.dumps(body),
     )
 
 
 async def post_workflow_submission(
     request: WorkflowSubmissionRequest,
 ) -> WorkflowPromptContext:
-    """Default LF transport for one already-admitted exact queue envelope."""
+    """Post one prepared queue envelope to ComfyUI's ``/prompt``."""
 
     async with aiohttp.ClientSession() as session:
         try:
@@ -972,27 +958,14 @@ async def post_workflow_submission(
 async def submit_workflow(
     payload: Dict[str, Any], prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None
 ) -> Tuple[str, str, str, Mapping[str, Any], Tuple[Any, ...], str | None]:
-    """Compatibility helper using LF's default direct submission transport.
+    """Prepare and queue one workflow, returning the legacy context tuple.
 
-    Full Workflow Runner API executions use the admission-owned queue boundary
-    in :mod:`run_service`.  This helper remains for legacy blocking callers and
-    tests which explicitly request the default transport.
+    Full Workflow Runner API executions go through :mod:`run_service`, which
+    also records and supervises the run.
     """
 
     request = await prepare_workflow_submission(payload, prepared)
-    admission = await acquire_default_workflow_admission(request)
-    try:
-        context = await admission.submit(post_workflow_submission)
-    except BaseException as exc:
-        await admission.release(
-            WorkflowAdmissionOutcome(
-                None,
-                "submission_failed",
-                error=str(exc) or type(exc).__name__,
-            )
-        )
-        raise
-    await admission.release(WorkflowAdmissionOutcome(context.prompt_id, "submitted"))
+    context = await post_workflow_submission(request)
     return context.as_legacy_tuple()
 
 async def finalize_workflow(
@@ -1119,61 +1092,20 @@ async def execute_workflow(
     payload: Dict[str, Any],
     prepared: Tuple[WorkflowNode | WorkflowSequenceNode, Dict[str, Any]] | None = None,
 ) -> Tuple[str, JobStatus, Dict[str, Any], int]:
-    """Blocking admitted execution wrapper preserving the legacy return tuple."""
+    """Blocking execution wrapper preserving the legacy return tuple."""
 
     try:
         request = await prepare_workflow_submission(payload, prepared)
+        context = await post_workflow_submission(request)
     except WorkflowPreparationError as exc:
         return "", JobStatus.FAILED, exc.response_body, exc.status
 
-    admission = await acquire_workflow_admission(request)
-    try:
-        context = await admission.submit(post_workflow_submission)
-    except WorkflowSubmissionRejectedBeforeQueue as exc:
-        await admission.release(
-            WorkflowAdmissionOutcome(None, "submission_rejected", error=str(exc))
-        )
-        if isinstance(exc, WorkflowPreparationError):
-            return "", JobStatus.FAILED, exc.response_body, exc.status
-        raise
-    except WorkflowPreparationError as exc:
-        retain_workflow_admission(admission, exc)
-        return "", JobStatus.FAILED, exc.response_body, exc.status
-    except BaseException as exc:
-        retain_workflow_admission(admission, exc)
-        raise
-
-    try:
-        status, response, http_status = await finalize_workflow(
-            context.prompt_id,
-            context.client_id,
-            context.comfy_url,
-            context.validation,
-        )
-    except BaseException as exc:
-        try:
-            await drain_workflow(context.prompt_id, comfy_url=context.comfy_url)
-        except BaseException as drain_exc:
-            retain_workflow_admission(admission, drain_exc)
-            logging.critical(
-                "Admission retained for prompt %s because terminal state was not proven",
-                context.prompt_id,
-                exc_info=True,
-            )
-            raise
-        await admission.release(
-            WorkflowAdmissionOutcome(
-                context.prompt_id,
-                JobStatus.FAILED.value,
-                error=str(exc) or type(exc).__name__,
-            )
-        )
-        raise
-
-    await admission.release(
-        WorkflowAdmissionOutcome(context.prompt_id, status.value)
+    status, response, http_status = await finalize_workflow(
+        context.prompt_id,
+        context.client_id,
+        context.comfy_url,
+        context.validation,
     )
-
     return context.prompt_id, status, response, http_status
 # endregion
 
@@ -1194,4 +1126,6 @@ __all__ = [
     "_monitor_until_running",
     "interrupt_workflow",
     "WorkflowPreparationError",
+    "WorkflowPromptContext",
+    "WorkflowSubmissionRequest",
 ]
