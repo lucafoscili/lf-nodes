@@ -30,3 +30,15 @@ reordered.
 LF Nodes requires Pillow 12.2.0 or newer instead of exactly 12.2.0. Save DDS
 records the running Pillow version in each receipt instead of refusing other
 versions.
+
+## Workflow Runner
+
+- **`WorkflowSubmissionPolicy` removed.** The class, the `WorkflowNode`
+  `submission_policy` field, `WorkflowRegistry.get_submission_policy` and
+  `get_workflow_submission_policy` are gone; the Runner never acted on them.
+  Workflow definitions in external workflow roots that pass
+  `submission_policy=` now raise `TypeError`; drop the argument.
+- **Krea 2 VAE choice.** Generate, Style Reference, Style Blend and Identity
+  Edit gain a VAE control. The official Qwen Image VAE is the first choice and
+  the default; the other files in ComfyUI's `vae` folder follow, read once when
+  the catalogue loads.
