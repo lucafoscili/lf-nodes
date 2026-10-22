@@ -35,7 +35,7 @@ class LF_RegionColorStats:
     RETURN_NAMES = ("stats", "overlay", "overlay_list")
     OUTPUT_IS_LIST = (False, False, True)
     OUTPUT_TOOLTIPS = (
-        "lf.region-color-stats.v1: full-region Lab mean/median, B-A deltas, matched CIEDE2000 and banding heuristic.",
+        "lf.region-color-stats.v1: full-region Lab mean/median/std, B-A deltas, matched CIEDE2000, banding and row-profile heuristics.",
         "A and B with exact region outlines, side by side at their original shared resolution.",
         "Single-item list containing the side-by-side diagnostic image.",
     )

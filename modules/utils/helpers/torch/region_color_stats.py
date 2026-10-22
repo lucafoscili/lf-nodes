@@ -107,13 +107,47 @@ def luminance_banding(luminance: torch.Tensor, mask: torch.Tensor) -> dict:
     return result
 
 
+ROW_PROFILE_WINDOW_ROWS = 5
+ROW_PROFILE_MINIMUM_ROW_PIXELS = 40
+
+
+def luminance_row_profile(luminance: torch.Tensor, mask: torch.Tensor) -> dict:
+    """The largest step in mean L* going down a region, a diagnostic for soft seams.
+
+    Every mask row with at least ROW_PROFILE_MINIMUM_ROW_PIXELS pixels gives its
+    mean L*; those rows, top first, are averaged in non-overlapping windows of
+    ROW_PROFILE_WINDOW_ROWS (a partial last window is dropped), and the step is
+    the difference between adjacent windows (lower minus upper) with the largest
+    magnitude. A band that a region mean cancels shows here; shading and texture
+    give steps too, so judge it against a reference render, not alone.
+    """
+    counts = mask.sum(1)
+    sums = torch.where(mask, luminance, torch.zeros_like(luminance)).sum(1)
+    rows = torch.nonzero(counts >= ROW_PROFILE_MINIMUM_ROW_PIXELS).flatten()
+    result = {"heuristic": True, "rows": int(rows.numel()), "max_step_l": None, "step_row": None,
+              "reason": "Fewer than two full windows of qualifying rows."}
+    windows = int(rows.numel()) // ROW_PROFILE_WINDOW_ROWS
+    if windows < 2:
+        return result
+    rows = rows[:windows * ROW_PROFILE_WINDOW_ROWS]
+    means = (sums[rows] / counts[rows]).view(windows, ROW_PROFILE_WINDOW_ROWS).mean(1)
+    steps = means[1:] - means[:-1]
+    index = int(steps.abs().argmax())
+    result.update(max_step_l=float(steps[index]),
+                  step_row=int(rows[(index + 1) * ROW_PROFILE_WINDOW_ROWS]),
+                  reason="Largest adjacent-window step in row-mean L*.")
+    return result
+
+
 def _region_measurement(lab: torch.Tensor, mask: torch.Tensor) -> dict:
     area = int(mask.sum())
     pixels = lab[mask]
     return {"area": area, "area_fraction": area / mask.numel(), "empty": area == 0,
             "lab_mean": pixels.mean(0).tolist() if area else None,
             "lab_median": torch.quantile(pixels, 0.5, dim=0).tolist() if area else None,
-            "banding": luminance_banding(lab[..., 0], mask)}
+            "lab_std": pixels.std(0, correction=0).tolist() if area else None,
+            "banding": luminance_banding(lab[..., 0], mask),
+            "row_profile": luminance_row_profile(lab[..., 0], mask)}
 
 
 def region_color_measurements(image_a, image_b, mask_sets, document) -> dict:
@@ -156,7 +190,7 @@ def region_color_measurements(image_a, image_b, mask_sets, document) -> dict:
             "color_space": "CIE Lab, D65 2-degree white, decoded sRGB; alpha ignored",
             "lab_channels": ["L*", "a*", "b*"], "mask_membership": "value > 0.5",
             "mask_mode": "shared" if len(mask_sets) == 1 else "per_image",
-            "lab_summary_method": "All pixels in each image's own mask; componentwise arithmetic mean and linear-interpolated median",
+            "lab_summary_method": "All pixels in each image's own mask; componentwise arithmetic mean, linear-interpolated median and population standard deviation",
             "delta_direction": "B minus A",
             "ciede2000_method": {"matching": "same-coordinate mask intersection; registered images required",
                                  "sampling": "row-major, at most 65536 evenly spaced indices floor(i*N/65536); all when smaller",
@@ -167,6 +201,11 @@ def region_color_measurements(image_a, image_b, mask_sets, document) -> dict:
                                "minimum_range_l": 4, "maximum_neighbor_p90_l": 4,
                                "maximum_neighbor_mean_l": 2, "bins": 64,
                                "minimum_empty_fraction": 0.35, "minimum_plateau_fraction": 0.5,
-                               "plateau_delta_l": 0.05}, "regions": rows}
+                               "plateau_delta_l": 0.05},
+            "row_profile_method": {"warning": "Heuristic only; shading and texture also give steps. Compare with a reference render.",
+                                   "minimum_row_pixels": ROW_PROFILE_MINIMUM_ROW_PIXELS,
+                                   "window_rows": ROW_PROFILE_WINDOW_ROWS,
+                                   "step": "lower window minus upper window, largest magnitude; step_row is the lower window's first row"},
+            "regions": rows}
 
 

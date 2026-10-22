@@ -10,7 +10,7 @@ import torch
 
 from modules.nodes.analytics import region_color_stats as node_module
 from modules.utils.helpers.torch.region_color_stats import (
-    ciede2000, luminance_banding, srgb_to_lab,
+    ciede2000, luminance_banding, luminance_row_profile, srgb_to_lab,
 )
 from modules.utils.helpers.ui import generated_preview
 
@@ -126,6 +126,42 @@ def test_quantized_gradient_flags_banding_while_smooth_gradient_does_not():
     checker = (torch.arange(24)[:, None] + torch.arange(512)[None, :]) % 2 * 80.0
     texture = luminance_banding(checker.double(), torch.ones(24, 512, dtype=torch.bool))
     assert not texture["eligible"] and not texture["suspected"]
+
+
+def test_row_profile_finds_a_band_that_the_region_mean_cancels():
+    # A smooth downward gradient against the same rows stepping up at row 20, with the rows above darkened
+    # so the region's mean does not move.
+    rows = torch.linspace(40, 44, 60, dtype=torch.float64)[:, None].expand(60, 90).clone()
+    banded = rows.clone()
+    banded[20:] += 1
+    banded[:20] -= 2
+    mask = torch.ones(60, 90, dtype=torch.bool)
+    smooth, band = luminance_row_profile(rows, mask), luminance_row_profile(banded, mask)
+    assert abs(float(banded.mean() - rows.mean())) < 0.01
+    assert abs(smooth["max_step_l"]) < 0.5
+    assert band["max_step_l"] > 0.5 and band["step_row"] == 20
+    assert band["rows"] == smooth["rows"] == 60
+
+
+def test_row_profile_skips_narrow_rows_and_needs_two_windows():
+    luminance = torch.full((12, 50), 50.0, dtype=torch.float64)
+    mask = torch.zeros(12, 50, dtype=torch.bool)
+    mask[:9, :] = True
+    mask[9:, :39] = True  # rows under ROW_PROFILE_MINIMUM_ROW_PIXELS do not count
+    profile = luminance_row_profile(luminance, mask)
+    assert profile["rows"] == 9 and profile["max_step_l"] is None and profile["step_row"] is None
+    mask[:10, :] = True
+    profile = luminance_row_profile(luminance, mask)
+    assert profile["rows"] == 10 and profile["max_step_l"] == 0.0
+
+
+def test_region_rows_report_standard_deviation_and_row_profile():
+    a = torch.full((1, 60, 48, 3), 0.4)
+    row = _measure(a, a.clone(), torch.ones(1, 60, 48))["result"][0]["regions"][0]
+    assert row["a"]["lab_std"] == pytest.approx([0.0, 0.0, 0.0], abs=1e-9)
+    assert row["a"]["row_profile"]["max_step_l"] == pytest.approx(0.0, abs=1e-9)
+    stats = _measure(a, a.clone(), torch.ones(1, 60, 48))["result"][0]
+    assert stats["row_profile_method"]["window_rows"] == 5
 
 
 @pytest.mark.parametrize("a,b,match", [
