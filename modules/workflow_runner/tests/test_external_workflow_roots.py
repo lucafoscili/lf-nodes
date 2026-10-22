@@ -75,7 +75,7 @@ def test_root_groups_stay_aligned_when_an_earlier_root_is_invalid(tmp_path) -> N
 
 def test_nested_module_uses_the_most_specific_configured_collection(tmp_path) -> None:
     parent = tmp_path / "workflows"
-    nested = parent / "velora"
+    nested = parent / "studio"
     nested.mkdir(parents=True)
     module_file = nested / "portrait.py"
     module_file.write_text("WORKFLOW = None\n", encoding="utf-8")
@@ -84,10 +84,10 @@ def test_nested_module_uses_the_most_specific_configured_collection(tmp_path) ->
     collection = workflows._module_collection(
         module,  # type: ignore[arg-type]
         (parent.resolve(), nested.resolve()),
-        ("Garage", "Velora"),
+        ("Lab", "Studio"),
     )
 
-    assert collection == "Velora"
+    assert collection == "Studio"
 
 
 def test_external_module_uses_existing_custom_package_contract(tmp_path) -> None:

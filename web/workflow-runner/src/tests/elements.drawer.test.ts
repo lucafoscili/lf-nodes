@@ -413,7 +413,7 @@ describe('Drawer Element', () => {
               id: 'legacy-custom',
               value: 'Legacy block',
               category: 'Image Processing',
-              collection: 'Garage',
+              collection: 'Lab',
               kind: 'workflow',
               children: [undefined, undefined],
             },
@@ -437,7 +437,7 @@ describe('Drawer Element', () => {
               id: 'custom-orchestra',
               value: 'Custom composition',
               category: 'Orchestration',
-              collection: 'Velora',
+              collection: 'Studio',
               kind: 'sequence',
               origin: 'custom',
               stages: [
@@ -475,7 +475,7 @@ describe('Drawer Element', () => {
         'LF Nodes',
         'Custom',
       ]);
-      expect(orchestraRoot.children[1].children[0].value).toBe('Velora');
+      expect(orchestraRoot.children[1].children[0].value).toBe('Studio');
       const warned = orchestraLeaves.find((node: any) => node.id === 'shipped-orchestra');
       expect(warned.icon).toBe('hexagon-info');
       expect(warned.description).toBe('Check setup: Could not check one block.');
@@ -596,19 +596,19 @@ describe('Drawer Element', () => {
               children: [undefined, undefined],
             },
             {
-              id: 'velora-vn',
+              id: 'studio-vn',
               value: 'Custom story workflow',
               category: 'Visual Novel Authoring',
               origin: 'custom',
-              collection: 'Velora',
+              collection: 'Studio',
               children: [undefined, undefined],
             },
             {
-              id: 'garage-image',
+              id: 'lab-image',
               value: 'Custom image workflow',
               category: 'Text to Image',
               origin: 'custom',
-              collection: 'Garage',
+              collection: 'Lab',
               children: [undefined, undefined],
             },
           ],
@@ -621,10 +621,10 @@ describe('Drawer Element', () => {
       const roots = tree.lfDataset.nodes[1].children;
       expect(roots.map((node: any) => node.value)).toEqual(['LF Nodes', 'Custom']);
       expect(roots[1].children.map((node: any) => node.value)).toEqual([
-        'Garage',
-        'Velora',
+        'Lab',
+        'Studio',
       ]);
-      expect(roots[1].children[1].children[0].id).toBe('velora-vn');
+      expect(roots[1].children[1].children[0].id).toBe('studio-vn');
       expect(roots[1].children.every((node: any) => node.icon !== 'alert-triangle')).toBe(
         true,
       );

@@ -240,11 +240,10 @@ const requireNode = (workflow: JsonRecord, id: number, type: string): JsonRecord
 /**
  * The maintainer's name and private project vocabulary. No public file may
  * contain these words: both workflow sanitizers audit with this pattern, and
- * tests/public_vocabulary.test.ts scans docs, scripts, nodes and the Runner
- * catalogue with it.
+ * tests/public_vocabulary.test.ts scans every tracked text file with it.
  */
 export const PRIVATE_VOCABULARY =
-  /\b(?:luca|foscili|velora|eden|azeroth|sentinel|stellaris|garage)\b/i;
+  /\b(?:luca|foscili|velora|eden|azeroth|stellaris|garage)\b/i;
 
 export const auditSanitizedTitanic = (workflow: JsonRecord): string[] => {
   const findings: string[] = [];

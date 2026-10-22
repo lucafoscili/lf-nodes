@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
 from importlib import import_module
-import json
 from pathlib import Path
 from runpy import run_path
 import sys
@@ -41,11 +39,6 @@ _HERO_ROOT = (
 
 
 @pytest.fixture(scope="module")
-def samples() -> dict[str, Any]:
-    return json.loads((_HERO_ROOT / "samples.json").read_text(encoding="utf-8"))
-
-
-@pytest.fixture(scope="module")
 def shipped_workflows() -> dict[str, Any]:
     """Inspect only packaged declarations, never custom roots or runtime registry."""
     workflows = {}
@@ -63,18 +56,24 @@ def shipped_workflows() -> dict[str, Any]:
     return workflows
 
 
-def test_shipped_hero_declarations_match_the_manifest_entries(samples, shipped_workflows) -> None:
-    heroes = samples["heroes"]
-    manifest_assets = {hero["workflowId"]: hero["asset"] for hero in heroes}
-    declared_assets = {
+def _declared_heroes(shipped_workflows) -> dict[str, str]:
+    return {
         workflow.id: workflow.card.hero.asset
         for workflow in shipped_workflows.values()
         if workflow.card is not None and workflow.card.hero is not None
     }
 
-    assert heroes, "The curated catalogue must contain at least one hero."
-    assert len(heroes) == len(manifest_assets), "Duplicate hero workflowId in samples.json."
-    assert declared_assets == manifest_assets
+
+def test_every_hero_file_is_declared_by_a_shipped_workflow(shipped_workflows) -> None:
+    declared = set(_declared_heroes(shipped_workflows).values())
+    on_disk = {
+        path.relative_to(_HERO_ROOT).as_posix()
+        for path in _HERO_ROOT.rglob("*")
+        if path.is_file()
+    }
+
+    assert declared, "The curated catalogue must contain at least one hero."
+    assert on_disk == declared
 
 
 def test_every_shipped_workflow_has_a_concise_catalogue_summary(shipped_workflows) -> None:
@@ -88,15 +87,13 @@ def test_every_shipped_workflow_has_a_concise_catalogue_summary(shipped_workflow
     assert all(len(workflow.card.summary) <= 180 for workflow in shipped_workflows.values())
 
 
-def test_shipped_heroes_are_small_decodable_and_metadata_free(samples) -> None:
-    for hero in samples["heroes"]:
-        workflow_id = hero["workflowId"]
-        asset_path = (_HERO_ROOT / hero["asset"]).resolve()
+def test_shipped_heroes_are_small_decodable_and_metadata_free(shipped_workflows) -> None:
+    for workflow_id, asset in _declared_heroes(shipped_workflows).items():
+        asset_path = (_HERO_ROOT / asset).resolve()
 
         assert asset_path.is_relative_to(_HERO_ROOT.resolve()), workflow_id
         assert asset_path.is_file(), workflow_id
-        assert 0 < asset_path.stat().st_size == hero["bytes"] <= 128 * 1024, workflow_id
-        assert hashlib.sha256(asset_path.read_bytes()).hexdigest() == hero["sha256"], workflow_id
+        assert 0 < asset_path.stat().st_size <= 128 * 1024, workflow_id
         with Image.open(asset_path) as raster:
             assert raster.format == "WEBP", workflow_id
             assert raster.size == (960, 540), workflow_id
@@ -105,78 +102,3 @@ def test_shipped_heroes_are_small_decodable_and_metadata_free(samples) -> None:
             metadata_keys = {key.lower() for key in raster.info}
             assert metadata_keys.isdisjoint({"prompt", "workflow", "exif", "xmp"}), workflow_id
             assert not raster.getexif(), workflow_id
-
-
-@pytest.mark.parametrize("source_id", ["h3-idea-orchestra", "iso-orchestra"])
-def test_new_orchestra_covers_retain_actual_child_relationships(samples, shipped_workflows, source_id) -> None:
-    sources = samples["sources"]
-    parent = sources[source_id]
-    definition = shipped_workflows[parent["workflowId"]]
-    assert parent["status"] == "succeeded"
-    assert [(stage["id"], stage["workflowId"]) for stage in parent["stages"]] == [
-        (stage.id, stage.workflow_id) for stage in definition.stages
-    ]
-    for stage in parent["stages"]:
-        child = sources[stage["source"]]
-        assert child["workflowId"] == stage["workflowId"]
-        assert child["parentRunId"] == parent["runId"]
-        assert child["runId"] != parent["runId"]
-    prompt = sources["h3-idea-prompt"]
-    assert hashlib.sha256(prompt["excerpt"].encode()).hexdigest() == prompt["excerptSha256"]
-
-
-def test_hero_sources_reference_recorded_runs_without_requiring_original_files(
-    samples, shipped_workflows,
-) -> None:
-    sources = samples["sources"]
-    for hero in samples["heroes"]:
-        assert hero["sources"], hero["workflowId"]
-        for source_id in hero["sources"]:
-            assert source_id in sources, (hero["workflowId"], source_id)
-            source = sources[source_id]
-            assert source["workflowId"] in shipped_workflows, source_id
-            assert isinstance(source["runId"], str) and source["runId"], source_id
-            # The source may be a raster, decoded DDS, text rendering, or a
-            # recorded preview. Original run files need not ship with the hero.
-
-
-def test_orchestra_manifest_stages_use_the_block_source_runs(samples, shipped_workflows) -> None:
-    declaration = shipped_workflows["identity_cleanup_restage"]
-    orchestra = samples["orchestra"]
-    sources = samples["sources"]
-    heroes = {hero["workflowId"]: hero for hero in samples["heroes"]}
-
-    assert orchestra["workflowId"] == declaration.id
-    assert orchestra["status"] == "succeeded"
-    assert orchestra["runId"]
-    assert orchestra["stages"] == [stage.id for stage in declaration.stages]
-    assert len(orchestra["stages"]) == 2
-    stage_run_ids = []
-    for stage in declaration.stages:
-        source = sources[stage.id]
-        assert source["workflowId"] == stage.workflow_id
-        assert source["runId"]
-        assert heroes[stage.workflow_id]["sources"][-1] == stage.id
-        stage_run_ids.append(source["runId"])
-    assert len(set(stage_run_ids)) == 2
-
-    # The block cards expose each step; the orchestra compares the same initial
-    # reference with the final stage result. No original output files are read.
-    identity_sources = heroes[declaration.stages[0].workflow_id]["sources"]
-    restage_sources = heroes[declaration.stages[1].workflow_id]["sources"]
-    assert identity_sources[-1] == restage_sources[0]
-    assert heroes[declaration.id]["sources"] == [
-        identity_sources[0], restage_sources[-1]
-    ]
-
-
-def test_sound_effects_cover_uses_the_user_accepted_hearth(samples) -> None:
-    hero = next(item for item in samples["heroes"] if item["workflowId"] == "stable_audio_3_sfx")
-    assert hero["sources"] == ["sfx-hearth"]
-    source = samples["sources"]["sfx-hearth"]
-    assert source["status"] == "succeeded"
-    assert source["listeningReview"]["acceptedBy"] == "Luca"
-    assert source["listeningReview"]["decision"] == "Hearth only"
-    assert source["channels"] == 2
-    assert source["sampleFrames"] / source["sampleRate"] == pytest.approx(source["durationSeconds"])
-    assert source["artifact"].endswith("sfx-seed-42_1.wav")

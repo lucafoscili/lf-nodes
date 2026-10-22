@@ -86,8 +86,7 @@ remain text-only.
 
 `asset` is a relative PNG, JPEG, WebP, or AVIF path below
 `web/deploy/assets/workflow-runner/heroes/`. Keep covers small, strip embedded
-metadata, use public-safe subjects, and record their source outputs and display
-transforms in that directory's `samples.json`. These are distributable static
+metadata and use public-safe subjects. These are distributable static
 assets, never private run URLs or temporary previews. Rendering uses the existing
 static-asset route and does not inspect history. A shipped orchestra's cover is
 omitted when a custom declaration replaces one of its blocks.

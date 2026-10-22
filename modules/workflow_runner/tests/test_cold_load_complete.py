@@ -49,7 +49,7 @@ class TestColdLoadWithAuth:
         from modules.workflow_runner.services.auth_service import derive_owner_id
         
         # Create test data
-        test_email = "luca.foscili@smeup.com"
+        test_email = "user@example.com"
         expected_owner_id = derive_owner_id(test_email)
         
         print(f"\n  Test email: {test_email}")
@@ -84,7 +84,7 @@ class TestColdLoadWithAuth:
         from modules.workflow_runner.services import job_store
         from modules.workflow_runner.services.auth_service import derive_owner_id
         
-        test_email = "luca.foscili@smeup.com"
+        test_email = "user@example.com"
         expected_owner_id = derive_owner_id(test_email)
         
         # Create mock request with authenticated email
@@ -135,7 +135,7 @@ class TestColdLoadWithAuth:
         from modules.workflow_runner.services import job_store
         from modules.workflow_runner.services.auth_service import derive_owner_id
         
-        test_email = "luca.foscili@smeup.com"
+        test_email = "user@example.com"
         expected_owner_id = derive_owner_id(test_email)
         
         print(f"\n  Simulating UI refresh for: {test_email}")

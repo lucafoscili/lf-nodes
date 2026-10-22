@@ -590,12 +590,12 @@ describe('Home Element', () => {
         children: [undefined, undefined] as [undefined, undefined],
       };
       const customOverride = {
-        ...shipped, value: 'Custom override', origin: 'custom' as const, collection: 'Velora',
+        ...shipped, value: 'Custom override', origin: 'custom' as const, collection: 'Studio',
       };
       const customOrchestra = {
-        id: 'garage-orchestra', value: 'Garage Orchestra', category: 'Orchestration',
+        id: 'lab-orchestra', value: 'Lab Orchestra', category: 'Orchestration',
         description: 'A custom sequence.', kind: 'orchestra' as const,
-        origin: 'custom' as const, collection: 'Garage',
+        origin: 'custom' as const, collection: 'Lab',
         stages: [{ id: 'custom', workflowId: 'unmarked' }],
         children: [undefined, undefined] as [undefined, undefined],
       };
@@ -616,7 +616,7 @@ describe('Home Element', () => {
       const customRoot = elements['home-section-custom-catalogue'];
       const groups = [...customRoot.querySelectorAll('.home-section-collection')];
       expect(groups.map((group: HTMLElement) => group.dataset.workflowCollection)).toEqual([
-        'Custom', 'Garage', 'Velora',
+        'Custom', 'Lab', 'Studio',
       ]);
       expect(shippedCells.shared).toBeUndefined();
       expect(elements['home-section-shipped'].hidden).toBe(true);
@@ -630,12 +630,12 @@ describe('Home Element', () => {
         ),
       ) as any[];
       expect(allCustomCells.map((cell) => cell.lfDataset.nodes[0].id).sort()).toEqual([
-        'garage-orchestra', 'shared', 'unmarked',
+        'lab-orchestra', 'shared', 'unmarked',
       ]);
       const override = allCustomCells.find((cell) => cell.lfDataset.nodes[0].id === 'shared');
       expect(override.lfDataset.nodes[0].cells['1'].value).toBe('Custom override');
       expect(override.htmlProps.dataset).toMatchObject({
-        workflowCollection: 'Velora', workflowKind: 'block', workflowOrigin: 'custom',
+        workflowCollection: 'Studio', workflowKind: 'block', workflowOrigin: 'custom',
       });
     });
 
