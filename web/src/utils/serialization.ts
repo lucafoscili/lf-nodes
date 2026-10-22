@@ -1,4 +1,14 @@
+import { CustomWidgetName } from '../types/widgets/widgets';
+
 const INLINE_IMAGE_DATA_URL = /^data:image\/[^,]*;base64,/i;
+
+// Model cards keep their cover thumbnails: nothing sends them again after a
+// workflow reload, so stripping them would leave blank cards until the node
+// runs again. Covers are JPEG thumbnails of at most 1024 pixels.
+const COVER_WIDGET_TYPES: ReadonlySet<string> = new Set([
+  CustomWidgetName.card,
+  CustomWidgetName.cardsWithChip,
+]);
 
 type SerializedRecord = Record<string, unknown>;
 
@@ -139,6 +149,9 @@ const rewriteWidgetSerialization = (node: NodeType, data: unknown, widget: Widge
  * constructing its output, so both boundaries are covered here.
  */
 export const hookDOMWidgetSerialization = (node: NodeType, widget: Widget<any>): Widget<any> => {
+  if (COVER_WIDGET_TYPES.has(widget?.type)) {
+    return widget;
+  }
   try {
     const originalSerializeValue = widget.serializeValue;
     widget.serializeValue = function (this: Widget<any>, ...args: any[]) {

@@ -63,6 +63,19 @@ describe('sanitizeSerializedValue', () => {
 });
 
 describe('hookDOMWidgetSerialization', () => {
+  it('leaves model card covers in the saved workflow', () => {
+    for (const type of ['LF_CARD', 'LF_CARDS_WITH_CHIP']) {
+      const prior = vi.fn();
+      const widget = { name: 'ui_widget', type, value: { cover: image } } as unknown as Widget<any>;
+      const node = { widgets: [widget], onSerialize: prior } as unknown as NodeType;
+
+      hookDOMWidgetSerialization(node, widget);
+
+      expect(widget.serializeValue).toBeUndefined();
+      expect(node.onSerialize).toBe(prior);
+    }
+  });
+
   it('sanitizes prompt and exact workflow entries while preserving prior hooks', () => {
     const prior = vi.fn();
     const liveValue = { preview: image, hash: '#preserve' };
