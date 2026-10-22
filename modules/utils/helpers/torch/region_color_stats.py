@@ -109,12 +109,16 @@ def luminance_banding(luminance: torch.Tensor, mask: torch.Tensor) -> dict:
 
 ROW_PROFILE_WINDOW_ROWS = 5
 ROW_PROFILE_MINIMUM_ROW_PIXELS = 40
+# Rows this close to the image's top or bottom edge are skipped: where the frame cuts a region, its edge rows
+# carry the cut (hair, the frame's last texels), not the region's shading.
+ROW_PROFILE_BORDER_ROWS = 10
 
 
 def luminance_row_profile(luminance: torch.Tensor, mask: torch.Tensor) -> dict:
     """The largest step in mean L* going down a region, a diagnostic for soft seams.
 
-    Every mask row with at least ROW_PROFILE_MINIMUM_ROW_PIXELS pixels gives its
+    Every mask row with at least ROW_PROFILE_MINIMUM_ROW_PIXELS pixels, and not
+    within ROW_PROFILE_BORDER_ROWS of the image's top or bottom edge, gives its
     mean L*; those rows, top first, are averaged in non-overlapping windows of
     ROW_PROFILE_WINDOW_ROWS (a partial last window is dropped), and the step is
     the difference between adjacent windows (lower minus upper) with the largest
@@ -124,6 +128,7 @@ def luminance_row_profile(luminance: torch.Tensor, mask: torch.Tensor) -> dict:
     counts = mask.sum(1)
     sums = torch.where(mask, luminance, torch.zeros_like(luminance)).sum(1)
     rows = torch.nonzero(counts >= ROW_PROFILE_MINIMUM_ROW_PIXELS).flatten()
+    rows = rows[(rows >= ROW_PROFILE_BORDER_ROWS) & (rows < mask.shape[0] - ROW_PROFILE_BORDER_ROWS)]
     result = {"heuristic": True, "rows": int(rows.numel()), "max_step_l": None, "step_row": None,
               "reason": "Fewer than two full windows of qualifying rows."}
     windows = int(rows.numel()) // ROW_PROFILE_WINDOW_ROWS
@@ -205,6 +210,7 @@ def region_color_measurements(image_a, image_b, mask_sets, document) -> dict:
             "row_profile_method": {"warning": "Heuristic only; shading and texture also give steps. Compare with a reference render.",
                                    "minimum_row_pixels": ROW_PROFILE_MINIMUM_ROW_PIXELS,
                                    "window_rows": ROW_PROFILE_WINDOW_ROWS,
+                                   "border_rows": ROW_PROFILE_BORDER_ROWS,
                                    "step": "lower window minus upper window, largest magnitude; step_row is the lower window's first row"},
             "regions": rows}
 

@@ -135,22 +135,25 @@ def test_row_profile_finds_a_band_that_the_region_mean_cancels():
     banded = rows.clone()
     banded[20:] += 1
     banded[:20] -= 2
-    mask = torch.ones(60, 90, dtype=torch.bool)
-    smooth, band = luminance_row_profile(rows, mask), luminance_row_profile(banded, mask)
     assert abs(float(banded.mean() - rows.mean())) < 0.01
+    # Ten unmasked rows above and below keep the region off the image border, which the profile skips.
+    rows, banded = (torch.nn.functional.pad(image, (0, 0, 10, 10)) for image in (rows, banded))
+    mask = torch.zeros(80, 90, dtype=torch.bool)
+    mask[10:70] = True
+    smooth, band = luminance_row_profile(rows, mask), luminance_row_profile(banded, mask)
     assert abs(smooth["max_step_l"]) < 0.5
-    assert band["max_step_l"] > 0.5 and band["step_row"] == 20
+    assert band["max_step_l"] > 0.5 and band["step_row"] == 30
     assert band["rows"] == smooth["rows"] == 60
 
 
 def test_row_profile_skips_narrow_rows_and_needs_two_windows():
-    luminance = torch.full((12, 50), 50.0, dtype=torch.float64)
-    mask = torch.zeros(12, 50, dtype=torch.bool)
-    mask[:9, :] = True
-    mask[9:, :39] = True  # rows under ROW_PROFILE_MINIMUM_ROW_PIXELS do not count
+    luminance = torch.full((32, 50), 50.0, dtype=torch.float64)
+    mask = torch.zeros(32, 50, dtype=torch.bool)  # rows 10-21: clear of the 10-row image border
+    mask[10:19, :] = True
+    mask[19:22, :39] = True  # rows under ROW_PROFILE_MINIMUM_ROW_PIXELS do not count
     profile = luminance_row_profile(luminance, mask)
     assert profile["rows"] == 9 and profile["max_step_l"] is None and profile["step_row"] is None
-    mask[:10, :] = True
+    mask[10:20, :] = True
     profile = luminance_row_profile(luminance, mask)
     assert profile["rows"] == 10 and profile["max_step_l"] == 0.0
 
@@ -162,6 +165,7 @@ def test_region_rows_report_standard_deviation_and_row_profile():
     assert row["a"]["row_profile"]["max_step_l"] == pytest.approx(0.0, abs=1e-9)
     stats = _measure(a, a.clone(), torch.ones(1, 60, 48))["result"][0]
     assert stats["row_profile_method"]["window_rows"] == 5
+    assert stats["row_profile_method"]["border_rows"] == 10
 
 
 @pytest.mark.parametrize("a,b,match", [
@@ -292,3 +296,14 @@ def test_public_schema_is_exact_single_pair_and_optional_compare():
     assert cls.RETURN_TYPES == ("JSON", "IMAGE", "IMAGE")
     assert cls.RETURN_NAMES == ("stats", "overlay", "overlay_list")
     assert cls.OUTPUT_IS_LIST == (False, False, True)
+
+
+def test_row_profile_skips_rows_at_the_image_border():
+    # A smooth region that runs off the bottom of the frame, whose last rows are bright (the cut).
+    luminance = torch.full((100, 64), 50.0)
+    luminance[95:] = 90.0
+    mask = torch.zeros((100, 64), dtype=torch.bool)
+    mask[40:] = True
+    profile = luminance_row_profile(luminance, mask)
+    assert profile["max_step_l"] == pytest.approx(0.0, abs=1e-9)
+    assert profile["rows"] == 50
