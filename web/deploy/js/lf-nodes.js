@@ -1283,6 +1283,10 @@ var NodeName;
   NodeName2["composeImageLayers"] = "LF_ComposeImageLayers";
   NodeName2["composeImageRegions"] = "LF_ComposeImageRegions";
   NodeName2["extractImageRegions"] = "LF_ExtractImageRegions";
+  NodeName2["textRegionMasks"] = "LF_TextRegionMasks";
+  NodeName2["regionColorStats"] = "LF_RegionColorStats";
+  NodeName2["regionFeatureSimilarity"] = "LF_RegionFeatureSimilarity";
+  NodeName2["visionPatchEncode"] = "LF_VisionPatchEncode";
   NodeName2["backgroundRemover"] = "LF_BackgroundRemover";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
@@ -1720,6 +1724,10 @@ const NODE_WIDGET_MAP = {
   LF_ComposeImageLayers: [],
   LF_ComposeImageRegions: [],
   LF_ExtractImageRegions: [],
+  LF_TextRegionMasks: [],
+  LF_RegionColorStats: [CustomWidgetName.compare],
+  LF_RegionFeatureSimilarity: [],
+  LF_VisionPatchEncode: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
@@ -11231,6 +11239,10 @@ const protectDOMWidgetWidth = (widget) => {
   return widget;
 };
 const INLINE_IMAGE_DATA_URL = /^data:image\/[^,]*;base64,/i;
+const COVER_WIDGET_TYPES = /* @__PURE__ */ new Set([
+  CustomWidgetName.card,
+  CustomWidgetName.cardsWithChip
+]);
 const isInlineImageDataUrl = (value) => INLINE_IMAGE_DATA_URL.test(value);
 const isPlainObject = (value) => {
   const prototype = Object.getPrototypeOf(value);
@@ -11304,6 +11316,9 @@ const rewriteWidgetSerialization = (node, data, widget) => {
   }
 };
 const hookDOMWidgetSerialization = (node, widget) => {
+  if (COVER_WIDGET_TYPES.has(widget == null ? void 0 : widget.type)) {
+    return widget;
+  }
   try {
     const originalSerializeValue = widget.serializeValue;
     widget.serializeValue = function(...args) {

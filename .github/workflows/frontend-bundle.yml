@@ -1,0 +1,43 @@
+name: Frontend bundle
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/src/**'
+      - 'web/workflow-runner/src/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'web/src/**'
+      - 'web/workflow-runner/src/**'
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install locked frontend dependencies
+        run: corepack yarn install --immutable
+      - name: Build the frontend
+        run: corepack yarn build
+      - name: Verify compiled frontend is committed
+        run: |
+          BUILD_CHANGES=$(git status --short --untracked-files=all -- web/deploy)
+          if [ -n "$BUILD_CHANGES" ]; then
+            printf '%s\n' "$BUILD_CHANGES"
+            echo "web/deploy is stale. Run corepack yarn build and commit web/deploy with the source change." >&2
+            exit 1
+          fi
