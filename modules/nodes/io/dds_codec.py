@@ -76,44 +76,6 @@ class DDSOutputError(ValueError):
         super().__init__(_canonical_json(self.payload))
 
 
-class DDSFileCustody:
-    """Private hard-link proof retained until a node batch commits or rolls back."""
-
-    __slots__ = ("target", "guard")
-
-    def __init__(self, target: Path, guard: Path) -> None:
-        self.target = target
-        self.guard = guard
-
-    def commit(self) -> None:
-        """Release the private proof after the complete batch succeeds."""
-
-        try:
-            self.guard.unlink(missing_ok=True)
-        except OSError:
-            # The final file is already complete and verified. A guard cleanup
-            # failure must not turn a valid output into an ambiguous execution.
-            pass
-
-    def rollback(self) -> None:
-        """Remove the target only while it is still the guarded LF-owned file."""
-
-        try:
-            if not self.target.is_symlink() and os.path.samefile(
-                self.guard,
-                self.target,
-            ):
-                self.target.unlink(missing_ok=True)
-        except OSError:
-            # Cleanup is best effort and must preserve the original stable error.
-            pass
-        finally:
-            try:
-                self.guard.unlink(missing_ok=True)
-            except OSError:
-                pass
-
-
 def _error(
     code: str,
     message: str,
@@ -673,14 +635,12 @@ def encode_dds(
     return data, receipt
 
 
-def write_dds_atomic(
-    output_file: str | Path,
-    data: bytes,
-    expected: dict[str, Any],
-    *,
-    retain_custody: bool = False,
-) -> DDSFileCustody | None:
-    """Publish one complete DDS file atomically without replacing an existing path."""
+def write_dds_atomic(output_file: str | Path, data: bytes) -> None:
+    """Write one complete DDS file through a same-folder temporary file.
+
+    ``os.replace`` swaps the finished file in, so readers never see a partial
+    DDS at the final path.
+    """
 
     target = Path(output_file)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -690,98 +650,28 @@ def write_dds_atomic(
         dir=target.parent,
     )
     temporary = Path(temporary_name)
-    published = False
-    custody: DDSFileCustody | None = None
     try:
         with os.fdopen(descriptor, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
-
-        staged = temporary.read_bytes()
-        _verify_dds_bytes(
-            staged,
-            width=int(expected["width"]),
-            height=int(expected["height"]),
-            pixel_format=str(expected["pixel_format"]),
-            mip_count=int(expected["mip_count"]),
-        )
-        if "sha256:" + hashlib.sha256(staged).hexdigest() != expected["sha256"]:
-            raise _error(
-                "readback_mismatch",
-                "Staged DDS checksum does not match the encoder receipt.",
-            )
-
-        try:
-            os.link(temporary, target)
-        except FileExistsError as error:
-            raise _error(
-                "encode_failure",
-                "DDS publication target became occupied before publication.",
-                stage="publish_no_clobber",
-            ) from error
-        except OSError as error:
-            raise _error(
-                "encode_failure",
-                "The output filesystem cannot provide atomic no-clobber DDS publication.",
-                stage="publish_no_clobber",
-            ) from error
-        published = True
-
-        if not os.path.samefile(temporary, target):
-            raise _error(
-                "readback_mismatch",
-                "DDS publication custody could not be verified.",
-            )
-
-        emitted = target.read_bytes()
-        _verify_dds_bytes(
-            emitted,
-            width=int(expected["width"]),
-            height=int(expected["height"]),
-            pixel_format=str(expected["pixel_format"]),
-            mip_count=int(expected["mip_count"]),
-        )
-        if "sha256:" + hashlib.sha256(emitted).hexdigest() != expected["sha256"]:
-            raise _error(
-                "readback_mismatch",
-                "Emitted DDS checksum does not match the encoder receipt.",
-            )
-        if retain_custody:
-            custody = DDSFileCustody(target=target, guard=temporary)
-            return custody
-        return None
-    except DDSOutputError:
-        if published:
-            try:
-                if os.path.samefile(temporary, target):
-                    target.unlink(missing_ok=True)
-            except (FileNotFoundError, OSError):
-                pass
-        raise
-    except Exception as error:
-        if published:
-            try:
-                if os.path.samefile(temporary, target):
-                    target.unlink(missing_ok=True)
-            except (FileNotFoundError, OSError):
-                pass
+        os.replace(temporary, target)
+    except OSError as error:
         raise _error(
             "encode_failure",
-            "DDS atomic publication failed.",
+            "The DDS file could not be written.",
+            stage="publish",
         ) from error
     finally:
-        if custody is None:
-            try:
-                temporary.unlink(missing_ok=True)
-            except OSError:
-                pass
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 __all__ = [
     "DDS_ERROR_SCHEMA",
     "DDS_RECEIPT_SCHEMA",
-    "DDSFileCustody",
     "DDSOutputError",
     "MIP_POLICIES",
     "PIXEL_FORMATS",

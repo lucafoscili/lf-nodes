@@ -7,7 +7,6 @@ import torch
 from . import CATEGORY
 from .dds_codec import (
     DDS_RECEIPT_SCHEMA,
-    DDSFileCustody,
     DDSOutputError,
     MIP_POLICIES,
     PIXEL_FORMATS,
@@ -71,7 +70,6 @@ class LF_SaveDDS:
     RETURN_TYPES = (Input.STRING, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
-        custody_tokens: list[DDSFileCustody] = []
         try:
             try:
                 images: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
@@ -109,20 +107,7 @@ class LF_SaveDDS:
                     extension="dds",
                     add_counter=True,
                 )
-                output_path = Path(output_file)
-                custody = write_dds_atomic(
-                    output_path,
-                    data,
-                    item_receipt,
-                    retain_custody=True,
-                )
-                if custody is None:
-                    raise DDSOutputError(
-                        "encode_failure",
-                        "DDS publication did not return a custody proof.",
-                        {"stage": "batch_publication"},
-                    )
-                custody_tokens.append(custody)
+                write_dds_atomic(Path(output_file), data)
 
                 relative_name = f"{subfolder}/{filename}" if subfolder else filename
                 file_names.append(relative_name.replace("\\", "/"))
@@ -138,7 +123,7 @@ class LF_SaveDDS:
                 "children": nodes,
                 "icon": "check",
                 "id": "root",
-                "value": f"Saved and verified {len(file_names)} DDS file(s).",
+                "value": f"Saved {len(file_names)} DDS file(s).",
             }
             dataset = {"nodes": [root]}
             for file_name, item in zip(file_names, receipt_items):
@@ -152,8 +137,6 @@ class LF_SaveDDS:
                 )
 
             safe_send_sync("savedds", {"dataset": dataset}, kwargs.get("node_id"))
-            for custody in custody_tokens:
-                custody.commit()
 
             return {
                 "ui": {
@@ -168,12 +151,8 @@ class LF_SaveDDS:
                 "result": (file_names, receipt),
             }
         except DDSOutputError:
-            for custody in custody_tokens:
-                custody.rollback()
             raise
         except Exception as error:
-            for custody in custody_tokens:
-                custody.rollback()
             raise DDSOutputError(
                 "encode_failure",
                 "DDS node execution failed.",

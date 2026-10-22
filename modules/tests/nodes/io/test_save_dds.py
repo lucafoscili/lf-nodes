@@ -389,43 +389,34 @@ def test_readback_rejects_extra_compressed_pixel_flags() -> None:
     assert raised.value.code == "readback_mismatch"
 
 
-def test_atomic_writer_removes_partial_output_after_final_readback_failure(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    data, receipt = encode_dds(pattern(8, 8, 3), "RGB24", "none")
+def test_atomic_writer_replaces_the_target_and_leaves_no_temporary(tmp_path: Path) -> None:
+    data, _receipt = encode_dds(pattern(8, 8, 3), "RGB24", "none")
     target = tmp_path / "result.dds"
-    original_verify = dds_codec._verify_dds_bytes
-    calls = 0
+    target.write_bytes(b"older")
 
-    def fail_final(*args, **kwargs):
-        nonlocal calls
-        calls += 1
-        if calls == 2:
-            raise DDSOutputError("readback_mismatch", "forced final mismatch")
-        return original_verify(*args, **kwargs)
+    write_dds_atomic(target, data)
 
-    monkeypatch.setattr(dds_codec, "_verify_dds_bytes", fail_final)
-
-    with pytest.raises(DDSOutputError) as raised:
-        write_dds_atomic(target, data, receipt)
-
-    assert raised.value.code == "readback_mismatch"
-    assert not target.exists()
+    assert target.read_bytes() == data
     assert list(tmp_path.glob("*.tmp")) == []
 
 
-def test_atomic_writer_never_replaces_an_occupied_target(tmp_path: Path) -> None:
-    data, receipt = encode_dds(pattern(8, 8, 3), "RGB24", "none")
+def test_atomic_writer_reports_a_failed_replace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data, _receipt = encode_dds(pattern(8, 8, 3), "RGB24", "none")
     target = tmp_path / "result.dds"
-    target.write_bytes(b"pre-existing")
+
+    def deny_replace(*_args):
+        raise PermissionError("locked")
+
+    monkeypatch.setattr(dds_codec.os, "replace", deny_replace)
 
     with pytest.raises(DDSOutputError) as raised:
-        write_dds_atomic(target, data, receipt)
+        write_dds_atomic(target, data)
 
     assert raised.value.code == "encode_failure"
-    assert raised.value.payload["error"]["details"]["stage"] == "publish_no_clobber"
-    assert target.read_bytes() == b"pre-existing"
+    assert not target.exists()
     assert list(tmp_path.glob("*.tmp")) == []
 
 
@@ -462,133 +453,6 @@ def test_node_publishes_ordered_files_and_receipt_envelope(
     assert all((tmp_path / name).is_file() for name in result["result"][0])
     assert sent[0][0] == "savedds"
     assert sent[0][2] == "node-7"
-
-
-def test_node_rolls_back_earlier_batch_files_on_write_failure(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    counter = 0
-    first = tmp_path / "first.dds"
-    second = tmp_path / "second.dds"
-    paths = [(first, "", first.name), (second, "", second.name)]
-    original_write = write_dds_atomic
-
-    def fail_second(path, data, receipt, *, retain_custody=False):
-        nonlocal counter
-        counter += 1
-        if counter == 2:
-            raise DDSOutputError("encode_failure", "forced write failure")
-        return original_write(
-            path,
-            data,
-            receipt,
-            retain_custody=retain_custody,
-        )
-
-    monkeypatch.setattr(save_dds, "get_comfy_dir", lambda _kind: str(tmp_path))
-    monkeypatch.setattr(save_dds, "resolve_filepath", lambda **_kwargs: paths.pop(0))
-    monkeypatch.setattr(save_dds, "write_dds_atomic", fail_second)
-    batch = torch.ones((2, 4, 4, 3), dtype=torch.float32)
-
-    with pytest.raises(DDSOutputError):
-        save_dds.LF_SaveDDS().on_exec(
-            image=batch,
-            filename_prefix="generic",
-            pixel_format="RGB24",
-            mip_policy="none",
-        )
-
-    assert not first.exists()
-    assert not second.exists()
-
-
-def test_batch_rollback_preserves_a_replacement_at_an_earlier_path(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    counter = 0
-    first = tmp_path / "first.dds"
-    second = tmp_path / "second.dds"
-    paths = [(first, "", first.name), (second, "", second.name)]
-    original_write = write_dds_atomic
-
-    def replace_then_fail(path, data, receipt, *, retain_custody=False):
-        nonlocal counter
-        counter += 1
-        if counter == 2:
-            raise DDSOutputError("encode_failure", "forced write failure")
-        custody = original_write(
-            path,
-            data,
-            receipt,
-            retain_custody=retain_custody,
-        )
-        path = Path(path)
-        path.unlink()
-        path.write_bytes(b"replacement")
-        return custody
-
-    monkeypatch.setattr(save_dds, "get_comfy_dir", lambda _kind: str(tmp_path))
-    monkeypatch.setattr(save_dds, "resolve_filepath", lambda **_kwargs: paths.pop(0))
-    monkeypatch.setattr(save_dds, "write_dds_atomic", replace_then_fail)
-
-    with pytest.raises(DDSOutputError) as raised:
-        save_dds.LF_SaveDDS().on_exec(
-            image=torch.ones((2, 4, 4, 3), dtype=torch.float32),
-            filename_prefix="generic",
-            pixel_format="RGB24",
-            mip_policy="none",
-        )
-
-    assert raised.value.code == "encode_failure"
-    assert first.read_bytes() == b"replacement"
-    assert not second.exists()
-    assert list(tmp_path.glob("*.tmp")) == []
-
-
-def test_batch_cleanup_failure_does_not_mask_canonical_error(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    counter = 0
-    first = tmp_path / "first.dds"
-    second = tmp_path / "second.dds"
-    paths = [(first, "", first.name), (second, "", second.name)]
-    original_write = write_dds_atomic
-    original_unlink = Path.unlink
-
-    def publish_then_fail(path, data, receipt, *, retain_custody=False):
-        nonlocal counter
-        counter += 1
-        if counter == 2:
-            raise DDSOutputError("readback_mismatch", "forced canonical failure")
-        return original_write(
-            path,
-            data,
-            receipt,
-            retain_custody=retain_custody,
-        )
-
-    def deny_target_unlink(path: Path, *args, **kwargs):
-        if path == first:
-            raise OSError("cleanup denied")
-        return original_unlink(path, *args, **kwargs)
-
-    monkeypatch.setattr(save_dds, "get_comfy_dir", lambda _kind: str(tmp_path))
-    monkeypatch.setattr(save_dds, "resolve_filepath", lambda **_kwargs: paths.pop(0))
-    monkeypatch.setattr(save_dds, "write_dds_atomic", publish_then_fail)
-    monkeypatch.setattr(Path, "unlink", deny_target_unlink)
-
-    with pytest.raises(DDSOutputError) as raised:
-        save_dds.LF_SaveDDS().on_exec(
-            image=torch.ones((2, 4, 4, 3), dtype=torch.float32),
-            filename_prefix="generic",
-            pixel_format="RGB24",
-            mip_policy="none",
-        )
-
-    assert raised.value.code == "readback_mismatch"
 
 
 def test_node_wraps_malformed_batch_in_stable_error() -> None:

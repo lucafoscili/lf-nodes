@@ -131,10 +131,10 @@ Stable v1 codes are:
 - `invalid_alpha`: a non-alpha format received meaningful alpha.
 - `invalid_dimensions`: the batch item is not a positive RGB/RGBA image.
 - `encode_failure`: normalization, compression, or publication failed.
-- `readback_mismatch`: staged or emitted bytes disagree with the requested
-  dimensions, format, alpha semantics, mip count, byte length, or SHA-256.
+- `readback_mismatch`: the encoded bytes disagree with the requested
+  dimensions, format, alpha semantics or mip count.
 
-## Writer, backend, and custody
+## Writer and backend
 
 LF Nodes owns the legacy 128-byte DDS header, uncompressed payload writer, mip
 layout, strict reader, receipt, and atomic publication. Compressed levels use
@@ -154,16 +154,12 @@ and its WIC-dependent functionality is not identical across operating systems.
 See the official [Pillow DDS documentation](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#dds)
 and [Microsoft DirectXTex repository](https://github.com/microsoft/DirectXTex).
 
-All batch items are encoded and validated before publication. Each output is
-written to a same-directory temporary file, flushed, read back, checksum-checked,
-and atomically hard-linked into an unused final path before a second readback.
-This create-only publication step cannot replace a path that wins a counter
-race. Filesystems without same-directory hard-link support fail closed with
-`encode_failure`. A private hard-link custody proof is retained until the whole
-batch commits. If any item fails, LF removes a final path only while it still
-matches that proof; a path replaced by another actor is preserved. Cleanup
-failures never mask the original `lf.dds.error.v1`. Comfy's own output path
-resolver enforces output-root containment.
+All batch items are encoded and validated before any file is written. Each
+output is written to a temporary file in its final folder, flushed, and moved
+into place with `os.replace`, so the final path never holds a partial DDS.
+Comfy's own counter picks an unused filename, and its output path resolver
+enforces output-root containment. A write failure raises `encode_failure`;
+files already written for earlier batch items stay on disk.
 
 Workflow Runner classifies `.dds` artifacts as `image/vnd-ms.dds` through the
 same output-manifest convention used for other saved files.
