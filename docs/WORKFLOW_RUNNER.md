@@ -372,10 +372,8 @@ modules/workflow_runner/
 │   └── schemas.py           # Request/response schemas
 ├── nodes/                   # Private Runner graph-node namespace
 │   └── __init__.py
-├── prompts/                 # Shared H3 prompt composition and audit logic
-│   ├── minimax_h3.py
-│   ├── minimax_h3_audit.py
-│   └── minimax_h3_pipeline.py
+├── prompts/                 # Shared H3 prompt composers
+│   └── minimax_h3.py
 ├── services/                # Business logic
 │   ├── __init__.py
 │   ├── auth_service.py      # Authentication & authorization

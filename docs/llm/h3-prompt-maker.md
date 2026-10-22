@@ -52,8 +52,9 @@ Unspecified environment, action development, camera and sound are creative choic
   widget, so history and cached output retain the result. No source images or
   base64 payloads are added to that history.
 
-The older compiler/composer helpers remain for legacy helper callers and
-separate deterministic H3 workflows. The Prompt Maker no longer imports them.
+The Runner's deterministic H3 workflows build their prompts with the section
+composers in `modules/workflow_runner/prompts/minimax_h3.py`; the Prompt Maker
+does not use them.
 
 Compatibility change: newly created nodes default to `auto`; saved explicit
 mode values remain unchanged. Existing input names/defaults otherwise remain;

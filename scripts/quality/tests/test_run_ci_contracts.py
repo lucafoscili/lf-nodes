@@ -72,8 +72,6 @@ class CpuContractGateTests(unittest.TestCase):
             "test_h3_prompt_skill",
             "test_multimodal_payload_contract",
             "test_minimax_h3_prompt_composer",
-            "test_minimax_h3_pipeline",
-            "test_minimax_h3_audit",
             "test_minimax_h3_prompt_maker_workflow",
             "test_minimax_h3_hd",
             "test_minimax_h3_prompt_video",

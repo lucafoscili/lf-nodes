@@ -112,8 +112,6 @@ ISOLATED_BEHAVIOR_TESTS: tuple[tuple[str, ...], ...] = (
         "modules/workflow_runner/tests/test_workflow_card_presentation.py",
     ),
     ("modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py",),
-    ("modules/workflow_runner/tests/test_minimax_h3_pipeline.py",),
-    ("modules/workflow_runner/tests/test_minimax_h3_audit.py",),
     ("modules/workflow_runner/tests/test_minimax_h3_prompt_maker_workflow.py",),
     (
         "modules/workflow_runner/tests/test_cardinal_turnaround_workflow.py",
