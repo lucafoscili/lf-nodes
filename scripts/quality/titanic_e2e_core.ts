@@ -105,6 +105,7 @@ export interface TitanicManifest {
   };
   smokeCases: ManifestCase[];
   coverageCases: ManifestCase[];
+  coverageExemptions?: Array<{ type: string; nodeIds: number[]; reason: string }>;
   dormantNodeIds: number[];
   disabledNodes: Array<{ id: number; type: string; reason: string }>;
   fixtures?: Array<{ path: string; expectedSha256: string }>;
@@ -553,6 +554,74 @@ export const validateCoverage = (
     if (!seen.has(target)) errors.push(`active output ${target} is unclassified`);
   }
   return errors.sort();
+};
+
+/** Static target ancestry only; live execution requires separate trace evidence. */
+export const validateLfNodeCoverage = (
+  workflow: {
+    nodes: Array<{ id: number | string; type: string; mode?: number }>;
+    links: Array<Array<number | string>>;
+    extra?: { ue_links?: Array<{ downstream: number | string; upstream: number | string }> };
+  },
+  manifest: Pick<TitanicManifest, 'coverageCases' | 'coverageExemptions' | 'disabledNodes'>,
+  publishedTypes: Iterable<string>,
+): string[] => {
+  const published = new Set(publishedTypes);
+  const nodes = new Map(workflow.nodes.map((node) => [String(node.id), node]));
+  const parents = new Map<string, string[]>();
+  const addParent = (downstream: number | string, upstream: number | string) => {
+    const key = String(downstream);
+    parents.set(key, [...(parents.get(key) ?? []), String(upstream)]);
+  };
+  workflow.links.forEach((link) => addParent(link[3], link[1]));
+  workflow.extra?.ue_links?.forEach((link) => addParent(link.downstream, link.upstream));
+  const errors: string[] = [];
+  const reached = new Set<string>();
+  const pending = manifest.coverageCases.flatMap((item) => item.targets.map(String));
+  while (pending.length) {
+    const id = pending.pop()!;
+    if (reached.has(id)) continue;
+    const node = nodes.get(id);
+    if (!node) {
+      // Link integrity is separate; an absent endpoint covers no type.
+      continue;
+    }
+    if (node.mode === 2) continue;
+    reached.add(id);
+    pending.push(...(parents.get(id) ?? []));
+  }
+  const covered = new Set([...reached].map((id) => nodes.get(id)!.type));
+  for (const type of new Set(workflow.nodes.map((node) => node.type))) {
+    if (type.startsWith('LF_') && !published.has(type)) {
+      errors.push(`Workflow uses unknown LF node type ${type}`);
+    }
+  }
+  const exemptions = [...(manifest.coverageExemptions ?? [])];
+  for (const disabled of manifest.disabledNodes) {
+    exemptions.push({ ...disabled, nodeIds: [disabled.id] });
+    if (nodes.get(String(disabled.id))?.mode !== 2) {
+      errors.push(`Disabled coverage node ${disabled.id} is not mode 2`);
+    }
+  }
+  const exempted = new Set<string>();
+  for (const exemption of exemptions) {
+    const type = exemption.type;
+    if (!exemption.reason.trim()) errors.push(`Coverage exemption for ${type} requires a reason`);
+    if (!published.has(type)) errors.push(`Coverage exemption uses unknown LF node type ${type}`);
+    const actualIds = workflow.nodes.filter((node) => node.type === type).map((node) => String(node.id)).sort();
+    const exemptIds = [...new Set(exemption.nodeIds.map(String))].sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify(exemptIds)) {
+      errors.push(`Coverage exemption node IDs do not match ${type}`);
+    }
+    if (covered.has(type)) errors.push(`Coverage exemption for ${type} is already reachable`);
+    exempted.add(type);
+  }
+  for (const type of published) {
+    if (!covered.has(type) && !exempted.has(type)) {
+      errors.push(`LF node type ${type} is not reachable from coverage targets and has no exemption`);
+    }
+  }
+  return [...new Set(errors)].sort();
 };
 
 const visit = (value: unknown, visitor: (record: Record<string, unknown>) => void) => {

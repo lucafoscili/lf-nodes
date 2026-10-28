@@ -54,6 +54,70 @@ def discover_lf_node_types(nodes_root: Path = _LF_NODES_ROOT) -> frozenset[str]:
     return frozenset(discovered)
 
 
+def validate_lf_node_coverage(
+    workflow: dict[str, Any],
+    manifest: dict[str, Any],
+    *,
+    lf_node_types: Iterable[str] | None = None,
+) -> list[str]:
+    """Check published types against target ancestry, with reviewed exemptions.
+
+    This is static reachability evidence, not proof that a branch executed.
+    Disabled nodes stop traversal and cannot provide execution coverage.
+    """
+    published = discover_lf_node_types() if lf_node_types is None else set(lf_node_types)
+    nodes = {str(node["id"]): node for node in workflow["nodes"]}
+    parents: dict[str, list[str]] = {}
+    for link in workflow.get("links", []):
+        parents.setdefault(str(link[3]), []).append(str(link[1]))
+    for link in workflow.get("extra", {}).get("ue_links", []):
+        parents.setdefault(str(link["downstream"]), []).append(str(link["upstream"]))
+
+    errors: list[str] = []
+    reached: set[str] = set()
+    pending = [str(target) for case in manifest["coverageCases"] for target in case["targets"]]
+    while pending:
+        node_id = pending.pop()
+        if node_id in reached:
+            continue
+        node = nodes.get(node_id)
+        if node is None:
+            # Link integrity is separate; an absent endpoint covers no type.
+            continue
+        if node.get("mode") == 2:
+            continue
+        reached.add(node_id)
+        pending.extend(parents.get(node_id, []))
+
+    covered = {nodes[node_id]["type"] for node_id in reached}
+    fixture_types = {node["type"] for node in nodes.values() if node["type"].startswith("LF_")}
+    for node_type in sorted(fixture_types - published):
+        errors.append(f"Workflow uses unknown LF node type {node_type}")
+
+    exemptions = list(manifest.get("coverageExemptions", []))
+    for disabled in manifest.get("disabledNodes", []):
+        exemptions.append({**disabled, "nodeIds": [disabled["id"]]})
+        node = nodes.get(str(disabled["id"]))
+        if node is None or node.get("mode") != 2:
+            errors.append(f"Disabled coverage node {disabled['id']} is not mode 2")
+    exempted: set[str] = set()
+    for exemption in exemptions:
+        node_type = exemption["type"]
+        if not exemption.get("reason", "").strip():
+            errors.append(f"Coverage exemption for {node_type} requires a reason")
+        if node_type not in published:
+            errors.append(f"Coverage exemption uses unknown LF node type {node_type}")
+        actual_ids = {node_id for node_id, node in nodes.items() if node["type"] == node_type}
+        if {str(node_id) for node_id in exemption["nodeIds"]} != actual_ids:
+            errors.append(f"Coverage exemption node IDs do not match {node_type}")
+        if node_type in covered:
+            errors.append(f"Coverage exemption for {node_type} is already reachable")
+        exempted.add(node_type)
+    for node_type in sorted(published - covered - exempted):
+        errors.append(f"LF node type {node_type} is not reachable from coverage targets and has no exemption")
+    return sorted(set(errors))
+
+
 def _workflow_to_prompt(workflow: dict[str, Any]) -> dict[str, Any]:
     if str(_REPO_ROOT) not in sys.path:
         sys.path.insert(0, str(_REPO_ROOT))

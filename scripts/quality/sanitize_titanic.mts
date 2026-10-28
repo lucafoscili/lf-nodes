@@ -496,6 +496,25 @@ export const sanitizeTitanicWorkflow = (
   return { workflow, changes };
 };
 
+export const assertTitanicNodePreservation = (
+  candidate: JsonRecord,
+  canonical: JsonRecord,
+): void => {
+  if (!Array.isArray(candidate.nodes) || !Array.isArray(canonical.nodes)) {
+    throw new Error('cannot compare Titanic node coverage: missing nodes array');
+  }
+  const identity = (node: JsonRecord): string => JSON.stringify([String(node.id), node.type]);
+  const candidateNodes = new Set(candidate.nodes.map(identity));
+  const removed = canonical.nodes.filter((node: JsonRecord) => !candidateNodes.has(identity(node)));
+  if (removed.length) {
+    throw new Error(
+      'refusing to publish Titanic: source removes canonical nodes: ' +
+        removed.map((node: JsonRecord) => `node ${node.id}: ${node.type}`).join(', ') +
+        '. Copy the canonical fixture, edit/export that workflow, and pass it with --input.',
+    );
+  }
+};
+
 const parseArgs = (argv: string[]): { input: string; output: string } => {
   let input = defaultInput;
   let output = defaultOutput;
@@ -518,6 +537,8 @@ const main = async (): Promise<void> => {
   const options = parseArgs(process.argv.slice(2));
   const sourceBytes = await readFile(options.input);
   const source = JSON.parse(sourceBytes.toString('utf8')) as JsonRecord;
+  const canonical = JSON.parse(await readFile(defaultOutput, 'utf8')) as JsonRecord;
+  assertTitanicNodePreservation(source, canonical);
   const { workflow, changes } = sanitizeTitanicWorkflow(source);
   const outputBytes = `${JSON.stringify(workflow)}\n`;
   await mkdir(dirname(options.output), { recursive: true });

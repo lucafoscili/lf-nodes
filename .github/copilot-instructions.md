@@ -66,13 +66,14 @@
   `modules/tests/nodes/test_output_metadata_contract.py` for new nodes.
 - Run `corepack yarn test`, TypeScript checks, and a full build for frontend
   changes.
-- Finish release-bound backend/frontend contract changes against the audited repository authority at
-  `scripts/quality/fixtures/E2E.json`: hydrate the real workflow, confirm
-  sockets, and execute only the in-scope branch. Refresh it from the maintainer
-  working projection with `corepack yarn sanitize:titanic`; the sanitizer must
-  preserve topology and fail closed on credentials, private paths, volatile
-  sessions/previews, and adult-content vocabulary. Coordinate queue ownership
-  before live execution and verify durable preview hydration after reload.
+- Follow the [Titanic release checklist](../scripts/quality/TITANIC_E2E.md#release-gate-and-checklist)
+  for release-bound backend/frontend changes. Start workflow edits from the
+  checked-in `scripts/quality/fixtures/E2E.json` using the documented
+  [edit path](../scripts/quality/TITANIC_E2E.md#editing-the-canonical-workflow);
+  an older user copy is not a safe source. The sanitizer preserves topology
+  and rejects credentials, private paths, volatile sessions/previews, and
+  adult-content vocabulary. Coordinate queue ownership before live execution
+  and verify durable preview hydration after reload.
 
 ## References
 

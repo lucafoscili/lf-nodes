@@ -1,8 +1,8 @@
-# Titanic E2E gate
+# Titanic release checks
 
 `titanic_e2e.mts` turns the checked-in canonical ComfyUI workflow at
-`scripts/quality/fixtures/E2E.json` into an honest,
-programmatic release gate. It loads the real LiteGraph document in Comfy's
+`scripts/quality/fixtures/E2E.json` into repeatable frontend and execution
+checks. It loads the real LiteGraph document in Comfy's
 frontend and uses `app.graphToPrompt()` as the only executable prompt
 authority. The older offline workflow converter is intentionally not used: it
 cannot faithfully resolve Titanic's reroutes, virtual links, disabled nodes,
@@ -11,20 +11,68 @@ and asynchronously serialized widgets.
 The command never starts or stops ComfyUI or LM Studio, saves the workflow,
 clears a queue, downloads a model, or issues a global interrupt.
 
-The maintainer's workflow under ComfyUI's user directory is a working
-projection. Refresh the repository authority deliberately with:
+## Release gate and checklist
+
+The release gate is **hydration plus targeted cases for the changed behavior,
+with execution proof**. A targeted result must report
+`achievedGate: "targeted-branch-execution"`: cached coverage or terminal success
+alone is insufficient. Declare the changed nodes in the case's
+`execution.requiredNodeIds` and assert their useful outputs in `expect`.
+`--full` remains an optional exhaustive diagnostic, not a release requirement.
+
+1. Run `python -I scripts/quality/run_ci_contracts.py` and
+   `corepack yarn check:release`. CI runs these offline contracts and the build;
+   it does not establish live hydration or execution.
+2. With Comfy already running, idle and coordinated, run the hydration command
+   below and the affected named cases with `--full --case <id>`. Use only the
+   resource flags those cases require. `--accept-warm-cache` permits a warm
+   service, but the required nodes must still execute.
+3. Inspect the changed widgets and outputs. Record the selected case IDs and
+   their achieved levels; retain failures and untested behavior explicitly.
+
+## Editing the canonical workflow
+
+Start from `scripts/quality/fixtures/E2E.json`, not an older workflow in Comfy's
+user directory. Copy the canonical file to a separately named working file,
+open that copy in Comfy, edit it, and export/save the complete graph to that
+working file. Preserve any existing user workflow. Then run:
 
 ```powershell
-corepack yarn sanitize:titanic
+corepack yarn sanitize:titanic --input <edited-workflow.json>
 ```
 
 The deterministic sanitizer preserves nodes, links, groups, and other graph
 metadata while removing private filenames/paths, transient editor state,
 history, preview URLs, credentials, and adult-content references. Its tests
-also prove idempotence. Review and commit both the fixture and its expected
-SHA-256 in `titanic_cases.json`.
+also prove idempotence. Before writing, it refuses a source that removes or
+retypes canonical node IDs, naming the lost nodes even if other nodes were
+added. The no-argument command still reads the maintainer's user copy; use it
+only after that copy has been refreshed from the canonical graph.
 
-## Hydration gate
+Review the graph changes and update the cases and the existing workflow fields
+in `titanic_cases.json` from the sanitizer output. Commit the fixture and
+manifest together. Repository-owned append scripts may edit the canonical
+fixture directly; they must start from its current graph as well.
+
+### Coverage and counts
+
+The offline Python and TypeScript checks walk backwards from every
+`coverageCases` target through ordinary and use-everywhere links. Each published
+LF type must be reachable, or explicitly exempted with a reason in
+`titanic_cases.json`. Disabled mode-2 nodes do not establish coverage;
+`disabledNodes` owns their policy reasons. `coverageExemptions` owns the dormant
+and pending-integration exceptions. These are admitted gaps, not execution
+passes; remove an exemption when its type is connected to a case.
+
+Current public type totals come from `NODE_CLASS_MAPPINGS`, read by
+`discover_lf_node_types` in
+`modules/workflow_runner/scripts/workflow_preflight.py`. The node-count workflow
+generates the README's `count.json` badge from that inventory; the badge is not
+a second release assertion. Canonical graph node/link counts live only in
+`titanic_cases.json` under `workflow`; tests read those fields instead of
+copying their values.
+
+## Hydration
 
 With ComfyUI already running and idle:
 
@@ -34,8 +82,8 @@ corepack yarn test:titanic
 
 This checks workflow identity, the seven disabled-policy branches, real
 frontend hydration, LF custom-widget DOM mounting, authoritative prompt
-serialization, exhaustive classification of every active output node, and
-inventory coverage for every currently published LF node type.
+serialization, and exhaustive classification of every active output node.
+Published-type reachability and exemptions are checked by the offline suites.
 The canonical `E2E.json` bytes are checked again before exit.
 
 ## Bounded CPU experience check
@@ -88,11 +136,10 @@ python -I scripts/quality/update_titanic_cpu_coverage.py --check
 
 The generator verifies the synthetic assets, appended graph and manifest.
 Without `--check`, it regenerates those repository-owned fixtures; it never
-reads or edits the maintainer's external working projection. If refreshing
-Titanic from that older projection, reapply the synthetic append and review
-the resulting graph before committing.
+reads or edits the maintainer's external working projection. Follow the edit
+path above so these appended nodes survive subsequent frontend edits.
 
-## Full active-workflow gate
+## Optional full active-workflow diagnostic
 
 ```powershell
 corepack yarn test:titanic -- --full `

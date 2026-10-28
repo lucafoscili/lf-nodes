@@ -6,9 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import {
+  assertTitanicNodePreservation,
   auditSanitizedTitanic,
   sanitizeTitanicWorkflow,
 } from '../sanitize_titanic.mts';
+import { validateLfNodeCoverage } from '../titanic_e2e_core';
 
 const fixturePath = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'E2E.json');
 const imageFixturePath = resolve(
@@ -51,6 +53,73 @@ const publicNodeTypes = (): string[] => {
   return [...names].sort();
 };
 
+const coverageWorkflow = (): any => ({
+  nodes: [
+    { id: 1, type: 'LF_Source' },
+    { id: 2, type: 'LF_Transform' },
+    { id: 3, type: 'LF_Output' },
+  ],
+  links: [[1, 1, 0, 2, 0, 'STRING'], [2, 2, 0, 3, 0, 'STRING']],
+});
+
+const checkCoverage = (workflow: any, overrides: any = {}) => validateLfNodeCoverage(
+  workflow,
+  {
+    coverageCases: [{ id: 'test.chain', title: 'Test chain', resourceClass: 'cpu', targets: [3], timeoutSeconds: 1 }],
+    coverageExemptions: [],
+    disabledNodes: [],
+    ...overrides,
+  },
+  ['LF_Source', 'LF_Transform', 'LF_Output'],
+);
+
+describe('Titanic published type reachability', () => {
+  it('rejects detached type presence', () => {
+    const workflow = coverageWorkflow();
+    workflow.links.shift();
+    expect(checkCoverage(workflow)).toEqual([
+      'LF node type LF_Source is not reachable from coverage targets and has no exemption',
+    ]);
+  });
+
+  it('walks ordinary and use-everywhere ancestor chains', () => {
+    const workflow = coverageWorkflow();
+    expect(checkCoverage(workflow)).toEqual([]);
+    workflow.links.shift();
+    workflow.extra = { ue_links: [{ upstream: '1', downstream: 2 }] };
+    expect(checkCoverage(workflow)).toEqual([]);
+    workflow.links.push([3, 3, 0, 1, 0, 'STRING']);
+    expect(checkCoverage(workflow)).toEqual([]);
+  });
+
+  it('stops at disabled nodes and reuses their policy reasons as exemptions', () => {
+    const workflow = coverageWorkflow();
+    workflow.nodes[1].mode = 2;
+    expect(checkCoverage(workflow)).toHaveLength(2);
+    expect(checkCoverage(workflow, {
+      disabledNodes: [{ id: 2, type: 'LF_Transform', reason: 'external intake disabled by policy' }],
+      coverageExemptions: [{ type: 'LF_Source', nodeIds: [1], reason: 'dormant upstream branch' }],
+    })).toEqual([]);
+    workflow.nodes[2].mode = 2;
+    expect(checkCoverage(workflow)).toContain(
+      'LF node type LF_Output is not reachable from coverage targets and has no exemption',
+    );
+  });
+
+  it('requires exemption reasons and exact fixture instances', () => {
+    const workflow = coverageWorkflow();
+    workflow.links.shift();
+    const exemption = { type: 'LF_Source', nodeIds: [1], reason: 'dormant source pending fixture work' };
+    expect(checkCoverage(workflow, { coverageExemptions: [exemption] })).toEqual([]);
+    expect(checkCoverage(workflow, { coverageExemptions: [{ ...exemption, reason: ' ' }] })).toEqual([
+      'Coverage exemption for LF_Source requires a reason',
+    ]);
+    expect(checkCoverage(workflow, { coverageExemptions: [{ ...exemption, nodeIds: [] }] })).toEqual([
+      'Coverage exemption node IDs do not match LF_Source',
+    ]);
+  });
+});
+
 describe('Titanic publication sanitizer', () => {
   it('pins a metadata-free generic raster fixture', () => {
     const png = readFileSync(imageFixturePath);
@@ -75,8 +144,8 @@ describe('Titanic publication sanitizer', () => {
     expect(sanitized).toEqual(fixture);
     expect(createHash('sha256').update(readFileSync(fixturePath)).digest('hex')).toBe(manifest.workflow.expectedSha256);
     expect(auditSanitizedTitanic(sanitized)).toEqual([]);
-    expect(sanitized.nodes).toHaveLength(390);
-    expect(sanitized.links).toHaveLength(515);
+    expect(sanitized.nodes).toHaveLength(manifest.workflow.expectedNodeCount);
+    expect(sanitized.links).toHaveLength(manifest.workflow.expectedLinkCount);
     const indexedKey = sanitized.nodes.find((node) => node.id === 596);
     expect(indexedKey.type).toBe('LF_GetKeyFromJSONByIndex');
     expect(indexedKey.widgets_values_named.index).toBe(1);
@@ -84,14 +153,32 @@ describe('Titanic publication sanitizer', () => {
     expect(sanitized.links).toContainEqual([1209, 596, 0, 597, 0, 'STRING']);
   });
 
-  it('contains every currently published LF node type', () => {
-    const fixtureTypes = [...new Set(
-      readFixture().nodes
-        .map((node: any) => node.type)
-        .filter((type: unknown) => typeof type === 'string' && type.startsWith('LF_')),
-    )].sort();
-    expect(fixtureTypes).toEqual(publicNodeTypes());
-    expect(fixtureTypes).toHaveLength(154);
+  it('reaches or explicitly exempts every currently published LF node type', () => {
+    expect(validateLfNodeCoverage(readFixture(), readManifest(), publicNodeTypes())).toEqual([]);
+  });
+
+  it('allows added nodes while preserving every canonical node identity', () => {
+    const canonical = { nodes: [{ id: 1, type: 'LF_Source' }] };
+    expect(() => assertTitanicNodePreservation({
+      nodes: [...canonical.nodes, { id: 2, type: 'LF_Output' }],
+    }, canonical)).not.toThrow();
+  });
+
+  it('names deleted canonical nodes even when replacements preserve or increase the count', () => {
+    const canonical = { nodes: [{ id: 1, type: 'LF_Source' }, { id: 2, type: 'LF_Output' }] };
+    for (const replacements of [[], [{ id: 3, type: 'LF_Source' }], [
+      { id: 3, type: 'LF_Source' }, { id: 4, type: 'LF_Transform' },
+    ]]) {
+      expect(() => assertTitanicNodePreservation({
+        nodes: [canonical.nodes[1], ...replacements],
+      }, canonical)).toThrow('node 1: LF_Source');
+    }
+  });
+
+  it('rejects retyping an existing canonical node ID', () => {
+    expect(() => assertTitanicNodePreservation({
+      nodes: [{ id: 1, type: 'LF_Transform' }],
+    }, { nodes: [{ id: 1, type: 'LF_Source' }] })).toThrow('node 1: LF_Source');
   });
 
   it('pins synthetic CPU inputs and connected coverage for all six additions', () => {

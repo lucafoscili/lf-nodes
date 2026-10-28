@@ -343,6 +343,19 @@
     }
   ],
   "dormantNodeIds": [13, 278, 380, 429, 438, 439, 440, 453, 478, 492, 495, 496, 537, 538],
+  "coverageExemptions": [
+    {"type": "LF_ONNXSelector", "nodeIds": [492], "reason": "dormant selector has no consumer in a coverage target branch; model fixture wiring is deferred"},
+    {"type": "LF_DetectRegions", "nodeIds": [537], "reason": "dormant detection branch has no coverage target consumer; model fixture wiring is deferred"},
+    {"type": "LF_RegionMask", "nodeIds": [538], "reason": "dormant region-mask result has no coverage target consumer; detection fixture wiring is deferred"},
+    {"type": "LF_StringTemplate", "nodeIds": [453], "reason": "dormant template has no coverage target consumer; connected fixture coverage is deferred"},
+    {"type": "LF_LoadAndEditImages", "nodeIds": [429], "reason": "dormant interactive loader has no coverage target consumer; a separate editing fixture is required"},
+    {"type": "LF_ControlPanel", "nodeIds": [13], "reason": "dormant frontend control has no execution target branch; widget interaction coverage is deferred"},
+    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"},
+    {"type": "LF_RegionColorStats", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"},
+    {"type": "LF_TextRegionMasks", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"},
+    {"type": "LF_RegionFeatureSimilarity", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"},
+    {"type": "LF_VisionPatchEncode", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"}
+  ],
   "disabledNodes": [
     {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},
     {"id": 574, "type": "LF_UploadImages", "reason": "pinned upload fixture required"},

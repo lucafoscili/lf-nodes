@@ -203,21 +203,13 @@ package. If a direct pytest command emits optional CUDA/xformers/flash-attn ABI
 noise, rerun it through this boundary rather than treating a fatal-looking DLL
 trace as product evidence.
 
-Titanic ships as an audited, recoverable fixture under
-`scripts/quality/fixtures/E2E.json`. The maintainer's Comfy workflow is a
-working projection, not the sole authority. Refresh the repository fixture with
-`corepack yarn sanitize:titanic`: that deterministic projection preserves graph
-topology while removing private filenames and paths, transient editor state,
-history, preview URLs, credentials, and adult-content references. The gate pins
-the resulting bytes in `scripts/quality/titanic_cases.json`.
-
-After backend/frontend contract changes, load and hydrate Titanic, verify
-existing sockets have not shifted, and execute only the in-scope CPU-safe
-branches. Coordinate queue ownership before live execution. Confirm final
-preview/state hydration after reload without unintentionally running
-provider/GPU branches. A custom case manifest is deliberately unsupported by
-the canonical gate; reviewed resource classes and grants come only from the
-checked-in manifest.
+Titanic's canonical fixture is `scripts/quality/fixtures/E2E.json`. Use its
+[edit path](../scripts/quality/TITANIC_E2E.md#editing-the-canonical-workflow)
+and [release checklist](../scripts/quality/TITANIC_E2E.md#release-gate-and-checklist)
+as the authority for editing and release verification. Coordinate queue
+ownership before live execution, verify existing sockets, and inspect final
+preview/state hydration after reload. Reviewed resource classes and grants
+come only from the checked-in manifest.
 
 Report the achieved Titanic gate precisely:
 

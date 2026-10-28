@@ -41,7 +41,8 @@ jobs:
         run: corepack enable
       - name: Install locked frontend dependencies
         run: corepack yarn install --immutable
-      - name: Validate frontend, Titanic units, and production build
+      # Live release checks are defined in scripts/quality/TITANIC_E2E.md.
+      - name: Validate offline frontend and Titanic contracts and production build
         run: corepack yarn check:release
       - name: Verify compiled frontend is committed
         run: |
