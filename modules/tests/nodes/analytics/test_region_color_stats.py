@@ -206,7 +206,8 @@ def test_per_image_areas_empty_regions_and_no_intersection_are_explicit(caplog):
     masks[0, 1, 6:, :] = 1
     masks[:, 2, 3:5, :] = 1
     document = _metadata(masks)
-    stats = _measure(a, a, masks.flatten(0, 1), [document])["result"][0]
+    response = _measure(a, a, masks.flatten(0, 1), [document])
+    stats = response["result"][0]
     disjoint, empty, same = stats["regions"]
     assert stats["mask_mode"] == "per_image"
     assert disjoint["a"]["area"] == 16 and disjoint["b"]["area"] == 24
@@ -216,6 +217,10 @@ def test_per_image_areas_empty_regions_and_no_intersection_are_explicit(caplog):
     assert empty["delta_b_minus_a"]["lab_median"] is None
     assert same["matched_count"] == 16 and same["ciede2000"]["mean"] == 0
     assert "No same-coordinate mask intersection" in caplog.text
+    payload = response['ui']['lf_output'][0]
+    assert 'DE00 N/A' in payload['dataset']['nodes'][1]['value']
+    assert 'N/A' in payload['datasets']['chip']['nodes'][1]['value']
+    assert len(payload['datasets']['chart']['nodes']) == 1
     json.dumps(stats, allow_nan=False)
 
 
@@ -265,13 +270,20 @@ def test_headless_event_history_preview_persistence_and_rgba(preview_root, monke
     payload = response["ui"]["lf_output"][0]
     assert sent == [("regioncolorstats", payload, ["node-7"])]
     assert payload["stats"] == stats
+    region_node = payload['dataset']['nodes'][1]
+    assert 'region_0 | DE00 ' in region_node['value']
+    assert 'Lab A [' in region_node['value'] and ' B [' in region_node['value']
+    assert '| B-A [' in region_node['value']
+    assert region_node['cells']['lfImage']['value'] == region_node['value'] + ' (before)'
+    assert region_node['cells']['lfImage_after']['value'] == region_node['value'] + ' (after)'
+    assert payload['datasets']['chart']['nodes'][0]['cells']['Series_0']['value'] == stats['regions'][0]['ciede2000']['mean']
     assert overlay.shape == (1, 8, 24, 4)
     torch.testing.assert_close(overlay[:, :, :8, 3], a[..., 3])
     assert torch.equal(overlay[0, 3, 3, :3], a[0, 3, 3, :3])
     assert not torch.equal(overlay[0, 1, 1, :3], a[0, 1, 1, :3])
-    cells = payload["dataset"]["nodes"][0]["cells"]
+    cells = [cell for node in payload['dataset']['nodes'] for cell in node['cells'].values()]
     saved = []
-    for cell in cells.values():
+    for cell in cells:
         query = parse_qs(urlsplit(cell["lfValue"]).query)
         assert query["type"] == ["input"]
         assert "nonce" not in query and "base64" not in cell["lfValue"]

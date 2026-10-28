@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "1e2fa82b557465119aa2ac406ae461dac1502956e87451627ef6f867fcb29ca7",
-    "expectedNodeCount": 390,
-    "expectedLinkCount": 515
+    "expectedSha256": "d62dbf257d3cd12b389efb9a73d7aced07d094007d40a0049b8459b8a0598641",
+    "expectedNodeCount": 414,
+    "expectedLinkCount": 549
   },
   "fixtures": [
     {
@@ -71,6 +71,172 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.region-comparison",
+      "title": "Synthetic priority masks and registered regional color diagnostics",
+      "resourceClass": "cpu",
+      "targets": [
+        638,
+        640,
+        642
+      ],
+      "timeoutSeconds": 120,
+      "execution": {
+        "requiredNodeIds": [
+          641,
+          642
+        ],
+        "forbiddenCachedNodeIds": [
+          641,
+          642
+        ]
+      },
+      "expect": {
+        "641": {
+          "minimumPreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.text-region-masks.v1",
+            "ordering": "image-major",
+            "image_count": 1,
+            "area": 2304,
+            "raw_area": 3072,
+            "value": "surface | image 0 | area 2304 px",
+            "empty": false
+          }
+        },
+        "642": {
+          "minimumPreviewCount": 3,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.region-color-stats.v1",
+            "matched_count": 768,
+            "intersection_count": 768,
+            "title": "Mean CIEDE2000",
+            "empty": false
+          }
+        }
+      }
+    },
+    {
+      "id": "model.sam3-region-masks",
+      "title": "Core SAM3.1 union masks and explicit empty-region diagnostics",
+      "resourceClass": "gpu",
+      "targets": [
+        646,
+        648
+      ],
+      "timeoutSeconds": 900,
+      "execution": {
+        "requiredNodeIds": [
+          643,
+          644,
+          645,
+          647,
+          648
+        ],
+        "forbiddenCachedNodeIds": [
+          643,
+          644,
+          645,
+          647,
+          648
+        ]
+      },
+      "expect": {
+        "647": {
+          "minimumPreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.text-region-masks.v1",
+            "ordering": "image-major",
+            "image_count": 1
+          }
+        },
+        "648": {
+          "minimumPreviewCount": 3,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.region-color-stats.v1"
+          }
+        }
+      }
+    },
+    {
+      "id": "model.dinov3-region-features",
+      "title": "Core-loaded DINOv3 patch geometry and weighted regional cosine",
+      "resourceClass": "gpu",
+      "targets": [
+        653
+      ],
+      "timeoutSeconds": 900,
+      "execution": {
+        "requiredNodeIds": [
+          641,
+          649,
+          650,
+          651,
+          652
+        ],
+        "forbiddenCachedNodeIds": [
+          641,
+          649,
+          650,
+          651,
+          652
+        ]
+      },
+      "expect": {
+        "650": {
+          "minimumPreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.vision-patch-encode.v1",
+            "crop": "none",
+            "image_count": 1,
+            "patch_size": 16,
+            "shape": "image",
+            "prefix_tokens": 5
+          }
+        },
+        "651": {
+          "minimumPreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.vision-patch-encode.v1",
+            "crop": "none",
+            "image_count": 1,
+            "patch_size": 16,
+            "shape": "image",
+            "prefix_tokens": 5
+          }
+        },
+        "652": {
+          "requiredNamedValues": {
+            "title": "Cosine similarity [-1, 1]",
+            "shape": "number",
+            "schema": "lf.region-feature-similarity.v1",
+            "method": "coverage_weighted_patch_mean_cosine",
+            "model_file": "dino_v3_vit_h.safetensors",
+            "crop": "none",
+            "prefix_tokens": 5,
+            "mask_sets": 1,
+            "empty": false
+          }
+        },
+        "653": {
+          "requiredNamedValues": {
+            "schema": "lf.region-feature-similarity.v1",
+            "method": "coverage_weighted_patch_mean_cosine",
+            "model_file": "dino_v3_vit_h.safetensors",
+            "crop": "none",
+            "prefix_tokens": 5,
+            "mask_sets": 1,
+            "empty": false
+          }
+        }
+      }
+    },
     {
       "id": "cpu.image-regions-layers",
       "title": "Named region edits and combined RGBA layers with cut masks",
@@ -350,11 +516,7 @@
     {"type": "LF_StringTemplate", "nodeIds": [453], "reason": "dormant template has no coverage target consumer; connected fixture coverage is deferred"},
     {"type": "LF_LoadAndEditImages", "nodeIds": [429], "reason": "dormant interactive loader has no coverage target consumer; a separate editing fixture is required"},
     {"type": "LF_ControlPanel", "nodeIds": [13], "reason": "dormant frontend control has no execution target branch; widget interaction coverage is deferred"},
-    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"},
-    {"type": "LF_RegionColorStats", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"},
-    {"type": "LF_TextRegionMasks", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"},
-    {"type": "LF_RegionFeatureSimilarity", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"},
-    {"type": "LF_VisionPatchEncode", "nodeIds": [], "reason": "published source-match type is absent from the canonical fixture; separate widget integration and connected fixture work is pending"}
+    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"}
   ],
   "disabledNodes": [
     {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},

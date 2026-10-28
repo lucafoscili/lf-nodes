@@ -1,4 +1,5 @@
 import { apiCall, cardPlaceholders } from '../helpers/card';
+import { NODE_WIDGET_MAP } from '../helpers/manager';
 import { setProgress } from '../helpers/imageEditor/status';
 import { APIMetadataEntry } from '../types/api/api';
 import { CardPayload, NotifyPayload, WidgetPayloadMap } from '../types/events/events';
@@ -6,7 +7,7 @@ import { LogSeverity } from '../types/manager/manager';
 import { Card } from '../types/widgets/card';
 import { CardsWithChip, CardsWithChipDeserializedValue } from '../types/widgets/cardsWithChip';
 import { ImageEditorState } from '../types/widgets/imageEditor';
-import { CustomWidgetName, NodeName, WidgetFactory } from '../types/widgets/widgets';
+import { CustomWidgetConstructor, CustomWidgetName, NodeName, WidgetFactory } from '../types/widgets/widgets';
 import {
   getApiRoutes,
   getComfyAPI,
@@ -60,7 +61,47 @@ export class LFWidgets {
   };
 
   //#region render
-  render = (name: CustomWidgetName) => this.#FACTORIES[name].render;
+  render = (name: CustomWidgetName): CustomWidgetConstructor => (node, ...args) => {
+    const nodeName = node.comfyClass as NodeName;
+    const regionResult = [
+      NodeName.textRegionMasks,
+      NodeName.regionColorStats,
+      NodeName.regionFeatureSimilarity,
+      NodeName.visionPatchEncode,
+    ].includes(nodeName);
+    // Keep the serialized optional input type stable when choosing another view.
+    const selected = regionResult ? NODE_WIDGET_MAP[nodeName][0] : name;
+    const rendered = this.#FACTORIES[selected].render(node, ...args);
+    if (regionResult) {
+      const outputNode = node as NodeType & {
+        onExecuted?: (output: unknown, ...args: unknown[]) => unknown;
+      };
+      const previous = outputNode.onExecuted;
+      outputNode.onExecuted = (output, ...executionArgs) => {
+        const result = previous?.apply(node, [output, ...executionArgs]);
+        const entries = (output as { lf_output?: WidgetPayloadMap[typeof selected][] })?.lf_output;
+        if (!Array.isArray(entries) || !entries.length || entries.some((entry) => !entry)) {
+          getLfManager().log(`${nodeName}: missing lf_output widget result.`, {}, LogSeverity.Error);
+          return result;
+        }
+        const payload = { ...entries[0], node: String(node.id) };
+        // Core can map the encoder over IMAGE lists. Retain every invocation's grid.
+        if (entries.length > 1 && 'dataset' in payload) {
+          payload.dataset = {
+            ...payload.dataset,
+            nodes: entries.flatMap((entry, index) =>
+              ('dataset' in entry ? entry.dataset.nodes || [] : []).map((item) => ({
+                ...item, id: `${index}:${item.id}`, value: `Image ${index + 1}: ${item.value}`,
+              })),
+            ),
+          };
+        }
+        this.onEvent(nodeName, new CustomEvent('lf-result', { detail: payload }), [selected]);
+        return result;
+      };
+    }
+    return rendered;
+  };
   //#endregion
 
   //#region Decorators

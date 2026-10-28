@@ -213,10 +213,10 @@ describe('Titanic publication sanitizer', () => {
     expect(manifest.coverageCases.find((item: any) => item.id === 'cpu.image-regions-layers')).toMatchObject({
       resourceClass: 'cpu', targets: [616, 621, 622, 626, 627, 628], bindings: { fixtureLayerManifestNodeIds: [622] },
     });
-    const newOutputIds = fixture.nodes.filter((node: any) => node.id >= 612 &&
+    const newOutputIds = fixture.nodes.filter((node: any) => node.id >= 612 && node.id <= 629 &&
       ['LF_WriteJSON', 'LF_ViewImages', 'Preview3DAdvanced'].includes(node.type)).map((node: any) => node.id).sort();
     const newTargets = manifest.coverageCases.flatMap((item: any) => item.targets)
-      .filter((id: number) => id >= 612).sort();
+      .filter((id: number) => id >= 612 && id <= 629).sort();
     expect(newTargets).toEqual(newOutputIds);
     // Every serialized socket points back to the same exact graph edge.
     const nodes = new Map(fixture.nodes.map((node: any) => [node.id, node]));
@@ -226,6 +226,88 @@ describe('Titanic publication sanitizer', () => {
       expect((nodes.get(destination) as any).inputs[destinationSlot].link).toBe(id);
       expect((nodes.get(source) as any).outputs[sourceSlot].type).toBe(type);
     }
+  });
+
+  it('connects synthetic regional diagnostics and independent core SAM3/DINOv3 cases', () => {
+    const fixture = readFixture();
+    const manifest = readManifest();
+    const byId = (id: number) => fixture.nodes.find((node: any) => node.id === id);
+    const coverageCase = (id: string) => manifest.coverageCases.find((item: any) => item.id === id);
+    const upstream = (id: number, name: string) => {
+      const slot = byId(id).inputs.findIndex((input: any) => input.name === name);
+      const link = fixture.links.find((edge: any) => edge[3] === id && edge[4] === slot);
+      return link?.slice(1, 3);
+    };
+
+    expect([641, 642, 647, 648, 650, 651, 652].map((id) => byId(id).type)).toEqual([
+      'LF_TextRegionMasks', 'LF_RegionColorStats', 'LF_TextRegionMasks', 'LF_RegionColorStats',
+      'LF_VisionPatchEncode', 'LF_VisionPatchEncode', 'LF_RegionFeatureSimilarity',
+    ]);
+    expect(JSON.parse(byId(640).widgets_values_named.ui_widget)).toEqual([
+      { id: 'surface', prompt: 'outer surface', priority: 0 },
+      { id: 'detail', prompt: 'central detail', priority: 10 },
+    ]);
+    expect(upstream(638, 'image_1')).toEqual([636, 0]);
+    expect(upstream(638, 'image_2')).toEqual([637, 0]);
+    expect(upstream(639, 'image')).toEqual([638, 0]);
+    expect(upstream(641, 'masks')).toEqual([639, 0]);
+    expect(byId(635).widgets_values_named).toEqual({ x: 16, y: 12, operation: 'add' });
+    expect(upstream(642, 'masks')).toEqual([641, 0]);
+    expect(upstream(642, 'metadata')).toEqual([641, 1]);
+    for (const id of [641, 642, 647, 648, 650, 651]) {
+      expect(byId(id).inputs.find((input: any) => input.name === 'ui_widget').type).toBe('LF_COMPARE');
+      expect(byId(id).widgets_values_named.ui_widget).toEqual({});
+    }
+    expect(byId(652).inputs.find((input: any) => input.name === 'ui_widget').type).toBe('LF_COUNT_BAR_CHART');
+    expect(coverageCase('cpu.region-comparison')).toMatchObject({
+      resourceClass: 'cpu', targets: [638, 640, 642],
+      execution: { requiredNodeIds: [641, 642], forbiddenCachedNodeIds: [641, 642] },
+      expect: { '641': { requiredNamedValues: { schema: 'lf.text-region-masks.v1', ordering: 'image-major', area: 2304, raw_area: 3072 } },
+        '642': { minimumPreviewCount: 3, requiredNamedValues: { schema: 'lf.region-color-stats.v1', matched_count: 768, intersection_count: 768 } } },
+    });
+
+    expect(byId(643).type).toBe('CheckpointLoaderSimple');
+    expect(byId(643).widgets_values_named.ckpt_name).toBe('sam3.1_multiplex_fp16.safetensors');
+    expect(upstream(644, 'clip')).toEqual([643, 1]);
+    expect(byId(645).type).toBe('SAM3_Detect');
+    expect(byId(645).widgets_values_named.individual_masks).toBe(false);
+    expect(upstream(645, 'model')).toEqual([643, 0]);
+    expect(upstream(645, 'conditioning')).toEqual([644, 0]);
+    expect(upstream(647, 'masks')).toEqual([645, 0]);
+    expect(JSON.parse(byId(646).widgets_values_named.ui_widget)[0].prompt)
+      .toBe(byId(644).widgets_values_named.text);
+    expect(coverageCase('model.sam3-region-masks')).toMatchObject({
+      resourceClass: 'gpu', targets: [646, 648],
+      execution: { requiredNodeIds: [643, 644, 645, 647, 648], forbiddenCachedNodeIds: [643, 644, 645, 647, 648] },
+    });
+
+    expect(byId(649).type).toBe('CLIPVisionLoader');
+    expect(byId(649).widgets_values_named.clip_name).toBe('dino_v3_vit_h.safetensors');
+    for (const id of [650, 651]) {
+      expect(upstream(id, 'clip_vision')).toEqual([649, 0]);
+      expect(byId(id).widgets_values_named.crop).toBe('none');
+    }
+    expect(upstream(652, 'features_a')).toEqual([650, 0]);
+    expect(upstream(652, 'features_b')).toEqual([651, 0]);
+    expect(upstream(652, 'masks')).toEqual([641, 0]);
+    expect(upstream(652, 'metadata')).toEqual([641, 1]);
+    expect(upstream(653, 'json_input')).toEqual([652, 0]);
+    expect(byId(652).widgets_values_named).toMatchObject({ model_file: 'dino_v3_vit_h.safetensors', crop: 'none' });
+    const dino = coverageCase('model.dinov3-region-features');
+    expect(dino).toMatchObject({ resourceClass: 'gpu', targets: [653],
+      execution: { requiredNodeIds: [641, 649, 650, 651, 652], forbiddenCachedNodeIds: [641, 649, 650, 651, 652] } });
+    for (const id of [650, 651, 652]) {
+      expect(dino.expect[String(id)].requiredNamedValues).toMatchObject({ crop: 'none', prefix_tokens: 5 });
+    }
+    for (const type of ['LF_TextRegionMasks', 'LF_RegionColorStats', 'LF_RegionFeatureSimilarity', 'LF_VisionPatchEncode']) {
+      expect(manifest.coverageExemptions.some((item: any) => item.type === type)).toBe(false);
+    }
+    const outputTypes = ['LF_ImageList', 'LF_WriteJSON', 'LF_RegionColorStats', 'LF_DisplayJSON'];
+    const outputIds = fixture.nodes.filter((node: any) => node.id >= 630 && outputTypes.includes(node.type))
+      .map((node: any) => node.id).sort();
+    const targets = manifest.coverageCases.flatMap((item: any) => item.targets)
+      .filter((id: number) => id >= 630).sort();
+    expect(targets).toEqual(outputIds);
   });
 
   it('pins the new media, audio, and exact-instance local-LLM coverage slice', () => {

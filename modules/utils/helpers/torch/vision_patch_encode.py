@@ -56,7 +56,7 @@ def vision_output_from_pixel_values(model, pixel_values, device, intermediate_ou
     return outputs
 
 
-def encode_vision_patches(clip_vision, image, crop):
+def encode_vision_patches(clip_vision, image, crop, *, return_preview=False):
     """CLIPVisionEncode's path for a core CLIP_VISION, tolerant of a None hidden state."""
     _check_inputs(clip_vision, image, crop)
     from comfy.clip_model import clip_preprocess
@@ -67,5 +67,52 @@ def encode_vision_patches(clip_vision, image, crop):
         image.to(clip_vision.load_device), size=clip_vision.image_size,
         mean=clip_vision.image_mean, std=clip_vision.image_std, crop=crop == 'center').float()
     mode = 'all' if getattr(clip_vision, 'return_all_hidden_states', False) else -2
-    return vision_output_from_pixel_values(clip_vision.model, pixel_values,
-                                           intermediate_device(), mode)
+    output = vision_output_from_pixel_values(clip_vision.model, pixel_values,
+                                            intermediate_device(), mode)
+    if return_preview:
+        # Reuse the actual model input; do not run preprocessing or the model twice.
+        mean = pixel_values.new_tensor(clip_vision.image_mean).view(1, 3, 1, 1)
+        std = pixel_values.new_tensor(clip_vision.image_std).view(1, 3, 1, 1)
+        preview = (pixel_values.detach() * std + mean).clamp(0, 1).movedim(1, -1).cpu()
+        return output, preview
+    return output
+
+
+def vision_encoding_preview(clip_vision, image, crop, output, encoded):
+    """Describe returned tensors and show the exact encoded pixels with a known grid."""
+    from ..ui import create_cached_compare_node
+
+    config = getattr(clip_vision, 'config', {})
+    patch_size = getattr(clip_vision.model, 'patch_size', config.get('patch_size'))
+    height, width = encoded.shape[1:3]
+    sequence = output.last_hidden_state
+    grid = prefix = None
+    if (type(patch_size) is int and patch_size > 0 and height % patch_size == 0
+            and width % patch_size == 0):
+        candidate = [height // patch_size, width // patch_size]
+        count = candidate[0] * candidate[1]
+        if sequence.shape[1] >= count:
+            grid, prefix = candidate, int(sequence.shape[1] - count)
+    metadata = {'schema': 'lf.vision-patch-encode.v1', 'crop': crop,
+                'source_size': [int(image.shape[2]), int(image.shape[1])],
+                'encoded_size': [int(width), int(height)], 'image_count': int(encoded.shape[0]),
+                'sequence_shape': list(sequence.shape), 'pooled_shape': list(output.image_embeds.shape),
+                'token_count': int(sequence.shape[1]), 'feature_dimension': int(sequence.shape[2]),
+                'patch_grid': grid, 'patch_size': patch_size if grid else None,
+                'prefix_tokens': prefix, 'model_identity': None}
+    if grid is None:
+        metadata['warning'] = 'Patch grid and prefix tokens unavailable: loaded model exposes no compatible patch geometry.'
+    nodes = []
+    for index, item in enumerate(encoded):
+        clean = item.unsqueeze(0)
+        preview = clean.clone()
+        if grid:
+            preview[:, ::patch_size, :, :3] = preview.new_tensor([1., .65, 0.])
+            preview[:, :, ::patch_size, :3] = preview.new_tensor([1., .65, 0.])
+        geometry = f"grid {grid[0]}x{grid[1]} | prefix {prefix}" if grid else 'grid N/A | prefix N/A'
+        label = (f"image {index + 1}/{len(encoded)} | {crop} | {image.shape[2]}x{image.shape[1]} -> {width}x{height} "
+                 f"| sequence {list(sequence.shape)} | {geometry} | pooled {list(output.image_embeds.shape)}")
+        if grid is None:
+            label += ' | ' + metadata['warning']
+        nodes.append(create_cached_compare_node(preview, clean, index=index, title=label))
+    return {'dataset': {'nodes': nodes}, 'encoding': metadata}

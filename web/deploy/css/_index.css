@@ -116,6 +116,17 @@
   width: 100%;
   height: 100%;
 }
+.lf-compare--summary {
+  display: grid;
+  grid-template-rows: minmax(120px, 1fr) auto;
+}
+.lf-compare--summary .lf-compare__widget {
+  min-height: 0;
+}
+.lf-compare__summary {
+  max-height: 10rem;
+  overflow: auto;
+}
 
 .lf-controlpanel {
   width: 100%;

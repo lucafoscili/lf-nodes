@@ -10,8 +10,15 @@ import pytest
 import torch
 
 from modules.nodes.analytics.region_feature_similarity import LF_RegionFeatureSimilarity
+from modules.nodes.analytics import region_feature_similarity as node_module
 from modules.nodes.regions.text_region_masks import LF_TextRegionMasks
 from modules.utils.helpers.torch.region_feature_similarity import pool_region_patches
+from modules.utils.helpers.ui import generated_preview
+
+
+@pytest.fixture(autouse=True)
+def preview_root(monkeypatch, tmp_path):
+    monkeypatch.setattr(generated_preview, 'get_comfy_dir', lambda _kind: str(tmp_path / 'input'))
 
 
 def _regions(masks=None):
@@ -22,7 +29,7 @@ def _regions(masks=None):
     table = [{'id': f'part-{i}', 'prompt': f'part {i}', 'priority': 0}
              for i in range(len(masks))]
     image = torch.zeros(1, *masks.shape[1:], 3)
-    return LF_TextRegionMasks().on_exec(image, masks, table)[:2]
+    return LF_TextRegionMasks().on_exec(image, masks, table)['result'][:2]
 
 
 def _patches(values=None):
@@ -40,7 +47,7 @@ def _compare(a=None, b=None, masks=None, metadata=None, **kwargs):
     return LF_RegionFeatureSimilarity().on_exec(
         features_a=_patches() if a is None else a,
         features_b=_patches() if b is None else b,
-        masks=masks, metadata=metadata, **kwargs)[0]
+        masks=masks, metadata=metadata, **kwargs)['result'][0]
 
 
 def test_identical_outputs_give_one_and_name_actual_method():
@@ -165,3 +172,29 @@ def test_public_contract():
     assert node.RETURN_TYPES == ('JSON',)
     assert node.RETURN_NAMES == ('similarity',)
     assert node.OUTPUT_IS_LIST == (False,)
+    assert list(required) == ['features_a', 'features_b', 'masks', 'metadata', 'model_file', 'crop']
+    assert [required[key][0] for key in ('masks', 'metadata', 'model_file')] == ['MASK', 'JSON', 'STRING']
+    assert required['model_file'][1]['default'] == 'dino_v3_vit_h.safetensors'
+    assert required['crop'][0] == ['none', 'center'] and required['crop'][1]['default'] == 'none'
+    assert node.INPUT_TYPES()['optional']['ui_widget'] == ('LF_COUNT_BAR_CHART', {'default': {}})
+    assert node.INPUT_TYPES()['hidden'] == {'node_id': 'UNIQUE_ID'}
+
+
+def test_signed_chart_values_empty_chips_and_tree_match_history(monkeypatch):
+    sent = []
+    monkeypatch.setattr(node_module, 'safe_send_sync', lambda *args: sent.append(args))
+    masks = torch.zeros(3, 4, 4)
+    masks[0, :, :2] = 1
+    masks[1, :, 2:] = 1
+    masks, metadata = _regions(masks)
+    a = SimpleNamespace(image_embeds=torch.tensor([[1., 0.], [0., 1.], [1., 1.]]))
+    b = SimpleNamespace(image_embeds=torch.tensor([[-1., 0.], [0., 1.], [1., 1.]]))
+    response = LF_RegionFeatureSimilarity().on_exec(a, b, masks, metadata, node_id=['19'])
+    payload = response['ui']['lf_output'][0]
+    assert sent == [('regionfeaturesimilarity', payload, ['19'])]
+    assert payload['similarity'] == response['result'][0]
+    assert [node['cells']['Series_0']['value'] for node in payload['datasets']['chart']['nodes']] == [-1., 1.]
+    chips = payload['datasets']['chip']['nodes']
+    assert 'cosine -1.0000' in chips[0]['value']
+    assert 'N/A' in chips[2]['value'] and 'no mask coverage' in chips[2]['value']
+    assert len(payload['dataset']['nodes']) == 3

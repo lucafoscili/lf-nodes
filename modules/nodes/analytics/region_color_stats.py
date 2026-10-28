@@ -5,7 +5,7 @@ from . import CATEGORY
 from ..image.side_by_side import compose_side_by_side
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.detection.build_overlay import outline_region_masks
+from ...utils.helpers.detection.build_overlay import outline_region_masks, region_mask_preview
 from ...utils.helpers.detection.region_masks import region_mask_sets
 from ...utils.helpers.logic import normalize_output_image
 from ...utils.helpers.torch.region_color_stats import region_color_measurements
@@ -62,7 +62,30 @@ class LF_RegionColorStats:
         batches, image_list = normalize_output_image([overlay])
         dataset = {"nodes": [create_cached_compare_node(
             outlined_a, outlined_b, index=0, title="Region outlines: A / B", debug=overlay)]}
-        payload = {"dataset": dataset, "stats": stats}
+        chart, chips = [], []
+        for index, row in enumerate(stats['regions']):
+            distance = row['ciede2000']['mean'] if row['ciede2000'] is not None else None
+            distance_label = f"{distance:.3f}" if distance is not None else 'N/A'
+            means = ['N/A' if row[side]['lab_mean'] is None else
+                     ','.join(f'{value:.2f}' for value in row[side]['lab_mean']) for side in ('a', 'b')]
+            delta = row['delta_b_minus_a']['lab_mean']
+            delta_label = 'N/A' if delta is None else ','.join(f'{value:+.2f}' for value in delta)
+            label = (f"{row['id']} | DE00 {distance_label} | Lab A [{means[0]}] B [{means[1]}] "
+                     f"| B-A [{delta_label}]")
+            if row['warnings']:
+                label += ' | ' + ' '.join(row['warnings'])
+            dataset['nodes'].append(create_cached_compare_node(
+                region_mask_preview(a, mask_sets[0, index], isolate=True),
+                region_mask_preview(b, mask_sets[-1, index], isolate=True),
+                index=index + 1, title=label))
+            chips.append({'id': str(index), 'value': label})
+            if distance is not None:
+                chart.append({'id': str(index), 'cells': {
+                    'Axis_0': {'value': row['id']}, 'Series_0': {'value': distance}}})
+        payload = {"dataset": dataset, "stats": stats, 'datasets': {
+            'chart': {'columns': [{'id': 'Axis_0', 'title': 'Region'},
+                                  {'id': 'Series_0', 'shape': 'number', 'title': 'Mean CIEDE2000'}],
+                      'nodes': chart}, 'chip': {'nodes': chips}}}
         safe_send_sync("regioncolorstats", payload, kwargs.get("node_id"))
         return {"ui": {"lf_output": [payload]}, "result": (stats, batches[0], image_list)}
 

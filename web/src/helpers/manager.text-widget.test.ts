@@ -43,6 +43,19 @@ describe('LLM widget contracts', () => {
 });
 
 describe('Generic output widget contracts', () => {
+  it('uses an emitted result view for every regional node, including map-only alternatives', () => {
+    const choices = {
+      [NodeName.textRegionMasks]: [CustomWidgetName.compare, CustomWidgetName.masonry],
+      [NodeName.regionColorStats]: [CustomWidgetName.compare, CustomWidgetName.countBarChart],
+      [NodeName.regionFeatureSimilarity]: [CustomWidgetName.countBarChart, CustomWidgetName.tree],
+      [NodeName.visionPatchEncode]: [CustomWidgetName.compare, CustomWidgetName.masonry],
+    };
+    for (const [name, views] of Object.entries(choices)) {
+      expect(NODE_WIDGET_MAP[name]).toHaveLength(1);
+      expect(views).toContain(NODE_WIDGET_MAP[name][0]);
+    }
+  });
+
   it('uses native Comfy audio UI for ACE-Step Remix', () => {
     expect(NODE_WIDGET_MAP[NodeName.aceStepRemix]).toEqual([]);
   });

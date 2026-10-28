@@ -139,6 +139,41 @@ Without `--check`, it regenerates those repository-owned fixtures; it never
 reads or edits the maintainer's external working projection. Follow the edit
 path above so these appended nodes survive subsequent frontend edits.
 
+### Regional masks, color and vision features
+
+The regional comparison slice uses two generated, registered 64 × 48 images.
+Its CPU case creates full-surface and central-detail masks with stock mask
+nodes, collects them in region-major order, resolves the priority overlap,
+and measures the color change. No input files or model weights are needed:
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.region-comparison
+```
+
+Two independent cases exercise the real core model boundaries:
+
+```powershell
+corepack yarn test:titanic -- --full --case model.sam3-region-masks --allow-gpu --allow-models
+corepack yarn test:titanic -- --full --case model.dinov3-region-features --allow-gpu --allow-models
+```
+
+The SAM3 case requires `sam3.1_multiplex_fp16.safetensors` in Core's checkpoint
+inventory. `CheckpointLoaderSimple` supplies its MODEL and CLIP; its own
+`CLIPTextEncode` conditioning feeds `SAM3_Detect`. The detector uses
+`individual_masks=false`, retaining one union mask even when the synthetic
+image has no detected object. Empty regions and their warnings are valid
+observable results, not evidence of semantic segmentation quality.
+
+The DINOv3 case independently requires `dino_v3_vit_h.safetensors` in Core's
+CLIP vision inventory. Core `CLIPVisionLoader` feeds two `LF_VisionPatchEncode`
+nodes with `crop=none`; regional feature comparison uses the nonempty CPU
+masks. Assertions inspect the encoder geometry, prefix-token count and
+durable previews, then the weighted patch-cosine method and region JSON.
+These cases require actual execution events from the changed LF nodes and
+reject their cached execution. They never download weights. With no running,
+coordinated Comfy service, offline fixture tests establish **inventory** only;
+widget hydration and real SAM3/DINOv3 inference remain separate live checks.
+
 ## Optional full active-workflow diagnostic
 
 ```powershell

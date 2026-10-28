@@ -11,6 +11,8 @@ const BASE_CSS_CLASS = 'lf-compare';
 export enum CompareCSS {
   Content = BASE_CSS_CLASS,
   Widget = `${BASE_CSS_CLASS}__widget`,
+  WithSummary = `${BASE_CSS_CLASS}--summary`,
+  Summary = `${BASE_CSS_CLASS}__summary`,
 }
 //#endregion
 
@@ -27,5 +29,6 @@ export type CompareDeserializedValue = LfDataDataset;
 //#region State
 export interface CompareState extends BaseWidgetState {
   compare: HTMLLfCompareElement;
+  summary?: HTMLLfTreeElement;
 }
 //#endregion

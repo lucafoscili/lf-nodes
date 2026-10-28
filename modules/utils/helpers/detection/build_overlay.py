@@ -8,6 +8,18 @@ import torch.nn.functional as F
 from ..conversion import tensor_to_numpy
 
 
+def region_mask_preview(image: torch.Tensor, mask: torch.Tensor, *, isolate=False) -> torch.Tensor:
+    """Show an exact region with a coloured fill or a dimmed surrounding image."""
+    result = image.detach().to(device="cpu", dtype=torch.float32).clone()
+    covered = mask.detach().to(device="cpu") > 0.5
+    rgb = result[0, ..., :3]
+    if isolate:
+        rgb[~covered] *= 0.15
+    else:
+        rgb[covered] = rgb[covered] * 0.55 + rgb.new_tensor([1.0, 0.65, 0.0]) * 0.45
+    return outline_region_masks(result, covered.unsqueeze(0))
+
+
 def outline_region_masks(image: torch.Tensor, masks: torch.Tensor) -> torch.Tensor:
     """Draw one-pixel inner mask boundaries, retaining image alpha exactly."""
     result = image.detach().to(device="cpu", dtype=torch.float32).clone()

@@ -6,8 +6,8 @@ return_all_hidden_states. Its model mimics DINOv3's forward, returning
 (sequence, None, pooled, None) with CLS, four registers, then 16-px patches.
 Core's comfy.clip_vision, comfy.clip_model and comfy.model_management import
 the GPU stack, so host modules are stubbed: Output as core's attribute bag,
-a recording load_model_gpu, and a stretch-only stand-in for clip_preprocess
-(the real preprocess and model loading run only live).
+a recording load_model_gpu, and a geometry-compatible stand-in for clip_preprocess
+(the real preprocessing implementation and model loading run only live).
 """
 import sys
 import types
@@ -17,9 +17,16 @@ import pytest
 import torch
 
 from modules.nodes.analytics.vision_patch_encode import LF_VisionPatchEncode
+from modules.nodes.analytics import vision_patch_encode as node_module
 from modules.nodes.regions.text_region_masks import LF_TextRegionMasks
 from modules.utils.helpers.torch.region_feature_similarity import compare_region_features
 from modules.utils.helpers.torch.vision_patch_encode import vision_output_from_pixel_values
+from modules.utils.helpers.ui import generated_preview
+
+
+@pytest.fixture(autouse=True)
+def preview_root(monkeypatch, tmp_path):
+    monkeypatch.setattr(generated_preview, 'get_comfy_dir', lambda _kind: str(tmp_path / 'input'))
 
 
 class _Output:  # mirror of comfy.clip_vision.Output
@@ -34,6 +41,7 @@ class _TinyDino(torch.nn.Module):
     def __init__(self, result=None):
         super().__init__()
         self.result = result
+        self.patch_size = 16
         self.kwargs = None
         self.register_buffer('projection', torch.arange(12, dtype=torch.float32).reshape(3, 4) / 10)
 
@@ -60,7 +68,14 @@ def _host(monkeypatch):
     def clip_preprocess(image, size, mean, std, crop):
         calls.append(('preprocess', size, crop))
         image = image[..., :3].movedim(-1, 1)
-        image = torch.nn.functional.interpolate(image, size=(size, size), mode='bilinear')
+        if image.shape[-2:] != (size, size):
+            height, width = image.shape[-2:]
+            scale = size / min(height, width)
+            scaled = (round(scale * height), round(scale * width)) if crop else (size, size)
+            image = torch.nn.functional.interpolate(image, size=scaled, mode='bicubic', antialias=True)
+            top, left = (image.shape[2] - size) // 2, (image.shape[3] - size) // 2
+            image = image[:, :, top:top + size, left:left + size]
+        image = (image * 255).clamp(0, 255).round() / 255.
         return (image - torch.tensor(mean).view(3, 1, 1)) / torch.tensor(std).view(3, 1, 1)
 
     clip_model.clip_preprocess = clip_preprocess
@@ -88,7 +103,7 @@ def _regions():
     masks[0, :, :2] = 1
     masks[1, :, 2:] = 1
     table = [{'id': f'part-{i}', 'prompt': f'part {i}', 'priority': 0} for i in range(2)]
-    return LF_TextRegionMasks().on_exec(torch.zeros(1, 4, 4, 3), masks, table)[:2]
+    return LF_TextRegionMasks().on_exec(torch.zeros(1, 4, 4, 3), masks, table)['result'][:2]
 
 
 def test_dinov3_tuple_gives_core_output_fields_and_shapes():
@@ -111,7 +126,7 @@ def test_hidden_state_tensor_is_kept_when_the_model_returns_one():
 
 def test_node_encodes_through_loaded_model_and_matches_core_crop(_host):
     clip_vision = _clip_vision()
-    output = LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'none')[0]
+    output = LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'none')['result'][0]
     assert _host == [('load', clip_vision.patcher), ('preprocess', 32, False)]
     assert output.last_hidden_state.shape == (1, 9, 4)
     LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'center')
@@ -120,14 +135,14 @@ def test_node_encodes_through_loaded_model_and_matches_core_crop(_host):
 
 def test_identical_images_compare_at_one_in_region_feature_similarity():
     clip_vision = _clip_vision()
-    a = LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'none')[0]
-    b = LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'none')[0]
+    a = LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'none')['result'][0]
+    b = LF_VisionPatchEncode().on_exec(clip_vision, _image(), 'none')['result'][0]
     masks, metadata = _regions()
     result = compare_region_features(a, b, masks, metadata, 'dino_v3_vit_h.safetensors', 'none')
     assert result['method'] == 'coverage_weighted_patch_mean_cosine'
     assert result['patch_grid'] == [2, 2]
     assert [row['similarity'] for row in result['regions']] == pytest.approx([1., 1.])
-    changed = LF_VisionPatchEncode().on_exec(clip_vision, _image(seed=5), 'none')[0]
+    changed = LF_VisionPatchEncode().on_exec(clip_vision, _image(seed=5), 'none')['result'][0]
     result = compare_region_features(a, changed, masks, metadata, 'dino_v3_vit_h.safetensors', 'none')
     assert all(row['similarity'] < 1. for row in result['regions'])
 
@@ -170,3 +185,48 @@ def test_public_contract_matches_core_clip_vision_encode():
     assert LF_VisionPatchEncode.RETURN_TYPES == ('CLIP_VISION_OUTPUT',)
     assert LF_VisionPatchEncode.OUTPUT_IS_LIST == (False,)
     assert not getattr(LF_VisionPatchEncode, 'INPUT_IS_LIST', False)
+    assert LF_VisionPatchEncode.RETURN_NAMES == ('clip_vision_output',)
+    assert LF_VisionPatchEncode.INPUT_TYPES()['optional']['ui_widget'] == ('LF_COMPARE', {'default': {}})
+    assert LF_VisionPatchEncode.INPUT_TYPES()['hidden'] == {'node_id': 'UNIQUE_ID'}
+
+
+def test_batch_geometry_payload_and_history_are_same_and_stable(monkeypatch):
+    sent = []
+    monkeypatch.setattr(node_module, 'safe_send_sync', lambda *args: sent.append(args))
+    image = torch.cat([_image(1), _image(2)])
+    clip = _clip_vision()
+    response = LF_VisionPatchEncode().on_exec(clip, image, 'none', node_id='20')
+    payload = response['ui']['lf_output'][0]
+    assert sent == [('visionpatchencode', payload, '20')]
+    assert payload['encoding'] == {
+        'schema': 'lf.vision-patch-encode.v1', 'crop': 'none', 'source_size': [40, 40],
+        'encoded_size': [32, 32], 'image_count': 2, 'sequence_shape': [2, 9, 4],
+        'pooled_shape': [2, 4], 'token_count': 9, 'feature_dimension': 4,
+        'patch_grid': [2, 2], 'patch_size': 16, 'prefix_tokens': 5, 'model_identity': None}
+    assert len(payload['dataset']['nodes']) == 2
+    assert 'pooled [2, 4]' in payload['dataset']['nodes'][1]['value']
+    assert all(node['cells']['lfImage']['value'] == node['value'] + ' (before)'
+               and node['cells']['lfImage_after']['value'] == node['value'] + ' (after)'
+               for node in payload['dataset']['nodes'])
+    assert LF_VisionPatchEncode().on_exec(clip, image, 'none')['ui']['lf_output'][0] == payload
+
+
+def test_unknown_model_does_not_invent_grid_or_prefix():
+    clip = _clip_vision()
+    clip.model_type = 'other'
+    del clip.model.patch_size
+    payload = LF_VisionPatchEncode().on_exec(clip, _image(), 'center')['ui']['lf_output'][0]
+    assert payload['encoding']['patch_grid'] is None and payload['encoding']['prefix_tokens'] is None
+    assert 'unavailable' in payload['encoding']['warning']
+    assert 'grid N/A' in payload['dataset']['nodes'][0]['value']
+
+
+def test_clip_config_geometry_reports_its_grid_and_single_prefix():
+    sequence = torch.ones(1, 5, 4)
+    clip = _clip_vision(_TinyDino((sequence, sequence, sequence[:, 0], None)))
+    clip.model_type, clip.image_size, clip.config = 'clip_vision_model', 28, {'patch_size': 14}
+    del clip.model.patch_size
+    payload = LF_VisionPatchEncode().on_exec(clip, _image(), 'center')['ui']['lf_output'][0]
+    assert payload['encoding']['patch_grid'] == [2, 2]
+    assert payload['encoding']['patch_size'] == 14
+    assert payload['encoding']['prefix_tokens'] == 1

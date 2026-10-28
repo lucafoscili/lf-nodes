@@ -10,4 +10,18 @@
 
     @include mixins.lf-el-stretch;
   }
+
+  &--summary {
+    display: grid;
+    grid-template-rows: minmax(120px, 1fr) auto;
+
+    .lf-compare__widget {
+      min-height: 0;
+    }
+  }
+
+  &__summary {
+    max-height: 10rem;
+    overflow: auto;
+  }
 }

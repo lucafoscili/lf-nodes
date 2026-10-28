@@ -7,6 +7,20 @@ from modules.nodes.image import compare_images as compare_module
 from modules.utils.helpers.ui import create_compare_node
 
 
+def test_titled_compare_cells_keep_visible_selector_labels():
+    node = create_compare_node('/before', '/after', 0, title='surface | DE00 2.345', debug='/debug')
+    assert node['value'] == 'surface | DE00 2.345'
+    assert {name: cell['value'] for name, cell in node['cells'].items()} == {
+        'lfImage': 'surface | DE00 2.345 (before)',
+        'lfImage_after': 'surface | DE00 2.345 (after)',
+        'lfImage_debug': 'surface | DE00 2.345 (debug)',
+    }
+    assert node['cells']['lfImage']['lfValue'] == '/before'
+    assert node['cells']['lfImage_after']['lfValue'] == '/after'
+    assert node['cells']['lfImage_debug']['lfValue'] == '/debug'
+    assert all(cell['value'] == '' for cell in create_compare_node('/before', '/after', 0)['cells'].values())
+
+
 def test_compare_images_publishes_history_dataset_and_preserves_rgba(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,

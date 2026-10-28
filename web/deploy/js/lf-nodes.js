@@ -1724,10 +1724,10 @@ const NODE_WIDGET_MAP = {
   LF_ComposeImageLayers: [],
   LF_ComposeImageRegions: [],
   LF_ExtractImageRegions: [],
-  LF_TextRegionMasks: [],
+  LF_TextRegionMasks: [CustomWidgetName.compare],
   LF_RegionColorStats: [CustomWidgetName.compare],
-  LF_RegionFeatureSimilarity: [],
-  LF_VisionPatchEncode: [],
+  LF_RegionFeatureSimilarity: [CustomWidgetName.countBarChart],
+  LF_VisionPatchEncode: [CustomWidgetName.compare],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
@@ -7775,6 +7775,8 @@ var CompareCSS;
 (function(CompareCSS2) {
   CompareCSS2["Content"] = "lf-compare";
   CompareCSS2["Widget"] = "lf-compare__widget";
+  CompareCSS2["WithSummary"] = "lf-compare--summary";
+  CompareCSS2["Summary"] = "lf-compare__summary";
 })(CompareCSS || (CompareCSS = {}));
 const STATE$a = /* @__PURE__ */ new WeakMap();
 const compareFactory = {
@@ -7788,9 +7790,13 @@ const compareFactory = {
         return compare.lfDataset || {};
       },
       setValue(value) {
-        const { compare } = STATE$a.get(wrapper);
+        const { compare, summary } = STATE$a.get(wrapper);
         const callback = (_, u) => {
-          compare.lfDataset = u.parsedJSON || {};
+          const dataset = u.parsedJSON || {};
+          compare.lfDataset = dataset;
+          if (summary) {
+            summary.lfDataset = { nodes: (dataset.nodes || []).map(({ id, value: value2 }) => ({ id, value: value2 })) };
+          }
         };
         normalizeValue(value, callback, CustomWidgetName.compare);
       }
@@ -7810,9 +7816,20 @@ const compareFactory = {
         break;
     }
     content.appendChild(compare);
+    let summary;
+    if ([NodeName.textRegionMasks, NodeName.regionColorStats, NodeName.visionPatchEncode].includes(node.comfyClass)) {
+      summary = document.createElement(TagName.LfTree);
+      summary.classList.add(CompareCSS.Summary);
+      summary.lfAccordionLayout = false;
+      summary.lfSelectable = false;
+      summary.lfFilter = false;
+      summary.lfStyle = ".node__value { white-space: normal; overflow-wrap: anywhere; }";
+      content.classList.add(CompareCSS.WithSummary);
+      content.appendChild(summary);
+    }
     wrapper.appendChild(content);
     const options = compareFactory.options(wrapper);
-    STATE$a.set(wrapper, { compare, node, wrapper });
+    STATE$a.set(wrapper, { compare, summary, node, wrapper });
     return { widget: createDOMWidget(CustomWidgetName.compare, wrapper, node, options) };
   },
   //#endregion
@@ -10804,7 +10821,43 @@ class LFWidgets {
       [CustomWidgetName.tree]: treeFactory,
       [CustomWidgetName.upload]: uploadFactory
     });
-    this.render = (name) => __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[name].render;
+    this.render = (name) => (node, ...args) => {
+      const nodeName = node.comfyClass;
+      const regionResult = [
+        NodeName.textRegionMasks,
+        NodeName.regionColorStats,
+        NodeName.regionFeatureSimilarity,
+        NodeName.visionPatchEncode
+      ].includes(nodeName);
+      const selected = regionResult ? NODE_WIDGET_MAP[nodeName][0] : name;
+      const rendered = __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[selected].render(node, ...args);
+      if (regionResult) {
+        const outputNode = node;
+        const previous = outputNode.onExecuted;
+        outputNode.onExecuted = (output, ...executionArgs) => {
+          const result = previous == null ? void 0 : previous.apply(node, [output, ...executionArgs]);
+          const entries = output == null ? void 0 : output.lf_output;
+          if (!Array.isArray(entries) || !entries.length || entries.some((entry) => !entry)) {
+            getLfManager().log(`${nodeName}: missing lf_output widget result.`, {}, LogSeverity.Error);
+            return result;
+          }
+          const payload = { ...entries[0], node: String(node.id) };
+          if (entries.length > 1 && "dataset" in payload) {
+            payload.dataset = {
+              ...payload.dataset,
+              nodes: entries.flatMap((entry, index) => ("dataset" in entry ? entry.dataset.nodes || [] : []).map((item) => ({
+                ...item,
+                id: `${index}:${item.id}`,
+                value: `Image ${index + 1}: ${item.value}`
+              })))
+            };
+          }
+          this.onEvent(nodeName, new CustomEvent("lf-result", { detail: payload }), [selected]);
+          return result;
+        };
+      }
+      return rendered;
+    };
     this.decorators = {
       card: (payload, widget) => {
         const { apiFlags, datasets, hashes, paths, chip } = payload;

@@ -6,9 +6,18 @@ import pytest
 import torch
 
 from modules.nodes.regions.text_region_masks import LF_TextRegionMasks
+from modules.nodes.regions import text_region_masks as node_module
+from modules.utils.helpers.ui import generated_preview
 from modules.utils.helpers.detection.region_masks import (
     TEXT_REGION_MASK_SCHEMA, region_mask_sets, resolve_region_overlaps,
 )
+
+
+@pytest.fixture(autouse=True)
+def preview_root(monkeypatch, tmp_path):
+    root = tmp_path / 'input'
+    monkeypatch.setattr(generated_preview, 'get_comfy_dir', lambda _kind: str(root))
+    return root
 
 
 def rows():
@@ -26,7 +35,7 @@ def execute(masks=None, regions=None, count=1):
         masks = torch.tensor([[[1, 1, 0], [0, 0, 0]],
                               [[0, 1, 1], [0, 0, 0]],
                               [[0, 1, 0], [0, 1, 0]]], dtype=torch.float32)
-    return LF_TextRegionMasks().on_exec([image(count)], [masks], [json.dumps(regions or rows())])
+    return LF_TextRegionMasks().on_exec([image(count)], [masks], [json.dumps(regions or rows())])['result']
 
 
 def test_priority_ties_and_triple_overlap_attribute_final_winner_once():
@@ -134,7 +143,7 @@ def test_empty_mask_dimensions_have_a_named_error():
 def test_direct_raw_table_single_row_and_singleton_mask_channel_forms():
     node = LF_TextRegionMasks()
     for masks in [torch.ones(2, 3), torch.ones(1, 1, 2, 3), torch.ones(1, 2, 3, 1)]:
-        batch, doc, _ = node.on_exec(image(), masks, rows()[:1])
+        batch, doc, _ = node.on_exec(image(), masks, rows()[:1])['result']
         assert batch.shape == (1, 2, 3) and doc['regions'] == rows()[:1]
 
 
@@ -234,3 +243,28 @@ def test_helper_accepts_general_n_and_node_metadata_is_aligned():
     assert node.RETURN_NAMES == ('masks', 'metadata', 'mask_list')
     assert node.OUTPUT_IS_LIST == (False, False, True)
     assert len(node.RETURN_TYPES) == len(node.RETURN_NAMES) == len(node.OUTPUT_TOOLTIPS)
+
+
+def test_compare_payload_keeps_empty_regions_and_matches_live_history(monkeypatch):
+    sent = []
+    monkeypatch.setattr(node_module, 'safe_send_sync', lambda *args: sent.append(args))
+    response = LF_TextRegionMasks().on_exec(image(2), torch.zeros(6, 2, 3), rows(), node_id=['7'])
+    payload = response['ui']['lf_output'][0]
+    assert sent == [('textregionmasks', payload, ['7'])]
+    assert payload['metadata'] == response['result'][1]
+    nodes = payload['dataset']['nodes']
+    assert len(nodes) == 6
+    assert all('N/A:' in node['value'] and 'area 0 px' in node['value'] for node in nodes)
+    assert all(node['cells']['lfImage']['value'] == node['value'] + ' (before)'
+               and node['cells']['lfImage_after']['value'] == node['value'] + ' (after)' for node in nodes)
+    assert 'image 1' in nodes[3]['value']
+    replay = LF_TextRegionMasks().on_exec(image(2), torch.zeros(6, 2, 3), rows())
+    assert replay['ui']['lf_output'][0] == json.loads(json.dumps(payload))
+    assert all('type=input' in cell['lfValue'] and 'nonce' not in cell['lfValue']
+               for node in nodes for cell in node['cells'].values())
+    schema = LF_TextRegionMasks.INPUT_TYPES()
+    assert list(schema['required']) == ['image', 'masks', 'regions']
+    assert [item[0] for item in schema['required'].values()] == ['IMAGE', 'MASK', 'JSON']
+    assert schema['optional']['ui_widget'] == ('LF_COMPARE', {'default': {}})
+    assert schema['hidden'] == {'node_id': 'UNIQUE_ID'}
+    assert LF_TextRegionMasks.RETURN_TYPES == ('MASK', 'JSON', 'MASK')

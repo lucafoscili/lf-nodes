@@ -39,5 +39,13 @@ def create_compare_node(
             "value": ""
         }
 
+    if title:
+        # LF Compare flattens image cells; its selector reads cell.value rather
+        # than the containing node's title.
+        for name, suffix in (("lfImage", "before"), ("lfImage_after", "after"),
+                             ("lfImage_debug", "debug")):
+            if name in node["cells"]:
+                node["cells"][name]["value"] = f"{title} ({suffix})"
+
     return node
 # endregion

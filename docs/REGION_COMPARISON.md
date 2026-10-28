@@ -4,7 +4,8 @@ These four project-independent nodes compare registered renders of the same
 subject. Core ComfyUI nodes own model loading and SAM inference; Vision Patch
 Encode runs a core-loaded vision model. LF Nodes does not download or load weights. No
 Workflow Runner catalogue entry is needed: workflows consume the JSON and IMAGE
-outputs normally, and the colour preview is also available in `ui.lf_output`.
+outputs normally. All four nodes share their final widget payload between live
+events and `ui.lf_output`, including persistent generated-preview URLs.
 
 ## Text Region Masks (`LF_TextRegionMasks`)
 
@@ -65,6 +66,12 @@ also have a `warning` string. Areas count pixels after thresholding;
 ordered IDs, disjoint binary masks, and recorded areas. Metadata is structural
 information; it does not establish the identity of the source image.
 
+The default **Compare** widget shows each resolved mask as a coloured fill over
+its source image, with the original alongside it. Each entry names the region,
+image index and pixel area; empty regions retain their warning. This makes the
+region-to-mask assignment visible. **Masonry** is the alternative for scanning
+all the labelled overlays together.
+
 ## Region Color Stats (`LF_RegionColorStats`)
 
 Required inputs are `image_a`, `image_b`, `masks`, and `metadata`. A and B must
@@ -106,8 +113,13 @@ tiny or textured regions report ineligibility and its reason. Sparse palettes
 can resemble banding; inspect the preview before interpreting the flag.
 
 The preview shows A left and B right, separated by eight black pixels, with
-one-pixel inner region outlines in table order. The optional LF Compare widget
-shows each outlined image and the composite. `create_cached_compare_node`
+one-pixel inner region outlines in table order. The default **Compare** widget
+keeps that overview and adds one A/B comparison per region, dimming the area
+outside it. Labels show the region ID, mean CIEDE2000, A/B Lab means and B-minus-A
+mean differences; unavailable measurements say N/A with their warning. Compare
+keeps the numbers beside the pixels that produced them. The alternative
+**Count Bar Chart** compares mean CIEDE2000 across regions, with the numeric
+summaries below it. `create_cached_compare_node`
 provides the same persistent generated-preview cache used by LF Compare Images;
 the final dataset and stats are shared between `safe_send_sync` and
 `ui.lf_output`. Omitting the widget does not affect execution.
@@ -154,8 +166,13 @@ model file, and records `method` as `coverage_weighted_patch_mean_cosine` or
 `per_region_crop_pooled_cosine`. Region rows contain `id`, `area_a`, `area_b`,
 `empty`, and `similarity`. No covered patches produces null plus a logged
 warning, including a nonempty region entirely removed by the centre crop. A
-zero-norm feature raises because cosine is undefined. This node has no widget
-or file outputs.
+zero-norm feature raises because cosine is undefined.
+
+The default **Count Bar Chart** shows the signed cosine score for each region,
+with exact scores and warnings in the labels below it. It makes differences
+between regions easy to compare. Unavailable scores retain N/A labels and have
+no bar, rather than a misleading zero. The alternative **Tree** expands each
+region's areas, score and warning. There are no file output sockets.
 
 ## Vision Patch Encode (`LF_VisionPatchEncode`)
 
@@ -192,6 +209,20 @@ It fails loud, naming the input: a missing `clip_vision`, a non-`[B,H,W,C]`
 `image`, an unknown `crop`, a `siglip2_vision_model` (its preprocessing
 differs; use core `CLIPVisionEncode`), or a model output without a sequence
 tensor at index 0 or a pooled tensor at index 2.
+
+The default **Compare** widget shows the actual preprocessed image with and
+without its patch grid, so the crop and encoded coverage can be inspected.
+Labels include source/encoded size, crop, sequence and pooled tensor shapes,
+grid dimensions and prefix-token count. The grid uses the loaded model's
+declared patch size and the returned sequence length; unavailable geometry is
+explicitly labelled with its reason. It is a geometry preview, not a feature
+similarity map, and does not claim a verified model filename. **Masonry** is the
+alternative for scanning a batch's grids together.
+
+Each alternative is already present in the emitted payload. Change only that
+node's `NODE_WIDGET_MAP` entry in `web/src/helpers/manager.ts` to choose it;
+the widget manager preserves the optional input type and uses the selected
+factory for live results, cached history and saved widget state.
 
 ## CPU checks
 
