@@ -64,6 +64,7 @@ interface CliOptions {
   allowLocalLlm: boolean;
   allowInteraction: boolean;
   acceptWarmCache: boolean;
+  resetCache: boolean;
   savePayloads: boolean;
 }
 
@@ -80,6 +81,7 @@ interface CaseResult {
   terminal?: JsonRecord;
   promptEvidence?: JsonRecord;
   executionTrace?: ExecutionTrace;
+  cacheReset?: Awaited<ReturnType<typeof resetExecutionCache>>;
   payloads?: { path?: string; nodeCount?: number; error?: string };
   downstreamArtifact?: JsonRecord;
   foreignWorkDetected?: boolean;
@@ -118,10 +120,11 @@ Execution authority is explicit:
   --local-instance-id <id> Optionally require this loaded instance ID.
   --allow-interaction      Permit browser-driven editing transactions.
   --accept-warm-cache      Allow full execution without Comfy --cache-none.
+  --reset-cache            Clear executor caches before each case; unloads models.
   --save-payloads          Save required nodes' final history UI under output-dir/payloads.
 
 Service lifecycle is deliberately out of scope: this command never starts,
-stops, restarts, clears, or globally interrupts Comfy or LM Studio.
+stops, restarts, or globally interrupts Comfy or LM Studio.
 `;
 
 export const parseArgs = (argv: string[]): CliOptions => {
@@ -143,6 +146,7 @@ export const parseArgs = (argv: string[]): CliOptions => {
     allowLocalLlm: false,
     allowInteraction: false,
     acceptWarmCache: false,
+    resetCache: false,
     savePayloads: false,
   };
   const takeValue = (index: number, name: string): string => {
@@ -220,6 +224,9 @@ export const parseArgs = (argv: string[]): CliOptions => {
         break;
       case '--accept-warm-cache':
         options.acceptWarmCache = true;
+        break;
+      case '--reset-cache':
+        options.resetCache = true;
         break;
       case '--save-payloads':
         options.savePayloads = true;
@@ -2526,6 +2533,59 @@ const validateCommittedEditPropagation = async (
   };
 };
 
+// /free acknowledges only a queued flag. Observe a warmed, identical CPU
+// output becoming uncached before allowing the real case to start.
+export const resetExecutionCache = async (comfyUrl: string) => {
+  const nodeId = 'lf_cache_probe';
+  const value = `Titanic cache probe ${randomUUID()}`;
+  const prompt = { [nodeId]: { class_type: 'LF_DisplayString', inputs: { string: value } } };
+  const probes: Array<{ promptId: string; cached: boolean }> = [];
+  const probe = async () => {
+    const queue = await queueIsEmpty(comfyUrl);
+    if (queue.ids.size || queue.parsed.malformed.length) {
+      throw new Error('cache reset requires an idle, readable Comfy queue');
+    }
+    const submitted = await jsonFetch(`${comfyUrl}/prompt`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    if (typeof submitted.prompt_id !== 'string') throw new Error('cache reset probe has no prompt ID');
+    const terminal = await waitForTerminal(comfyUrl, submitted.prompt_id, 30);
+    if (terminal.classification !== 'success' || terminal.foreignIds.length || terminal.queueDiagnostics.length) {
+      throw new Error(`cache reset probe ${submitted.prompt_id} failed: ${terminal.classification}; foreign prompts: ${terminal.foreignIds.join(', ')}; ${terminal.queueDiagnostics.join('; ')}`);
+    }
+    if (terminal.entry?.outputs?.[nodeId]?.lf_output?.[0]?.string !== value) {
+      throw new Error(`cache reset probe ${submitted.prompt_id} returned no matching output`);
+    }
+    const messages = terminal.entry?.status?.messages ?? [];
+    const cachedEvent = messages.find(([type, data]: [string, JsonRecord]) =>
+      type === 'execution_cached' && data.prompt_id === submitted.prompt_id);
+    if (!Array.isArray(cachedEvent?.[1]?.nodes)) {
+      throw new Error(`cache reset probe ${submitted.prompt_id} has no cache evidence`);
+    }
+    const result = { promptId: submitted.prompt_id, cached: cachedEvent[1].nodes.includes(nodeId) };
+    probes.push(result);
+    return result;
+  };
+  await probe();
+  if (!(await probe()).cached) {
+    throw new Error('cache reset cannot be verified: identical CPU probe was not cached; use --cache-none without --reset-cache');
+  }
+  const requestedAt = new Date().toISOString();
+  await jsonFetch(`${comfyUrl}/free`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ free_memory: true }),
+  });
+  // A prompt can race the flag wakeup and run once before the worker's reset.
+  // Repeating the same prompt observes that boundary without a blind delay.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (!(await probe()).cached) {
+      return { requestedAt, verifiedAt: new Date().toISOString(), unloadsModels: true, probes };
+    }
+  }
+  throw new Error(`cache reset was not applied: identical CPU probe remained cached after /free; ${JSON.stringify(probes)}`);
+};
+
 const executeCase = async (
   manifestCase: ManifestCase,
   page: Page,
@@ -2577,6 +2637,18 @@ const executeCase = async (
     };
   }
 
+  let cacheReset: CaseResult['cacheReset'];
+  if (options.resetCache) {
+    try {
+      cacheReset = await resetExecutionCache(options.comfyUrl);
+    } catch (error) {
+      return {
+        id: manifestCase.id, title: manifestCase.title, outcome: 'ABORTED',
+        durationSeconds: (performance.now() - started) / 1000,
+        message: String(error),
+      };
+    }
+  }
   const historyBefore = await historyPromptIds(options.comfyUrl);
   const recorderToken = await installExecutionRecorder(page);
   const requestedPromptId = randomUUID();
@@ -2918,6 +2990,7 @@ const executeCase = async (
     executionTrace,
     payloads,
     downstreamArtifact: downstream.evidence ?? undefined,
+    cacheReset,
     liveWidgetChecks: liveWidgets,
     foreignWorkDetected:
       foreignWorkDetected,
@@ -2954,6 +3027,7 @@ const main = async () => {
       allowLocalLlm: options.allowLocalLlm,
       allowInteraction: options.allowInteraction,
       acceptWarmCache: options.acceptWarmCache,
+      resetCache: options.resetCache,
     },
     achievedGate: 'none',
     fullWorkflowPass: false,
@@ -3070,8 +3144,8 @@ const main = async () => {
     if (manifest.schema !== 'lf.titanic-e2e.manifest.v1') inventoryErrors.push('manifest schema mismatch');
     for (const fixture of manifest.fixtures ?? []) {
       try {
-        if (!/^scripts\/quality\/fixtures\/titanic-cpu\/(?:lower\.png|upper\.png|synthetic\.glb)$/.test(fixture.path)) {
-          throw new Error('unreviewed CPU fixture path');
+        if (!/^scripts\/quality\/fixtures\/(?:titanic-cpu\/(?:lower\.png|upper\.png|synthetic\.glb)|titanic-sam3\/comfy-example\.png)$/.test(fixture.path)) {
+          throw new Error('unreviewed fixture path');
         }
         const bytes = await readFile(resolve(repoRoot, fixture.path));
         if (sha256(bytes) !== fixture.expectedSha256) throw new Error('SHA-256 drift');

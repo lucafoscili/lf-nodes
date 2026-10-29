@@ -162,7 +162,22 @@ Use `--cache-none` at Comfy startup for repeatable actual-work checks. A first
 uncached run on a warm-cache service may explicitly add `--accept-warm-cache`,
 but these cases still require execution events from all six new LF nodes and
 reject their cached execution. Repeating the same warm-cache run is therefore
-not an execution pass. The gate does not restart Comfy or clear its cache.
+not an execution pass. The gate never restarts Comfy. On a coordinated, idle
+warm-cache service, add `--accept-warm-cache --reset-cache` to explicitly clear
+the executor caches before each case. The harness warms an identical, tiny
+`LF_DisplayString` CPU prompt, observes its `execution_cached` history entry,
+POSTs `/free` with `{"free_memory": true}`, and repeats the same probe until
+terminal history proves it is no longer cached. A queued `/free` response alone
+is not acknowledgement; probe prompt IDs and cache transitions are recorded in
+the case's `cacheReset` evidence. Failure to observe the transition fails the
+case before submission. Use `--cache-none` without `--reset-cache`: there is no
+retained probe entry to clear in that mode.
+
+Core also unloads resident models when processing `free_memory`, so subsequent
+model cases pay model reload time. This is a shared-service operation: coordinate
+the queue first. `--accept-warm-cache` still only permits running on a service
+without `--cache-none`; it neither clears caches nor relaxes required-node
+execution proof. Hydration-only runs never reset caches.
 
 The GLB case replaces the texture of a tiny animated, skinned synthetic quad,
 scales its joint chain, and previews the result through stock
@@ -208,16 +223,23 @@ corepack yarn test:titanic -- --full --case model.dinov3-region-features --allow
 
 The SAM3 case requires `sam3.1_multiplex_fp16.safetensors` in Core's checkpoint
 inventory. `CheckpointLoaderSimple` supplies its MODEL and CLIP; its own
-`CLIPTextEncode` conditioning feeds `SAM3_Detect`. The detector uses
-`individual_masks=false`, retaining one union mask even when the synthetic
-image has no detected object. Empty regions and their warnings are valid
-observable results, not evidence of semantic segmentation quality.
+`CLIPTextEncode` conditioning feeds `SAM3_Detect`. The stock ComfyUI
+`input/example.png`, copied into `fixtures/titanic-sam3/comfy-example.png`,
+shows a person wearing a pink dress. The case asks for that dress and requires
+a nonempty region. The detector uses `individual_masks=false` for one union
+mask. Color stats compares this image with itself, so its zero color difference
+is expected; an empty detection fails the case.
 
 The DINOv3 case independently requires `dino_v3_vit_h.safetensors` in Core's
 CLIP vision inventory. Core `CLIPVisionLoader` feeds two `LF_VisionPatchEncode`
 nodes with `crop=none`; regional feature comparison uses the nonempty CPU
 masks. Assertions inspect the encoder geometry, prefix-token count and
 durable previews, then the weighted patch-cosine method and region JSON.
+Preview-asset requirements count image references, while
+`minimumLivePreviewCount` counts visible dataset entries. Text Region Masks
+shows one Compare entry per image/region, Color Stats one overview plus one
+entry per region, and Vision Patch Encode one entry per image; each Compare
+entry can contain multiple images.
 These cases require actual execution events from the changed LF nodes and
 reject their cached execution. They never download weights. With no running,
 coordinated Comfy service, offline fixture tests establish **inventory** only;

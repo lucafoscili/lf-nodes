@@ -10,7 +10,7 @@ import {
   auditSanitizedTitanic,
   sanitizeTitanicWorkflow,
 } from '../sanitize_titanic.mts';
-import { validateLfNodeCoverage } from '../titanic_e2e_core';
+import { validateCaseOutputs, validateLfNodeCoverage } from '../titanic_e2e_core';
 
 const fixturePath = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'E2E.json');
 const imageFixturePath = resolve(
@@ -195,7 +195,7 @@ describe('Titanic publication sanitizer', () => {
       expect(createHash('sha256').update(bytes).digest('hex')).toBe(asset.expectedSha256);
     }
     expect(manifest.fixtures.map((asset: any) => asset.path.split('/').at(-1))).toEqual([
-      'lower.png', 'upper.png', 'synthetic.glb',
+      'lower.png', 'upper.png', 'synthetic.glb', 'comfy-example.png',
     ]);
     expect(byId(612).widgets_values_named.source_glb).toBe('titanic-cpu/synthetic.glb');
     expect(byId(614).widgets_values_named.percent).toBe(75);
@@ -262,8 +262,10 @@ describe('Titanic publication sanitizer', () => {
     expect(coverageCase('cpu.region-comparison')).toMatchObject({
       resourceClass: 'cpu', targets: [638, 640, 642],
       execution: { requiredNodeIds: [641, 642], forbiddenCachedNodeIds: [641, 642] },
-      expect: { '641': { requiredNamedValues: { schema: 'lf.text-region-masks.v1', ordering: 'image-major', area: 2304, raw_area: 3072 } },
-        '642': { minimumPreviewCount: 3, requiredNamedValues: { schema: 'lf.region-color-stats.v1', matched_count: 768, intersection_count: 768 } } },
+      expect: { '641': { minimumPreviewCount: 2, minimumLivePreviewCount: 2,
+        requiredNamedValues: { schema: 'lf.text-region-masks.v1', ordering: 'image-major', area: 2304, raw_area: 3072 } },
+        '642': { minimumPreviewCount: 3, minimumLivePreviewCount: 3,
+          requiredNamedValues: { schema: 'lf.region-color-stats.v1', matched_count: 768, intersection_count: 768 } } },
     });
 
     expect(byId(643).type).toBe('CheckpointLoaderSimple');
@@ -273,12 +275,28 @@ describe('Titanic publication sanitizer', () => {
     expect(byId(645).widgets_values_named.individual_masks).toBe(false);
     expect(upstream(645, 'model')).toEqual([643, 0]);
     expect(upstream(645, 'conditioning')).toEqual([644, 0]);
+    expect(byId(644).widgets_values_named.text).toBe('pink dress');
+    expect(byId(654).type).toBe('LF_LoadImages');
+    expect(byId(654).widgets_values_named).toMatchObject({
+      dir: 'scripts/quality/fixtures/titanic-sam3', subdir: false,
+      load_cap: 1, dummy_output: false, copy_into_input_dir: false,
+    });
+    for (const [id, name] of [[645, 'image'], [647, 'image'], [648, 'image_a'], [648, 'image_b']] as const) {
+      expect(upstream(id, name)).toEqual([654, 0]);
+    }
     expect(upstream(647, 'masks')).toEqual([645, 0]);
-    expect(JSON.parse(byId(646).widgets_values_named.ui_widget)[0].prompt)
-      .toBe(byId(644).widgets_values_named.text);
+    expect(JSON.parse(byId(646).widgets_values_named.ui_widget))
+      .toEqual([{ id: 'dress', prompt: byId(644).widgets_values_named.text, priority: 0 }]);
     expect(coverageCase('model.sam3-region-masks')).toMatchObject({
       resourceClass: 'gpu', targets: [646, 648],
+      bindings: { fixtureImageSourceNodeIds: [654] },
       execution: { requiredNodeIds: [643, 644, 645, 647, 648], forbiddenCachedNodeIds: [643, 644, 645, 647, 648] },
+      expect: {
+        '647': { minimumPreviewCount: 2, minimumLivePreviewCount: 1,
+          requiredNamedValues: { id: 'dress', prompt: 'pink dress', empty: false } },
+        '648': { minimumPreviewCount: 3, minimumLivePreviewCount: 2,
+          requiredNamedValues: { id: 'dress', empty: false, mean: 0 } },
+      },
     });
 
     expect(byId(649).type).toBe('CLIPVisionLoader');
@@ -299,6 +317,9 @@ describe('Titanic publication sanitizer', () => {
     for (const id of [650, 651, 652]) {
       expect(dino.expect[String(id)].requiredNamedValues).toMatchObject({ crop: 'none', prefix_tokens: 5 });
     }
+    for (const id of [650, 651]) {
+      expect(dino.expect[String(id)]).toMatchObject({ minimumPreviewCount: 2, minimumLivePreviewCount: 1 });
+    }
     for (const type of ['LF_TextRegionMasks', 'LF_RegionColorStats', 'LF_RegionFeatureSimilarity', 'LF_VisionPatchEncode']) {
       expect(manifest.coverageExemptions.some((item: any) => item.type === type)).toBe(false);
     }
@@ -308,6 +329,27 @@ describe('Titanic publication sanitizer', () => {
     const targets = manifest.coverageCases.flatMap((item: any) => item.targets)
       .filter((id: number) => id >= 630).sort();
     expect(targets).toEqual(outputIds);
+  });
+
+  it('rejects an empty SAM result even when its Compare cells are complete', () => {
+    const sam = readManifest().coverageCases.find((item: any) => item.id === 'model.sam3-region-masks');
+    const cells = { lfImage: { lfValue: '/view?filename=source.png&type=input' },
+      lfImage_after: { lfValue: '/view?filename=overlay.png&type=input' },
+      lfImage_debug: { lfValue: '/view?filename=overview.png&type=input' } };
+    const outputs = {
+      '647': { lf_output: [{ dataset: { nodes: [{ cells }] }, metadata: {
+        schema: 'lf.text-region-masks.v1', ordering: 'image-major', image_count: 1,
+        regions: [{ id: 'dress', prompt: 'pink dress', empty: true }],
+      } }] },
+      '648': { lf_output: [{ dataset: { nodes: [{ cells }, { cells }] }, stats: {
+        schema: 'lf.region-color-stats.v1', regions: [{ id: 'dress', empty: true, mean: null }],
+      } }] },
+    };
+    expect(validateCaseOutputs(sam, { outputs })).toEqual([
+      'node 647 exposed no "empty" value equal to false',
+      'node 648 exposed no "empty" value equal to false',
+      'node 648 exposed no "mean" value equal to 0',
+    ]);
   });
 
   it('pins the new media, audio, and exact-instance local-LLM coverage slice', () => {

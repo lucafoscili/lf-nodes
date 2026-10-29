@@ -123,7 +123,7 @@ window.gallery = { defaults: structuredClone(NODE_WIDGET_MAP), widgetNames: Cust
     if (!payload || !Object.keys(payload).length) throw new Error('Saved UI output is empty');
     document.querySelector('#title').textContent = spec.nodeType;
     document.querySelector('#label').textContent = spec.widget + ' · ' + spec.role + ' · ' + spec.caseId + ' · node ' + spec.nodeId;
-    const host = document.querySelector('#widget'); host.replaceChildren();
+    const host = document.querySelector('#widget'); host.replaceChildren(); host.style.height = '680px';
     const node = window.galleryNode = { id: spec.nodeId, comfyClass: spec.nodeType, widgets: [], size: [912,680],
       addDOMWidget(name, type, element, options) {
         const widget = { name, type, element, options, value: '' };
@@ -198,12 +198,16 @@ export async function renderGallery(options: ReturnType<typeof parseGalleryArgs>
           return value && JSON.stringify(value) !== (window as any).gallery.before;
         }, null, { timeout: 10_000 }).catch(() => { throw new Error('Payload did not populate this widget'); });
         // Walk nested web-component shadows: outer readiness alone misses images/charts.
-        await page.evaluate(async () => {
+        await page.evaluate(async (widget) => {
+          const images: HTMLImageElement[] = [];
           const ready = async (root: Document | ShadowRoot | Element) => {
             for (const element of Array.from(root.querySelectorAll('*')) as any[]) {
               if (element.componentOnReady) await element.componentOnReady();
               if (element.shadowRoot) await ready(element.shadowRoot);
-              if (element instanceof HTMLImageElement && element.src) await element.decode();
+              if (element instanceof HTMLImageElement && element.src) {
+                await element.decode();
+                images.push(element);
+              }
             }
           };
           await Promise.race([
@@ -211,7 +215,14 @@ export async function renderGallery(options: ReturnType<typeof parseGalleryArgs>
             new Promise((_, reject) => setTimeout(() => reject(new Error('Widget readiness timed out')), 30_000)),
           ]);
           await document.fonts.ready;
-        });
+          // Compare displays full-width images; a fixed landscape frame clips
+          // square/portrait evidence. Give the gallery the image's full height.
+          if (widget === (window as any).gallery.widgetNames.compare && images.length) {
+            const height = Math.max(680, ...images.map((image) => Math.ceil(912 * image.naturalHeight / image.naturalWidth)));
+            document.querySelector<HTMLElement>('#widget')!.style.height = `${height}px`;
+            (window as any).galleryNode.size[1] = height;
+          }
+        }, render.widget);
         // LF charts animate their canvas after component readiness (not a CSS animation).
         await page.waitForTimeout(2_000);
         if (errors.length) throw new Error([...new Set(errors)].join('; '));

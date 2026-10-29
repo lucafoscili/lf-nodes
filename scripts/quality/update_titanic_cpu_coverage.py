@@ -243,8 +243,10 @@ def main():
     manifest = json.loads(manifest_source)
     manifest["workflow"].update(expectedSha256=hashlib.sha256(workflow_bytes).hexdigest(),
         expectedNodeCount=len(workflow["nodes"]), expectedLinkCount=len(workflow["links"]))
+    other_fixtures = [row for row in manifest.get("fixtures", [])
+                      if not row["path"].startswith("scripts/quality/fixtures/titanic-cpu/")]
     manifest["fixtures"] = [{"path": f"scripts/quality/fixtures/titanic-cpu/{name}",
-        "expectedSha256": hashlib.sha256(data).hexdigest()} for name, data in assets.items()]
+        "expectedSha256": hashlib.sha256(data).hexdigest()} for name, data in assets.items()] + other_fixtures
     cases = [
         {"id": "cpu.glb-texture-scale", "title": "Pinned animated GLB texture replacement and joint scale",
          "resourceClass": "cpu", "targets": [613, 615], "timeoutSeconds": 120,

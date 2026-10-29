@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { parseArgs, resetExecutionCache } from '../titanic_e2e.mts';
 
 import {
   classifyHistoryEntry,
@@ -35,6 +37,64 @@ import {
 } from '../titanic_e2e_core.ts';
 
 describe('Titanic E2E pure contracts', () => {
+  it('keeps cache reset explicit and independent of warm-cache acceptance', () => {
+    expect(parseArgs([])).toMatchObject({ resetCache: false, acceptWarmCache: false });
+    expect(parseArgs(['--full', '--accept-warm-cache'])).toMatchObject({ resetCache: false, acceptWarmCache: true });
+    expect(parseArgs(['--full', '--reset-cache'])).toMatchObject({ resetCache: true, acceptWarmCache: false });
+  });
+
+  it.each([
+    { cached: [false, true, false], succeeds: true },
+    { cached: [false, true, true, false], succeeds: true },
+    { cached: [false, true, true, true, true], succeeds: false },
+  ])('waits for the warmed probe to become uncached: $cached', async ({ cached, succeeds }) => {
+    const requests: string[] = [];
+    const prompts: unknown[] = [];
+    let promptIndex = -1;
+    let value: string;
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      const path = new URL(url).pathname;
+      requests.push(path);
+      let response: unknown = {};
+      if (path === '/queue') response = { queue_running: [], queue_pending: [] };
+      else if (path === '/prompt') {
+        const { prompt } = JSON.parse(String(init?.body));
+        prompts.push(prompt);
+        value = prompt.lf_cache_probe.inputs.string;
+        promptIndex += 1;
+        response = { prompt_id: `probe-${promptIndex}` };
+      } else if (path.startsWith('/history/')) {
+        const promptId = `probe-${promptIndex}`;
+        response = { [promptId]: {
+          outputs: { lf_cache_probe: { lf_output: [{ string: value }] } },
+          status: { status_str: 'success', completed: true, messages: [
+            ['execution_cached', { prompt_id: promptId, nodes: cached[promptIndex] ? ['lf_cache_probe'] : [] }],
+          ] },
+        } };
+      } else if (path === '/free') {
+        expect(init?.method).toBe('POST');
+        expect(JSON.parse(String(init?.body))).toEqual({ free_memory: true });
+        expect(prompts).toHaveLength(2);
+      } else throw new Error(`unexpected request ${path}`);
+      return new Response(JSON.stringify(response), { status: 200 });
+    }));
+    try {
+      const reset = resetExecutionCache('http://comfy.test');
+      if (succeeds) {
+        const result = await reset;
+        expect(result.probes.map((probe) => probe.cached)).toEqual(cached);
+        expect(result.unloadsModels).toBe(true);
+      } else {
+        await expect(reset).rejects.toThrow('remained cached after /free');
+      }
+      expect(requests.filter((path) => path === '/free')).toHaveLength(1);
+      expect(prompts).toHaveLength(cached.length);
+      expect(prompts.every((prompt) => JSON.stringify(prompt) === JSON.stringify(prompts[0]))).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('captures only declared final UI with node types from the submitted prompt', () => {
     const manifestCase = { id: 'cpu.payloads', execution: { requiredNodeIds: [12, 10, 12] } } as any;
     const ui = { lf_output: [{ value: 'résultat', dataset: { nodes: [] } }] };
@@ -154,6 +214,29 @@ describe('Titanic E2E pure contracts', () => {
       'node 615 live native 3D viewport is not hydrated',
     ]);
   });
+  it('counts Compare entries separately from their persistent asset references', () => {
+    const url = '/view?filename=shared.png&type=input';
+    const expectation = { minimumPreviewCount: 2, minimumLivePreviewCount: 1 };
+    const live = { nodeId: 647, kind: 'image' as const, found: true, hasElement: true, previewCount: 1 };
+    const history = { outputs: { '647': { lf_output: [{ dataset: { nodes: [{
+      cells: { lfImage: { lfValue: url }, lfImage_after: { lfValue: url } },
+    }] } }] } } };
+    // Content-addressed storage can reuse one URL for both cells of an entry.
+    expect(countPreviewReferences(history.outputs['647'])).toBe(2);
+    expect(collectPreviewUrls(history.outputs['647'])).toEqual([url]);
+    expect(validateCaseOutputs({ expect: { '647': expectation } } as any, history)).toEqual([]);
+    expect(validateLivePreviewWidget('647', expectation, live)).toEqual([]);
+    expect(validateLivePreviewWidget('647', expectation, { ...live, previewCount: 0 })).toEqual([
+      'node 647 live widget has 0 previews; expected at least 1',
+    ]);
+    expect(validateLivePreviewWidget('647', { minimumPreviewCount: 2 }, live)).toEqual([
+      'node 647 live widget has 1 previews; expected at least 2',
+    ]);
+    expect(validateCaseOutputs({ expect: { '647': expectation } } as any,
+      { outputs: { '647': { lf_output: [{ lfValue: url }] } } })).toEqual([
+      'node 647 exposed 1 preview references; expected at least 2',
+    ]);
+  });
   it('binds reviewed CPU fixture inputs without changing the portable prompt', () => {
     const layers = { root: 'scripts/quality/fixtures/titanic-cpu', layers: [{ file: 'lower.png' }] };
     const prompt = {
@@ -176,6 +259,28 @@ describe('Titanic E2E pure contracts', () => {
     prompt['622'].inputs.ui_widget = JSON.stringify({ ...layers, root: '/private' });
     expect(() => buildCpuFixturePromptBindings(prompt, bindings, '/checkout')).toThrow('root drifted');
     expect(buildCpuFixturePromptBindings({}, undefined, '/checkout')).toEqual([]);
+  });
+  it('binds the reviewed single-image SAM fixture to the selected checkout', () => {
+    const prompt = { '654': { class_type: 'LF_LoadImages', inputs: {
+      dir: 'scripts/quality/fixtures/titanic-sam3', load_cap: 1,
+      subdir: false, dummy_output: false, copy_into_input_dir: false,
+    } } };
+    const original = structuredClone(prompt);
+    const bindings = { fixtureImageSourceNodeIds: [654] };
+    expect(buildCpuFixturePromptBindings(prompt, bindings, 'C:\\checkout\\lf-nodes\\')).toEqual([
+      { nodeId: '654', classType: 'LF_LoadImages', input: 'dir',
+        value: 'C:\\checkout\\lf-nodes/scripts/quality/fixtures/titanic-sam3' },
+    ]);
+    expect(prompt).toEqual(original);
+    for (const inputs of [{ dir: '/private' }, { load_cap: 0 }, { dummy_output: true },
+      { subdir: true }, { copy_into_input_dir: true }]) {
+      expect(() => buildCpuFixturePromptBindings({ '654': {
+        ...prompt['654'], inputs: { ...prompt['654'].inputs, ...inputs },
+      } }, bindings, '/checkout')).toThrow('image fixture binding node 654 drifted');
+    }
+    expect(() => buildCpuFixturePromptBindings({ '654': {
+      ...prompt['654'], class_type: 'LF_LoadFileOnce',
+    } }, bindings, '/checkout')).toThrow('image fixture binding node 654 drifted');
   });
   it('finds only a named Comfy argv with relative, Windows, or POSIX main.py paths', () => {
     expect(findComfyArgv({ system: { argv: ['main.py', '--cache-none'] } })).toEqual([

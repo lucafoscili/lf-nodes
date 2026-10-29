@@ -2,8 +2,8 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "d62dbf257d3cd12b389efb9a73d7aced07d094007d40a0049b8459b8a0598641",
-    "expectedNodeCount": 414,
+    "expectedSha256": "8268b06ee8bffccda19924227684265d216a0a7195bd5558b58fa62232f3ba0a",
+    "expectedNodeCount": 415,
     "expectedLinkCount": 549
   },
   "fixtures": [
@@ -18,6 +18,10 @@
     {
       "path": "scripts/quality/fixtures/titanic-cpu/synthetic.glb",
       "expectedSha256": "c8d8430e570de662b4ee476b5c1c51d243efcb8b30218e331ac306290902fd84"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-sam3/comfy-example.png",
+      "expectedSha256": "a8e215ad32a0052fc4190e9c5863428d5ee35cd98b246243842ba8360511b7c4"
     }
   ],
   "smokeCases": [
@@ -94,6 +98,7 @@
       "expect": {
         "641": {
           "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 2,
           "previewStorageType": "input",
           "requiredNamedValues": {
             "schema": "lf.text-region-masks.v1",
@@ -107,6 +112,7 @@
         },
         "642": {
           "minimumPreviewCount": 3,
+          "minimumLivePreviewCount": 3,
           "previewStorageType": "input",
           "requiredNamedValues": {
             "schema": "lf.region-color-stats.v1",
@@ -120,7 +126,7 @@
     },
     {
       "id": "model.sam3-region-masks",
-      "title": "Core SAM3.1 union masks and explicit empty-region diagnostics",
+      "title": "Core SAM3.1 nonempty pink-dress mask and same-image color diagnostics",
       "resourceClass": "gpu",
       "targets": [
         646,
@@ -146,20 +152,33 @@
       "expect": {
         "647": {
           "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
           "previewStorageType": "input",
           "requiredNamedValues": {
             "schema": "lf.text-region-masks.v1",
             "ordering": "image-major",
-            "image_count": 1
+            "image_count": 1,
+            "id": "dress",
+            "empty": false,
+            "prompt": "pink dress"
           }
         },
         "648": {
           "minimumPreviewCount": 3,
+          "minimumLivePreviewCount": 2,
           "previewStorageType": "input",
           "requiredNamedValues": {
-            "schema": "lf.region-color-stats.v1"
+            "schema": "lf.region-color-stats.v1",
+            "id": "dress",
+            "empty": false,
+            "mean": 0
           }
         }
+      },
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
       }
     },
     {
@@ -189,6 +208,7 @@
       "expect": {
         "650": {
           "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
           "previewStorageType": "input",
           "requiredNamedValues": {
             "schema": "lf.vision-patch-encode.v1",
@@ -201,6 +221,7 @@
         },
         "651": {
           "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
           "previewStorageType": "input",
           "requiredNamedValues": {
             "schema": "lf.vision-patch-encode.v1",

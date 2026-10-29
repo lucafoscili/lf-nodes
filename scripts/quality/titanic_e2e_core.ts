@@ -32,12 +32,14 @@ export interface ManifestCase {
     localNativeChatNodeIds?: number[];
     fixtureGlbSourceNodeIds?: number[];
     fixtureLayerManifestNodeIds?: number[];
+    fixtureImageSourceNodeIds?: number[];
   };
   expect?: Record<
     string,
     {
       receiptSchema?: string;
       minimumPreviewCount?: number;
+      minimumLivePreviewCount?: number;
       previewStorageType?: 'input' | 'output' | 'temp';
       previewKind?: 'image' | 'model-3d';
       forbidTopLevelJsonKeys?: string[];
@@ -146,6 +148,17 @@ export const buildCpuFixturePromptBindings = (
     }
     result.push({ nodeId: String(id), classType: node.class_type,
       input: 'ui_widget', value: JSON.stringify({ ...document, root }) });
+  }
+  for (const id of bindings?.fixtureImageSourceNodeIds ?? []) {
+    const node = prompt[String(id)];
+    if (node?.class_type !== 'LF_LoadImages' ||
+        node.inputs?.dir !== 'scripts/quality/fixtures/titanic-sam3' ||
+        node.inputs?.load_cap !== 1 || node.inputs?.subdir !== false ||
+        node.inputs?.dummy_output !== false || node.inputs?.copy_into_input_dir !== false) {
+      throw new Error(`image fixture binding node ${id} drifted`);
+    }
+    result.push({ nodeId: String(id), classType: node.class_type,
+      input: 'dir', value: `${repoRoot.replace(/[\\/]+$/, '')}/scripts/quality/fixtures/titanic-sam3` });
   }
   return result;
 };
@@ -729,9 +742,10 @@ export const validateLivePreviewWidget = (
       !historyPreviewUrls.some((url) => comfyArtifactKey(url) === comfyArtifactKey(live.modelUrl)))) {
     return [`node ${nodeId} live native 3D viewport has not loaded its terminal-history model`];
   }
-  if (kind === 'image' && expectation.minimumPreviewCount !== undefined &&
-      live.previewCount < expectation.minimumPreviewCount) {
-    return [`node ${nodeId} live widget has ${live.previewCount} previews; expected at least ${expectation.minimumPreviewCount}`];
+  const minimumLivePreviewCount = expectation.minimumLivePreviewCount ?? expectation.minimumPreviewCount;
+  if (kind === 'image' && minimumLivePreviewCount !== undefined &&
+      live.previewCount < minimumLivePreviewCount) {
+    return [`node ${nodeId} live widget has ${live.previewCount} previews; expected at least ${minimumLivePreviewCount}`];
   }
   return [];
 };
