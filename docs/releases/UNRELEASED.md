@@ -1,3 +1,3 @@
 # Next release
 
-No additional changes recorded after [LF Nodes 5.0.0](5.0.0.md).
+No additional changes recorded after [LF Nodes 5.1.0](5.1.0.md).
