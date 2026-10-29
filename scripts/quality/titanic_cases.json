@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "9890771e2834e99e61b404d8b1e4375a73c69f588008f345bc966bf3bd2ff2c8",
-    "expectedNodeCount": 427,
-    "expectedLinkCount": 567
+    "expectedSha256": "98715cb7366fb566d41354c9e1540f3fb95a07a81ae0ed55a78af8a546a462bd",
+    "expectedNodeCount": 429,
+    "expectedLinkCount": 568
   },
   "fixtures": [
     {
@@ -75,6 +75,57 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.png-stored-values",
+      "title": "Load PNG and Save PNG keep the stock example's stored values, written back at 16 bits",
+      "resourceClass": "cpu",
+      "targets": [
+        668
+      ],
+      "timeoutSeconds": 120,
+      "bindings": {
+        "fixturePngSourceNodeIds": [
+          667
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          667,
+          668
+        ],
+        "forbiddenCachedNodeIds": [
+          667,
+          668
+        ]
+      },
+      "expect": {
+        "667": {
+          "minimumPreviewCount": 1,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.load-png.v1",
+            "color_type": "rgb",
+            "bit_depth": 8,
+            "width": 768,
+            "height": 768,
+            "alpha": false
+          }
+        },
+        "668": {
+          "minimumPreviewCount": 1,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.save-png.v1",
+            "rounding": "nearest",
+            "metadata": "none",
+            "channels": "rgb",
+            "bit_depth": 16
+          }
+        }
+      }
+    },
     {
       "id": "cpu.texture-tools",
       "title": "Masked Lab grade, detail transfer, edge padding and normal repack on the stock example",

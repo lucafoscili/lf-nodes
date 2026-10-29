@@ -45,7 +45,8 @@ The nodes span quite a few categories:
 - **Visual novel nodes**: Author, validate, and preview deterministic target-neutral narrative graphs.
 
 To see example workflows, check the [example_workflows folder](example_workflows).
-For generic texture serialization, see [DDS Output](docs/DDS_OUTPUT.md). For the
+For generic texture serialization, see [DDS Output](docs/DDS_OUTPUT.md) and
+[PNG with stored values](docs/PNG_STORED_VALUES.md). For the
 current visual-novel node inputs and identity contract, see
 [Visual Novel Nodes](docs/VISUAL_NOVEL.md).
 
@@ -237,6 +238,7 @@ For an overview of how this nodes suite is structured and how it integrates with
 - [Frontend Proxy](docs/FRONTEND_PROXY.md)
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)
+- [PNG with Stored Values](docs/PNG_STORED_VALUES.md)
 - [Proxy](docs/PROXY.md)
 - [Region Comparison](docs/REGION_COMPARISON.md)
 - [Texture Tools](docs/TEXTURE_TOOLS.md)

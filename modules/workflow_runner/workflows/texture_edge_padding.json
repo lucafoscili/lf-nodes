@@ -1,11 +1,12 @@
 {
   "load_image": {
     "inputs": {
-      "image": "texture.png"
+      "image": "texture.png",
+      "ui_widget": {}
     },
-    "class_type": "LoadImage",
+    "class_type": "LF_LoadPNG",
     "_meta": {
-      "title": "1. Load the texture"
+      "title": "1. Load the texture (stored values)"
     }
   },
   "load_mask": {
@@ -37,15 +38,21 @@
   },
   "save": {
     "inputs": {
-      "images": [
+      "image": [
         "pad",
         0
       ],
-      "filename_prefix": "LF_Nodes/EdgePadding"
+      "filename_prefix": "LF_Nodes/EdgePadding",
+      "bit_depth": [
+        "load_image",
+        2
+      ],
+      "compress_level": 4,
+      "ui_widget": {}
     },
-    "class_type": "SaveImage",
+    "class_type": "LF_SavePNG",
     "_meta": {
-      "title": "4. Save the padded texture"
+      "title": "4. Save the padded texture (rounded, same bit depth)"
     }
   },
   "display_receipt": {

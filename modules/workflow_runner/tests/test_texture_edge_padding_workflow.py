@@ -54,17 +54,19 @@ def test_graph_reads_the_mask_from_red_and_publishes_the_receipt() -> None:
     graph = json.loads(WORKFLOW.workflow_path.read_text(encoding="utf-8"))
 
     assert [node["class_type"] for node in graph.values()] == [
-        "LoadImage",
+        "LF_LoadPNG",
         "LoadImageMask",
         "LF_EdgePadding",
-        "SaveImage",
+        "LF_SavePNG",
         "LF_DisplayJSON",
     ]
     # Red, not alpha: Core inverts only an alpha-channel mask.
     assert graph["load_mask"]["inputs"]["channel"] == "red"
     assert graph["pad"]["inputs"]["image"] == ["load_image", 0]
     assert graph["pad"]["inputs"]["mask"] == ["load_mask", 0]
-    assert graph["save"]["inputs"]["images"] == ["pad", 0]
+    # Stored values out: the padded image at the texture's own bit depth, rounded.
+    assert graph["save"]["inputs"]["image"] == ["pad", 0]
+    assert graph["save"]["inputs"]["bit_depth"] == ["load_image", 2]
     assert graph["display_receipt"]["inputs"]["json_input"] == ["pad", 1]
 
 
@@ -100,3 +102,19 @@ def test_configure_refuses_a_missing_prefix(prefix: object) -> None:
         WORKFLOW.configure_prompt(WORKFLOW.load_prompt(), inputs)
 
     assert error.value.input_name == "filename_prefix"
+
+
+def test_the_saved_png_is_the_one_artifact_of_the_save_node() -> None:
+    from modules.workflow_runner.services.lifecycle import build_output_manifest
+
+    file_name = "textures/padded_00001_.png"
+    history = {"outputs": {"save": {"lf_output": [{"dataset": {"nodes": []}, "file_names": [file_name],
+                                                   "receipt": {"schema": "lf.save-png.v1"}}]}}}
+    manifest = build_output_manifest("sub-1", "prompt-1", {"body": {"payload": {"history": history}}})
+
+    artifacts = [item for item in manifest["artifacts"] if item["node_id"] == "save"]
+    assert len(artifacts) == 1
+    assert artifacts[0]["filename"] == "padded_00001_.png"
+    assert artifacts[0]["subfolder"] == "textures"
+    assert artifacts[0]["storage_type"] == "output"
+    assert artifacts[0]["media_type"] == "image/png"

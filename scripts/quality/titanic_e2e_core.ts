@@ -33,6 +33,7 @@ export interface ManifestCase {
     fixtureGlbSourceNodeIds?: number[];
     fixtureLayerManifestNodeIds?: number[];
     fixtureImageSourceNodeIds?: number[];
+    fixturePngSourceNodeIds?: number[];
   };
   expect?: Record<
     string,
@@ -159,6 +160,15 @@ export const buildCpuFixturePromptBindings = (
     }
     result.push({ nodeId: String(id), classType: node.class_type,
       input: 'dir', value: `${repoRoot.replace(/[\\/]+$/, '')}/scripts/quality/fixtures/titanic-sam3` });
+  }
+  for (const id of bindings?.fixturePngSourceNodeIds ?? []) {
+    const node = prompt[String(id)];
+    if (node?.class_type !== 'LF_LoadPNG' ||
+        node.inputs?.image !== 'scripts/quality/fixtures/titanic-sam3/comfy-example.png') {
+      throw new Error(`PNG fixture binding node ${id} drifted`);
+    }
+    result.push({ nodeId: String(id), classType: node.class_type, input: 'image',
+      value: `${repoRoot.replace(/[\\/]+$/, '')}/scripts/quality/fixtures/titanic-sam3/comfy-example.png` });
   }
   return result;
 };

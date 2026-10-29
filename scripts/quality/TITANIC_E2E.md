@@ -270,6 +270,20 @@ the case; `--check` verifies the canonical workflow and manifest still match
 it, and `modules/tests/test_titanic_texture_fixture.py` runs the same settings
 through the nodes offline.
 
+### PNG with stored values
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.png-stored-values --accept-warm-cache --reset-cache
+```
+
+`LF_LoadPNG` (node 667) loads the same pinned stock example; its
+`fixturePngSourceNodeIds` binding replaces the checked-in relative path with the
+checkout's absolute one at run time. `LF_SavePNG` (node 668) writes it back at
+16 bits. The case asserts both receipts' schemas, the example's size, colour
+type and depth, and the 16-bit RGB write. `update_titanic_png_coverage.py`
+appended them (`--check`), and `modules/tests/test_titanic_png_fixture.py`
+proves offline that the written file holds the example's values exactly.
+
 ## Optional full active-workflow diagnostic
 
 ```powershell

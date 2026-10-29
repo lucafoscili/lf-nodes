@@ -24,12 +24,13 @@ input_image = WorkflowCell(
     value="Texture",
     shape="upload",
     description=(
-        "Choose one texture to pad, such as a baked map or an atlas. Its colour "
-        "channels are padded; transparency is not carried by this block."
+        "Choose one PNG texture to pad, such as a baked map or an atlas. Every "
+        "channel is padded, alpha included, and its values are read as stored "
+        "(8 or 16 bits)."
     ),
     props={
         "lfHtmlAttributes": {
-            "accept": "image/*",
+            "accept": "image/png",
         },
         "lfLabel": "1. Choose a texture",
     },
@@ -60,7 +61,8 @@ input_filename_prefix = WorkflowCell(
     shape="textfield",
     description=(
         "The folder and filename inside ComfyUI's output directory. A counter and "
-        "the .png extension are added automatically."
+        "the .png extension are added automatically; the PNG keeps the texture's "
+        "bit depth and holds no metadata."
     ),
     props={
         "lfHtmlAttributes": {
@@ -81,7 +83,10 @@ output_image = WorkflowCell(
     node_id="save",
     id="padded_image",
     shape="masonry",
-    description="The padded texture: pixels inside the mask are unchanged, every other pixel is filled.",
+    description=(
+        "The padded texture: pixels inside the mask keep their stored values, every "
+        "other pixel is filled and rounded to the nearest level."
+    ),
 )
 
 output_receipt = WorkflowCell(
@@ -105,7 +110,8 @@ node = WorkflowNode(
         "Fill a texture outside its coverage mask from the pixels inside it, so "
         "mipmaps and filtering never blend the background into the border of a "
         "baked texture or an atlas island. Runs on CPU, loads no model and never "
-        "resizes. Saved as 8-bit RGB."
+        "resizes. Loads and saves stored values: 8 or 16-bit PNG, alpha kept as a "
+        "channel, filled pixels rounded."
     ),
     category="Image Processing",
     card=WorkflowCardPresentation(

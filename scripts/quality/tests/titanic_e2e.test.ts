@@ -282,6 +282,20 @@ describe('Titanic E2E pure contracts', () => {
       ...prompt['654'], class_type: 'LF_LoadFileOnce',
     } }, bindings, '/checkout')).toThrow('image fixture binding node 654 drifted');
   });
+  it('binds the stored-value PNG loader to the pinned stock example by absolute path', () => {
+    const image = 'scripts/quality/fixtures/titanic-sam3/comfy-example.png';
+    const prompt = { '667': { class_type: 'LF_LoadPNG', inputs: { image } } };
+    const original = structuredClone(prompt);
+    const bindings = { fixturePngSourceNodeIds: [667] };
+    expect(buildCpuFixturePromptBindings(prompt, bindings, 'C:\\checkout\\lf-nodes\\')).toEqual([
+      { nodeId: '667', classType: 'LF_LoadPNG', input: 'image', value: `C:\\checkout\\lf-nodes/${image}` },
+    ]);
+    expect(prompt).toEqual(original);
+    expect(() => buildCpuFixturePromptBindings({ '667': { class_type: 'LF_LoadPNG', inputs: { image: '/private.png' } } },
+      bindings, '/checkout')).toThrow('PNG fixture binding node 667 drifted');
+    expect(() => buildCpuFixturePromptBindings({ '667': { class_type: 'LoadImage', inputs: { image } } },
+      bindings, '/checkout')).toThrow('PNG fixture binding node 667 drifted');
+  });
   it('finds only a named Comfy argv with relative, Windows, or POSIX main.py paths', () => {
     expect(findComfyArgv({ system: { argv: ['main.py', '--cache-none'] } })).toEqual([
       'main.py',

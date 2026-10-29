@@ -567,6 +567,7 @@ const validateCombos = (
   prompt: JsonRecord,
   objectInfo: JsonRecord,
   targets: number[],
+  boundInputs: ReadonlySet<string> = new Set(),
 ): string[] => {
   const blockers: string[] = [];
   for (const nodeId of collectAncestors(prompt, targets)) {
@@ -585,7 +586,8 @@ const validateCombos = (
       const spec = definitions[name];
       const choices = Array.isArray(spec) && Array.isArray(spec[0]) ? spec[0] : null;
       const isLink = Array.isArray(value) && value.length >= 2;
-      if (choices && !isLink && !choices.includes(value)) {
+      // A fixture binding replaces this value with a checkout path before submission.
+      if (choices && !isLink && !boundInputs.has(`${nodeId}:${name}`) && !choices.includes(value)) {
         blockers.push(
           `node ${nodeId} (${classType}) input ${name} selects unavailable value ${JSON.stringify(value)}`,
         );
@@ -2599,7 +2601,10 @@ const executeCase = async (
   for (const flag of requiredFlagsForResourceClass(manifestCase.resourceClass)) {
     if (optionRecord[flag] !== true) blockers.push(`requires --${flag.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}`);
   }
-  blockers.push(...validateCombos(prompt, objectInfo, manifestCase.targets));
+  const fixtureBoundInputs = new Set(
+    (manifestCase.bindings?.fixturePngSourceNodeIds ?? []).map((id) => `${id}:image`),
+  );
+  blockers.push(...validateCombos(prompt, objectInfo, manifestCase.targets, fixtureBoundInputs));
   blockers.push(...validateCaseBindings(prompt, manifestCase));
   if (manifestCase.resourceClass === 'local-llm-gpu-write' && options.allowLocalLlm) {
     blockers.push(...(await localModelBlockers(options)));

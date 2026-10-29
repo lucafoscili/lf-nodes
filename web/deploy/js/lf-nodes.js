@@ -1357,6 +1357,7 @@ var NodeName;
   NodeName2["loadFileOnce"] = "LF_LoadFileOnce";
   NodeName2["loadImages"] = "LF_LoadImages";
   NodeName2["loadLocalJSON"] = "LF_LoadLocalJSON";
+  NodeName2["loadPng"] = "LF_LoadPNG";
   NodeName2["loadLoraTags"] = "LF_LoadLoraTags";
   NodeName2["loadMetadata"] = "LF_LoadMetadata";
   NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
@@ -1389,6 +1390,7 @@ var NodeName;
   NodeName2["saveImageForCivitai"] = "LF_SaveImageForCivitAI";
   NodeName2["saveDds"] = "LF_SaveDDS";
   NodeName2["saveJson"] = "LF_SaveJSON";
+  NodeName2["savePng"] = "LF_SavePNG";
   NodeName2["saveMarkdown"] = "LF_SaveMarkdown";
   NodeName2["saveSvg"] = "LF_SaveSVG";
   NodeName2["saveText"] = "LF_SaveText";
@@ -1807,6 +1809,7 @@ const NODE_WIDGET_MAP = {
   LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLocalJSON: [CustomWidgetName.tree],
+  LF_LoadPNG: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.upload],
   LF_LoadWD14Model: [CustomWidgetName.code],
@@ -1840,6 +1843,7 @@ const NODE_WIDGET_MAP = {
   LF_SaveDDS: [CustomWidgetName.tree],
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
+  LF_SavePNG: [CustomWidgetName.masonry],
   LF_SaveMarkdown: [CustomWidgetName.tree],
   LF_SaveSVG: [CustomWidgetName.masonry],
   LF_SaveText: [CustomWidgetName.tree],

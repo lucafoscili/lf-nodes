@@ -65,6 +65,11 @@ describe('Generic output widget contracts', () => {
     expect(NODE_WIDGET_MAP[NodeName.saveDds]).toEqual([CustomWidgetName.tree]);
   });
 
+  it('shows stored-value PNG loads and saves in Masonry', () => {
+    expect(NODE_WIDGET_MAP[NodeName.loadPng]).toEqual([CustomWidgetName.masonry]);
+    expect(NODE_WIDGET_MAP[NodeName.savePng]).toEqual([CustomWidgetName.masonry]);
+  });
+
   it('renders registered output receipts with the LF tree widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.registerOutputFile]).toEqual([CustomWidgetName.tree]);
   });
