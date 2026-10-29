@@ -33,6 +33,13 @@ mask with no covered pixel raises: there is nothing to pad from.
 The receipt (`lf.edge-padding.v1`) gives, per image, the covered and padded
 pixel counts, the covered share and the pyramid's levels.
 
+The Workflow Runner block **Texture Edge Padding** (`texture_edge_padding`)
+runs it file in, file out: a texture and a coverage mask (white keeps, read
+from the red channel by Core `LoadImageMask`) in, the padded texture (Core
+`SaveImage`) and the receipt out. Core's image loading and saving set its
+limits: colour only (no alpha), 8 bits, and `SaveImage` truncates rather than
+rounds, so a filled pixel can come out one level below a rounded result.
+
 ## Masked Lab grade (`LF_MaskedLabGrade`)
 
 Gives a region the colour of another: `mask` on `image` is measured and graded,

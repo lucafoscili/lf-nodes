@@ -49,6 +49,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "sprite_loop_cut",
     "stable_audio_3_sfx",
     "svg_generation_gemini",
+    "texture_edge_padding",
     "t2i_15_lcm",
     "t2i_illustrious_xl",
     "trellis2",

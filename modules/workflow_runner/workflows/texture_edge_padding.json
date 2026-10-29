@@ -1,0 +1,64 @@
+{
+  "load_image": {
+    "inputs": {
+      "image": "texture.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "1. Load the texture"
+    }
+  },
+  "load_mask": {
+    "inputs": {
+      "image": "mask.png",
+      "channel": "red"
+    },
+    "class_type": "LoadImageMask",
+    "_meta": {
+      "title": "2. Load the coverage mask"
+    }
+  },
+  "pad": {
+    "inputs": {
+      "image": [
+        "load_image",
+        0
+      ],
+      "mask": [
+        "load_mask",
+        0
+      ],
+      "ui_widget": {}
+    },
+    "class_type": "LF_EdgePadding",
+    "_meta": {
+      "title": "3. Pad past the mask"
+    }
+  },
+  "save": {
+    "inputs": {
+      "images": [
+        "pad",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/EdgePadding"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "4. Save the padded texture"
+    }
+  },
+  "display_receipt": {
+    "inputs": {
+      "json_input": [
+        "pad",
+        1
+      ],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "Publish the padding receipt to Runner history"
+    }
+  }
+}
