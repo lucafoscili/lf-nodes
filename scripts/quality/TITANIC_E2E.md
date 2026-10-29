@@ -99,6 +99,55 @@ receipts, generated preview URLs, live widget updates, durable `ui.lf_output`,
 and an unchanged workflow file. It never calls a provider or changes model
 residency.
 
+### Saving final UI payloads
+
+Add `--save-payloads` to an execution command to write UTF-8 JSON at
+`<output-dir>/payloads/<caseId>.json`. Each file has schema
+`lf.titanic-payloads.v1`, a `caseId`, and `nodes` entries containing string
+`nodeId`, submitted `nodeType`, and the raw terminal-history UI object in `ui`.
+Only `execution.requiredNodeIds` are selected; cases without required nodes
+produce an empty `nodes` array. Prompt inputs and workflow documents are omitted.
+Headless nodes such as model loaders normally have no history UI; their `ui`
+is `{}`, while available UI from the other required nodes is retained.
+Each case's summary includes its payload path and node count, or a capture error.
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.image-regions-layers --save-payloads --output-dir output/titanic-ui
+```
+
+Capture runs before execution assertions, so usable terminal UI is retained
+when a warm-cache run fails execution proof. A saved payload is evidence of UI
+output, not a case pass. A missing submitted node type or a failed write fails
+the case and preserves its terminal and execution diagnostics. Hydration-only runs do
+not execute cases or create payload files.
+
+### Widget gallery
+
+After building LF's frontend, render saved UI through its own widget factories
+and event handler in an isolated headless page:
+
+```powershell
+corepack yarn titanic:gallery --run output/titanic-ui --out output/widget-gallery --node LF_RegionColorStats --alternative LF_RegionColorStats=countBarChart
+```
+
+Repeat `--run`, `--node` and `--alternative NODE=WIDGET` as needed. Widget names
+accept `CustomWidgetName` keys (such as `masonry`) or values (`LF_MASONRY`).
+Defaults come directly from the built bundle's `NODE_WIDGET_MAP`; no production
+defaults change. Use `--node` to select widget-bearing nodes when a case also
+captures loaders with empty UI. Each mapped `lf_output` entry gets its own views.
+The gallery reads `web/deploy` by default (`--bundle-dir` overrides it), and
+fetches preview images from `--comfy-url` (default `http://127.0.0.1:8188`).
+It opens no workflow and submits no work. `--browser-channel chrome` selects an
+installed browser without downloading one.
+
+The output contains PNGs and `manifest.json` (`lf.titanic-gallery.v1`), with
+case, node ID/type, payload index, evidence index, widget, default/alternative,
+filename and outcome for every render. An evidence index selects the input
+payload document in run order (case files sorted by name). Render failures are
+named in the manifest and stderr, and return a nonzero exit code. The manifest
+contains no UI payload, prompt or workflow document. This is visual evidence,
+not a replacement for the live case's execution result.
+
 ### Synthetic GLB, region and layer cases
 
 The six Studio-supporting public nodes have two dedicated CPU cases. With

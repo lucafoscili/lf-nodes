@@ -21,8 +21,9 @@
     "sanitize:titanic": "tsx scripts/quality/sanitize_titanic.mts",
     "test:examples:unit": "vitest run scripts/quality/tests/sanitize_example_workflows.test.ts",
     "test:titanic": "tsx scripts/quality/titanic_e2e.mts",
+    "titanic:gallery": "tsx scripts/quality/titanic_gallery.mts",
     "test:vocabulary": "vitest run scripts/quality/tests/public_vocabulary.test.ts",
-    "test:titanic:unit": "vitest run scripts/quality/tests/titanic_e2e.test.ts scripts/quality/tests/sanitize_titanic.test.ts",
+    "test:titanic:unit": "vitest run scripts/quality/tests/titanic_e2e.test.ts scripts/quality/tests/sanitize_titanic.test.ts scripts/quality/tests/titanic_gallery.test.ts",
     "test:watch": "vitest"
   },
   "devDependencies": {

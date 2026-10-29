@@ -155,6 +155,38 @@ const asRecord = (value: unknown): Record<string, unknown> | null =>
     ? (value as Record<string, unknown>)
     : null;
 
+export interface TitanicPayloads {
+  schema: 'lf.titanic-payloads.v1';
+  caseId: string;
+  nodes: Array<{ nodeId: string; nodeType: string; ui: Record<string, unknown> }>;
+}
+
+/** Select final UI only; submitted inputs and unrelated history never leave memory. */
+export const buildCasePayloads = (
+  manifestCase: ManifestCase,
+  submittedPrompt: Record<string, unknown> | null,
+  historyEntry: unknown,
+): TitanicPayloads => {
+  const outputs = asRecord(asRecord(historyEntry)?.outputs);
+  const errors: string[] = [];
+  const nodes: TitanicPayloads['nodes'] = [];
+  for (const id of new Set(manifestCase.execution?.requiredNodeIds ?? [])) {
+    const nodeId = String(id);
+    const nodeType = asRecord(submittedPrompt?.[nodeId])?.class_type;
+    const ui = asRecord(outputs?.[nodeId]) ?? {};
+    if (typeof nodeType !== 'string' || !nodeType.trim()) {
+      errors.push(`node ${nodeId} has no submitted class_type`);
+    }
+    if (typeof nodeType === 'string' && nodeType.trim()) {
+      nodes.push({ nodeId, nodeType, ui });
+    }
+  }
+  if (errors.length) {
+    throw new Error(`payload capture for ${manifestCase.id}: ${errors.join('; ')}`);
+  }
+  return { schema: 'lf.titanic-payloads.v1', caseId: manifestCase.id, nodes };
+};
+
 const isComfyMainPath = (value: string): boolean =>
   /(?:^|[\\/])main\.py$/i.test(value);
 

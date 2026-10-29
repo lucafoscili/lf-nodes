@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   classifyHistoryEntry,
+  buildCasePayloads,
   buildCpuFixturePromptBindings,
   classifyPostCancellation,
   comfyArtifactKey,
@@ -34,6 +35,88 @@ import {
 } from '../titanic_e2e_core.ts';
 
 describe('Titanic E2E pure contracts', () => {
+  it('captures only declared final UI with node types from the submitted prompt', () => {
+    const manifestCase = { id: 'cpu.payloads', execution: { requiredNodeIds: [12, 10, 12] } } as any;
+    const ui = { lf_output: [{ value: 'résultat', dataset: { nodes: [] } }] };
+    const nativeUi = { result: ['model.glb [temp]', null, []] };
+    const submittedPrompt = {
+      '10': { class_type: 'LF_DisplayJSON', inputs: { text: 'input-only' } },
+      '12': { class_type: 'Preview3DAdvanced', inputs: { model_file: 'input.glb' } },
+      '99': { class_type: 'LF_WriteJSON', inputs: { text: 'unrelated-input' } },
+    };
+    const history = {
+      prompt: [0, 'owned', { '10': { class_type: 'different-history-type' } }],
+      outputs: { '10': ui, '12': nativeUi, '99': { lf_output: ['unrelated-output'] } },
+      workflow: { nodes: ['workflow-only'] },
+      status: { completed: true, status_str: 'success' },
+    };
+    const before = structuredClone({ submittedPrompt, history });
+    const captured = buildCasePayloads(manifestCase, submittedPrompt, history);
+    expect(captured).toEqual({
+      schema: 'lf.titanic-payloads.v1', caseId: 'cpu.payloads',
+      nodes: [
+        { nodeId: '12', nodeType: 'Preview3DAdvanced', ui: nativeUi },
+        { nodeId: '10', nodeType: 'LF_DisplayJSON', ui },
+      ],
+    });
+    expect(JSON.parse(JSON.stringify(captured))).toEqual(captured);
+    expect({ submittedPrompt, history }).toEqual(before);
+  });
+
+  it('keeps terminal UI available when cached execution is rejected', () => {
+    const manifestCase = { id: 'cpu.cached', execution: {
+      requiredNodeIds: [10], forbiddenCachedNodeIds: [10],
+    } } as any;
+    const history = { outputs: { '10': { lf_output: [{ value: 'cached result' }] } } };
+    expect(validateExecutionTrace(manifestCase, {
+      promptId: 'owned', started: true, terminalEvent: 'execution_success',
+      executedNodeIds: [], uiExecutedNodeIds: [], cachedNodeIds: ['10'],
+      executingEvents: [], executedPreviewUrlsByNode: {},
+    })).toEqual([
+      'node 10 was not observed executing for prompt owned',
+      'node 10 was served from cache for prompt owned',
+    ]);
+    expect(buildCasePayloads(manifestCase, { '10': { class_type: 'LF_DisplayJSON' } }, history).nodes)
+      .toEqual([{ nodeId: '10', nodeType: 'LF_DisplayJSON', ui: history.outputs['10'] }]);
+  });
+
+  it('retains available UI when required headless nodes have no history UI', () => {
+    const manifestCase = { id: 'cpu.missing', execution: { requiredNodeIds: [10, 12] } } as any;
+    const prompt = { '10': { class_type: 'LF_DisplayJSON' }, '12': { class_type: 'LF_LoadSAM3Model' } };
+    const ui = { lf_output: [{ value: 1 }] };
+    for (const missing of [undefined, null, {}, [], 'not UI']) {
+      expect(buildCasePayloads(manifestCase, prompt, {
+        outputs: { '10': ui, '12': missing },
+      }).nodes).toEqual([
+        { nodeId: '10', nodeType: 'LF_DisplayJSON', ui },
+        { nodeId: '12', nodeType: 'LF_LoadSAM3Model', ui: {} },
+      ]);
+    }
+    expect(buildCasePayloads(manifestCase, prompt, undefined).nodes).toEqual([
+      { nodeId: '10', nodeType: 'LF_DisplayJSON', ui: {} },
+      { nodeId: '12', nodeType: 'LF_LoadSAM3Model', ui: {} },
+    ]);
+  });
+
+  it('reports missing submitted node types without inventing a type', () => {
+    const manifestCase = { id: 'cpu.missing', execution: { requiredNodeIds: [10, 12] } } as any;
+    const prompt = { '10': { class_type: 'LF_DisplayJSON' }, '12': { class_type: 'LF_LoadSAM3Model' } };
+    expect(() => buildCasePayloads(manifestCase, null, undefined)).toThrow(
+      'payload capture for cpu.missing: node 10 has no submitted class_type; node 12 has no submitted class_type',
+    );
+    expect(() => buildCasePayloads(manifestCase, {
+      ...prompt, '12': { class_type: ' ' },
+    }, { outputs: { '10': { text: ['valid'] }, '12': { result: ['valid'] } } }))
+      .toThrow('node 12 has no submitted class_type');
+  });
+
+  it('does not expand payload selection to expectations or targets', () => {
+    expect(buildCasePayloads({ id: 'cpu.no-required', targets: [10], expect: { '10': {} } } as any,
+      null, { outputs: { '10': { text: ['outside selection'] } } })).toEqual({
+      schema: 'lf.titanic-payloads.v1', caseId: 'cpu.no-required', nodes: [],
+    });
+  });
+
   it('verifies the stock temporary GLB preview without treating arbitrary result strings as assets', () => {
     const output = { result: ['preview3d_advanced_aabb.glb [temp]', null, []] };
     expect(collectPreviewUrls(output)).toEqual(['/view?filename=preview3d_advanced_aabb.glb&type=temp']);

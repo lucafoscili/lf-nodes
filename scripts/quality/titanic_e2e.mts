@@ -1,13 +1,14 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import playwright from 'playwright';
 import type { Browser, Page } from 'playwright';
 
 import {
   classifyHistoryEntry,
+  buildCasePayloads,
   buildCpuFixturePromptBindings,
   classifyPostCancellation,
   collectPreviewUrls,
@@ -63,6 +64,7 @@ interface CliOptions {
   allowLocalLlm: boolean;
   allowInteraction: boolean;
   acceptWarmCache: boolean;
+  savePayloads: boolean;
 }
 
 interface CaseResult {
@@ -78,6 +80,7 @@ interface CaseResult {
   terminal?: JsonRecord;
   promptEvidence?: JsonRecord;
   executionTrace?: ExecutionTrace;
+  payloads?: { path?: string; nodeCount?: number; error?: string };
   downstreamArtifact?: JsonRecord;
   foreignWorkDetected?: boolean;
   liveWidgetChecks?: Array<{ nodeId: number; kind: string; found: boolean; hasElement: boolean; previewCount: number }>;
@@ -115,12 +118,13 @@ Execution authority is explicit:
   --local-instance-id <id> Optionally require this loaded instance ID.
   --allow-interaction      Permit browser-driven editing transactions.
   --accept-warm-cache      Allow full execution without Comfy --cache-none.
+  --save-payloads          Save required nodes' final history UI under output-dir/payloads.
 
 Service lifecycle is deliberately out of scope: this command never starts,
 stops, restarts, clears, or globally interrupts Comfy or LM Studio.
 `;
 
-const parseArgs = (argv: string[]): CliOptions => {
+export const parseArgs = (argv: string[]): CliOptions => {
   const options: CliOptions = {
     workflowPath: process.env.LF_TITANIC_WORKFLOW || defaultWorkflow,
     comfyUrl: process.env.LF_COMFY_URL || 'http://127.0.0.1:8188',
@@ -139,6 +143,7 @@ const parseArgs = (argv: string[]): CliOptions => {
     allowLocalLlm: false,
     allowInteraction: false,
     acceptWarmCache: false,
+    savePayloads: false,
   };
   const takeValue = (index: number, name: string): string => {
     const value = argv[index + 1];
@@ -215,6 +220,9 @@ const parseArgs = (argv: string[]): CliOptions => {
         break;
       case '--accept-warm-cache':
         options.acceptWarmCache = true;
+        break;
+      case '--save-payloads':
+        options.savePayloads = true;
         break;
       default:
         throw new Error(`unknown argument: ${arg}`);
@@ -2716,6 +2724,24 @@ const executeCase = async (
   } finally {
     executionTrace = await stopExecutionRecorder(page, recorderToken, promptId);
   }
+  // Retain useful terminal UI even when later execution checks reject a warm cache.
+  // A capture failure becomes a case assertion so terminal diagnostics survive.
+  let payloads: CaseResult['payloads'];
+  const payloadAssertions: string[] = [];
+  if (options.savePayloads) {
+    try {
+      const captured = buildCasePayloads(manifestCase, submittedPrompt, terminal.entry);
+      const payloadDir = resolve(options.outputDir, 'payloads');
+      const path = resolve(payloadDir, `${manifestCase.id}.json`);
+      await mkdir(payloadDir, { recursive: true });
+      await writeFile(path, `${JSON.stringify(captured, null, 2)}\n`, 'utf8');
+      payloads = { path, nodeCount: captured.nodes.length };
+    } catch (error) {
+      const message = `payload capture failed: ${String(error)}`;
+      payloads = { error: message };
+      payloadAssertions.push(message);
+    }
+  }
   let historyAfter = new Set<string>();
   let historyAfterError: string | null = null;
   try {
@@ -2784,10 +2810,13 @@ const executeCase = async (
       terminal: terminalEvidence,
       promptEvidence,
       executionTrace,
+      payloads,
+      assertions: payloadAssertions,
       foreignWorkDetected,
-      message: editingSessionResidue
+      message: (editingSessionResidue
         ? `terminal state: ${terminal.classification}; exact editing-session cleanup is unproven and residue was preserved`
-        : `terminal state: ${terminal.classification}`,
+        : `terminal state: ${terminal.classification}`) +
+        (payloadAssertions.length ? `; ${payloadAssertions.join('; ')}` : ''),
     };
   }
   if (editingSessionResidue) {
@@ -2801,11 +2830,14 @@ const executeCase = async (
       terminal: terminalEvidence,
       promptEvidence,
       executionTrace,
+      payloads,
+      assertions: payloadAssertions,
       foreignWorkDetected,
-      message: 'Core reported success, but exact editing-session cleanup is unproven and residue was preserved',
+      message: 'Core reported success, but exact editing-session cleanup is unproven and residue was preserved' +
+        (payloadAssertions.length ? `; ${payloadAssertions.join('; ')}` : ''),
     };
   }
-  const assertions = validateCaseOutputs(manifestCase, terminal.entry);
+  const assertions = [...payloadAssertions, ...validateCaseOutputs(manifestCase, terminal.entry)];
   if (historyAfterError) {
     assertions.push(`post-terminal foreign-history snapshot failed: ${historyAfterError}`);
   }
@@ -2884,6 +2916,7 @@ const executeCase = async (
     terminal: terminalEvidence,
     promptEvidence,
     executionTrace,
+    payloads,
     downstreamArtifact: downstream.evidence ?? undefined,
     liveWidgetChecks: liveWidgets,
     foreignWorkDetected:
@@ -2936,6 +2969,7 @@ const main = async () => {
       browserChannel: options.browserChannel,
       headed: options.headed,
     },
+    savePayloads: options.savePayloads,
     results,
   };
   let browser: Browser | undefined;
@@ -3248,4 +3282,6 @@ const main = async () => {
           : 1;
 };
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  await main();
+}
