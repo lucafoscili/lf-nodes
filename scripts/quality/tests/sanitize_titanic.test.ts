@@ -324,11 +324,53 @@ describe('Titanic publication sanitizer', () => {
       expect(manifest.coverageExemptions.some((item: any) => item.type === type)).toBe(false);
     }
     const outputTypes = ['LF_ImageList', 'LF_WriteJSON', 'LF_RegionColorStats', 'LF_DisplayJSON'];
-    const outputIds = fixture.nodes.filter((node: any) => node.id >= 630 && outputTypes.includes(node.type))
+    // The regional slice spans nodes 630-654; later slices check their own targets.
+    const regional = (id: number) => id >= 630 && id <= 654;
+    const outputIds = fixture.nodes.filter((node: any) => regional(node.id) && outputTypes.includes(node.type))
       .map((node: any) => node.id).sort();
     const targets = manifest.coverageCases.flatMap((item: any) => item.targets)
-      .filter((id: number) => id >= 630).sort();
+      .filter(regional).sort();
     expect(targets).toEqual(outputIds);
+  });
+
+  it('chains the texture tools on the stock example and repacks a synthetic normal map', () => {
+    const fixture = readFixture();
+    const manifest = readManifest();
+    const byId = (id: number) => fixture.nodes.find((node: any) => node.id === id);
+    const upstream = (id: number, name: string) => {
+      const slot = byId(id).inputs.findIndex((input: any) => input.name === name);
+      const link = fixture.links.find((edge: any) => edge[3] === id && edge[4] === slot);
+      return link?.slice(1, 3);
+    };
+    expect([660, 661, 662, 665].map((id) => byId(id).type)).toEqual([
+      'LF_MaskedLabGrade', 'LF_DetailTransfer', 'LF_EdgePadding', 'LF_NormalMapRepack',
+    ]);
+    expect(upstream(660, 'image')).toEqual([654, 0]);
+    expect(upstream(660, 'mask')).toEqual([657, 0]);
+    expect(upstream(660, 'reference_mask')).toEqual([659, 0]);
+    expect(upstream(661, 'image')).toEqual([660, 0]);
+    expect(upstream(661, 'detail_source')).toEqual([654, 0]);
+    expect(upstream(662, 'image')).toEqual([661, 0]);
+    expect(upstream(662, 'mask')).toEqual([657, 0]);
+    expect(upstream(663, 'image')).toEqual([662, 0]);
+    expect(upstream(665, 'image')).toEqual([664, 0]);
+    expect(upstream(666, 'image')).toEqual([665, 0]);
+    for (const id of [660, 661, 662, 665]) {
+      expect(byId(id).inputs.find((input: any) => input.name === 'ui_widget').type).toBe('LF_COMPARE');
+      expect(byId(id).widgets_values_named.ui_widget).toEqual({});
+    }
+    expect(byId(665).widgets_values_named).toMatchObject({ green_in: 'opengl', green_out: 'directx' });
+    const texture = manifest.coverageCases.find((item: any) => item.id === 'cpu.texture-tools');
+    expect(texture).toMatchObject({
+      resourceClass: 'cpu', targets: [663, 666], bindings: { fixtureImageSourceNodeIds: [654] },
+      execution: { requiredNodeIds: [660, 661, 662, 665], forbiddenCachedNodeIds: [660, 661, 662, 665] },
+    });
+    for (const type of ['LF_MaskedLabGrade', 'LF_DetailTransfer', 'LF_EdgePadding', 'LF_NormalMapRepack']) {
+      expect(manifest.coverageExemptions.some((item: any) => item.type === type)).toBe(false);
+    }
+    const viewers = fixture.nodes.filter((node: any) => node.id >= 655 && node.type === 'LF_ViewImages')
+      .map((node: any) => node.id).sort();
+    expect(texture.targets).toEqual(viewers);
   });
 
   it('rejects an empty SAM result even when its Compare cells are complete', () => {

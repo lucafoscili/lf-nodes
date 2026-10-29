@@ -50,6 +50,13 @@ describe('Generic output widget contracts', () => {
     expect(NODE_WIDGET_MAP[NodeName.visionPatchEncode]).toEqual([CustomWidgetName.compare]);
   });
 
+  it('shows the texture nodes before and after in Compare', () => {
+    for (const name of [NodeName.edgePadding, NodeName.maskedLabGrade, NodeName.detailTransfer,
+      NodeName.normalMapRepack]) {
+      expect(NODE_WIDGET_MAP[name]).toEqual([CustomWidgetName.compare]);
+    }
+  });
+
   it('uses native Comfy audio UI for ACE-Step Remix', () => {
     expect(NODE_WIDGET_MAP[NodeName.aceStepRemix]).toEqual([]);
   });

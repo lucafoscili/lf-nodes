@@ -1287,6 +1287,10 @@ var NodeName;
   NodeName2["regionColorStats"] = "LF_RegionColorStats";
   NodeName2["regionFeatureSimilarity"] = "LF_RegionFeatureSimilarity";
   NodeName2["visionPatchEncode"] = "LF_VisionPatchEncode";
+  NodeName2["edgePadding"] = "LF_EdgePadding";
+  NodeName2["maskedLabGrade"] = "LF_MaskedLabGrade";
+  NodeName2["detailTransfer"] = "LF_DetailTransfer";
+  NodeName2["normalMapRepack"] = "LF_NormalMapRepack";
   NodeName2["backgroundRemover"] = "LF_BackgroundRemover";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
@@ -1436,6 +1440,12 @@ var NodeName;
   NodeName2["writeJson"] = "LF_WriteJSON";
   NodeName2["youtubeReference"] = "LF_YouTubeReference";
 })(NodeName || (NodeName = {}));
+const TEXTURE_RESULT_NODES = [
+  NodeName.edgePadding,
+  NodeName.maskedLabGrade,
+  NodeName.detailTransfer,
+  NodeName.normalMapRepack
+];
 var TagName;
 (function(TagName2) {
   TagName2["Div"] = "div";
@@ -1728,6 +1738,10 @@ const NODE_WIDGET_MAP = {
   LF_RegionColorStats: [CustomWidgetName.compare],
   LF_RegionFeatureSimilarity: [CustomWidgetName.tree],
   LF_VisionPatchEncode: [CustomWidgetName.compare],
+  LF_EdgePadding: [CustomWidgetName.compare],
+  LF_MaskedLabGrade: [CustomWidgetName.compare],
+  LF_DetailTransfer: [CustomWidgetName.compare],
+  LF_NormalMapRepack: [CustomWidgetName.compare],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
@@ -7817,7 +7831,12 @@ const compareFactory = {
     }
     content.appendChild(compare);
     let summary;
-    if ([NodeName.textRegionMasks, NodeName.regionColorStats, NodeName.visionPatchEncode].includes(node.comfyClass)) {
+    if ([
+      NodeName.textRegionMasks,
+      NodeName.regionColorStats,
+      NodeName.visionPatchEncode,
+      ...TEXTURE_RESULT_NODES
+    ].includes(node.comfyClass)) {
       summary = document.createElement(TagName.LfTree);
       summary.classList.add(CompareCSS.Summary);
       summary.lfAccordionLayout = false;
@@ -10827,7 +10846,8 @@ class LFWidgets {
         NodeName.textRegionMasks,
         NodeName.regionColorStats,
         NodeName.regionFeatureSimilarity,
-        NodeName.visionPatchEncode
+        NodeName.visionPatchEncode,
+        ...TEXTURE_RESULT_NODES
       ].includes(nodeName);
       const rendered = __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[name].render(node, ...args);
       if (regionResult) {

@@ -51,6 +51,10 @@ describe('region comparison result views', () => {
     [NodeName.regionColorStats, CustomWidgetName.compare],
     [NodeName.regionFeatureSimilarity, CustomWidgetName.tree],
     [NodeName.visionPatchEncode, CustomWidgetName.compare],
+    [NodeName.edgePadding, CustomWidgetName.compare],
+    [NodeName.maskedLabGrade, CustomWidgetName.compare],
+    [NodeName.detailTransfer, CustomWidgetName.compare],
+    [NodeName.normalMapRepack, CustomWidgetName.compare],
   ])('hydrates %s live and from cached history in %s', (name, widget) => {
     const previous = vi.fn((_output: unknown) => 'previous result');
     const node = { comfyClass: name, id: 641, onExecuted: previous };

@@ -247,6 +247,29 @@ reject their cached execution. They never download weights. With no running,
 coordinated Comfy service, offline fixture tests establish **inventory** only;
 widget hydration and real SAM3/DINOv3 inference remain separate live checks.
 
+### Texture tools
+
+The texture slice reuses the SAM3 case's pinned stock example
+(`fixtures/titanic-sam3/comfy-example.png`, node 654, bound the same way) and
+needs no model:
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.texture-tools --accept-warm-cache --reset-cache
+```
+
+Stock `SolidMask` and `MaskComposite` nodes make a central square and a top
+band. Masked Lab grade gives the square the band's colour, Detail transfer
+restores the square's fine detail with the original as source and reference,
+and Edge padding fills the rest of the image from the square. A flat,
+unnormalised `LF_EmptyImage` normal (`A0A0E0`) goes through Normal map check and
+repack from OpenGL to DirectX green. The case requires actual execution of all
+four nodes and asserts their schemas and exact pixel counts.
+
+`scripts/quality/update_titanic_texture_coverage.py` appended these nodes and
+the case; `--check` verifies the canonical workflow and manifest still match
+it, and `modules/tests/test_titanic_texture_fixture.py` runs the same settings
+through the nodes offline.
+
 ## Optional full active-workflow diagnostic
 
 ```powershell

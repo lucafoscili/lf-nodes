@@ -6,7 +6,13 @@ import { LogSeverity } from '../types/manager/manager';
 import { Card } from '../types/widgets/card';
 import { CardsWithChip, CardsWithChipDeserializedValue } from '../types/widgets/cardsWithChip';
 import { ImageEditorState } from '../types/widgets/imageEditor';
-import { CustomWidgetConstructor, CustomWidgetName, NodeName, WidgetFactory } from '../types/widgets/widgets';
+import {
+  CustomWidgetConstructor,
+  CustomWidgetName,
+  NodeName,
+  TEXTURE_RESULT_NODES,
+  WidgetFactory,
+} from '../types/widgets/widgets';
 import {
   getApiRoutes,
   getComfyAPI,
@@ -67,6 +73,7 @@ export class LFWidgets {
       NodeName.regionColorStats,
       NodeName.regionFeatureSimilarity,
       NodeName.visionPatchEncode,
+      ...TEXTURE_RESULT_NODES,
     ].includes(nodeName);
     const rendered = this.#FACTORIES[name].render(node, ...args);
     if (regionResult) {

@@ -239,6 +239,7 @@ For an overview of how this nodes suite is structured and how it integrates with
 - [Node Template](docs/NODE_TEMPLATE.md)
 - [Proxy](docs/PROXY.md)
 - [Region Comparison](docs/REGION_COMPARISON.md)
+- [Texture Tools](docs/TEXTURE_TOOLS.md)
 - [Visual Novel Nodes](docs/VISUAL_NOVEL.md)
 - [Workflow Runner](docs/WORKFLOW_RUNNER.md)
 

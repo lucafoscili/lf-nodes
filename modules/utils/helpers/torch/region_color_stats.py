@@ -24,6 +24,27 @@ def srgb_to_lab(rgb: torch.Tensor) -> torch.Tensor:
                         200 * (f[..., 1] - f[..., 2])), dim=-1)
 
 
+def lab_to_srgb(lab: torch.Tensor) -> torch.Tensor:
+    """CIE Lab (D65 2-degree white) back to encoded sRGB, the inverse of ``srgb_to_lab``.
+
+    Values are not clamped: colours outside the sRGB gamut leave 0..1, and the
+    caller decides how to clip and report them.
+    """
+    lab = lab.detach().to(device="cpu", dtype=torch.float64)
+    fy = (lab[..., 0] + 16) / 116
+    f = torch.stack((fy + lab[..., 1] / 500, fy, fy - lab[..., 2] / 200), dim=-1)
+    delta = 6 / 29
+    xyz = torch.where(f > delta, f ** 3, 3 * delta ** 2 * (f - 4 / 29)) * lab.new_tensor([0.95047, 1.0, 1.08883])
+    matrix = lab.new_tensor([
+        [0.4124564, 0.3575761, 0.1804375],
+        [0.2126729, 0.7151522, 0.0721750],
+        [0.0193339, 0.1191920, 0.9503041],
+    ])
+    linear = xyz @ torch.linalg.inv(matrix).T
+    return torch.where(linear <= 0.0031308, linear * 12.92,
+                       1.055 * linear.clamp_min(0.0031308) ** (1 / 2.4) - 0.055)
+
+
 def ciede2000(lab_a: torch.Tensor, lab_b: torch.Tensor) -> torch.Tensor:
     """CIEDE2000 per matched Lab pair, with kL=kC=kH=1."""
     l1, a1, b1 = lab_a.to(torch.float64).unbind(-1)

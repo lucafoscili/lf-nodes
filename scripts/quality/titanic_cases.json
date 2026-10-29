@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "a8a877dbb2b0233cf51c729790a40f447512a22aadcda7bb0b1d377998f81fe4",
-    "expectedNodeCount": 415,
-    "expectedLinkCount": 549
+    "expectedSha256": "9890771e2834e99e61b404d8b1e4375a73c69f588008f345bc966bf3bd2ff2c8",
+    "expectedNodeCount": 427,
+    "expectedLinkCount": 567
   },
   "fixtures": [
     {
@@ -75,6 +75,80 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.texture-tools",
+      "title": "Masked Lab grade, detail transfer, edge padding and normal repack on the stock example",
+      "resourceClass": "cpu",
+      "targets": [
+        663,
+        666
+      ],
+      "timeoutSeconds": 120,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          660,
+          661,
+          662,
+          665
+        ],
+        "forbiddenCachedNodeIds": [
+          660,
+          661,
+          662,
+          665
+        ]
+      },
+      "expect": {
+        "660": {
+          "minimumPreviewCount": 3,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.masked-lab-grade.v1",
+            "apply_to": "mask",
+            "changed_pixels": 147456
+          }
+        },
+        "661": {
+          "minimumPreviewCount": 3,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.detail-transfer.v1",
+            "mode": "match_reference",
+            "radius": 4,
+            "changed_pixels": 147456
+          }
+        },
+        "662": {
+          "minimumPreviewCount": 3,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.edge-padding.v1",
+            "covered_pixels": 147456,
+            "padded_pixels": 442368
+          }
+        },
+        "665": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.normal-map-repack.v1",
+            "green_flipped": true,
+            "checked_pixels": 4096,
+            "invalid_share": 0,
+            "renormalized_share": 1
+          }
+        }
+      }
+    },
     {
       "id": "cpu.region-comparison",
       "title": "Synthetic priority masks and registered regional color diagnostics",

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { NodeName } from '../types/widgets/widgets';
+import { NodeName, TEXTURE_RESULT_NODES } from '../types/widgets/widgets';
 import { compareFactory } from './compare';
 
 vi.mock('../utils/common', () => ({
@@ -10,7 +10,7 @@ vi.mock('../utils/common', () => ({
 }));
 
 describe('regional compare summaries', () => {
-  it.each([NodeName.textRegionMasks, NodeName.regionColorStats, NodeName.visionPatchEncode])(
+  it.each([NodeName.textRegionMasks, NodeName.regionColorStats, NodeName.visionPatchEncode, ...TEXTURE_RESULT_NODES])(
     '%s keeps labels visible without opening image selectors and restores them from saved state',
     (comfyClass) => {
       const { widget } = compareFactory.render({ comfyClass } as never);

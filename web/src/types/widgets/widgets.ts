@@ -66,6 +66,10 @@ export enum NodeName {
   regionColorStats = 'LF_RegionColorStats',
   regionFeatureSimilarity = 'LF_RegionFeatureSimilarity',
   visionPatchEncode = 'LF_VisionPatchEncode',
+  edgePadding = 'LF_EdgePadding',
+  maskedLabGrade = 'LF_MaskedLabGrade',
+  detailTransfer = 'LF_DetailTransfer',
+  normalMapRepack = 'LF_NormalMapRepack',
   backgroundRemover = 'LF_BackgroundRemover',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
@@ -215,6 +219,13 @@ export enum NodeName {
   writeJson = 'LF_WriteJSON',
   youtubeReference = 'LF_YouTubeReference',
 }
+/** Texture nodes whose Compare result keeps a visible summary and hydrates from history. */
+export const TEXTURE_RESULT_NODES: readonly NodeName[] = [
+  NodeName.edgePadding,
+  NodeName.maskedLabGrade,
+  NodeName.detailTransfer,
+  NodeName.normalMapRepack,
+];
 export enum TagName {
   Div = 'div',
   LfAccordion = 'lf-accordion',
