@@ -30,7 +30,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ExtractImageRegions: [],
   LF_TextRegionMasks: [CustomWidgetName.compare],
   LF_RegionColorStats: [CustomWidgetName.compare],
-  LF_RegionFeatureSimilarity: [CustomWidgetName.countBarChart],
+  LF_RegionFeatureSimilarity: [CustomWidgetName.tree],
   LF_VisionPatchEncode: [CustomWidgetName.compare],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],

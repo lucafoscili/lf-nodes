@@ -2,7 +2,7 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "8268b06ee8bffccda19924227684265d216a0a7195bd5558b58fa62232f3ba0a",
+    "expectedSha256": "a8a877dbb2b0233cf51c729790a40f447512a22aadcda7bb0b1d377998f81fe4",
     "expectedNodeCount": 415,
     "expectedLinkCount": 549
   },
@@ -118,7 +118,6 @@
             "schema": "lf.region-color-stats.v1",
             "matched_count": 768,
             "intersection_count": 768,
-            "title": "Mean CIEDE2000",
             "empty": false
           }
         }
@@ -234,8 +233,6 @@
         },
         "652": {
           "requiredNamedValues": {
-            "title": "Cosine similarity [-1, 1]",
-            "shape": "number",
             "schema": "lf.region-feature-similarity.v1",
             "method": "coverage_weighted_patch_mean_cosine",
             "model_file": "dino_v3_vit_h.safetensors",

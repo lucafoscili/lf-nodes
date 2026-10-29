@@ -219,8 +219,7 @@ def test_per_image_areas_empty_regions_and_no_intersection_are_explicit(caplog):
     assert "No same-coordinate mask intersection" in caplog.text
     payload = response['ui']['lf_output'][0]
     assert 'DE00 N/A' in payload['dataset']['nodes'][1]['value']
-    assert 'N/A' in payload['datasets']['chip']['nodes'][1]['value']
-    assert len(payload['datasets']['chart']['nodes']) == 1
+    assert set(payload) == {'dataset', 'stats'}
     json.dumps(stats, allow_nan=False)
 
 
@@ -276,7 +275,6 @@ def test_headless_event_history_preview_persistence_and_rgba(preview_root, monke
     assert '| B-A [' in region_node['value']
     assert region_node['cells']['lfImage']['value'] == region_node['value'] + ' (before)'
     assert region_node['cells']['lfImage_after']['value'] == region_node['value'] + ' (after)'
-    assert payload['datasets']['chart']['nodes'][0]['cells']['Series_0']['value'] == stats['regions'][0]['ciede2000']['mean']
     assert overlay.shape == (1, 8, 24, 4)
     torch.testing.assert_close(overlay[:, :, :8, 3], a[..., 3])
     assert torch.equal(overlay[0, 3, 3, :3], a[0, 3, 3, :3])

@@ -28,10 +28,11 @@ Draft notes for the release after [LF Nodes 4.0.0](4.0.0.md).
   SigLIP2 models are rejected; use core's encoder for those.
 
 All four have result widgets backed by durable history: labelled mask overlays,
-per-region colour comparisons and numbers, signed feature-similarity bars, and
-encoded-image patch grids with tensor shapes. Empty regions and unavailable
-measurements remain visible. The canonical E2E workflow now includes synthetic
-CPU coverage and separate SAM3.1 and DINOv3 cases.
+per-region colour comparisons and numbers, searchable per-region
+feature-similarity records, and encoded-image patch grids with tensor shapes.
+Empty regions and unavailable measurements remain visible. The canonical E2E
+workflow now includes synthetic CPU coverage and separate SAM3.1 and DINOv3
+cases.
 
 The nodes do not download weights; Core owns model loading and detector
 inference. See [region comparison wiring and measurement limits](../REGION_COMPARISON.md).

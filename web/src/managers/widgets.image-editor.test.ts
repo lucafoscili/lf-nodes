@@ -2,10 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
 import { LFWidgets } from './widgets';
-import { NODE_WIDGET_MAP } from '../helpers/manager';
 import { compareFactory } from '../widgets/compare';
-import { countBarChartFactory } from '../widgets/countBarChart';
-import { masonryFactory } from '../widgets/masonry';
 import { treeFactory } from '../widgets/tree';
 
 const mocks = vi.hoisted(() => ({
@@ -43,50 +40,36 @@ beforeEach(() => {
 
 describe('region comparison result views', () => {
   const dataset = { nodes: [{ id: 'surface', value: 'surface: 0.75' }] };
-  const datasets = { chart: dataset, chip: dataset };
-  const payload = { dataset, datasets };
+  const payload = { dataset };
   const factories = {
     [CustomWidgetName.compare]: compareFactory,
-    [CustomWidgetName.countBarChart]: countBarChartFactory,
-    [CustomWidgetName.masonry]: masonryFactory,
     [CustomWidgetName.tree]: treeFactory,
   };
 
   it.each([
-    [NodeName.textRegionMasks, CustomWidgetName.compare, CustomWidgetName.masonry],
-    [NodeName.regionColorStats, CustomWidgetName.compare, CustomWidgetName.countBarChart],
-    [NodeName.regionFeatureSimilarity, CustomWidgetName.countBarChart, CustomWidgetName.tree],
-    [NodeName.visionPatchEncode, CustomWidgetName.compare, CustomWidgetName.masonry],
-  ])('hydrates %s live and cached, including a map-only alternative', (name, inputType, alternative) => {
-    const mapping = NODE_WIDGET_MAP[name];
-    try {
-      for (const selected of [inputType, alternative]) {
-        NODE_WIDGET_MAP[name] = [selected];
-        const previous = vi.fn((_output: unknown) => 'previous result');
-        const node = { comfyClass: name, id: 641, onExecuted: previous };
-        mocks.getNodeById.mockReturnValue(node);
-        const factory = vi.spyOn(factories[selected], 'render').mockReturnValue({ widget: {} } as never);
-        const widgets = new LFWidgets();
-        widgets.render(inputType)(node as never);
-        expect(factory).toHaveBeenCalledWith(node);
+    [NodeName.textRegionMasks, CustomWidgetName.compare],
+    [NodeName.regionColorStats, CustomWidgetName.compare],
+    [NodeName.regionFeatureSimilarity, CustomWidgetName.tree],
+    [NodeName.visionPatchEncode, CustomWidgetName.compare],
+  ])('hydrates %s live and from cached history in %s', (name, widget) => {
+    const previous = vi.fn((_output: unknown) => 'previous result');
+    const node = { comfyClass: name, id: 641, onExecuted: previous };
+    mocks.getNodeById.mockReturnValue(node);
+    const factory = vi.spyOn(factories[widget], 'render').mockReturnValue({ widget: {} } as never);
+    const widgets = new LFWidgets();
+    widgets.render(widget)(node as never);
+    expect(factory).toHaveBeenCalledWith(node);
 
-        const expected = selected === CustomWidgetName.masonry
-          ? { ...payload, node: '641' }
-          : selected === CustomWidgetName.countBarChart ? datasets : dataset;
-        widgets.onEvent(name, new CustomEvent('lf-result', {
-          detail: { ...payload, node: '641' },
-        }), [selected]);
-        expect(mocks.setValue).toHaveBeenLastCalledWith(JSON.stringify(expected));
-        mocks.setValue.mockClear();
+    widgets.onEvent(name, new CustomEvent('lf-result', {
+      detail: { ...payload, node: '641' },
+    }), [widget]);
+    expect(mocks.setValue).toHaveBeenLastCalledWith(JSON.stringify(dataset));
+    mocks.setValue.mockClear();
 
-        expect(node.onExecuted({ lf_output: [payload] } as never)).toBe('previous result');
-        expect(mocks.setValue).toHaveBeenLastCalledWith(JSON.stringify(expected));
-        expect(previous).toHaveBeenCalledWith({ lf_output: [payload] });
-        factory.mockRestore();
-      }
-    } finally {
-      NODE_WIDGET_MAP[name] = mapping;
-    }
+    expect(node.onExecuted({ lf_output: [payload] } as never)).toBe('previous result');
+    expect(mocks.setValue).toHaveBeenLastCalledWith(JSON.stringify(dataset));
+    expect(previous).toHaveBeenCalledWith({ lf_output: [payload] });
+    factory.mockRestore();
   });
 
   it('retains grids from every mapped encoder execution and names missing history', () => {

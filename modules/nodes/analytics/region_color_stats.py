@@ -62,7 +62,6 @@ class LF_RegionColorStats:
         batches, image_list = normalize_output_image([overlay])
         dataset = {"nodes": [create_cached_compare_node(
             outlined_a, outlined_b, index=0, title="Region outlines: A / B", debug=overlay)]}
-        chart, chips = [], []
         for index, row in enumerate(stats['regions']):
             distance = row['ciede2000']['mean'] if row['ciede2000'] is not None else None
             distance_label = f"{distance:.3f}" if distance is not None else 'N/A'
@@ -78,14 +77,7 @@ class LF_RegionColorStats:
                 region_mask_preview(a, mask_sets[0, index], isolate=True),
                 region_mask_preview(b, mask_sets[-1, index], isolate=True),
                 index=index + 1, title=label))
-            chips.append({'id': str(index), 'value': label})
-            if distance is not None:
-                chart.append({'id': str(index), 'cells': {
-                    'Axis_0': {'value': row['id']}, 'Series_0': {'value': distance}}})
-        payload = {"dataset": dataset, "stats": stats, 'datasets': {
-            'chart': {'columns': [{'id': 'Axis_0', 'title': 'Region'},
-                                  {'id': 'Series_0', 'shape': 'number', 'title': 'Mean CIEDE2000'}],
-                      'nodes': chart}, 'chip': {'nodes': chips}}}
+        payload = {"dataset": dataset, "stats": stats}
         safe_send_sync("regioncolorstats", payload, kwargs.get("node_id"))
         return {"ui": {"lf_output": [payload]}, "result": (stats, batches[0], image_list)}
 

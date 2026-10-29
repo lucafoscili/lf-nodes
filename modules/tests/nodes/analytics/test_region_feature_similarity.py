@@ -176,11 +176,11 @@ def test_public_contract():
     assert [required[key][0] for key in ('masks', 'metadata', 'model_file')] == ['MASK', 'JSON', 'STRING']
     assert required['model_file'][1]['default'] == 'dino_v3_vit_h.safetensors'
     assert required['crop'][0] == ['none', 'center'] and required['crop'][1]['default'] == 'none'
-    assert node.INPUT_TYPES()['optional']['ui_widget'] == ('LF_COUNT_BAR_CHART', {'default': {}})
+    assert node.INPUT_TYPES()['optional']['ui_widget'] == ('LF_TREE', {'default': {}})
     assert node.INPUT_TYPES()['hidden'] == {'node_id': 'UNIQUE_ID'}
 
 
-def test_signed_chart_values_empty_chips_and_tree_match_history(monkeypatch):
+def test_tree_records_signed_scores_and_empty_regions_and_match_history(monkeypatch):
     sent = []
     monkeypatch.setattr(node_module, 'safe_send_sync', lambda *args: sent.append(args))
     masks = torch.zeros(3, 4, 4)
@@ -193,8 +193,11 @@ def test_signed_chart_values_empty_chips_and_tree_match_history(monkeypatch):
     payload = response['ui']['lf_output'][0]
     assert sent == [('regionfeaturesimilarity', payload, ['19'])]
     assert payload['similarity'] == response['result'][0]
-    assert [node['cells']['Series_0']['value'] for node in payload['datasets']['chart']['nodes']] == [-1., 1.]
-    chips = payload['datasets']['chip']['nodes']
-    assert 'cosine -1.0000' in chips[0]['value']
-    assert 'N/A' in chips[2]['value'] and 'no mask coverage' in chips[2]['value']
-    assert len(payload['dataset']['nodes']) == 3
+    assert set(payload) == {'similarity', 'dataset'}
+    records = payload['dataset']['nodes']
+    assert len(records) == 3
+    assert 'cosine -1.0000' in records[0]['value']
+    assert 'N/A' in records[2]['value'] and 'no mask coverage' in records[2]['value']
+    fields = {child['value'].split(':', 1)[0] for child in records[0]['children']}
+    assert {'id', 'area_a', 'area_b', 'similarity', 'empty'} <= fields
+    assert 'empty: True' in [child['value'] for child in records[2]['children']]

@@ -1,5 +1,4 @@
 import { apiCall, cardPlaceholders } from '../helpers/card';
-import { NODE_WIDGET_MAP } from '../helpers/manager';
 import { setProgress } from '../helpers/imageEditor/status';
 import { APIMetadataEntry } from '../types/api/api';
 import { CardPayload, NotifyPayload, WidgetPayloadMap } from '../types/events/events';
@@ -69,17 +68,16 @@ export class LFWidgets {
       NodeName.regionFeatureSimilarity,
       NodeName.visionPatchEncode,
     ].includes(nodeName);
-    // Keep the serialized optional input type stable when choosing another view.
-    const selected = regionResult ? NODE_WIDGET_MAP[nodeName][0] : name;
-    const rendered = this.#FACTORIES[selected].render(node, ...args);
+    const rendered = this.#FACTORIES[name].render(node, ...args);
     if (regionResult) {
+      // Comfy restores history through onExecuted; hydrate the result view from lf_output.
       const outputNode = node as NodeType & {
         onExecuted?: (output: unknown, ...args: unknown[]) => unknown;
       };
       const previous = outputNode.onExecuted;
       outputNode.onExecuted = (output, ...executionArgs) => {
         const result = previous?.apply(node, [output, ...executionArgs]);
-        const entries = (output as { lf_output?: WidgetPayloadMap[typeof selected][] })?.lf_output;
+        const entries = (output as { lf_output?: WidgetPayloadMap[typeof name][] })?.lf_output;
         if (!Array.isArray(entries) || !entries.length || entries.some((entry) => !entry)) {
           getLfManager().log(`${nodeName}: missing lf_output widget result.`, {}, LogSeverity.Error);
           return result;
@@ -96,7 +94,7 @@ export class LFWidgets {
             ),
           };
         }
-        this.onEvent(nodeName, new CustomEvent('lf-result', { detail: payload }), [selected]);
+        this.onEvent(nodeName, new CustomEvent('lf-result', { detail: payload }), [name]);
         return result;
       };
     }

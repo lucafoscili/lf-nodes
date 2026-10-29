@@ -140,20 +140,7 @@ def test_backend_and_frontend_node_widget_registries_are_exact() -> None:
     assert widget_map["LF_SaveAudio"] == ["LF_MASONRY"]
     assert "LF_Brush" not in widget_map
     assert "LF_ExtractFaceEmbedding" not in widget_map
+    assert widget_map["LF_RegionFeatureSimilarity"] == ["LF_TREE"]
 
-    # The manager selects these result views from NODE_WIDGET_MAP while keeping
-    # their published optional input type stable. Both payload shapes are emitted.
-    result_views = {
-        "LF_TextRegionMasks": ({"LF_COMPARE"}, {"LF_COMPARE", "LF_MASONRY"}),
-        "LF_RegionColorStats": ({"LF_COMPARE"}, {"LF_COMPARE", "LF_COUNT_BAR_CHART"}),
-        "LF_RegionFeatureSimilarity": ({"LF_COUNT_BAR_CHART"}, {"LF_COUNT_BAR_CHART", "LF_TREE"}),
-        "LF_VisionPatchEncode": ({"LF_COMPARE"}, {"LF_COMPARE", "LF_MASONRY"}),
-    }
     for node_name, declared_widgets in backend.items():
-        if node_name in result_views:
-            input_types, choices = result_views[node_name]
-            assert declared_widgets == input_types, node_name
-            assert len(widget_map[node_name]) == 1, node_name
-            assert set(widget_map[node_name]) <= choices, node_name
-        else:
-            assert set(widget_map[node_name]) == declared_widgets, node_name
+        assert set(widget_map[node_name]) == declared_widgets, node_name

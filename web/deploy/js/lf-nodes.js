@@ -1726,7 +1726,7 @@ const NODE_WIDGET_MAP = {
   LF_ExtractImageRegions: [],
   LF_TextRegionMasks: [CustomWidgetName.compare],
   LF_RegionColorStats: [CustomWidgetName.compare],
-  LF_RegionFeatureSimilarity: [CustomWidgetName.countBarChart],
+  LF_RegionFeatureSimilarity: [CustomWidgetName.tree],
   LF_VisionPatchEncode: [CustomWidgetName.compare],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
@@ -10829,8 +10829,7 @@ class LFWidgets {
         NodeName.regionFeatureSimilarity,
         NodeName.visionPatchEncode
       ].includes(nodeName);
-      const selected = regionResult ? NODE_WIDGET_MAP[nodeName][0] : name;
-      const rendered = __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[selected].render(node, ...args);
+      const rendered = __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[name].render(node, ...args);
       if (regionResult) {
         const outputNode = node;
         const previous = outputNode.onExecuted;
@@ -10852,7 +10851,7 @@ class LFWidgets {
               })))
             };
           }
-          this.onEvent(nodeName, new CustomEvent("lf-result", { detail: payload }), [selected]);
+          this.onEvent(nodeName, new CustomEvent("lf-result", { detail: payload }), [name]);
           return result;
         };
       }

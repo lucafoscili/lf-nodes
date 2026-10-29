@@ -22,7 +22,7 @@ class LF_RegionFeatureSimilarity:
                 'tooltip': 'Filename selected by CLIPVisionLoader, recorded as supplied by the workflow.'}),
             'crop': (['none', 'center'], {
                 'default': 'none', 'tooltip': 'Must match both CLIPVisionEncode crop controls; none retains the full image.'}),
-        }, 'optional': {'ui_widget': (Input.LF_COUNT_BAR_CHART, {'default': {}})},
+        }, 'optional': {'ui_widget': (Input.LF_TREE, {'default': {}})},
             'hidden': {'node_id': 'UNIQUE_ID'}}
 
     CATEGORY = CATEGORY
@@ -37,23 +37,16 @@ class LF_RegionFeatureSimilarity:
                 model_file='dino_v3_vit_h.safetensors', crop='none', **kwargs):
         similarity = compare_region_features(features_a, features_b, masks, metadata,
                                              model_file, crop)
-        chart, chips, details = [], [], []
+        details = []
         for index, row in enumerate(similarity['regions']):
             score = row['similarity']
             label = f"{row['id']}: cosine {score:.4f}" if score is not None else f"{row['id']}: N/A"
             if row.get('warning'):
                 label += f" | {row['warning']}"
-            chips.append({'id': str(index), 'value': label})
-            if score is not None:
-                chart.append({'id': str(index), 'cells': {
-                    'Axis_0': {'value': row['id']}, 'Series_0': {'value': score}}})
             details.append({'id': str(index), 'value': label, 'children': [
                 {'id': f'{index}_{key}', 'value': f'{key}: {value}'}
                 for key, value in row.items()]})
-        payload = {'similarity': similarity, 'dataset': {'nodes': details}, 'datasets': {
-            'chart': {'columns': [{'id': 'Axis_0', 'title': 'Region'},
-                                  {'id': 'Series_0', 'shape': 'number', 'title': 'Cosine similarity [-1, 1]'}],
-                      'nodes': chart}, 'chip': {'nodes': chips}}}
+        payload = {'similarity': similarity, 'dataset': {'nodes': details}}
         safe_send_sync('regionfeaturesimilarity', payload, kwargs.get('node_id'))
         return {'ui': {'lf_output': [payload]}, 'result': (similarity,)}
 

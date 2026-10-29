@@ -258,7 +258,7 @@ describe('Titanic publication sanitizer', () => {
       expect(byId(id).inputs.find((input: any) => input.name === 'ui_widget').type).toBe('LF_COMPARE');
       expect(byId(id).widgets_values_named.ui_widget).toEqual({});
     }
-    expect(byId(652).inputs.find((input: any) => input.name === 'ui_widget').type).toBe('LF_COUNT_BAR_CHART');
+    expect(byId(652).inputs.find((input: any) => input.name === 'ui_widget').type).toBe('LF_TREE');
     expect(coverageCase('cpu.region-comparison')).toMatchObject({
       resourceClass: 'cpu', targets: [638, 640, 642],
       execution: { requiredNodeIds: [641, 642], forbiddenCachedNodeIds: [641, 642] },

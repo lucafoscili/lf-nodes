@@ -127,11 +127,12 @@ After building LF's frontend, render saved UI through its own widget factories
 and event handler in an isolated headless page:
 
 ```powershell
-corepack yarn titanic:gallery --run output/titanic-ui --out output/widget-gallery --node LF_RegionColorStats --alternative LF_RegionColorStats=countBarChart
+corepack yarn titanic:gallery --run output/titanic-ui --out output/widget-gallery --node LF_RegionFeatureSimilarity
 ```
 
-Repeat `--run`, `--node` and `--alternative NODE=WIDGET` as needed. Widget names
-accept `CustomWidgetName` keys (such as `masonry`) or values (`LF_MASONRY`).
+Repeat `--run`, `--node` and `--alternative NODE=WIDGET` as needed; an
+alternative renders only when the saved payload carries the data its widget
+reads. Widget names accept `CustomWidgetName` keys (such as `masonry`) or values (`LF_MASONRY`).
 Defaults come directly from the built bundle's `NODE_WIDGET_MAP`; no production
 defaults change. Use `--node` to select widget-bearing nodes when a case also
 captures loaders with empty UI. Each mapped `lf_output` entry gets its own views.
@@ -239,7 +240,8 @@ Preview-asset requirements count image references, while
 `minimumLivePreviewCount` counts visible dataset entries. Text Region Masks
 shows one Compare entry per image/region, Color Stats one overview plus one
 entry per region, and Vision Patch Encode one entry per image; each Compare
-entry can contain multiple images.
+entry can contain multiple images. Region Feature Similarity shows one Tree
+record per region.
 These cases require actual execution events from the changed LF nodes and
 reject their cached execution. They never download weights. With no running,
 coordinated Comfy service, offline fixture tests establish **inventory** only;

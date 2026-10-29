@@ -69,8 +69,7 @@ information; it does not establish the identity of the source image.
 The default **Compare** widget shows each resolved mask as a coloured fill over
 its source image, with the original alongside it. Each entry names the region,
 image index and pixel area; empty regions retain their warning. This makes the
-region-to-mask assignment visible. **Masonry** is the alternative for scanning
-all the labelled overlays together.
+region-to-mask assignment visible.
 
 ## Region Color Stats (`LF_RegionColorStats`)
 
@@ -117,9 +116,7 @@ one-pixel inner region outlines in table order. The default **Compare** widget
 keeps that overview and adds one A/B comparison per region, dimming the area
 outside it. Labels show the region ID, mean CIEDE2000, A/B Lab means and B-minus-A
 mean differences; unavailable measurements say N/A with their warning. Compare
-keeps the numbers beside the pixels that produced them. The alternative
-**Count Bar Chart** compares mean CIEDE2000 across regions, with the numeric
-summaries below it. `create_cached_compare_node`
+keeps the numbers beside the pixels that produced them. `create_cached_compare_node`
 provides the same persistent generated-preview cache used by LF Compare Images;
 the final dataset and stats are shared between `safe_send_sync` and
 `ui.lf_output`. Omitting the widget does not affect execution.
@@ -168,11 +165,11 @@ model file, and records `method` as `coverage_weighted_patch_mean_cosine` or
 warning, including a nonempty region entirely removed by the centre crop. A
 zero-norm feature raises because cosine is undefined.
 
-The default **Count Bar Chart** shows the signed cosine score for each region,
-with exact scores and warnings in the labels below it. It makes differences
-between regions easy to compare. Unavailable scores retain N/A labels and have
-no bar, rather than a misleading zero. The alternative **Tree** expands each
-region's areas, score and warning. There are no file output sockets.
+The **Tree** widget lists one searchable record per region, labelled with its
+exact cosine score and any warning; expanding it shows the region's `id`,
+`area_a`, `area_b`, `similarity` and `empty` flag. Unavailable scores read N/A
+with their warning rather than a misleading zero. There are no file output
+sockets.
 
 ## Vision Patch Encode (`LF_VisionPatchEncode`)
 
@@ -216,13 +213,11 @@ Labels include source/encoded size, crop, sequence and pooled tensor shapes,
 grid dimensions and prefix-token count. The grid uses the loaded model's
 declared patch size and the returned sequence length; unavailable geometry is
 explicitly labelled with its reason. It is a geometry preview, not a feature
-similarity map, and does not claim a verified model filename. **Masonry** is the
-alternative for scanning a batch's grids together.
+similarity map, and does not claim a verified model filename.
 
-Each alternative is already present in the emitted payload. Change only that
-node's `NODE_WIDGET_MAP` entry in `web/src/helpers/manager.ts` to choose it;
-the widget manager preserves the optional input type and uses the selected
-factory for live results, cached history and saved widget state.
+Each node's `ui_widget` input type matches its `NODE_WIDGET_MAP` entry. The
+widget manager hydrates the same view from live events and from cached history
+(`ui.lf_output`).
 
 ## CPU checks
 

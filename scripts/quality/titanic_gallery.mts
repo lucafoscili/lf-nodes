@@ -23,7 +23,7 @@ export interface GalleryRender {
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const usage = `LF Titanic widget gallery
 Usage: corepack yarn titanic:gallery --run DIR [--run DIR] --out DIR
-  --alternative NODE=WIDGET  Add a view (repeatable; e.g. LF_RegionColorStats=countBarChart).
+  --alternative NODE=WIDGET  Add a view (repeatable; e.g. LF_TextRegionMasks=masonry).
   --node NODE                Render only this node type (repeatable).
   --bundle-dir DIR           Built LF web/deploy folder (default: repository web/deploy).
   --comfy-url URL            Preview origin (default: http://127.0.0.1:8188).
