@@ -12,11 +12,24 @@
   "load_mask": {
     "inputs": {
       "image": "mask.png",
+      "ui_widget": {}
+    },
+    "class_type": "LF_LoadPNG",
+    "_meta": {
+      "title": "2. Load the coverage mask (stored values)"
+    }
+  },
+  "mask_channel": {
+    "inputs": {
+      "image": [
+        "load_mask",
+        0
+      ],
       "channel": "red"
     },
-    "class_type": "LoadImageMask",
+    "class_type": "ImageToMask",
     "_meta": {
-      "title": "2. Load the coverage mask"
+      "title": "2b. Read the mask from red"
     }
   },
   "pad": {
@@ -26,7 +39,7 @@
         0
       ],
       "mask": [
-        "load_mask",
+        "mask_channel",
         0
       ],
       "ui_widget": {}

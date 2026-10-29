@@ -55,15 +55,17 @@ def test_graph_reads_the_mask_from_red_and_publishes_the_receipt() -> None:
 
     assert [node["class_type"] for node in graph.values()] == [
         "LF_LoadPNG",
-        "LoadImageMask",
+        "LF_LoadPNG",
+        "ImageToMask",
         "LF_EdgePadding",
         "LF_SavePNG",
         "LF_DisplayJSON",
     ]
-    # Red, not alpha: Core inverts only an alpha-channel mask.
-    assert graph["load_mask"]["inputs"]["channel"] == "red"
+    # Both files load as stored values (Core LoadImageMask decodes through PyAV, which refuses tiny grey PNGs);
+    # the mask is the red channel, never an inverted alpha.
+    assert graph["mask_channel"]["inputs"] == {"image": ["load_mask", 0], "channel": "red"}
     assert graph["pad"]["inputs"]["image"] == ["load_image", 0]
-    assert graph["pad"]["inputs"]["mask"] == ["load_mask", 0]
+    assert graph["pad"]["inputs"]["mask"] == ["mask_channel", 0]
     # Stored values out: the padded image at the texture's own bit depth, rounded.
     assert graph["save"]["inputs"]["image"] == ["pad", 0]
     assert graph["save"]["inputs"]["bit_depth"] == ["load_image", 2]

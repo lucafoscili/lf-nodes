@@ -34,9 +34,9 @@ The receipt (`lf.edge-padding.v1`) gives, per image, the covered and padded
 pixel counts, the covered share and the pyramid's levels.
 
 The Workflow Runner block **Texture Edge Padding** (`texture_edge_padding`)
-runs it file in, file out: a PNG texture and a coverage mask (white keeps, read
-from the red channel by Core `LoadImageMask`) in, the padded texture and the
-receipt out. The texture goes through [Load PNG and Save PNG](PNG_STORED_VALUES.md):
+runs it file in, file out: a PNG texture and a PNG coverage mask (white keeps,
+read from the red channel) in, the padded texture and the receipt out. Both
+files load and the texture saves through [Load PNG and Save PNG](PNG_STORED_VALUES.md):
 8 or 16 bits in and the same depth out, alpha padded as a channel, covered
 pixels written back with their stored values and filled pixels rounded to the
 nearest level.

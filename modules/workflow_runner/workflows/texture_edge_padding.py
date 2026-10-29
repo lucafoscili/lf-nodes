@@ -48,7 +48,7 @@ input_mask = WorkflowCell(
     ),
     props={
         "lfHtmlAttributes": {
-            "accept": "image/*",
+            "accept": "image/png",
         },
         "lfLabel": "2. Choose the coverage mask",
     },
