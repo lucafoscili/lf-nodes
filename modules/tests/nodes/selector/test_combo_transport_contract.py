@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import importlib
 import pytest
 
 from modules.nodes.configuration import civitai_metadata_setup
 from modules.nodes.selector import checkpoint_selector
+from modules.nodes.selector import diffusion_model_selector
 from modules.nodes.selector import embedding_selector
 from modules.nodes.selector import lora_and_embedding_selector
+from modules.nodes.selector import lora_selector
 from modules.nodes.selector import sampler_selector
 from modules.nodes.selector import scheduler_selector
 from modules.nodes.selector import upscale_model_selector
@@ -19,6 +22,9 @@ from modules.nodes.selector.scheduler_selector import LF_SchedulerSelector
 from modules.nodes.selector.upscale_model_selector import LF_UpscaleModelSelector
 from modules.nodes.selector.vae_selector import LF_VAESelector
 from modules.utils.helpers.logic.selector_utils import _SelectorListRefresher
+
+# The api package re-exports a process_model function over its module of the same name.
+process_model = importlib.import_module("modules.utils.helpers.api.process_model")
 
 
 @pytest.mark.parametrize(
@@ -57,39 +63,143 @@ def test_no_selection_remains_an_explicit_prompt_option(
     assert input_config[1]["default"] == "None"
 
 
-def test_checkpoint_no_selection_preserves_published_empty_outputs(
+@pytest.mark.parametrize(
+    ("module", "node_class", "input_name", "label", "extra"),
+    (
+        (checkpoint_selector, LF_CheckpointSelector, "checkpoint", "Checkpoint selector", {}),
+        (
+            diffusion_model_selector,
+            LF_DiffusionModelSelector,
+            "diffusion_model",
+            "Diffusion model selector",
+            {"weight_dtype": "default"},
+        ),
+    ),
+)
+@pytest.mark.parametrize("missing", ("None", None))
+def test_model_selectors_fail_loud_when_no_model_arrives(
+    monkeypatch: pytest.MonkeyPatch,
+    module,
+    node_class,
+    input_name: str,
+    label: str,
+    extra: dict,
+    missing,
+) -> None:
+    # An API client can submit the combo's "None" default (issue #120); the node
+    # names itself and the remedy instead of letting ComfyUI's path join fail.
+    monkeypatch.setattr(module, "get_comfy_list", lambda _kind: ["a.safetensors"])
+    monkeypatch.setattr(module, "safe_send_sync", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        module.folder_paths,
+        "get_full_path_or_raise",
+        lambda *_args: pytest.fail("No model may load without a selection."),
+    )
+    monkeypatch.setattr(
+        module,
+        "process_model_async",
+        lambda *_args, **_kwargs: pytest.fail("No metadata lookup without a selection."),
+    )
+
+    with pytest.raises(ValueError) as raised:
+        node_class().on_exec(
+            **{
+                input_name: missing,
+                "get_civitai_info": True,
+                "randomize": False,
+                "filter": "",
+                "seed": 42,
+                "node_id": "57",
+                **extra,
+            }
+        )
+
+    message = str(raised.value)
+    assert message.startswith(f"{label} (node 57): no ")
+    assert "randomize" in message
+
+
+@pytest.mark.parametrize(
+    ("module", "node_class", "input_name"),
+    (
+        (checkpoint_selector, LF_CheckpointSelector, "checkpoint"),
+        (diffusion_model_selector, LF_DiffusionModelSelector, "diffusion_model"),
+    ),
+)
+def test_model_selectors_randomize_on_an_empty_folder_fails_loud(
+    monkeypatch: pytest.MonkeyPatch,
+    module,
+    node_class,
+    input_name: str,
+) -> None:
+    monkeypatch.setattr(module, "get_comfy_list", lambda _kind: [])
+    monkeypatch.setattr(module, "safe_send_sync", lambda *_args, **_kwargs: None)
+
+    with pytest.raises(ValueError, match="randomize is on"):
+        node_class().on_exec(
+            **{
+                input_name: "None",
+                "get_civitai_info": True,
+                "randomize": True,
+                "filter": "",
+                "seed": 42,
+                "node_id": "7",
+            }
+        )
+
+
+def test_basic_metadata_never_hands_a_missing_name_to_comfy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(checkpoint_selector, "get_comfy_list", lambda _kind: [])
     monkeypatch.setattr(
-        checkpoint_selector,
+        process_model.folder_paths,
+        "get_full_path",
+        lambda *_args: pytest.fail("ComfyUI's path lookup must not see a missing name."),
+    )
+
+    metadata = process_model._build_basic_metadata("checkpoint", None, "checkpoints")
+
+    assert metadata["model_path"] is None
+    assert metadata["model_name"] is None
+
+
+@pytest.mark.parametrize(
+    ("module", "node_class", "input_name", "stack_name"),
+    (
+        (lora_selector, LF_LoraSelector, "lora", "lora_stack"),
+        (embedding_selector, LF_EmbeddingSelector, "embedding", "embedding_stack"),
+    ),
+)
+@pytest.mark.parametrize("missing", ("None", None))
+def test_stack_selectors_pass_the_stack_through_without_a_selection(
+    monkeypatch: pytest.MonkeyPatch,
+    module,
+    node_class,
+    input_name: str,
+    stack_name: str,
+    missing,
+) -> None:
+    monkeypatch.setattr(module, "safe_send_sync", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        module,
         "process_model_async",
-        lambda *_args, **_kwargs: {
-            "model_name": None,
-            "model_path": None,
-            "model_cover": None,
-        },
-    )
-    monkeypatch.setattr(
-        checkpoint_selector,
-        "safe_send_sync",
-        lambda *_args, **_kwargs: None,
-    )
-    monkeypatch.setattr(
-        checkpoint_selector.folder_paths,
-        "get_full_path_or_raise",
-        lambda *_args: pytest.fail("No checkpoint may load for the None selection."),
+        lambda *_args, **_kwargs: pytest.fail("Passthrough needs no metadata lookup."),
     )
 
-    result = LF_CheckpointSelector().on_exec(
-        checkpoint="None",
-        get_civitai_info=True,
-        randomize=False,
-        filter="",
-        seed=42,
+    result = node_class().on_exec(
+        **{
+            input_name: missing,
+            "get_civitai_info": True,
+            "weight": 1.0,
+            "randomize": False,
+            "filter": "",
+            "seed": 42,
+            stack_name: "<upstream>",
+            "node_id": "9",
+        }
     )
 
-    assert result == (None, None, None, None, None, None, None)
+    assert result == (None, "<upstream>", "", "", None)
 
 
 @pytest.mark.parametrize(

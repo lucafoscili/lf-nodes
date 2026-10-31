@@ -123,7 +123,8 @@ def _build_basic_metadata(
     *,
     load_cover_from_disk: bool = False,
 ) -> MetadataDict:
-    model_path = folder_paths.get_full_path(folder, model_name)
+    # ComfyUI's lookup joins the name into a path, so a missing name never reaches it.
+    model_path = folder_paths.get_full_path(folder, model_name) if model_name else None
     saved_info = _read_saved_info(model_path)
     encoded_cover, tensor_cover = _extract_cover_from_saved_info(saved_info)
 

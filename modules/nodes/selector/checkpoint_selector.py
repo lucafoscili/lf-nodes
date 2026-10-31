@@ -82,6 +82,7 @@ class LF_CheckpointSelector:
         randomize: bool = normalize_list_to_value(kwargs.get("randomize"))
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         filter: str = normalize_list_to_value(kwargs.get("filter"))
+        node_id = kwargs.get("node_id")
 
         if is_none(checkpoint):
             checkpoint = None
@@ -93,8 +94,19 @@ class LF_CheckpointSelector:
                 checkpoints = filter_list(filter, checkpoints)
                 if not checkpoints:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
+            if not checkpoints:
+                raise ValueError(
+                    f"Checkpoint selector (node {node_id}): randomize is on, "
+                    "but the checkpoints folder has no models."
+                )
             random.seed(seed)
             checkpoint = random.choice(checkpoints)
+
+        if not checkpoint:
+            raise ValueError(
+                f"Checkpoint selector (node {node_id}): no checkpoint was selected "
+                "(it received 'None'). Pick a checkpoint in the node, or turn on randomize."
+            )
 
         model = None
         clip = None
@@ -115,7 +127,6 @@ class LF_CheckpointSelector:
             model, clip, vae = out[:3]
 
         should_fetch_civitai = bool(get_civitai_info)
-        node_id = kwargs.get("node_id")
 
         callback = None
         if node_id and checkpoint:

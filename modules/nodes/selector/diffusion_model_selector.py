@@ -99,8 +99,19 @@ class LF_DiffusionModelSelector:
                 models = filter_list(filter, models)
                 if not models:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
+            if not models:
+                raise ValueError(
+                    f"Diffusion model selector (node {node_id}): randomize is on, "
+                    "but the 'unet' (diffusion_models) folder has no models."
+                )
             random.seed(seed)
             diffusion_model = random.choice(models)
+
+        if not diffusion_model:
+            raise ValueError(
+                f"Diffusion model selector (node {node_id}): no diffusion model was selected "
+                "(it received 'None'). Pick a model in the node, or turn on randomize."
+            )
 
         model_obj = None
         if diffusion_model:
