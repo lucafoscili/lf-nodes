@@ -66,6 +66,8 @@ export enum NodeName {
   regionColorStats = 'LF_RegionColorStats',
   regionFeatureSimilarity = 'LF_RegionFeatureSimilarity',
   visionPatchEncode = 'LF_VisionPatchEncode',
+  faceAlign = 'LF_FaceAlign',
+  faceIdentity = 'LF_FaceIdentity',
   edgePadding = 'LF_EdgePadding',
   maskedLabGrade = 'LF_MaskedLabGrade',
   detailTransfer = 'LF_DetailTransfer',

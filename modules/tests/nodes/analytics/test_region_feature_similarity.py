@@ -164,14 +164,40 @@ def test_metadata_and_feature_shape_mismatches_fail():
         _compare(b=b)
 
 
+def test_patch_cosine_compares_same_position_patches_and_maps_them():
+    # A swaps its two halves' features relative to B: region means still match, patches do not.
+    a = _patches([[1., 0.], [0., 1.], [1., 0.], [0., 1.]])
+    b = _patches([[0., 1.], [1., 0.], [1., 0.], [0., 1.]])
+    masks = torch.ones(1, 4, 4)
+    masks, metadata = _regions(masks)
+    response = LF_RegionFeatureSimilarity().on_exec(a, b, masks, metadata)
+    similarity, patch_map = response['result']
+    row = similarity['regions'][0]
+    assert row['similarity'] == pytest.approx(1.0)
+    assert row['patch_cosine'] == pytest.approx(0.5)
+    assert similarity['patch_cosine']['regions_union'] == pytest.approx(0.5)
+    assert patch_map.shape == (1, 32, 32, 3)
+    assert patch_map[0, 0, 0].sum() > 2.5  # cosine 0: brightest
+    assert patch_map[0, 31, 31].sum() < 0.1  # cosine 1: black
+
+
+def test_pooled_inputs_have_a_blank_patch_map_and_no_patch_cosine():
+    masks, metadata = _regions()
+    a = SimpleNamespace(image_embeds=torch.tensor([[1., 0.], [0., 1.]]))
+    similarity, patch_map = LF_RegionFeatureSimilarity().on_exec(a, a, masks, metadata)['result']
+    assert 'patch_cosine' not in similarity and 'patch_cosine' not in similarity['regions'][0]
+    assert patch_map.shape == (1, 64, 64, 3) and patch_map.abs().sum() == 0
+
+
 def test_public_contract():
     node = LF_RegionFeatureSimilarity
     required = node.INPUT_TYPES()['required']
     assert required['features_a'][0] == required['features_b'][0] == 'CLIP_VISION_OUTPUT'
     assert node.INPUT_IS_LIST is True
-    assert node.RETURN_TYPES == ('JSON',)
-    assert node.RETURN_NAMES == ('similarity',)
-    assert node.OUTPUT_IS_LIST == (False,)
+    # patch_map is appended after the published similarity socket.
+    assert node.RETURN_TYPES == ('JSON', 'IMAGE')
+    assert node.RETURN_NAMES == ('similarity', 'patch_map')
+    assert node.OUTPUT_IS_LIST == (False, False)
     assert list(required) == ['features_a', 'features_b', 'masks', 'metadata', 'model_file', 'crop']
     assert [required[key][0] for key in ('masks', 'metadata', 'model_file')] == ['MASK', 'JSON', 'STRING']
     assert required['model_file'][1]['default'] == 'dino_v3_vit_h.safetensors'

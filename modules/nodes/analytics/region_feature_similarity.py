@@ -2,7 +2,7 @@
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.torch.region_feature_similarity import compare_region_features
+from ...utils.helpers.torch.region_feature_similarity import compare_region_features, render_patch_map
 
 
 class LF_RegionFeatureSimilarity:
@@ -28,19 +28,23 @@ class LF_RegionFeatureSimilarity:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     INPUT_IS_LIST = True
-    RETURN_TYPES = (Input.JSON,)
-    RETURN_NAMES = ('similarity',)
-    OUTPUT_IS_LIST = (False,)
-    OUTPUT_TOOLTIPS = ('Per-region feature cosine similarity, model filename and pooling method.',)
+    RETURN_TYPES = (Input.JSON, Input.IMAGE)
+    RETURN_NAMES = ('similarity', 'patch_map')
+    OUTPUT_IS_LIST = (False, False)
+    OUTPUT_TOOLTIPS = ('Per-region feature cosine similarity, model filename and pooling method.',
+                       'Per-patch A/B cosine at the encoded size: black 1.0, brighter lower, white 0.8 or less. '
+                       'Patch outputs only; meaningful for registered or aligned inputs.')
 
     def on_exec(self, features_a=None, features_b=None, masks=None, metadata=None,
                 model_file='dino_v3_vit_h.safetensors', crop='none', **kwargs):
-        similarity = compare_region_features(features_a, features_b, masks, metadata,
-                                             model_file, crop)
+        similarity, patch_map = compare_region_features(features_a, features_b, masks, metadata,
+                                                        model_file, crop, return_map=True)
         details = []
         for index, row in enumerate(similarity['regions']):
             score = row['similarity']
             label = f"{row['id']}: cosine {score:.4f}" if score is not None else f"{row['id']}: N/A"
+            if row.get('patch_cosine') is not None:
+                label += f" | patch cosine {row['patch_cosine']:.4f}"
             if row.get('warning'):
                 label += f" | {row['warning']}"
             details.append({'id': str(index), 'value': label, 'children': [
@@ -48,7 +52,7 @@ class LF_RegionFeatureSimilarity:
                 for key, value in row.items()]})
         payload = {'similarity': similarity, 'dataset': {'nodes': details}}
         safe_send_sync('regionfeaturesimilarity', payload, kwargs.get('node_id'))
-        return {'ui': {'lf_output': [payload]}, 'result': (similarity,)}
+        return {'ui': {'lf_output': [payload]}, 'result': (similarity, render_patch_map(patch_map, similarity))}
 
 
 NODE_CLASS_MAPPINGS = {'LF_RegionFeatureSimilarity': LF_RegionFeatureSimilarity}

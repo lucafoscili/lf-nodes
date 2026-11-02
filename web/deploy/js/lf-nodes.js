@@ -1287,6 +1287,8 @@ var NodeName;
   NodeName2["regionColorStats"] = "LF_RegionColorStats";
   NodeName2["regionFeatureSimilarity"] = "LF_RegionFeatureSimilarity";
   NodeName2["visionPatchEncode"] = "LF_VisionPatchEncode";
+  NodeName2["faceAlign"] = "LF_FaceAlign";
+  NodeName2["faceIdentity"] = "LF_FaceIdentity";
   NodeName2["edgePadding"] = "LF_EdgePadding";
   NodeName2["maskedLabGrade"] = "LF_MaskedLabGrade";
   NodeName2["detailTransfer"] = "LF_DetailTransfer";
@@ -1740,6 +1742,8 @@ const NODE_WIDGET_MAP = {
   LF_RegionColorStats: [CustomWidgetName.compare],
   LF_RegionFeatureSimilarity: [CustomWidgetName.tree],
   LF_VisionPatchEncode: [CustomWidgetName.compare],
+  LF_FaceAlign: [CustomWidgetName.compare],
+  LF_FaceIdentity: [CustomWidgetName.tree],
   LF_EdgePadding: [CustomWidgetName.compare],
   LF_MaskedLabGrade: [CustomWidgetName.compare],
   LF_DetailTransfer: [CustomWidgetName.compare],

@@ -1,10 +1,12 @@
 # Region-by-region render comparison
 
-These four project-independent nodes compare registered renders of the same
+These project-independent nodes compare registered renders of the same
 subject. Core ComfyUI nodes own model loading and SAM inference; Vision Patch
-Encode runs a core-loaded vision model. LF Nodes does not download or load weights. No
+Encode runs a core-loaded vision model. LF Nodes does not download or bundle weights;
+the [face nodes](#face-align-lf_facealign) open InsightFace ONNX packs the user
+has placed in ComfyUI's `models/insightface`. No
 Workflow Runner catalogue entry is needed: workflows consume the JSON and IMAGE
-outputs normally. All four nodes share their final widget payload between live
+outputs normally. All nodes share their final widget payload between live
 events and `ui.lf_output`, including persistent generated-preview URLs.
 
 ## Text Region Masks (`LF_TextRegionMasks`)
@@ -168,8 +170,20 @@ zero-norm feature raises because cosine is undefined.
 The **Tree** widget lists one searchable record per region, labelled with its
 exact cosine score and any warning; expanding it shows the region's `id`,
 `area_a`, `area_b`, `similarity` and `empty` flag. Unavailable scores read N/A
-with their warning rather than a misleading zero. There are no file output
-sockets.
+with their warning rather than a misleading zero, and the patch cosine
+beside it when there is one.
+
+**Patch cosine and `patch_map`** (appended output). With patch tokens, each
+row also carries `patch_cosine`: the cosine of A's and B's features at the
+*same* patch position, averaged with the patch's shared coverage
+(`min(coverage_a, coverage_b)`), and the document a top-level
+`patch_cosine.regions_union` over every region together. Region means cancel
+local differences (a region whose halves swap scores 1.0); the patch cosine
+does not. It is meaningful only when A and B are registered, such as two
+Face Align crops. The second output, `patch_map`, draws the per-patch cosine at
+the encoded size: black is 1.0, brighter is lower, white is 0.8 or less.
+Pooled-only inputs have no patch grid: `patch_map` is a black 64 x 64 image and
+the reason is logged.
 
 ## Vision Patch Encode (`LF_VisionPatchEncode`)
 
@@ -219,10 +233,68 @@ Each node's `ui_widget` input type matches its `NODE_WIDGET_MAP` entry. The
 widget manager hydrates the same view from live events and from cached history
 (`ui.lf_output`).
 
+## Face Align (`LF_FaceAlign`)
+
+Aligns one face per input image onto ArcFace's five-point template, scaled so
+the 112-pixel template spans `face_scale` of a `crop_size` square (0.5 keeps
+the hair and neck), so two renders of the same face line up pixel for pixel
+however the camera framed them. Inputs: `image` (one or more), `model_pack`
+(a folder under `models/insightface/models`, such as `antelopev2` or
+`buffalo_l`), `select` (`center`, `largest` or `confident` when several faces
+are found), `crop_size`, `face_scale`, `det_size` (the detector canvas: raise
+it for small faces in large frames) and `score_threshold`.
+
+Models run through `onnxruntime` on the CPU, without the `insightface`
+package. Each file's role is read from its signature: the SCRFD detector (nine
+outputs, strides 8/16/32, two anchors), the 68-point `1k3d68` landmarks
+(iBUG layout) and the ArcFace recogniser (112 x 112 in, 512 out). A pack
+missing one of them, an image with no face, or a workflow mask of the wrong
+size raises naming the image and the reason.
+
+Regions come from the landmarks: `skin` (the jaw line closed over the brows
+raised by 0.6 interocular distances), `brows`, `eyes` and `lips` (outer lips
+minus the inner mouth). Optional `extra_masks` at source size, region-major
+like Text Region Masks (all images for the first ID, then the next), are
+warped with the same transform and added under `extra_ids` (default `hair`)
+at `extra_priority` (default 35: above skin 0 and brows 30, below eyes and
+lips 40). A SAM 3 `hair` detection on the source images is the usual source.
+
+Outputs: the aligned crops (batch and list), the disjoint region masks
+(image-major) and an `lf.text-region-masks.v1` document, so Region Color Stats
+and Region Feature Similarity take them unchanged. The document adds a
+`face_alignment` block (`lf.face-alignment.v1`): the pack and its files, the
+alignment settings, and per image the faces found, the chosen box, detector
+score, five points in source and crop pixels, the 68 landmarks in the crop and
+the 2 x 3 source-to-crop matrix. The **Compare** widget shows each crop
+against its region outlines.
+
+## Face Identity (`LF_FaceIdentity`)
+
+ArcFace cosine between Face Align crops: `image` and `metadata` from one Face
+Align, `model_pack` (antelopev2's `glintr100` or buffalo_l's `w600k_r50`) and
+`reference_index`. Each crop is re-aligned to ArcFace's 112 x 112 input from
+the crop-space points in the metadata. The `lf.face-identity.v1` document
+lists every face against the reference and the full matrix; the **Tree**
+widget lists the pairs. Identity models are trained to ignore lighting,
+pose and expression, so a high cosine says the same person, not the same
+look; compare appearance with the region nodes above. At small face sizes
+(a 50-pixel face) lighting still moves it.
+
+```text
+Load A, Load B -> ImageBatch -> SAM3 Detect ("hair") --extra_masks--+
+                             -> Face Align (crop 1024) <------------+
+Face Align -> Face Identity
+           -> ImageFromBatch 0/1 -> Vision Patch Encode -> Region Feature Similarity
+           -> ImageFromBatch 0/1 -> Region Color Stats
+```
+
+The InsightFace models are licensed for non-commercial research; LF Nodes
+neither ships nor downloads them.
+
 ## CPU checks
 
 ```text
-python -I scripts/quality/run_pytests.py -q -p no:cacheprovider modules/tests/nodes/regions/test_text_region_masks.py modules/tests/nodes/analytics/test_region_color_stats.py modules/tests/nodes/analytics/test_region_feature_similarity.py modules/tests/nodes/analytics/test_vision_patch_encode.py modules/tests/test_frontend_widget_registry.py modules/tests/nodes/test_output_metadata_contract.py
+python -I scripts/quality/run_pytests.py -q -p no:cacheprovider modules/tests/nodes/regions/test_text_region_masks.py modules/tests/nodes/analytics/test_region_color_stats.py modules/tests/nodes/analytics/test_region_feature_similarity.py modules/tests/nodes/analytics/test_vision_patch_encode.py modules/tests/nodes/regions/test_face_align.py modules/tests/test_frontend_widget_registry.py modules/tests/nodes/test_output_metadata_contract.py
 python -I scripts/quality/check_node_contracts.py
 ```
 
@@ -231,5 +303,7 @@ tests use an attribute object with the exact fields read from Core's output;
 importing Core's output module also imports its GPU stack. The encoder test uses
 a tiny model returning DINOv3's tuple shape and stubs Core's `Output`,
 `clip_preprocess` and `load_model_gpu`. These tests exercise
-LF's numerical and node contracts, not SAM detection or DINO inference.
+LF's numerical and node contracts, not SAM detection or DINO inference. The
+face tests stub the three ONNX sessions with SCRFD-, 1k3d68- and ArcFace-shaped
+arrays and use no face image.
 Real model execution and live widget hydration require a separate runtime test.

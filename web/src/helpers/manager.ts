@@ -32,6 +32,8 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_RegionColorStats: [CustomWidgetName.compare],
   LF_RegionFeatureSimilarity: [CustomWidgetName.tree],
   LF_VisionPatchEncode: [CustomWidgetName.compare],
+  LF_FaceAlign: [CustomWidgetName.compare],
+  LF_FaceIdentity: [CustomWidgetName.tree],
   LF_EdgePadding: [CustomWidgetName.compare],
   LF_MaskedLabGrade: [CustomWidgetName.compare],
   LF_DetailTransfer: [CustomWidgetName.compare],

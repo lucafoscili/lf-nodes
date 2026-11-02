@@ -45,8 +45,8 @@ def _patch_features(output, name):
     return features[0, 5:], grid, (height, width)
 
 
-def pool_region_patches(features, masks, grid, encoded_size, crop):
-    """Return region means and coverage sums, excluding all prefix tokens.
+def region_patch_weights(masks, grid, encoded_size, crop):
+    """Return [R, patches] fractional mask coverage on the encoder's patch grid.
 
     Geometry follows Core clip_preprocess: stretch for ``none``; resize the
     shorter side then floor-centre crop for ``center``. Area resampling keeps
@@ -63,7 +63,12 @@ def pool_region_patches(features, masks, grid, encoded_size, crop):
         coverage = coverage[:, :, top:top + size, left:left + size]
     elif crop != 'none':
         raise ValueError("crop must match CLIPVisionEncode: 'center' or 'none'.")
-    weights = F.interpolate(coverage, size=grid, mode='area').flatten(1)
+    return F.interpolate(coverage, size=grid, mode='area').flatten(1)
+
+
+def pool_region_patches(features, masks, grid, encoded_size, crop):
+    """Return region means and coverage sums, excluding all prefix tokens."""
+    weights = region_patch_weights(masks, grid, encoded_size, crop)
     totals = weights.sum(dim=1)
     means = weights @ features / totals.clamp_min(torch.finfo(torch.float64).tiny)[:, None]
     return means, totals
@@ -82,7 +87,7 @@ def _pooled_features(outputs, count, name):
 
 
 def compare_region_features(features_a, features_b, masks, region_metadata,
-                            model_file, crop):
+                            model_file, crop, return_map=False):
     """Compare two full-image patch outputs or two ordered sets of pooled crops."""
     sets, metadata = region_mask_sets(masks, region_metadata)
     if sets.shape[0] not in (1, 2):
@@ -107,9 +112,14 @@ def compare_region_features(features_a, features_b, masks, region_metadata,
             raise ValueError('features_a and features_b must have matching patch grids and feature dimensions.')
         means_a, coverage_a = pool_region_patches(patches_a, mask_a, grid_a, size_a, crop)
         means_b, coverage_b = pool_region_patches(patches_b, mask_b, grid_b, size_b, crop)
+        # Registered inputs only: the same patch in A and B shows the same place.
+        patch_cosine = F.cosine_similarity(patches_a, patches_b, dim=1).clamp(-1, 1)
+        shared = torch.minimum(region_patch_weights(mask_a, grid_a, size_a, crop),
+                               region_patch_weights(mask_b, grid_b, size_b, crop))
         method = 'coverage_weighted_patch_mean_cosine'
         geometry = {'patch_grid': list(grid_a), 'patch_size': 16, 'prefix_tokens': 5,
-                    'crop': crop, 'mask_resampling': 'area'}
+                    'crop': crop, 'mask_resampling': 'area', 'encoded_size': list(size_a)}
+        patch_map = patch_cosine.reshape(grid_a)
     elif any(has_patches):
         raise ValueError('features_a and features_b must both carry patch tokens or both carry pooled-only crops.')
     else:
@@ -118,6 +128,7 @@ def compare_region_features(features_a, features_b, masks, region_metadata,
         if means_a.shape != means_b.shape:
             raise ValueError('features_a and features_b pooled feature dimensions must match.')
         coverage_a, coverage_b = mask_a.sum((1, 2)), mask_b.sum((1, 2))
+        patch_cosine = shared = patch_map = None
         method = 'per_region_crop_pooled_cosine'
         geometry = {'crop': crop, 'crop_order': 'region_table',
                     'note': 'Workflow supplies one independently encoded crop per region and image.'}
@@ -137,7 +148,39 @@ def compare_region_features(features_a, features_b, masks, region_metadata,
                 raise ValueError(f"Region '{region['id']}' has a zero-norm mean feature in A or B.")
             similarity = torch.dot(means_a[index] / norm_a, means_b[index] / norm_b)
             row['similarity'] = float(similarity.clamp(-1, 1))
+        if patch_cosine is not None:
+            weight = shared[index].sum()
+            row['patch_cosine'] = float((shared[index] @ patch_cosine) / weight) if weight > 0 else None
         rows.append(row)
-    return {'schema': 'lf.region-feature-similarity.v1', 'model_file': model_file,
-            'model_file_source': 'workflow_input', 'method': method, **geometry,
-            'mask_sets': int(sets.shape[0]), 'regions': rows}
+    result = {'schema': 'lf.region-feature-similarity.v1', 'model_file': model_file,
+              'model_file_source': 'workflow_input', 'method': method, **geometry,
+              'mask_sets': int(sets.shape[0]), 'regions': rows}
+    if patch_cosine is not None:
+        union = shared.sum(dim=0).clamp(max=1)
+        result['patch_cosine'] = {
+            'method': 'per_patch_cosine_weighted_by_shared_coverage',
+            'note': 'Same-position patches of A and B; meaningful only for registered or aligned inputs.',
+            'regions_union': float((union @ patch_cosine) / union.sum()) if union.sum() > 0 else None}
+    if return_map:
+        return result, patch_map
+    return result
+
+
+def render_patch_map(patch_map, similarity):
+    """Colour the per-patch cosine grid at the encoded size as an IMAGE [1,H,W,3].
+
+    Pooled-only comparisons have no patch grid: the map is a black 64 x 64
+    image and the reason is logged, so a wired consumer never reads it as data.
+    """
+    if patch_map is None:
+        logging.warning('Region Feature Similarity: pooled-only inputs have no patch map; patch_map is blank.')
+        return torch.zeros(1, 64, 64, 3)
+    import cv2
+    import numpy as np
+
+    height, width = similarity['encoded_size']
+    # White at 0.8: lighting changes move registered patches by a few hundredths.
+    level = ((1 - patch_map.to(torch.float64)) / 0.2).clamp(0, 1).numpy()
+    level = np.ascontiguousarray(np.repeat(np.repeat(level, height // level.shape[0], 0), width // level.shape[1], 1))
+    colours = cv2.applyColorMap((level * 255).round().astype(np.uint8), cv2.COLORMAP_INFERNO)[..., ::-1]
+    return torch.from_numpy(np.ascontiguousarray(colours)).float().div(255).unsqueeze(0)
