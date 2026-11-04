@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from ...utils.helpers.motion.render import parse_betas
 from ..services.registry import (
     InputValidationError,
     WorkflowCardPresentation,
@@ -16,6 +15,9 @@ from .utils import choice, integer, resolve_upload_paths
 
 
 def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload: bool) -> None:
+    # Imported per run: catalogue declarations load without the node helper package.
+    from ...utils.helpers.motion.render import parse_betas
+
     body = choice(inputs, "body", "female", ("female", "neutral", "male"))
     betas = inputs.get("betas", "0.5,-1.5")
     try:
