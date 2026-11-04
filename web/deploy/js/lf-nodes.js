@@ -1277,6 +1277,8 @@ var CustomWidgetName;
 })(CustomWidgetName || (CustomWidgetName = {}));
 var NodeName;
 (function(NodeName2) {
+  NodeName2["videoToMotion"] = "LF_VideoToMotion";
+  NodeName2["motionToVideo"] = "LF_MotionToVideo";
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
   NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
   NodeName2["scaleGLBNodes"] = "LF_ScaleGLBNodes";
@@ -1733,6 +1735,8 @@ function installH3References(node) {
   schedule();
 }
 const NODE_WIDGET_MAP = {
+  LF_VideoToMotion: [CustomWidgetName.code],
+  LF_MotionToVideo: [CustomWidgetName.code],
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
   LF_ScaleGLBNodes: [],
@@ -7757,6 +7761,8 @@ const codeFactory = {
     content.classList.add(CodeCSS.Content);
     code.classList.add(CodeCSS.Widget);
     switch (node.comfyClass) {
+      case NodeName.videoToMotion:
+      case NodeName.motionToVideo:
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
       case NodeName.shuffleJsonKeys:

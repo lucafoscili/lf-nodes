@@ -50,6 +50,8 @@ export const codeFactory: CodeFactory = {
     code.classList.add(CodeCSS.Widget);
 
     switch (node.comfyClass) {
+      case NodeName.videoToMotion:
+      case NodeName.motionToVideo:
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
       case NodeName.shuffleJsonKeys:

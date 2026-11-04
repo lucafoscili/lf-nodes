@@ -1,0 +1,26 @@
+{
+  "extract_motion": {
+    "class_type": "LF_VideoToMotion",
+    "inputs": {
+      "video_path": "video.mp4",
+      "engine": "ExMR",
+      "static_camera": true,
+      "smoothing": true,
+      "gpu_index": 0,
+      "include_shape": false
+    },
+    "_meta": {"title": "Extract motion from one video"}
+  },
+  "render_motion": {
+    "class_type": "LF_MotionToVideo",
+    "inputs": {
+      "motion_file": ["extract_motion", 0],
+      "body": "female",
+      "betas": "0.5,-1.5",
+      "width": 320,
+      "height": 560,
+      "source_video": "video.mp4"
+    },
+    "_meta": {"title": "Inspect motion on a chosen body"}
+  }
+}

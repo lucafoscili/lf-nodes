@@ -55,6 +55,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "t2i_illustrious_xl",
     "trellis2",
     "triposplat",
+    "video_to_mocap",
     "ace_step_remix",
     "youtube_reference_intake",
     # Import order is not dependency order: the packaged registry performs a

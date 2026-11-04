@@ -56,6 +56,8 @@ export enum CustomWidgetName {
   upload = 'LF_UPLOAD',
 }
 export enum NodeName {
+  videoToMotion = 'LF_VideoToMotion',
+  motionToVideo = 'LF_MotionToVideo',
   aceStepRemix = 'LF_ACEStepRemix',
   applyTextureToGLB = 'LF_ApplyTextureToGLB',
   scaleGLBNodes = 'LF_ScaleGLBNodes',

@@ -40,6 +40,7 @@ class Settings:
     USER_ID_SECRET: str
     WORKFLOW_RUNNER_LMS_ENDPOINT: str = "http://127.0.0.1:1234/api/v1/chat"
     WORKFLOW_RUNNER_LMS_MODEL: str = ""
+    RGB_MOCAP_PATH: str = ""
 
 repo_root = Path(__file__).resolve().parents[2]
 maybe_load_dotenv(repo_root / ".env")
@@ -78,6 +79,7 @@ _SETTINGS = Settings(
         "WORKFLOW_RUNNER_LMS_ENDPOINT", "http://127.0.0.1:1234/api/v1/chat"
     ),
     WORKFLOW_RUNNER_LMS_MODEL=str_env("WORKFLOW_RUNNER_LMS_MODEL", ""),
+    RGB_MOCAP_PATH=str_env("RGB_MOCAP_PATH", ""),
 )
 
 def get_settings() -> Settings:

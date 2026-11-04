@@ -2,6 +2,11 @@
 
 ## Overview
 
+The **Motion → Video to Motion Capture** block extracts motion from one local
+video and renders a source comparison on an independently chosen body. See
+[video motion capture setup and contracts](MOTION.md) for the local runtime,
+licensed model requirements, outputs, and inspection limits.
+
 The Workflow Runner is a miniapp within LF Nodes that provides a web-based interface for executing ComfyUI workflows. It allows users to select, configure, and run workflows through a modern web UI, with real-time progress tracking and result visualization.
 
 ### Blocks and orchestras

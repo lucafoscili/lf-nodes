@@ -20,6 +20,7 @@ dependencies = [
     "rembg",
     "requests",
     "safetensors",
+    "smplx>=0.1.28",
     "svgwrite",
     "timm",
     "torch",
