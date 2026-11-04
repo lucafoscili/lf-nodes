@@ -114,10 +114,14 @@ def test_titanic_face_icon_and_motion_inventory_has_explicit_execution_boundarie
     assert upstream(671, "image") == [654, 0]
     assert upstream(672, "image") == [671, 0]
     assert upstream(672, "metadata") == [671, 2]
-    assert cases["model.face-align-identity"]["resourceClass"] == "model-cpu"
     assert upstream(673, "json_input") == [672, 0]
-    assert cases["model.face-align-identity"]["targets"] == [673]
-    assert cases["model.face-align-identity"]["execution"]["requiredNodeIds"] == [671, 672]
+    # The stock example has no detectable face: the branch stays dormant until a face fixture exists.
+    assert "model.face-align-identity" not in cases
+    assert {671, 672, 673} <= set(manifest["dormantNodeIds"])
+    exempted = {item["type"]: item["nodeIds"] for item in manifest["coverageExemptions"]}
+    assert exempted["LF_FaceAlign"] == [671]
+    assert exempted["LF_FaceIdentity"] == [672]
+    assert not ({671, 672, 673} & {target for case in cases.values() for target in case["targets"]})
 
     assert nodes[674]["type"] == "LF_IconFramer"
     assert upstream(674, "image") == [654, 0]

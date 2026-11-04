@@ -105,43 +105,6 @@
       }
     },
     {
-      "id": "model.face-align-identity",
-      "title": "Align the public stock example and compare its face embedding with itself",
-      "resourceClass": "model-cpu",
-      "targets": [
-        673
-      ],
-      "timeoutSeconds": 300,
-      "bindings": {
-        "fixtureImageSourceNodeIds": [
-          654
-        ]
-      },
-      "execution": {
-        "requiredNodeIds": [
-          671,
-          672
-        ],
-        "forbiddenCachedNodeIds": [
-          671,
-          672
-        ]
-      },
-      "expect": {
-        "671": {
-          "minimumPreviewCount": 2,
-          "minimumLivePreviewCount": 2,
-          "previewStorageType": "input"
-        },
-        "672": {
-          "requiredNamedValues": {
-            "reference": 0,
-            "cosine": 1
-          }
-        }
-      }
-    },
-    {
       "id": "cpu.png-stored-values",
       "title": "Load PNG and Save PNG keep the stock example's stored values, written back at 16 bits",
       "resourceClass": "cpu",
@@ -717,7 +680,7 @@
       }
     }
   ],
-  "dormantNodeIds": [13, 278, 380, 429, 438, 439, 440, 453, 478, 492, 495, 496, 537, 538],
+  "dormantNodeIds": [13, 278, 380, 429, 438, 439, 440, 453, 478, 492, 495, 496, 537, 538, 671, 672, 673],
   "coverageExemptions": [
     {"type": "LF_ONNXSelector", "nodeIds": [492], "reason": "dormant selector has no consumer in a coverage target branch; model fixture wiring is deferred"},
     {"type": "LF_DetectRegions", "nodeIds": [537], "reason": "dormant detection branch has no coverage target consumer; model fixture wiring is deferred"},
@@ -725,7 +688,9 @@
     {"type": "LF_StringTemplate", "nodeIds": [453], "reason": "dormant template has no coverage target consumer; connected fixture coverage is deferred"},
     {"type": "LF_LoadAndEditImages", "nodeIds": [429], "reason": "dormant interactive loader has no coverage target consumer; a separate editing fixture is required"},
     {"type": "LF_ControlPanel", "nodeIds": [13], "reason": "dormant frontend control has no execution target branch; widget interaction coverage is deferred"},
-    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"}
+    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"},
+    {"type": "LF_FaceAlign", "nodeIds": [671], "reason": "dormant face branch: the public stock example has no detectable face; a licensed stock face fixture is deferred"},
+    {"type": "LF_FaceIdentity", "nodeIds": [672], "reason": "dormant face branch: the public stock example has no detectable face; a licensed stock face fixture is deferred"}
   ],
   "disabledNodes": [
     {"id": 669, "type": "LF_VideoToMotion", "reason": "pinned source video and configured isolated RGB MoCap runtime required; inventory only"},
