@@ -33,6 +33,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "cardinal_turnaround",
     "caption_image_vision",
     "compare_images",
+    "icon_from_text",
     "image_detail_4k",
     "image_sheet",
     "image_to_dds",

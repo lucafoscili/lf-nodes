@@ -1332,6 +1332,7 @@ var NodeName;
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
   NodeName2["getKeyFromJsonByIndex"] = "LF_GetKeyFromJSONByIndex";
   NodeName2["h3PromptMaker"] = "LF_H3PromptMaker";
+  NodeName2["iconFramer"] = "LF_IconFramer";
   NodeName2["imageClassifier"] = "LF_ImageClassifier";
   NodeName2["imageGrid"] = "LF_ImageGrid";
   NodeName2["imageList"] = "LF_ImageList";
@@ -1786,6 +1787,7 @@ const NODE_WIDGET_MAP = {
   LF_GetKeyFromJSONByIndex: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_H3PromptMaker: [CustomWidgetName.code],
+  LF_IconFramer: [CustomWidgetName.compare],
   LF_ImageClassifier: [CustomWidgetName.code],
   LF_ImageGrid: [CustomWidgetName.masonry],
   LF_ImageHistogram: [CustomWidgetName.tabBarChart],

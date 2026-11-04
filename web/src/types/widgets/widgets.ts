@@ -111,6 +111,7 @@ export enum NodeName {
   getRandomKeyFromJson = 'LF_GetRandomKeyFromJSON',
   getKeyFromJsonByIndex = 'LF_GetKeyFromJSONByIndex',
   h3PromptMaker = 'LF_H3PromptMaker',
+  iconFramer = 'LF_IconFramer',
   imageClassifier = 'LF_ImageClassifier',
   imageGrid = 'LF_ImageGrid',
   imageList = 'LF_ImageList',

@@ -170,6 +170,14 @@ contain-fit and letterboxing. Its populated LfDataDataset and deterministic
 layout receipt are also retained in Runner history. The Scene Sheet H3 card can
 consume that composite as one experimental dense reference.
 
+The `Icon from Text` card (`icon_from_text`) paints one object with Krea 2 Turbo,
+optionally guided by up to three style images through the style-reference
+adapter, then cuts it out with Background Remover and frames it with
+`LF_IconFramer`: a square at a chosen fill, a backdrop, an optional glow, a dark
+outline, darkened corners and a bevelled rim. It saves the painting, a
+master-size icon and a small icon. One submission is one candidate; submit
+several seeds for several, so each stays reproducible from its own seed.
+
 ### TripoSplat workflows
 
 The shipped `TripoSplat` category contains one focused card,

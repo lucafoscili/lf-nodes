@@ -1,0 +1,144 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "KR2/krea2_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {"title": "Load Krea 2 model"}
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {"title": "Load Krea 2 Qwen3-VL encoder"}
+  },
+  "vae": {
+    "inputs": {"vae_name": "qwen_image_vae.safetensors"},
+    "class_type": "VAELoader",
+    "_meta": {"title": "Load Krea 2 VAE"}
+  },
+  "lora": {
+    "inputs": {
+      "lora_name": "KR2/krea2_style_reference.safetensors",
+      "strength_model": 1.0,
+      "model": ["unet", 0]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {"title": "Apply community style-reference LoRA (removed without style images)"}
+  },
+  "patch": {
+    "inputs": {"model": ["lora", 0], "kv_cache": false},
+    "class_type": "Krea2OstrisEditModelPatch",
+    "_meta": {"title": "Enable Krea 2 reference conditioning"}
+  },
+  "style_1": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Style reference 1"}
+  },
+  "style_2": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Style reference 2"}
+  },
+  "style_3": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Style reference 3"}
+  },
+  "positive": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "prompt": "A single brass oil lantern with a glowing flame behind amber glass panes, centred, filling the frame, on a plain flat black background.",
+      "vae": ["vae", 0],
+      "image1": ["style_1", 0],
+      "image2": ["style_2", 0],
+      "image3": ["style_3", 0]
+    },
+    "class_type": "TextEncodeKrea2OstrisEdit",
+    "_meta": {"title": "Prompt plus style references"}
+  },
+  "negative": {
+    "inputs": {"conditioning": ["positive", 0]},
+    "class_type": "ConditioningZeroOut",
+    "_meta": {"title": "Zero unconditional conditioning"}
+  },
+  "latent": {
+    "inputs": {"width": 1024, "height": 1024, "batch_size": 1},
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {"title": "Square canvas"}
+  },
+  "sampler": {
+    "inputs": {
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "denoise": 1.0,
+      "model": ["patch", 0],
+      "positive": ["positive", 0],
+      "negative": ["negative", 0],
+      "latent_image": ["latent", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {"title": "Sampler"}
+  },
+  "decode": {
+    "inputs": {"samples": ["sampler", 0], "vae": ["vae", 0]},
+    "class_type": "VAEDecode",
+    "_meta": {"title": "Decode painting"}
+  },
+  "cutout": {
+    "inputs": {
+      "image": ["decode", 0],
+      "transparent_background": true,
+      "background_color": "#000000",
+      "model": "RMBG-2.0",
+      "ui_widget": {}
+    },
+    "class_type": "LF_BackgroundRemover",
+    "_meta": {"title": "Find the subject"}
+  },
+  "frame": {
+    "inputs": {
+      "image": ["decode", 0],
+      "mask": ["cutout", 3],
+      "master_size": 512,
+      "icon_size": 64,
+      "fill": 0.86,
+      "backdrop": "color",
+      "backdrop_color": "#000000",
+      "glow_color": "#000000",
+      "glow_strength": 0.0,
+      "outline": 0.012,
+      "outline_color": "#000000",
+      "vignette": 0.35,
+      "bevel": 0.05,
+      "bevel_color": "#8a8a8a",
+      "bevel_light": 0.35,
+      "threshold": 0.5,
+      "ui_widget": {}
+    },
+    "class_type": "LF_IconFramer",
+    "_meta": {"title": "Frame the icon"}
+  },
+  "save_source": {
+    "inputs": {"filename_prefix": "LF_Nodes/IconFromText/source/seed-42", "images": ["decode", 0]},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the painting"}
+  },
+  "save_master": {
+    "inputs": {"filename_prefix": "LF_Nodes/IconFromText/master/seed-42", "images": ["frame", 0]},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the master icon"}
+  },
+  "save_icon": {
+    "inputs": {"filename_prefix": "LF_Nodes/IconFromText/icon/seed-42", "images": ["frame", 2]},
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the small icon"}
+  }
+}
