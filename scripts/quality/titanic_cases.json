@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "98715cb7366fb566d41354c9e1540f3fb95a07a81ae0ed55a78af8a546a462bd",
-    "expectedNodeCount": 429,
-    "expectedLinkCount": 568
+    "expectedSha256": "fc21c5638accfb2416ca50f7bc6e3b6c0a9049a9610a0d5986c75d6ba9444850",
+    "expectedNodeCount": 436,
+    "expectedLinkCount": 576
   },
   "fixtures": [
     {
@@ -75,6 +75,72 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.icon-framer",
+      "title": "Frame the public stock example central square at master and icon sizes",
+      "resourceClass": "cpu",
+      "targets": [
+        675
+      ],
+      "timeoutSeconds": 120,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          674
+        ],
+        "forbiddenCachedNodeIds": [
+          674
+        ]
+      },
+      "expect": {
+        "674": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input"
+        }
+      }
+    },
+    {
+      "id": "model.face-align-identity",
+      "title": "Align the public stock example and compare its face embedding with itself",
+      "resourceClass": "model-cpu",
+      "targets": [
+        673
+      ],
+      "timeoutSeconds": 300,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          671,
+          672
+        ],
+        "forbiddenCachedNodeIds": [
+          671,
+          672
+        ]
+      },
+      "expect": {
+        "671": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input"
+        },
+        "672": {
+          "requiredNamedValues": {
+            "reference": 0,
+            "cosine": 1
+          }
+        }
+      }
+    },
     {
       "id": "cpu.png-stored-values",
       "title": "Load PNG and Save PNG keep the stock example's stored values, written back at 16 bits",
@@ -662,6 +728,8 @@
     {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"}
   ],
   "disabledNodes": [
+    {"id": 669, "type": "LF_VideoToMotion", "reason": "pinned source video and configured isolated RGB MoCap runtime required; inventory only"},
+    {"id": 670, "type": "LF_MotionToVideo", "reason": "pinned motion capture and registered licensed SMPL-X model required; inventory only"},
     {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},
     {"id": 574, "type": "LF_UploadImages", "reason": "pinned upload fixture required"},
     {"id": 575, "type": "LF_ACEStepRemix", "reason": "external backend disabled by workflow policy"},

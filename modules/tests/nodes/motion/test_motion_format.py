@@ -134,3 +134,67 @@ def test_motion_invalid_write_does_not_replace_existing_file(tmp_path) -> None:
     with pytest.raises(ValueError, match="body_pose"):
         write_motion(path, motion)
     assert path.read_text(encoding="utf-8") == "previous"
+
+
+@pytest.mark.parametrize("source_fps", [24, 60])
+def test_capture_writer_keeps_working_frame_rate_and_source_time(tmp_path, monkeypatch, source_fps) -> None:
+    """Exercise the bridge and JSON writer with synthetic native worker output."""
+    import sys
+    from types import ModuleType
+
+    import torch
+
+    from modules.utils.helpers.motion import rgb_mocap_bridge
+    from modules.utils.helpers.motion.format import POSE_WIDTHS
+
+    project = tmp_path / "project"
+    project.mkdir()
+    # The app prepares 60 working frames from a two-second source at either rate.
+    (project / "project.json").write_text(json.dumps({
+        "fps": 30, "frames": 60, "source": {"fps": source_fps, "frames": 2 * source_fps},
+    }), encoding="utf-8")
+    request_path = tmp_path / "capture_request.json"
+    request_path.write_text(json.dumps({
+        "project_dir": str(project), "joint_names": JOINT_NAMES, "include_shape": False,
+    }), encoding="utf-8")
+
+    mocap = ModuleType("mocap")
+    for name in ("runtime_registry", "models", "paths", "exmr_backend", "batch_worker"):
+        module = ModuleType("mocap." + name)
+        setattr(mocap, name, module)
+        monkeypatch.setitem(sys.modules, "mocap." + name, module)
+    monkeypatch.setitem(sys.modules, "mocap", mocap)
+    mocap.runtime_registry.activate = lambda *_: None
+    mocap.exmr_backend.LINKS = {}
+    mocap.models.BY_KEY = {}
+    mocap.models.ready = lambda _: True
+
+    def capture(arguments, observe):
+        state = json.loads((project / "project.json").read_text(encoding="utf-8"))
+        parameters = {key: torch.zeros(state["frames"], width) for key, width in POSE_WIDTHS.items()}
+        parameters["transl"][:, 0] = torch.arange(state["frames"]) / state["fps"]
+        # This is the pinned backend's output seam: native fps is project fps.
+        torch.save({"fps": state["fps"], "smplx_global": parameters, "smplx_incam": parameters},
+                   project / "exmr_results.pt")
+        return 0
+
+    mocap.batch_worker.main = capture
+    monkeypatch.setattr(sys, "argv", ["bridge", str(tmp_path / "app"), str(tmp_path), "capture", str(request_path)])
+    # Restore process environment after main sets its isolated-worker paths.
+    monkeypatch.setenv("RGB_MOCAP_DATA", "")
+    monkeypatch.setenv("RGB_MOCAP_MANAGED", "")
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    monkeypatch.setattr(sys, "dont_write_bytecode", True)
+    result = rgb_mocap_bridge.main()
+    output = tmp_path / "motion.lf.json"
+    write_motion(output, result["motion"])
+    motion = read_motion(output)
+
+    assert motion["fps"] == 30
+    assert result["frame_count"] == len(motion["world"]["transl"]) == 60
+    assert result["frame_count"] / motion["fps"] == 2
+    np.testing.assert_allclose(
+        np.asarray(motion["world"]["transl"])[:, 0], np.arange(60) / motion["fps"],
+    )
+    assert motion["world"]["transl"][30][0] == 30 / motion["fps"] == 1
+    assert 30 / motion["fps"] * source_fps == source_fps

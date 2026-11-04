@@ -25,6 +25,7 @@ class LF_VideoToMotion:
             "optional": {
                 "include_shape": (Input.BOOLEAN, {"default": False, "tooltip": "Include inferred body shape in JSON and BVH/FBX. Off uses a neutral export skeleton and pose/root/hand motion only."}),
                 "ui_widget": (Input.LF_CODE, {"default": ""}),
+                "stage_timeout_seconds": (Input.FLOAT, {"default": 0.0, "min": 0.0, "max": 86400.0, "step": 1.0, "tooltip": "Time limit for each worker stage. 0 derives limits from clip duration; a positive value overrides every stage. Timeout stops the worker and its children, retains logs, and does not retry."}),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -44,14 +45,15 @@ class LF_VideoToMotion:
     DESCRIPTION = "Capture ExMR body, root and finger motion from a local video using isolated RGB MoCap workers. Requires RGB_MOCAP_PATH and installed registered models; never installs or downloads dependencies."
 
     def on_exec(self, video_path, engine="ExMR", static_camera=True, smoothing=True,
-                gpu_index=0, include_shape=False, ui_widget=None, node_id=None):
+                gpu_index=0, include_shape=False, ui_widget=None, node_id=None,
+                stage_timeout_seconds=0.0):
         def progress(event):
             if event.get("type") == "progress":
                 safe_send_sync("videotomotion", {"value": event.get("message", "Processing motion...")}, node_id)
 
         output = run_video_to_motion(video_path, folder_paths.get_output_directory(), engine=engine,
             static_camera=static_camera, smoothing=smoothing, gpu_index=gpu_index,
-            include_shape=include_shape, progress=progress)
+            include_shape=include_shape, progress=progress, stage_timeout_seconds=stage_timeout_seconds)
         root = Path(folder_paths.get_output_directory()).resolve()
         files = [Path(output[key]).resolve().relative_to(root).as_posix()
                  for key in ("motion_file", "bvh_file", "fbx_file")]

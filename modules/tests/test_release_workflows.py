@@ -86,3 +86,43 @@ def test_exemptions_require_reasons_and_exact_fixture_instances():
     assert _coverage(workflow, exemptions=[{**exemption, "nodeIds": []}]) == [
         "Coverage exemption node IDs do not match LF_Source"
     ]
+
+
+def test_titanic_face_icon_and_motion_inventory_has_explicit_execution_boundaries():
+    workflow = json.loads((REPO_ROOT / "scripts/quality/fixtures/E2E.json").read_text(encoding="utf-8"))
+    manifest = json.loads((REPO_ROOT / "scripts/quality/titanic_cases.json").read_text(encoding="utf-8"))
+    nodes = {node["id"]: node for node in workflow["nodes"]}
+    cases = {case["id"]: case for case in manifest["coverageCases"]}
+    disabled = {item["id"]: item for item in manifest["disabledNodes"]}
+
+    def upstream(identifier, name):
+        slot = next(i for i, value in enumerate(nodes[identifier]["inputs"]) if value["name"] == name)
+        return next(link[1:3] for link in workflow["links"] if link[3:5] == [identifier, slot])
+
+    for identifier, kind in ((669, "LF_VideoToMotion"), (670, "LF_MotionToVideo")):
+        assert nodes[identifier]["type"] == kind
+        assert nodes[identifier]["mode"] == 2
+        assert disabled[identifier]["type"] == kind
+        assert "required" in disabled[identifier]["reason"]
+    assert upstream(670, "motion_file") == [669, 0]
+    assert nodes[669]["widgets_values_named"]["stage_timeout_seconds"] == 0
+    assert nodes[670]["widgets_values_named"]["image_frame_limit"] == 32
+    assert not ({669, 670} & {target for case in cases.values() for target in case["targets"]})
+
+    assert nodes[671]["type"] == "LF_FaceAlign"
+    assert nodes[672]["type"] == "LF_FaceIdentity"
+    assert upstream(671, "image") == [654, 0]
+    assert upstream(672, "image") == [671, 0]
+    assert upstream(672, "metadata") == [671, 2]
+    assert cases["model.face-align-identity"]["resourceClass"] == "model-cpu"
+    assert upstream(673, "json_input") == [672, 0]
+    assert cases["model.face-align-identity"]["targets"] == [673]
+    assert cases["model.face-align-identity"]["execution"]["requiredNodeIds"] == [671, 672]
+
+    assert nodes[674]["type"] == "LF_IconFramer"
+    assert upstream(674, "image") == [654, 0]
+    assert upstream(674, "mask") == [657, 0]
+    assert cases["cpu.icon-framer"]["resourceClass"] == "cpu"
+    assert upstream(675, "image") == [674, 2]
+    assert cases["cpu.icon-framer"]["targets"] == [675]
+    assert cases["cpu.icon-framer"]["execution"]["requiredNodeIds"] == [674]

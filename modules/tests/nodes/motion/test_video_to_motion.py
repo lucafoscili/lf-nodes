@@ -1,6 +1,10 @@
 """CPU synthetic contracts; application/GPU execution belongs to acceptance."""
 
 import json
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 import types
@@ -30,6 +34,8 @@ def test_schema_and_output_contract():
     assert schema["required"]["gpu_index"][1]["default"] == 0
     assert schema["optional"]["include_shape"][1]["default"] is False
     assert schema["optional"]["ui_widget"][0] == "LF_CODE"
+    assert schema["optional"]["stage_timeout_seconds"][0] == "FLOAT"
+    assert schema["optional"]["stage_timeout_seconds"][1]["default"] == 0.0
     assert node.INPUT_IS_LIST is False
     assert node.RETURN_TYPES == ("STRING",) * 4
     assert node.RETURN_NAMES == ("motion_file", "bvh_file", "fbx_file", "project_dir")
@@ -47,6 +53,7 @@ def test_headless_node_returns_live_and_durable_artifacts(tmp_path, monkeypatch)
     def run(path, output_root, **options):
         assert path == "source.mp4"
         assert options["include_shape"] is False
+        assert options["stage_timeout_seconds"] == 0.0
         options["progress"]({"type": "progress", "message": "Capturing"})
         return output
     monkeypatch.setattr(node_module, "run_video_to_motion", run)
@@ -83,6 +90,10 @@ def test_missing_runtime_is_actionable(tmp_path):
     ({"gpu_index": -1}, "gpu_index"),
     ({"gpu_index": True}, "gpu_index"),
     ({"smoothing": "global"}, "smoothing must be a boolean"),
+    ({"stage_timeout_seconds": -1}, "stage_timeout_seconds"),
+    ({"stage_timeout_seconds": True}, "stage_timeout_seconds"),
+    ({"stage_timeout_seconds": float("inf")}, "stage_timeout_seconds"),
+    ({"stage_timeout_seconds": float("nan")}, "stage_timeout_seconds"),
 ])
 def test_invalid_controls_fail_before_installation(tmp_path, options, message):
     with pytest.raises(ValueError, match=message):
@@ -94,6 +105,8 @@ def test_capture_pipeline_preserves_motion_and_explicit_shape(tmp_path, monkeypa
     source.touch()
     monkeypatch.setattr(adapter, "installation_path", lambda: tmp_path)
     monkeypatch.setattr(adapter, "runtime_python", lambda *args: tmp_path / "python.exe")
+    monkeypatch.setattr(adapter, "_cuda_preflight", lambda *args: None)
+    monkeypatch.setattr(adapter, "_clip_duration", lambda *args: 2.0)
     calls = []
     motion = motion_fixture()
     def bridge(root, job, action, request, profile, progress):
@@ -122,6 +135,8 @@ def test_stage_failure_does_not_continue_to_export(tmp_path, monkeypatch):
     source.touch()
     monkeypatch.setattr(adapter, "installation_path", lambda: tmp_path)
     monkeypatch.setattr(adapter, "runtime_python", lambda *args: tmp_path / "python.exe")
+    monkeypatch.setattr(adapter, "_cuda_preflight", lambda *args: None)
+    monkeypatch.setattr(adapter, "_clip_duration", lambda *args: 2.0)
     stages = []
     def bridge(root, job, action, request, profile, progress):
         stages.append(action)
@@ -134,20 +149,115 @@ def test_stage_failure_does_not_continue_to_export(tmp_path, monkeypatch):
     assert stages == ["prepare", "track"]
 
 
-def test_worker_error_names_stage_and_retains_log(tmp_path, monkeypatch):
-    monkeypatch.setattr(adapter, "runtime_python", lambda *args: Path("python.exe"))
-    class FailedProcess:
-        stdout = iter([adapter.PREFIX + json.dumps({"type": "failed", "message": "prepare required models first"}) + "\n"])
-        def __enter__(self):
-            return self
-        def __exit__(self, *args):
-            return False
-        def wait(self):
-            return 3
-    monkeypatch.setattr(adapter.subprocess, "Popen", lambda *a, **k: FailedProcess())
+@pytest.fixture
+def bridge_worker(tmp_path, monkeypatch):
+    """Use real isolated processes; substitute only the application entry script."""
+    worker = tmp_path / "synthetic_worker.py"
+    launch = subprocess.Popen
+    calls = []
+
+    def popen(command, **kwargs):
+        calls.append(list(command))
+        command = list(command)
+        command[5] = str(worker)
+        return launch(command, **kwargs)
+
+    monkeypatch.setattr(adapter, "runtime_python", lambda *args: Path(sys.executable))
+    monkeypatch.setattr(adapter.subprocess, "Popen", popen)
+
+    def write(source):
+        worker.write_text(source, encoding="utf-8", newline="\n")
+        return calls
+    return write
+
+
+def test_worker_error_names_stage_and_retains_log(tmp_path, bridge_worker):
+    bridge_worker(
+        "import sys\n"
+        + "print(" + repr(adapter.PREFIX + json.dumps({"type": "failed", "message": "prepare required models first"})) + ", flush=True)\n"
+        + "sys.exit(3)\n"
+    )
     with pytest.raises(RuntimeError, match="RGB MoCap capture failed: prepare required models first"):
-        adapter._run_bridge(tmp_path, tmp_path, "capture", {"gpu_index": 0}, "exmr", None)
+        adapter._run_bridge(tmp_path, tmp_path, "capture", {"gpu_index": 0, "stage_timeout_seconds": 10}, "exmr", None)
     assert "prepare required models first" in (tmp_path / "capture.log").read_text(encoding="utf-8")
+
+
+def test_worker_timeout_stops_real_sleeping_worker_and_child(tmp_path, bridge_worker):
+    child_code = "import pathlib,time; pathlib.Path('child_ready').touch(); time.sleep(120)"
+    calls = bridge_worker(
+        "import json, pathlib, subprocess, sys, time\n"
+        f"child = subprocess.Popen([sys.executable, '-B', '-I', '-c', {child_code!r}])\n"
+        "pathlib.Path('pids.json').write_text(json.dumps([__import__('os').getpid(), child.pid]), encoding='utf-8')\n"
+        "print('sleeping worker with child', flush=True)\n"
+        "time.sleep(120)\n"
+    )
+    started = time.monotonic()
+    with pytest.raises(RuntimeError, match=r"capture timed out after .*limit 2 seconds.*no retry.*capture.log"):
+        adapter._run_bridge(tmp_path, tmp_path, "capture", {"gpu_index": 0, "stage_timeout_seconds": 2}, "exmr", None)
+    assert time.monotonic() - started < 8
+    assert len(calls) == 1
+    assert (tmp_path / "child_ready").exists()
+    pids = json.loads((tmp_path / "pids.json").read_text(encoding="utf-8"))
+    for pid in pids:
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+            kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+            kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+            kernel.OpenProcess.restype = wintypes.HANDLE
+            kernel.WaitForSingleObject.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+            kernel.WaitForSingleObject.restype = wintypes.DWORD
+            kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+            handle = kernel.OpenProcess(0x00100000, False, pid)
+            if handle:
+                try:
+                    assert kernel.WaitForSingleObject(handle, 1000) == 0
+                finally:
+                    kernel.CloseHandle(handle)
+        else:
+            # waitpid can reap our worker; a killed grandchild may briefly be a zombie.
+            status = Path(f"/proc/{pid}/stat")
+            assert not status.exists() or status.read_text(encoding="utf-8").split()[2] == "Z"
+    log = (tmp_path / "capture.log").read_text(encoding="utf-8")
+    assert "sleeping worker with child" in log
+    assert "worker process tree stopped; no retry" in log
+
+
+def test_timeout_diagnostic_survives_native_stop_error(tmp_path, bridge_worker, monkeypatch):
+    from contextlib import contextmanager
+
+    bridge_worker("import time; time.sleep(120)\n")
+    contain = adapter._worker_tree
+
+    @contextmanager
+    def reported_failure(process):
+        with contain(process) as stop:
+            def fail_after_stopping():
+                stop()
+                raise OSError("synthetic native tree stop failure")
+            yield fail_after_stopping
+
+    monkeypatch.setattr(adapter, "_worker_tree", reported_failure)
+    with pytest.raises(RuntimeError, match=r"capture timed out after .*limit 0.2 seconds.*tree stop failed.*no retry.*capture.log"):
+        adapter._run_bridge(tmp_path, tmp_path, "capture",
+                            {"gpu_index": 0, "stage_timeout_seconds": 0.2}, "exmr", None)
+
+
+def test_worker_streams_progress_and_result_while_retaining_log(tmp_path, bridge_worker):
+    calls = bridge_worker(
+        "import json, os, time\n"
+        + "print('plain diagnostic', flush=True)\n"
+        + "print(" + repr(adapter.PREFIX + json.dumps({"type": "progress", "message": "Capturing"})) + ", flush=True)\n"
+        + "time.sleep(0.15)\n"
+        + "print(" + repr(adapter.PREFIX + json.dumps({"type": "result", "result": {"done": True}})) + ", flush=True)\n"
+    )
+    events = []
+    output = adapter._run_bridge(tmp_path, tmp_path, "capture",
+                                {"gpu_index": 0, "stage_timeout_seconds": 10}, "exmr", events.append)
+    assert output == {"done": True}
+    assert [event["type"] for event in events] == ["progress", "result"]
+    assert len(calls) == 1
+    assert "plain diagnostic" in (tmp_path / "capture.log").read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("model_ready", [True, False])
@@ -207,3 +317,98 @@ def test_export_shape_option_preserves_native_and_pose(tmp_path, monkeypatch, in
     assert native.read_bytes() == b"native inference remains unchanged"
     if include_shape:
         assert source.read_bytes() == original_bytes
+
+
+def test_git_missing_from_path_is_actionable(tmp_path, monkeypatch):
+    (tmp_path / "worker_boot.py").touch()
+    monkeypatch.setenv("RGB_MOCAP_PATH", str(tmp_path))
+    monkeypatch.setenv("PATH", str(tmp_path / "no_git_here"))
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(RuntimeError, match="requires git on ComfyUI's PATH.*Install Git"):
+        adapter.installation_path()
+
+
+def test_capture_setting_has_one_owner_and_is_read_at_execution(tmp_path, monkeypatch):
+    from modules.workflow_runner.config import Settings
+
+    assert "RGB_MOCAP_PATH" not in Settings.__dataclass_fields__
+    roots = [tmp_path / "first", tmp_path / "second"]
+    for root in roots:
+        root.mkdir()
+        (root / "worker_boot.py").touch()
+    calls = []
+    monkeypatch.setattr(adapter.subprocess, "run", lambda command, **kwargs:
+                        calls.append(command) or SimpleNamespace(returncode=0, stdout=adapter.SUPPORTED_COMMIT))
+    for root in roots:
+        monkeypatch.setenv("RGB_MOCAP_PATH", str(root))
+        assert adapter.installation_path() == root.resolve()
+    assert [call[2] for call in calls] == [str(root.resolve()) for root in roots]
+
+
+@pytest.mark.parametrize("devices,index", [([], 0), (["Synthetic GPU"], 1)])
+def test_cuda_unavailable_or_index_fails_before_job_creation(tmp_path, monkeypatch, devices, index):
+    source = tmp_path / "source.mp4"
+    source.touch()
+    monkeypatch.setattr(adapter, "installation_path", lambda: tmp_path)
+    monkeypatch.setattr(adapter, "runtime_python", lambda *args: tmp_path / "python.exe")
+    monkeypatch.setattr(adapter.subprocess, "run", lambda *args, **kwargs:
+                        SimpleNamespace(returncode=0, stdout=adapter.PREFIX + json.dumps(devices), stderr=""))
+    with pytest.raises(RuntimeError, match=f"gpu_index={index}.*available CUDA devices") as failure:
+        adapter.run_video_to_motion(source, tmp_path / "output", gpu_index=index)
+    assert ("none" if not devices else "0: Synthetic GPU") in str(failure.value)
+    assert not (tmp_path / "output").exists()
+
+
+def test_cuda_probe_uses_app_runtime_and_physical_order(tmp_path, monkeypatch):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "7")
+    monkeypatch.setenv("CUDA_DEVICE_ORDER", "FASTEST_FIRST")
+    monkeypatch.setattr(adapter, "runtime_python", lambda root, profile: tmp_path / profile / "python.exe")
+    calls = []
+    def run(command, **options):
+        calls.append((command, options))
+        return SimpleNamespace(returncode=0, stdout=adapter.PREFIX + '["GPU A", "GPU B"]', stderr="")
+    monkeypatch.setattr(adapter.subprocess, "run", run)
+    adapter._cuda_preflight(tmp_path, 1)
+    command, options = calls[0]
+    assert command[0] == str(tmp_path / "exmr" / "python.exe")
+    assert command[1:6] == ["-B", "-I", "-X", "utf8", "-c"]
+    assert "import json, torch" in command[-1]
+    assert options["env"]["CUDA_DEVICE_ORDER"] == "PCI_BUS_ID"
+    assert "CUDA_VISIBLE_DEVICES" not in options["env"]
+    assert options["timeout"] == 30
+    assert os.environ["CUDA_VISIBLE_DEVICES"] == "7"
+
+
+def test_cuda_probe_timeout_names_index_and_recovery(tmp_path, monkeypatch):
+    monkeypatch.setattr(adapter, "runtime_python", lambda *args: tmp_path / "python.exe")
+    def run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(args[0], 30)
+    monkeypatch.setattr(adapter.subprocess, "run", run)
+    with pytest.raises(RuntimeError, match="gpu_index=2.*timed out after 30 seconds.*available devices"):
+        adapter._cuda_preflight(tmp_path, 2)
+
+
+@pytest.mark.parametrize("action,short,long", [
+    ("prepare", 120, 400), ("track", 300, 3000),
+    ("capture", 600, 12000), ("export", 300, 2000),
+])
+def test_stage_bounds_scale_with_duration_and_honor_override(action, short, long):
+    assert adapter._stage_timeout(action, {"duration_seconds": 1}) == short
+    assert adapter._stage_timeout(action, {"duration_seconds": 100}) == long
+    assert adapter._stage_timeout(action, {"duration_seconds": 100, "stage_timeout_seconds": 17.5}) == 17.5
+
+
+def test_clip_duration_reads_real_video_metadata(tmp_path):
+    import av
+    import numpy as np
+    source = tmp_path / "source.mp4"
+    with av.open(str(source), mode="w") as video:
+        stream = video.add_stream("libx264", rate=30)
+        stream.width, stream.height, stream.pix_fmt = 64, 64, "yuv420p"
+        for _ in range(6):
+            frame = av.VideoFrame.from_ndarray(np.zeros((64, 64, 3), dtype=np.uint8), format="rgb24")
+            for packet in stream.encode(frame):
+                video.mux(packet)
+        for packet in stream.encode():
+            video.mux(packet)
+    assert adapter._clip_duration(source) == pytest.approx(0.2)

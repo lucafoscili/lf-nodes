@@ -15,6 +15,9 @@ from .format import POSE_WIDTHS, read_motion
 
 
 DEFAULT_BETAS = "0.5,-1.5"
+DEFAULT_IMAGE_FRAME_LIMIT = 32
+# Both selected uint8 frames and the node's float32 IMAGE conversion coexist.
+IMAGE_OUTPUT_BUDGET_BYTES = 256 * 1024 * 1024
 
 
 def parse_betas(value: str) -> np.ndarray:
@@ -56,20 +59,25 @@ def pose_meshes(motion: dict, model_path: Path, body: str, betas: np.ndarray):
             for key in POSE_WIDTHS
         }
         shape = torch.as_tensor(betas, dtype=torch.float32).reshape(1, 10)
-        meshes = []
-        # Bound skinning intermediates independently of clip duration.
-        with torch.inference_mode():
-            for start in range(0, len(parameters["body_pose"]), 16):
-                batch = {key: values[start:start + 16] for key, values in parameters.items()}
-                count = len(batch["body_pose"])
-                zeros = torch.zeros(count, 3)
-                result = model(
-                    **batch, betas=shape.expand(count, -1),
-                    jaw_pose=zeros, leye_pose=zeros, reye_pose=zeros,
-                    expression=torch.zeros(count, 10),
-                )
-                meshes.append(result.vertices.cpu().numpy())
-        return np.concatenate(meshes), np.asarray(model.faces, dtype=np.int32)
+        def mesh_batches():
+            # Re-evaluate bounded batches for framing and rendering. Retaining
+            # all vertices (and their turned copy) scales with clip duration.
+            try:
+                for start in range(0, len(parameters["body_pose"]), 16):
+                    with torch.inference_mode():
+                        batch = {key: values[start:start + 16] for key, values in parameters.items()}
+                        count = len(batch["body_pose"])
+                        zeros = torch.zeros(count, 3)
+                        result = model(
+                            **batch, betas=shape.expand(count, -1),
+                            jaw_pose=zeros, leye_pose=zeros, reye_pose=zeros,
+                            expression=torch.zeros(count, 10),
+                        )
+                        vertices = result.vertices.cpu().numpy()
+                    yield vertices
+            except Exception as error:
+                raise RuntimeError(f"SMPL-X body evaluation failed for {model_path.name}: {error}") from error
+        return mesh_batches, np.asarray(model.faces, dtype=np.int32)
     except Exception as error:
         raise RuntimeError(f"SMPL-X body evaluation failed for {model_path.name}: {error}") from error
 
@@ -148,8 +156,23 @@ def _source_frames(path: str, fps: float, count: int):
         raise RuntimeError(f"Source video decoding failed: {path}: {error}") from error
 
 
-def render_motion(motion_file, model_path, body, betas, width, height, output_path, source_video=""):
-    """Return one uint8 RGB array [frames,H,W,3] and write its H.264 MP4."""
+def select_image_frames(count, width, height, image_frame_limit):
+    """Select ordered playback indices within the combined IMAGE storage budget."""
+    if type(image_frame_limit) is not int or image_frame_limit < 0:
+        raise ValueError("image_frame_limit must be a non-negative integer; 0 requests all frames.")
+    selected = count if image_frame_limit == 0 else min(count, image_frame_limit)
+    size = selected * height * width * 3 * (1 + 4)
+    if size > IMAGE_OUTPUT_BUDGET_BYTES:
+        raise ValueError(
+            f"IMAGE selection of {selected} frames requires {size / 1024**2:.1f} MiB "
+            f"for uint8 and float32 storage; the budget is {IMAGE_OUTPUT_BUDGET_BYTES / 1024**2:.0f} MiB. "
+            "Reduce image_frame_limit or preview dimensions. The MP4 always includes every frame."
+        )
+    return np.linspace(0, count - 1, selected, dtype=np.int64)
+
+
+def render_motion(motion_file, model_path, body, betas, width, height, output_path, source_video="", image_frame_limit=DEFAULT_IMAGE_FRAME_LIMIT):
+    """Stream every RGB frame to H.264; return selected uint8 frames and timing."""
     import av
     from PIL import Image, ImageDraw, ImageFont, ImageOps
 
@@ -159,36 +182,52 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
     motion = read_motion(motion_file)
     if source_video and not Path(source_video).is_file():
         raise FileNotFoundError(f"Source video is missing: {source_video}")
-    meshes, faces = pose_meshes(motion, Path(model_path), body, shape)
+    count = len(motion["camera"]["body_pose"])
+    total_width = width * (3 if source_video else 2)
+    indices = select_image_frames(count, total_width, height, image_frame_limit)
+    mesh_batches, faces = pose_meshes(motion, Path(model_path), body, shape)
     # Preserve translation over time; turn around the clip's shared centre.
-    origin = (meshes.min(axis=(0, 1)) + meshes.max(axis=(0, 1))) / 2
+    low, high = np.full(3, np.inf, dtype=np.float32), np.full(3, -np.inf, dtype=np.float32)
+    for meshes in mesh_batches():
+        low = np.minimum(low, meshes.min(axis=(0, 1)))
+        high = np.maximum(high, meshes.max(axis=(0, 1)))
+    origin = (low + high) / 2
     angle = np.deg2rad(45)
     turn = np.array([[np.cos(angle), 0, np.sin(angle)], [0, 1, 0], [-np.sin(angle), 0, np.cos(angle)]], dtype=np.float32)
-    views = (meshes, (meshes - origin) @ turn.T + origin)
-    bounds = [(view.min(axis=(0, 1)), view.max(axis=(0, 1))) for view in views]
+    turned_low, turned_high = np.full(3, np.inf, dtype=np.float32), np.full(3, -np.inf, dtype=np.float32)
+    for meshes in mesh_batches():
+        turned = (meshes - origin) @ turn.T + origin
+        turned_low = np.minimum(turned_low, turned.min(axis=(0, 1)))
+        turned_high = np.maximum(turned_high, turned.max(axis=(0, 1)))
+    bounds = [(low, high), (turned_low, turned_high)]
     # One scale for both views, one fixed frame across time. Leave room for labels.
     scale = min(min(width / (high[0] - low[0]), (height - 24) / (high[1] - low[1])) for low, high in bounds) / 1.12
     centres = [(low + high) / 2 for low, high in bounds]
-    count = len(meshes)
     sources = _source_frames(source_video, float(motion["fps"]), count) if source_video else None
-    frames = np.empty((count, height, width * (3 if sources else 2), 3), dtype=np.uint8)
+    frames = np.empty((len(indices), height, total_width, 3), dtype=np.uint8)
+    selected = iter(enumerate(indices))
+    next_selection = next(selected, None)
+    # Release framing batches before encoding begins.
+    del meshes, turned
     font = ImageFont.load_default(size=13)
     try:
         with av.open(str(output_path), mode="w") as container:
             stream = container.add_stream("libx264", rate=Fraction(str(motion["fps"])).limit_denominator(100000))
-            stream.width, stream.height = frames.shape[2], height
+            stream.width, stream.height = total_width, height
             stream.pix_fmt = "yuv420p"
             stream.options = {"crf": "20", "preset": "fast"}
-            for index in range(count):
-                canvas = Image.new("RGB", (frames.shape[2], height), (238, 239, 242))
+            mesh_frames = (mesh for batch in mesh_batches() for mesh in batch)
+            for index, mesh in enumerate(mesh_frames):
+                canvas = Image.new("RGB", (total_width, height), (238, 239, 242))
                 offset = 0
                 if sources is not None:
                     source = ImageOps.pad(next(sources), (width, height), color=(238, 239, 242))
                     canvas.paste(source, (0, 0))
                     offset = width
+                views = (mesh, (mesh - origin) @ turn.T + origin)
                 for view, centre in zip(views, centres):
                     # Supersample edges without a graphics context.
-                    rendered = _rasterize(view[index], faces, centre, scale * 2, width * 2, height * 2)
+                    rendered = _rasterize(view, faces, centre, scale * 2, width * 2, height * 2)
                     panel = Image.fromarray(rendered).resize((width, height), Image.Resampling.LANCZOS)
                     canvas.paste(panel, (offset, 0))
                     offset += width
@@ -197,8 +236,11 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
                 for panel, label in enumerate(labels):
                     draw.rectangle((panel * width, 0, (panel + 1) * width, 22), fill=(238, 239, 242))
                     draw.text((panel * width + 7, 4), label, fill=(45, 46, 50), font=font)
-                frames[index] = np.asarray(canvas)
-                for packet in stream.encode(av.VideoFrame.from_ndarray(frames[index], format="rgb24")):
+                pixels = np.asarray(canvas)
+                if next_selection is not None and index == next_selection[1]:
+                    frames[next_selection[0]] = pixels
+                    next_selection = next(selected, None)
+                for packet in stream.encode(av.VideoFrame.from_ndarray(pixels, format="rgb24")):
                     container.mux(packet)
             for packet in stream.encode():
                 container.mux(packet)
@@ -207,4 +249,4 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
     finally:
         if sources is not None:
             sources.close()
-    return frames
+    return frames, {"frames": count, "image_frames": len(indices), "frame_indices": indices.tolist(), "fps": float(motion["fps"])}

@@ -368,7 +368,7 @@ describe('Titanic publication sanitizer', () => {
     for (const type of ['LF_MaskedLabGrade', 'LF_DetailTransfer', 'LF_EdgePadding', 'LF_NormalMapRepack']) {
       expect(manifest.coverageExemptions.some((item: any) => item.type === type)).toBe(false);
     }
-    const viewers = fixture.nodes.filter((node: any) => node.id >= 655 && node.type === 'LF_ViewImages')
+    const viewers = fixture.nodes.filter((node: any) => node.id >= 655 && node.id <= 666 && node.type === 'LF_ViewImages')
       .map((node: any) => node.id).sort();
     expect(texture.targets).toEqual(viewers);
   });

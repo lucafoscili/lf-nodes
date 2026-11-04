@@ -17,7 +17,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCardPresentation, WorkflowCell, WorkflowNode
 from .krea2 import (
     _LOCAL_MAX_SEED,
     _OFFICIAL_KREA2_MODEL,
@@ -160,6 +160,7 @@ WORKFLOW = WorkflowNode(
         "icon and a small icon. One run is one candidate; vary the seed for more."
     ),
     category="Image",
+    card=WorkflowCardPresentation(summary="Paint an object from a prompt and frame it as a square icon."),
     inputs=[
         _prompt_cell(
             default=(

@@ -45,6 +45,8 @@ def _configure(monkeypatch: pytest.MonkeyPatch, **inputs: Any) -> tuple[dict[str
 def test_is_registered_and_described() -> None:
     assert "icon_from_text" in _WORKFLOW_MODULES
     assert WORKFLOW.id == "icon_from_text"
+    assert WORKFLOW.card is not None
+    assert WORKFLOW.card.summary == "Paint an object from a prompt and frame it as a square icon."
     assert all(cell.description for cell in (*WORKFLOW.inputs, *WORKFLOW.outputs))
     assert [(cell.node_id, cell.id) for cell in WORKFLOW.outputs] == [
         ("save_icon", "icon"),

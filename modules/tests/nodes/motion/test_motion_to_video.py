@@ -3,6 +3,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 import json
 import sys
+import tracemalloc
 
 import numpy as np
 import pytest
@@ -12,6 +13,64 @@ from modules.nodes.motion import motion_to_video
 from modules.nodes.motion.motion_to_video import LF_MotionToVideo
 from modules.utils.constants import Input
 from modules.utils.helpers.motion import render
+from modules.utils.helpers.motion.format import JOINT_NAMES, POSE_WIDTHS, write_motion
+
+
+@pytest.fixture
+def synthetic_motion(monkeypatch, tmp_path):
+    """Exercise real skinning batches/raster/encoding without licensed weights."""
+    def create(count=3, fps=30, vertex_count=4):
+        camera = {key: np.zeros((count, width), dtype=np.float32).tolist() for key, width in POSE_WIDTHS.items()}
+        camera["transl"] = [[index / count * 0.2, 0, 0] for index in range(count)]
+        motion = {"schema": "lf.motion.v1", "fps": fps, "joint_names": JOINT_NAMES, "camera": camera, "world": camera}
+        path = tmp_path / f"motion-{count}.json"
+        write_motion(path, motion)
+        calls = []
+
+        class Body:
+            faces = np.array([[0, 1, 2], [0, 3, 1], [1, 3, 2], [2, 3, 0]], dtype=np.int32)
+            def __init__(self, *args, **kwargs):
+                pass
+            def eval(self):
+                return self
+            def __call__(self, **kwargs):
+                count = len(kwargs["body_pose"])
+                calls.append(count)
+                vertices = torch.zeros(count, vertex_count, 3)
+                vertices[:, :4] = torch.tensor([[-0.5, -1, 2], [0.5, -1, 2], [0, 1, 2], [0, 0, 3]])
+                vertices += kwargs["transl"][:, None, :]
+                return SimpleNamespace(vertices=vertices)
+
+        monkeypatch.setitem(sys.modules, "smplx", SimpleNamespace(SMPLX=Body))
+        return path, motion, Body, calls
+    return create
+
+
+def legacy_preview(motion, body_type, width, height):
+    """Frozen all-at-once framing/composition from the published renderer."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    parameters = {key: torch.tensor(motion["camera"][key]) for key in POSE_WIDTHS}
+    meshes = body_type()(**parameters).vertices.numpy()
+    origin = (meshes.min(axis=(0, 1)) + meshes.max(axis=(0, 1))) / 2
+    angle = np.deg2rad(45)
+    turn = np.array([[np.cos(angle), 0, np.sin(angle)], [0, 1, 0], [-np.sin(angle), 0, np.cos(angle)]], dtype=np.float32)
+    views = (meshes, (meshes - origin) @ turn.T + origin)
+    bounds = [(view.min(axis=(0, 1)), view.max(axis=(0, 1))) for view in views]
+    scale = min(min(width / (high[0] - low[0]), (height - 24) / (high[1] - low[1])) for low, high in bounds) / 1.12
+    centres = [(low + high) / 2 for low, high in bounds]
+    frames = []
+    for index in range(len(meshes)):
+        canvas = Image.new("RGB", (width * 2, height), (238, 239, 242))
+        for panel, (view, centre) in enumerate(zip(views, centres)):
+            pixels = render._rasterize(view[index], body_type.faces, centre, scale * 2, width * 2, height * 2)
+            canvas.paste(Image.fromarray(pixels).resize((width, height), Image.Resampling.LANCZOS), (panel * width, 0))
+        draw = ImageDraw.Draw(canvas)
+        for panel, label in enumerate(["Camera", "Turned 45 degrees"]):
+            draw.rectangle((panel * width, 0, (panel + 1) * width, 22), fill=(238, 239, 242))
+            draw.text((panel * width + 7, 4), label, fill=(45, 46, 50), font=ImageFont.load_default(size=13))
+        frames.append(np.asarray(canvas))
+    return np.stack(frames)
 
 
 def test_motion_to_video_snapshots_public_schema_and_mapped_execution() -> None:
@@ -30,7 +89,7 @@ def test_motion_to_video_snapshots_public_schema_and_mapped_execution() -> None:
             "width": (Input.INTEGER, 320),
             "height": (Input.INTEGER, 560),
         },
-        "optional": {"source_video": (Input.STRING, ""), "ui_widget": (Input.LF_CODE, "")},
+        "optional": {"source_video": (Input.STRING, ""), "ui_widget": (Input.LF_CODE, ""), "image_frame_limit": (Input.INTEGER, 32)},
     }
     assert schema["hidden"] == {"node_id": "UNIQUE_ID"}
     assert LF_MotionToVideo.INPUT_IS_LIST is False
@@ -44,13 +103,13 @@ def test_motion_to_video_snapshots_public_schema_and_mapped_execution() -> None:
 
 
 @pytest.mark.parametrize("node_id", [None, "render-node", ["render-node"]])
-def test_motion_to_video_preserves_frame_order_and_final_event_history(monkeypatch, tmp_path, node_id) -> None:
+def test_motion_to_video_preserves_frame_order_and_final_event_history(monkeypatch, tmp_path, node_id, synthetic_motion) -> None:
     output = tmp_path / "motion" / "preview_00001.mp4"
+    output.parent.mkdir()
     model = tmp_path / "SMPLX_FEMALE.npz"
-    raw = np.zeros((3, 64, 128, 3), dtype=np.uint8)
-    raw[1, ...] = 128
-    raw[2, ...] = 255
-    calls, sent = [], []
+    path, motion, body_type, _ = synthetic_motion()
+    raw = legacy_preview(motion, body_type, 64, 64)
+    sent = []
     monkeypatch.setattr(motion_to_video, "resolve_body_model", lambda body: model)
     monkeypatch.setattr(motion_to_video.folder_paths, "get_output_directory", lambda: str(tmp_path))
 
@@ -62,47 +121,47 @@ def test_motion_to_video_preserves_frame_order_and_final_event_history(monkeypat
         return str(output), None, None
 
     monkeypatch.setattr(motion_to_video, "resolve_filepath", resolve)
-    monkeypatch.setattr(motion_to_video, "render_motion", lambda *args: calls.append(args) or raw)
     monkeypatch.setattr(motion_to_video, "safe_send_sync", lambda *args: sent.append(args))
 
     response = LF_MotionToVideo().on_exec(
-        "clip.json", body="female", betas="0.2,-0.4", width=64, height=64,
-        source_video="source.mp4", node_id=node_id,
+        str(path), body="female", betas="0.2,-0.4", width=64, height=64, node_id=node_id,
     )
 
-    assert calls == [("clip.json", model, "female", "0.2,-0.4", 64, 64, str(output), "source.mp4")]
     path, batch, frames = response["result"]
     assert path == str(output)
     assert batch.dtype == torch.float32
     assert batch.shape == (3, 64, 128, 3)
     assert isinstance(frames, list)
     assert [tuple(frame.shape) for frame in frames] == [(1, 64, 128, 3)] * 3
-    torch.testing.assert_close(batch[:, 0, 0, 0], torch.tensor([0, 128 / 255, 1]))
+    torch.testing.assert_close(batch, torch.from_numpy(raw).float() / 255)
     for index, frame in enumerate(frames):
         torch.testing.assert_close(frame, batch[index:index + 1])
+        assert frame.untyped_storage().data_ptr() == batch.untyped_storage().data_ptr()
     payload = response["ui"]["lf_output"][0]
     assert sent == [("motiontovideo", payload, node_id)]
     assert payload is sent[0][1]
     assert payload["file_names"] == ["motion/preview_00001.mp4"]
     assert payload["json"] == {
-        "video_file": "motion/preview_00001.mp4", "frames": 3, "body": "female", "betas": "0.2,-0.4",
+        "video_file": "motion/preview_00001.mp4", "frames": 3, "image_frames": 3,
+        "frame_indices": [0, 1, 2], "fps": 30, "body": "female", "betas": "0.2,-0.4",
     }
     assert json.loads(payload["value"]) == payload["json"]
 
 
-def test_motion_to_video_does_not_publish_failed_render(monkeypatch, tmp_path) -> None:
+def test_motion_to_video_does_not_publish_failed_render(monkeypatch, tmp_path, synthetic_motion) -> None:
+    path, _, _, _ = synthetic_motion()
     sent = []
     monkeypatch.setattr(motion_to_video, "resolve_body_model", lambda _: tmp_path / "model.npz")
     monkeypatch.setattr(motion_to_video.folder_paths, "get_output_directory", lambda: str(tmp_path))
     monkeypatch.setattr(motion_to_video, "resolve_filepath", lambda **_: (str(tmp_path / "preview.mp4"), None, None))
     monkeypatch.setattr(motion_to_video, "safe_send_sync", lambda *args: sent.append(args))
 
-    def fail(*_args):
+    def fail(*_args, **_kwargs):
         raise RuntimeError("Synthetic encode failure")
 
-    monkeypatch.setattr(motion_to_video, "render_motion", fail)
+    monkeypatch.setitem(sys.modules, "av", SimpleNamespace(open=fail))
     with pytest.raises(RuntimeError, match="Synthetic encode failure"):
-        LF_MotionToVideo().on_exec("clip.json")
+        LF_MotionToVideo().on_exec(str(path), width=64, height=64)
     assert not sent
 
 
@@ -173,14 +232,11 @@ def test_source_decoder_reports_source_ending_before_motion(monkeypatch) -> None
 
 
 @pytest.mark.parametrize("with_source,failure", [(False, None), (True, None), (True, "encode"), (True, "flush"), (True, "mux")])
-def test_renderer_composes_source_and_body_views_and_wraps_encoder_failures(monkeypatch, tmp_path, with_source, failure) -> None:
+def test_renderer_composes_source_and_body_views_and_wraps_encoder_failures(monkeypatch, tmp_path, with_source, failure, synthetic_motion) -> None:
     from PIL import Image
 
-    mesh = np.array([[-0.5, -1, 2], [0.5, -1, 2], [0, 1, 2], [0, 0, 3]], dtype=np.float32)
-    meshes = np.stack([mesh, mesh + np.array([0.1, 0, 0], dtype=np.float32)])
-    faces = np.array([[0, 1, 2], [0, 3, 1], [1, 3, 2], [2, 3, 0]], dtype=np.int32)
-    monkeypatch.setattr(render, "read_motion", lambda _: {"fps": 29.97})
-    monkeypatch.setattr(render, "pose_meshes", lambda *_: (meshes, faces))
+    inference_mode = torch.is_inference_mode_enabled()
+    path, _, _, _ = synthetic_motion(count=2, fps=29.97)
     source = tmp_path / "source.mp4"
     source.touch()
     closed, encoded, packets = [], [], []
@@ -233,11 +289,12 @@ def test_renderer_composes_source_and_body_views_and_wraps_encoder_failures(monk
     source_path = str(source) if with_source else ""
     if failure:
         with pytest.raises(RuntimeError, match="Motion video render/encode failed") as caught:
-            render.render_motion("clip.json", "model.npz", "female", "0", 64, 64, output, source_path)
+            render.render_motion(path, "model.npz", "female", "0", 64, 64, output, source_path)
         assert isinstance(caught.value.__cause__, ValueError)
         assert f"Synthetic {failure}" in str(caught.value)
     else:
-        frames = render.render_motion("clip.json", "model.npz", "female", "0", 64, 64, output, source_path)
+        frames, timing = render.render_motion(path, "model.npz", "female", "0", 64, 64, output, source_path)
+        assert timing == {"frames": 2, "image_frames": 2, "frame_indices": [0, 1], "fps": 29.97}
         total_width = 192 if with_source else 128
         assert frames.shape == (2, 64, total_width, 3)
         assert frames.dtype == np.uint8
@@ -248,6 +305,7 @@ def test_renderer_composes_source_and_body_views_and_wraps_encoder_failures(monk
         assert len(packets) == 3  # Two frame packets, then encoder flush.
         assert stream.width == total_width and stream.height == 64
     assert closed == ([True] if with_source else [])
+    assert torch.is_inference_mode_enabled() is inference_mode
 
 
 def test_raster_depth_occlusion_survives_face_order_and_chunk_boundary() -> None:
@@ -268,3 +326,94 @@ def test_raster_depth_occlusion_survives_face_order_and_chunk_boundary() -> None
     ):
         actual = render._rasterize(vertices, faces, centre, 12, 32, 32)
         np.testing.assert_array_equal(actual, expected)
+
+
+@pytest.mark.parametrize("limit,expected", [(0, list(range(7))), (1, [0]), (3, [0, 3, 6]), (32, list(range(7)))])
+def test_image_frame_selection_is_explicit_and_ordered(limit, expected) -> None:
+    assert render.select_image_frames(7, 128, 64, limit).tolist() == expected
+
+
+@pytest.mark.parametrize("limit", [-1, 1.5, True, "32", None])
+def test_image_frame_selection_rejects_invalid_controls(limit) -> None:
+    with pytest.raises(ValueError, match="image_frame_limit must be a non-negative integer"):
+        render.select_image_frames(7, 128, 64, limit)
+
+
+@pytest.mark.parametrize("limit,with_source", [(0, False), (1800, False), (0, True)])
+def test_image_budget_fails_before_body_evaluation_or_output(monkeypatch, tmp_path, synthetic_motion, limit, with_source) -> None:
+    path, _, _, calls = synthetic_motion(count=1800)
+    output = tmp_path / "too-large.mp4"
+    source = tmp_path / "source.mp4"
+    source.touch()
+    size = "13842.8" if with_source else "9228.5"
+    with pytest.raises(ValueError, match=f"{size} MiB.*budget is 256 MiB"):
+        render.render_motion(path, "model.npz", "female", "0", 320, 560, output, str(source) if with_source else "", image_frame_limit=limit)
+    assert calls == []
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("limit", [0, 5])
+def test_real_pyav_preserves_legacy_pixels_and_all_frame_timing(tmp_path, synthetic_motion, limit) -> None:
+    import av
+    from fractions import Fraction
+
+    path, motion, body_type, calls = synthetic_motion(count=35, fps=29.97)
+    expected = legacy_preview(motion, body_type, 64, 64)
+    calls.clear()
+    output = tmp_path / "streamed.mp4"
+    actual, timing = render.render_motion(path, "model.npz", "female", "0", 64, 64, output, image_frame_limit=limit)
+    indices = timing["frame_indices"]
+    np.testing.assert_array_equal(actual, expected[indices])
+    assert calls == [16, 16, 3] * 3
+    assert timing["frames"] == 35
+    assert timing["image_frames"] == (35 if limit == 0 else 5)
+    assert indices[0] == 0 and indices[-1] == 34
+
+    # Re-encode the frozen legacy RGB frames using its exact published options.
+    legacy = tmp_path / "legacy.mp4"
+    with av.open(str(legacy), mode="w") as container:
+        stream = container.add_stream("libx264", rate=Fraction("29.97"))
+        stream.width, stream.height, stream.pix_fmt = 128, 64, "yuv420p"
+        stream.options = {"crf": "20", "preset": "fast"}
+        for pixels in expected:
+            for packet in stream.encode(av.VideoFrame.from_ndarray(pixels, format="rgb24")):
+                container.mux(packet)
+        for packet in stream.encode():
+            container.mux(packet)
+    def decoded(video):
+        with av.open(str(video)) as container:
+            rate = container.streams.video[0].average_rate
+            frames = [(frame.pts, frame.time_base, frame.to_ndarray(format="rgb24")) for frame in container.decode(video=0)]
+        return rate, frames
+    rate, streamed = decoded(output)
+    legacy_rate, previous = decoded(legacy)
+    assert rate == legacy_rate == Fraction("29.97")
+    assert len(streamed) == len(previous) == 35
+    for new, old in zip(streamed, previous):
+        assert new[:2] == old[:2]
+        np.testing.assert_array_equal(new[2], old[2])
+
+
+def test_long_clip_bounds_mesh_and_image_memory_through_real_node(monkeypatch, tmp_path, synthetic_motion) -> None:
+    monkeypatch.setattr(motion_to_video, "resolve_body_model", lambda _: tmp_path / "model.npz")
+    monkeypatch.setattr(motion_to_video.folder_paths, "get_output_directory", lambda: str(tmp_path))
+    peaks = []
+    for count in (32, 600):
+        path, _, _, calls = synthetic_motion(count=count, vertex_count=10475)
+        output = tmp_path / f"memory-{count}.mp4"
+        monkeypatch.setattr(motion_to_video, "resolve_filepath", lambda **_: (str(output), None, None))
+        tracemalloc.start()
+        try:
+            response = LF_MotionToVideo().on_exec(str(path), width=64, height=64)
+            peaks.append(tracemalloc.get_traced_memory()[1])
+        finally:
+            tracemalloc.stop()
+        assert response["result"][1].shape == (32, 64, 128, 3)
+        assert len(response["result"][2]) == 32
+        assert response["ui"]["lf_output"][0]["json"]["frames"] == count
+        assert max(calls) <= 16 and sum(calls) == count * 3
+        del response
+    # Includes JSON parsing, bounded mesh passes, rasterization and node output
+    # conversion/list creation. tracemalloc excludes native torch storage.
+    assert peaks[1] < 40 * 1024**2
+    assert peaks[1] < peaks[0] + 20 * 1024**2
