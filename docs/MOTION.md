@@ -54,6 +54,9 @@ to 0 (automatic); a positive value sets the timeout of each worker stage in seco
 The optional `motion_correction` defaults to true: the app's Motion Correction runs
 after the engine and every output carries its result ([below](#motion-correction)).
 False returns the engine's motion as it came.
+With it, `ground_feet` (default true), `push_in` (`auto`, `yes` or `no`; default
+`auto`) and `planted_seconds` (default empty) prepare the capture before the
+correction solves it ([grounding the feet](#grounding-the-feet)).
 Automatic bounds use the source clip duration `D` in seconds:
 
 | Stage | Timeout in seconds |
@@ -102,6 +105,42 @@ details add `correction`: the result name, the floor height in metres (world
 Y), the app's warning text (empty when it has none), its options, method and
 which shape it solved on. A warning names a contact it could not resolve;
 inspect those frames.
+
+### Grounding the feet
+
+A fixed-camera capture reads camera motion as body motion: when the camera
+pushes in, the performer walks toward it with her feet sliding and her body
+leaning over them. A foot out of frame is often guessed standing on its heel
+with its toes up, and the correction keeps each ankle's world rotation, so the
+toes stay up. With `ground_feet`, the bridge runs the correction once to learn
+which feet stand when, prepares the capture, and runs the correction again on
+the prepared capture, so the motion file, BVH and FBX carry it. The steps live
+in `modules/utils/helpers/motion/motion_grounding.py`, which runs in the app's
+runtime beside the bridge and is importable by any caller that holds the app:
+
+- **The camera's drift.** The material under the most planted standing foot
+  only moves because the camera did. Its step between frames (heel and toe
+  blended by the app's support weights), carried across frames where no foot
+  stands and smoothed over 0.15 s, is taken out of the root.
+- **A push-in.** When that drift moves along the camera's horizontal view by
+  more than 15 cm (`push_in` `auto`; `yes` or `no` overrides the reading), the
+  pelvis is kept over the middle of both soles along the view, at its offset
+  from the opening half second, turned with the body's heading; across the view
+  the capture stands. The legs swing at the hips so the feet stay where they
+  were.
+- **Flat heels.** A standing foot on its heel with its toes 0.5 to 6 cm up is
+  pitched about its ankle until its toes meet the floor, easing in and out over
+  0.1 s; a foot on its toes stays as it is.
+- **Planted seconds.** Spans such as `1.65-2.3, 4-5` hold both feet on the floor
+  whatever the capture's foot confidence says, for a clip where the feet are
+  planted but the engine lost them.
+
+The correction then solves the prepared capture on the export body (neutral,
+or the performer's shape with `include_shape`). The result details' `correction`
+adds `grounded`: one line per step and the push-in reading in metres
+(`null` when `ground_feet` is off). The module's `seat_on_floor`, which raises a
+pelvis whose seat sinks below the floor after the solve, is not run by the node:
+it would rewrite the app's corrected result after the app has recorded it.
 
 `LF_MotionToVideo` accepts `motion_file`, `body` (`female`, `neutral`, or `male`;
 default `female`), `betas` (comma-separated render-shape coefficients; default

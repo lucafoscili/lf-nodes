@@ -37,9 +37,16 @@ def test_schema_and_output_contract():
     assert schema["optional"]["stage_timeout_seconds"][0] == "FLOAT"
     assert schema["optional"]["stage_timeout_seconds"][1]["default"] == 0.0
     # Appended last: saved graphs keep their widget order.
-    assert list(schema["optional"]) == ["include_shape", "ui_widget", "stage_timeout_seconds", "motion_correction"]
+    assert list(schema["optional"]) == ["include_shape", "ui_widget", "stage_timeout_seconds", "motion_correction",
+                                        "ground_feet", "push_in", "planted_seconds"]
     assert schema["optional"]["motion_correction"][0] == "BOOLEAN"
     assert schema["optional"]["motion_correction"][1]["default"] is True
+    assert schema["optional"]["ground_feet"][0] == "BOOLEAN"
+    assert schema["optional"]["ground_feet"][1]["default"] is True
+    assert schema["optional"]["push_in"][0] == ["auto", "yes", "no"]
+    assert schema["optional"]["push_in"][1]["default"] == "auto"
+    assert schema["optional"]["planted_seconds"][0] == "STRING"
+    assert schema["optional"]["planted_seconds"][1]["default"] == ""
     assert node.INPUT_IS_LIST is False
     assert node.RETURN_TYPES == ("STRING",) * 4
     assert node.RETURN_NAMES == ("motion_file", "bvh_file", "fbx_file", "project_dir")
@@ -96,6 +103,12 @@ def test_missing_runtime_is_actionable(tmp_path):
     ({"gpu_index": True}, "gpu_index"),
     ({"smoothing": "global"}, "smoothing must be a boolean"),
     ({"motion_correction": 1}, "motion_correction must be a boolean"),
+    ({"ground_feet": "yes"}, "ground_feet must be a boolean"),
+    ({"push_in": True}, "push_in must be auto, yes or no"),
+    ({"planted_seconds": "1.5"}, "planted_seconds needs spans"),
+    ({"planted_seconds": "2-1"}, "must run forward"),
+    ({"planted_seconds": "1-2", "ground_feet": False}, "turn on motion_correction and ground_feet"),
+    ({"planted_seconds": "1-2", "motion_correction": False}, "turn on motion_correction and ground_feet"),
     ({"stage_timeout_seconds": -1}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": True}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": float("inf")}, "stage_timeout_seconds"),
@@ -146,6 +159,41 @@ def test_capture_pipeline_preserves_motion_and_explicit_shape(tmp_path, monkeypa
     assert len(saved["world"]["left_hand_pose"][0]) == 45
     assert output["motion_correction"] is motion_correction
     assert output.get("correction") == (correction if motion_correction else None)
+    # Grounding rides on the correction, read from the data by default.
+    assert {request["ground_feet"] for _, _, request in calls} == {motion_correction}
+    assert output["ground_feet"] is motion_correction
+    assert {request["push_in"] for _, _, request in calls} == {None}
+    assert {tuple(map(tuple, request["planted_seconds"])) for _, _, request in calls} == {()}
+
+
+def test_grounding_options_reach_every_stage(tmp_path, monkeypatch):
+    source = tmp_path / "source.mp4"
+    source.touch()
+    monkeypatch.setattr(adapter, "installation_path", lambda: tmp_path)
+    monkeypatch.setattr(adapter, "runtime_python", lambda *args: tmp_path / "python.exe")
+    monkeypatch.setattr(adapter, "_cuda_preflight", lambda *args: None)
+    monkeypatch.setattr(adapter, "_clip_duration", lambda *args: 6.0)
+    requests = []
+    def bridge(root, job, action, request, profile, progress):
+        requests.append(dict(request))
+        if action == "prepare":
+            return {"project_dir": str(job / "project" / "exmr")}
+        if action in ("capture", "correct"):
+            return {"motion": motion_fixture(), "frame_count": 4, "correction": {}}
+        if action == "export":
+            return {"bvh_file": str(job / "motion.bvh"), "fbx_file": str(job / "motion.fbx")}
+        return {}
+    monkeypatch.setattr(adapter, "_run_bridge", bridge)
+    adapter.run_video_to_motion(source, tmp_path, push_in="yes", planted_seconds="1.65-2.3; 4-5")
+    assert {request["push_in"] for request in requests} == {True}
+    assert requests[-1]["planted_seconds"] == [[1.65, 2.3], [4.0, 5.0]]
+    adapter.run_video_to_motion(source, tmp_path, push_in="no", ground_feet=False)
+    assert requests[-1]["push_in"] is False and requests[-1]["ground_feet"] is False
+
+
+def test_planted_spans_parse_commas_and_semicolons():
+    assert adapter.planted_spans("") == []
+    assert adapter.planted_spans(" 0-0.5 , 1.25-2 ;3-4 ") == [[0.0, 0.5], [1.25, 2.0], [3.0, 4.0]]
 
 
 def test_stage_failure_does_not_continue_to_export(tmp_path, monkeypatch):

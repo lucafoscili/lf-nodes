@@ -68,6 +68,60 @@ def select_result(state, result):
     return state
 
 
+GROUND_LOGIT = 20.0  # a planted frame's static confidence logit: sigmoid 1 to float precision
+
+
+def ground_capture(project, kind, request):
+    """Prepare the export representation for a second correction, with motion_grounding's steps.
+
+    The first correction's held feet steer the steps (the camera's drift taken out, the pelvis kept over the
+    feet under a push-in, held heels set flat, planted seconds held), as they do on any target body; the app's
+    solver then stands the prepared capture on the floor by the export body's own feet. Returns the steps.
+    """
+    import numpy as np
+    import torch
+    import smplx
+    from scipy.spatial.transform import Rotation
+    from mocap.correction import SoleGeometry
+    from mocap.engines import save_tensor
+    from mocap.mamma_body import body_path
+    import motion_grounding as grounding
+    source = project / "hmr4d_results.pt"
+    record = torch.load(source, map_location="cpu", weights_only=False)
+    params = record["smpl_params_global"]
+    fps = float(json.loads((project / "project.json").read_text(encoding="utf-8")).get("fps", 30))
+    body = smplx.SMPLX(str(body_path(project)), gender="neutral", num_pca_comps=12, flat_hand_mean=False,
+                       batch_size=1).eval()
+    geometry = SoleGeometry(body, params["betas"][0].numpy())
+    array = lambda value: value.detach().cpu().double().numpy()
+    raw = {key: array(params[key]) for key in ("global_orient", "body_pose", "transl")}
+    n = len(raw["transl"])
+    root, quat = grounding.arrays_from_params(raw, geometry.rest[0])
+    logits = record["net_outputs"]["static_conf_logits"]
+    probabilities = logits[0, :, :4].sigmoid().double().numpy()
+    held = np.zeros((n, 2), bool)
+    for foot, start, end, *_ in np.load(project / (kind + "_contacts.npz"))["segments"]:
+        held[int(start):int(end), int(foot)] = True
+    native = torch.load(project / "exmr_results.pt", map_location="cpu", weights_only=False, mmap=True)
+    view = grounding.view_directions(array(native["smplx_incam"]["global_orient"]),
+                                     array(native["smplx_global"]["global_orient"]))
+    ready = grounding.prepare(geometry, root, quat, probabilities, held, fps, view,
+                              planted=request["planted_seconds"], push_in=request["push_in"])
+    pose = Rotation.from_quat(ready["quat"][..., [1, 2, 3, 0]].reshape(-1, 4)).as_rotvec().reshape(n, 22, 3)
+    body_pose = params["body_pose"].clone()
+    for joint in grounding.SOLVED_JOINTS:
+        body_pose[:, 3 * (joint - 1):3 * joint] = torch.from_numpy(pose[:, joint]).to(body_pose.dtype)
+    params["body_pose"] = body_pose
+    params["transl"] = torch.from_numpy(ready["root"] - geometry.rest[0]).to(params["transl"].dtype)
+    planted = grounding.planted_frames(request["planted_seconds"], fps, n)
+    if planted.any():
+        logits = logits.clone()
+        logits[0, torch.from_numpy(planted), :4] = GROUND_LOGIT
+        record["net_outputs"]["static_conf_logits"] = logits
+    save_tensor(record, source)
+    return dict(steps=ready["steps"], push_in=ready["push_in"], push_in_reading_m=ready["push_in_reading"])
+
+
 FIELDS = ("global_orient", "transl", "body_pose", "left_hand_pose", "right_hand_pose")
 
 
@@ -123,6 +177,8 @@ def main():
     os.environ["RGB_MOCAP_MANAGED"] = "1"
     sys.dont_write_bytecode = True
     sys.path.insert(0, str(root))
+    # -I leaves the script's own folder off the path; motion_grounding lives beside this bridge.
+    sys.path.insert(1, str(Path(__file__).resolve().parent))
     from mocap.runtime_registry import activate
     activate(root, "exmr" if action == "capture" else "shared")
     # Keep model assets and their registrations read-only at their installed home.
@@ -180,9 +236,16 @@ def main():
             raise RuntimeError("Prepare required RGB MoCap models: " + ", ".join(model.name for model in absent))
         from mocap import worker
         worker.emit = observe
-        sys.argv = ["mocap.worker", "correct", "--project", str(project), "--result", kind]
-        if worker.main():
-            raise RuntimeError(stage_errors[-1] if stage_errors else "Motion Correction failed; inspect the preceding stage error.")
+        def correct():
+            sys.argv = ["mocap.worker", "correct", "--project", str(project), "--result", kind]
+            if worker.main():
+                raise RuntimeError(stage_errors[-1] if stage_errors else "Motion Correction failed; inspect the preceding stage error.")
+        correct()
+        grounded = None
+        if request["ground_feet"]:
+            emit("progress", message="Ground the feet: the camera's drift, a push-in and heels set flat")
+            grounded = ground_capture(project, kind, request)
+            correct()
         import torch
         from mocap.motion_tools import RESULTS
         filename, key = RESULTS[kind]
@@ -192,7 +255,8 @@ def main():
         report = json.loads((project / (kind + "_correction.json")).read_text(encoding="utf-8"))
         correction = dict(result=kind, floor=report["floor"], warning=report["warning"],
                           options=report["options"], method=report["method"],
-                          solved_on="estimated performer shape" if request["include_shape"] else "neutral shape")
+                          solved_on="estimated performer shape" if request["include_shape"] else "neutral shape",
+                          grounded=grounded)
         return dict(motion=motion, frame_count=len(motion["world"]["body_pose"]), correction=correction)
     if action == "export":
         import shutil

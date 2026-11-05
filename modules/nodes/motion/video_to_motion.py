@@ -27,6 +27,9 @@ class LF_VideoToMotion:
                 "ui_widget": (Input.LF_CODE, {"default": ""}),
                 "stage_timeout_seconds": (Input.FLOAT, {"default": 0.0, "min": 0.0, "max": 86400.0, "step": 1.0, "tooltip": "Time limit for each worker stage. 0 derives limits from clip duration; a positive value overrides every stage. Timeout stops the worker and its children, retains logs, and does not retry."}),
                 "motion_correction": (Input.BOOLEAN, {"default": True, "tooltip": "Run RGB MoCap's Motion Correction after the engine, with the app's defaults: one flat floor found automatically, and each foot held on it while it stands, so a foot on tiptoe keeps its toes on the floor. The JSON, BVH and FBX carry the corrected motion. Off returns the engine's motion as it came."}),
+                "ground_feet": (Input.BOOLEAN, {"default": True, "tooltip": "With Motion Correction: before the correction solves the legs, take the camera's drift along the floor out of the motion (read off the planted feet), keep the pelvis over the feet when the camera pushes in or pulls out, and set a standing foot that rests on its heel with its toes up flat on the floor. Off keeps the app's correction as it comes."}),
+                "push_in": (["auto", "yes", "no"], {"default": "auto", "tooltip": "Whether the camera pushes in or pulls out during the clip. auto reads it from the drift along the camera's view (over 15 cm); yes or no overrides the reading."}),
+                "planted_seconds": (Input.STRING, {"default": "", "tooltip": "Seconds where both feet stay planted whatever the capture's foot confidence says, as spans such as 1.65-2.3, 4-5. Empty leaves the contacts to the capture."}),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -47,7 +50,8 @@ class LF_VideoToMotion:
 
     def on_exec(self, video_path, engine="ExMR", static_camera=True, smoothing=True,
                 gpu_index=0, include_shape=False, ui_widget=None, node_id=None,
-                stage_timeout_seconds=0.0, motion_correction=True):
+                stage_timeout_seconds=0.0, motion_correction=True, ground_feet=True, push_in="auto",
+                planted_seconds=""):
         def progress(event):
             if event.get("type") == "progress":
                 safe_send_sync("videotomotion", {"value": event.get("message", "Processing motion...")}, node_id)
@@ -55,7 +59,8 @@ class LF_VideoToMotion:
         output = run_video_to_motion(video_path, folder_paths.get_output_directory(), engine=engine,
             static_camera=static_camera, smoothing=smoothing, gpu_index=gpu_index,
             include_shape=include_shape, progress=progress, stage_timeout_seconds=stage_timeout_seconds,
-            motion_correction=motion_correction)
+            motion_correction=motion_correction, ground_feet=ground_feet, push_in=push_in,
+            planted_seconds=planted_seconds)
         root = Path(folder_paths.get_output_directory()).resolve()
         files = [Path(output[key]).resolve().relative_to(root).as_posix()
                  for key in ("motion_file", "bvh_file", "fbx_file")]

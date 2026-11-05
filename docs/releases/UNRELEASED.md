@@ -12,6 +12,14 @@ Changes since [LF Nodes 5.1.0](https://github.com/lucafoscili/lf-nodes/blob/v5.1
   the floor and any warning of the app's. Off returns the engine's motion as
   before. Video to Motion Capture and Pose Shoot expose it with the other
   capture controls. See [Video motion capture](https://github.com/lucafoscili/lf-nodes/blob/main/docs/MOTION.md#motion-correction).
+- **Video to motion** grounds the feet before that correction, on by default
+  (`ground_feet`, `push_in` and `planted_seconds`, appended last): the camera's
+  drift along the floor is taken out, a camera that pushes in no longer walks
+  the performer toward it, a standing foot on its heel is set flat, and chosen
+  seconds hold both feet planted. The correction then runs again on the
+  prepared capture, and the result details list each step. Video to Motion
+  Capture exposes all three; Pose Shoot the first two. See
+  [Grounding the feet](https://github.com/lucafoscili/lf-nodes/blob/main/docs/MOTION.md#grounding-the-feet).
 
 ## Workflow Runner
 

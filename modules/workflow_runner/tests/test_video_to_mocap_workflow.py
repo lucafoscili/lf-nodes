@@ -46,6 +46,7 @@ def test_download_is_portable_and_shape_is_independent():
         "video_path": "video.mp4", "engine": "ExMR", "static_camera": True,
         "smoothing": True, "gpu_index": 0, "include_shape": False,
         "stage_timeout_seconds": 0.0, "motion_correction": True,
+        "ground_feet": True, "push_in": "auto", "planted_seconds": "",
     }
     assert prompt["render_motion"]["inputs"] == {
         "motion_file": ["extract_motion", 0], "body": "neutral", "betas": "0,1",
@@ -73,13 +74,14 @@ def test_all_capture_options_are_forwarded(configure_name, tmp_path, monkeypatch
     getattr(WORKFLOW, configure_name)(prompt, {
         "video_path": [video], "engine": "ExMR", "static_camera": False,
         "smoothing": False, "gpu_index": "2", "include_shape": True,
-        "stage_timeout_seconds": "17.5", "motion_correction": False,
+        "stage_timeout_seconds": "17.5", "motion_correction": True,
+        "ground_feet": True, "push_in": "yes", "planted_seconds": "1-2",
     })
     assert prompt["extract_motion"]["inputs"] == {
         "video_path": str(video) if configure_name == "configure_prompt" else "video.mp4",
         "engine": "ExMR", "static_camera": False, "smoothing": False,
         "gpu_index": 2, "include_shape": True, "stage_timeout_seconds": 17.5,
-        "motion_correction": False,
+        "motion_correction": True, "ground_feet": True, "push_in": "yes", "planted_seconds": "1-2",
     }
     assert prompt["render_motion"]["inputs"]["motion_file"] == ["extract_motion", 0]
 
@@ -105,6 +107,9 @@ def test_multiple_uploads_are_rejected(monkeypatch):
     ({"height": "561"}, "height"), ({"gpu_index": True}, "gpu_index"),
     ({"engine": "GVHMR"}, "engine"), ({"include_shape": "true"}, "include_shape"),
     ({"motion_correction": "true"}, "motion_correction"),
+    ({"ground_feet": 1}, "ground_feet"), ({"push_in": "maybe"}, "push_in"),
+    ({"planted_seconds": "soon"}, "planted_seconds"), ({"planted_seconds": 3}, "planted_seconds"),
+    ({"planted_seconds": "1-2", "motion_correction": False}, "planted_seconds"),
     ({"stage_timeout_seconds": True}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": -1}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": "nan"}, "stage_timeout_seconds"),

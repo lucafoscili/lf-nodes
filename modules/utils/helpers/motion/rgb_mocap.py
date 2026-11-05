@@ -265,20 +265,46 @@ def _run_bridge(root, job, action, request, profile, progress):
     return result
 
 
+PUSH_IN = {"auto": None, "yes": True, "no": False}
+
+
+def planted_spans(text):
+    """Seconds spans typed as "1.65-2.3, 4-5" as [[1.65, 2.3], [4.0, 5.0]]; empty text is no span."""
+    spans = []
+    for part in (piece.strip() for piece in str(text).replace(";", ",").split(",")):
+        if not part:
+            continue
+        try:
+            first, last = (float(value) for value in part.split("-"))
+        except ValueError:
+            raise ValueError(f"planted_seconds needs spans such as 1.5-2.25, separated by commas; got {part!r}.") from None
+        if not (math.isfinite(first) and math.isfinite(last) and 0 <= first < last):
+            raise ValueError(f"planted_seconds span {part!r} must run forward from 0 or later.")
+        spans.append([first, last])
+    return spans
+
+
 def run_video_to_motion(video_path, output_root, *, engine="ExMR", static_camera=True,
                         smoothing=True, gpu_index=0, include_shape=False, progress=None,
-                        stage_timeout_seconds=0.0, motion_correction=True):
+                        stage_timeout_seconds=0.0, motion_correction=True, ground_feet=True,
+                        push_in="auto", planted_seconds=""):
     if engine != "ExMR":
         raise ValueError("engine must be ExMR.")
     if type(gpu_index) is not int or not 0 <= gpu_index <= 31:
         raise ValueError("gpu_index must be an integer from 0 to 31.")
     for name, value in (("static_camera", static_camera), ("smoothing", smoothing),
-                        ("include_shape", include_shape), ("motion_correction", motion_correction)):
+                        ("include_shape", include_shape), ("motion_correction", motion_correction),
+                        ("ground_feet", ground_feet)):
         if type(value) is not bool:
             raise ValueError(name + " must be a boolean.")
     if (type(stage_timeout_seconds) not in (int, float)
             or not math.isfinite(stage_timeout_seconds) or stage_timeout_seconds < 0):
         raise ValueError("stage_timeout_seconds must be a finite nonnegative number; 0 selects automatic limits.")
+    if push_in not in PUSH_IN:
+        raise ValueError("push_in must be auto, yes or no.")
+    spans = planted_spans(planted_seconds)
+    if spans and not (motion_correction and ground_feet):
+        raise ValueError("planted_seconds holds the feet while grounding them: turn on motion_correction and ground_feet.")
     source = Path(video_path).expanduser().resolve()
     if not source.is_file():
         raise ValueError("video_path must name an existing local video file.")
@@ -296,7 +322,9 @@ def run_video_to_motion(video_path, output_root, *, engine="ExMR", static_camera
                    smoothing=smoothing, gpu_index=gpu_index, include_shape=include_shape,
                    joint_names=JOINT_NAMES, duration_seconds=duration,
                    stage_timeout_seconds=stage_timeout_seconds,
-                   result=CORRECTED_RESULT if motion_correction else CAPTURED_RESULT)
+                   result=CORRECTED_RESULT if motion_correction else CAPTURED_RESULT,
+                   ground_feet=motion_correction and ground_feet, push_in=PUSH_IN[push_in],
+                   planted_seconds=spans)
     prepared = _run_bridge(root, job, "prepare", request, "shared", progress)
     request["project_dir"] = prepared["project_dir"]
     _run_bridge(root, job, "track", request, "shared", progress)
@@ -310,6 +338,7 @@ def run_video_to_motion(video_path, output_root, *, engine="ExMR", static_camera
     output = dict(motion_file=str(motion_file), bvh_file=exported["bvh_file"],
                   fbx_file=exported["fbx_file"], project_dir=request["project_dir"],
                   engine=engine, include_shape=include_shape, motion_correction=motion_correction,
+                  ground_feet=request["ground_feet"],
                   frame_count=captured["frame_count"], fps=captured["motion"]["fps"])
     if motion_correction:
         output["correction"] = delivered["correction"]

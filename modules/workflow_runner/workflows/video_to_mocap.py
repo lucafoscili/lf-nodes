@@ -18,6 +18,7 @@ from .utils import choice, integer, resolve_upload_paths
 def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload: bool) -> None:
     # Imported per run: catalogue declarations load without the node helper package.
     from ...utils.helpers.motion.render import parse_betas
+    from ...utils.helpers.motion.rgb_mocap import planted_spans
 
     engine = choice(inputs, "engine", "ExMR", ("ExMR",))
     body = choice(inputs, "body", "female", ("female", "neutral", "male"))
@@ -30,10 +31,20 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
     smoothing = inputs.get("smoothing", True)
     include_shape = inputs.get("include_shape", False)
     motion_correction = inputs.get("motion_correction", True)
+    ground_feet = inputs.get("ground_feet", True)
     for name, value in (("static_camera", static_camera), ("smoothing", smoothing),
-                        ("include_shape", include_shape), ("motion_correction", motion_correction)):
+                        ("include_shape", include_shape), ("motion_correction", motion_correction),
+                        ("ground_feet", ground_feet)):
         if not isinstance(value, bool):
             raise InputValidationError(name)
+    push_in = choice(inputs, "push_in", "auto", ("auto", "yes", "no"))
+    planted_seconds = inputs.get("planted_seconds", "") or ""
+    try:
+        if not isinstance(planted_seconds, str) or (planted_spans(planted_seconds)
+                                                    and not (motion_correction and ground_feet)):
+            raise ValueError(planted_seconds)
+    except ValueError as error:
+        raise InputValidationError("planted_seconds") from error
     timeout = inputs.get("stage_timeout_seconds", 0.0)
     if timeout in (None, ""):
         timeout = 0.0
@@ -61,6 +72,7 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
         video_path=video_path, engine=engine, static_camera=static_camera,
         smoothing=smoothing, gpu_index=gpu_index, include_shape=include_shape,
         stage_timeout_seconds=timeout, motion_correction=motion_correction,
+        ground_feet=ground_feet, push_in=push_in, planted_seconds=planted_seconds,
     )
     prompt["render_motion"]["inputs"].update(
         body=body, betas=betas, width=width, height=height, source_video=video_path,
@@ -145,6 +157,24 @@ WORKFLOW = WorkflowNode(
             props={"lfLabel": "Motion correction", "lfValue": True},
         ),
         _number("stage_timeout_seconds", "extract_motion", "Stage timeout (seconds; 0 = automatic)", 0, 0, 86400),
+        WorkflowCell(
+            id="ground_feet", node_id="extract_motion", shape="toggle", required=False,
+            description=("With Motion correction: take the camera's drift out of the motion, keep the pelvis over "
+                         "the feet when the camera pushes in, and set a standing foot resting on its heel flat."),
+            props={"lfLabel": "Ground the feet", "lfValue": True},
+        ),
+        WorkflowCell(
+            id="push_in", node_id="extract_motion", shape="select", required=False,
+            description="Whether the camera pushes in or pulls out; auto reads it from the motion.",
+            props={"lfValue": "auto", "lfTextfieldProps": {"lfLabel": "Camera push-in"},
+                   "lfDataset": {"nodes": [{"id": value, "value": value.title(), "workflowValue": value}
+                                            for value in ("auto", "yes", "no")]}},
+        ),
+        WorkflowCell(
+            id="planted_seconds", node_id="extract_motion", shape="textfield", required=False,
+            description="Seconds where both feet stay planted, as spans such as 1.65-2.3, 4-5.",
+            props={"lfLabel": "Planted seconds", "lfValue": ""},
+        ),
     ),
     outputs=(
         WorkflowCell(
