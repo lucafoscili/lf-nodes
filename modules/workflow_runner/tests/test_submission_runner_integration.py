@@ -358,6 +358,7 @@ async def test_sequence_parent_uses_stable_replay_and_exact_cancel_seam(
     assert validate_preflight.call_args_list[1].args[1] == {
         "sampler": "quality",
         "strength": 0.6,
+        "reference_image": "pending-orchestra-artifact",
     }
 
     sequence_cancel = AsyncMock(

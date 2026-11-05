@@ -338,7 +338,9 @@ def test_catalogue_preflights_bound_outputs_and_keeps_optional_branches_runnable
         for node in graph.values():
             nodes.add(node["class_type"])
             filenames.update(value for value in node["inputs"].values() if isinstance(value, str))
-    nodes.add("LF_LocalChatCompletions")
+    # The catalogue's writer defaults follow the host settings, which may opt
+    # into load-and-release; those installed nodes belong to the environment.
+    nodes.update({"LF_LocalChatCompletions", "LF_LMSLoadModel", "LF_LMSUnloadModel"})
     if missing_generator:
         nodes.remove("KSampler")
     scanner = WorkflowReadinessScanner(
