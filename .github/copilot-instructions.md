@@ -39,9 +39,11 @@
   URLs and base64 previews do not belong in durable history.
 - Add every node to the exhaustive frontend `NodeName` and `NODE_WIDGET_MAP`.
   A new node is not released until it has a real widget that shows its result
-  (not `[]`) and a place in `scripts/quality/fixtures/E2E.json` with its case in
-  `scripts/quality/titanic_cases.json`. `[]` stays only on existing nodes where
-  native Comfy UI is sufficient.
+  (not `[]`); `[]` stays only on existing nodes where native Comfy UI is
+  sufficient. Give it a place in `scripts/quality/fixtures/E2E.json` and a case
+  in `scripts/quality/titanic_cases.json`, generating any input the stock
+  fixture lacks (a face, a clip) rather than borrowing one. A case still
+  missing is named in the release notes; it does not hold the release.
 
 ## Shared implementation
 
