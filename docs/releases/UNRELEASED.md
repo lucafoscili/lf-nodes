@@ -11,7 +11,7 @@ Changes since [LF Nodes 5.1.0](https://github.com/lucafoscili/lf-nodes/blob/v5.1
   camera paragraph is appended after writing and review, H3 renders the clip
   (8 seconds at 9:16 by default), and Video to Motion Capture returns the
   motion file, BVH, FBX and the mannequin comparison MP4. Photos never reach
-  H3. See [the Pose Shoot guide](../llm/h3-pose-shoot.md).
+  H3. See [the Pose Shoot guide](https://github.com/lucafoscili/lf-nodes/blob/main/docs/llm/h3-pose-shoot.md).
 - Orchestras can expand their stages from the submitted inputs
   (`stages_factory`, up to 64 stages), append fixed text to a text binding
   (`text_suffix`), keep chosen stages visible in history
