@@ -17,6 +17,8 @@ from .format import JOINT_NAMES, write_motion
 
 SUPPORTED_COMMIT = "ef05127a0dbddb3f3ac672a0722dddeae42ea651"
 PREFIX = "@@LF_MOTION@@"
+# The app's result names: the engine's motion, and the same after its Motion Correction.
+CAPTURED_RESULT, CORRECTED_RESULT = "initial", "corrected_initial"
 
 
 def installation_path():
@@ -117,7 +119,7 @@ def _stage_timeout(action, request):
         return float(override)
     minimum, multiplier = {
         "prepare": (120, 4), "track": (300, 30),
-        "capture": (600, 120), "export": (300, 20),
+        "capture": (600, 120), "correct": (300, 20), "export": (300, 20),
     }[action]
     return max(minimum, multiplier * request["duration_seconds"])
 
@@ -265,13 +267,13 @@ def _run_bridge(root, job, action, request, profile, progress):
 
 def run_video_to_motion(video_path, output_root, *, engine="ExMR", static_camera=True,
                         smoothing=True, gpu_index=0, include_shape=False, progress=None,
-                        stage_timeout_seconds=0.0):
+                        stage_timeout_seconds=0.0, motion_correction=True):
     if engine != "ExMR":
         raise ValueError("engine must be ExMR.")
     if type(gpu_index) is not int or not 0 <= gpu_index <= 31:
         raise ValueError("gpu_index must be an integer from 0 to 31.")
     for name, value in (("static_camera", static_camera), ("smoothing", smoothing),
-                        ("include_shape", include_shape)):
+                        ("include_shape", include_shape), ("motion_correction", motion_correction)):
         if type(value) is not bool:
             raise ValueError(name + " must be a boolean.")
     if (type(stage_timeout_seconds) not in (int, float)
@@ -293,15 +295,22 @@ def run_video_to_motion(video_path, output_root, *, engine="ExMR", static_camera
     request = dict(video_path=str(source), static_camera=static_camera,
                    smoothing=smoothing, gpu_index=gpu_index, include_shape=include_shape,
                    joint_names=JOINT_NAMES, duration_seconds=duration,
-                   stage_timeout_seconds=stage_timeout_seconds)
+                   stage_timeout_seconds=stage_timeout_seconds,
+                   result=CORRECTED_RESULT if motion_correction else CAPTURED_RESULT)
     prepared = _run_bridge(root, job, "prepare", request, "shared", progress)
     request["project_dir"] = prepared["project_dir"]
     _run_bridge(root, job, "track", request, "shared", progress)
-    captured = _run_bridge(root, job, "capture", request, "exmr", progress)
+    delivered = captured = _run_bridge(root, job, "capture", request, "exmr", progress)
+    if motion_correction:
+        # The app's own Motion Correction stage with its defaults, after the engine and before every export.
+        delivered = _run_bridge(root, job, "correct", request, "shared", progress)
     motion_file = job / "motion.lf.json"
-    write_motion(motion_file, captured["motion"])
+    write_motion(motion_file, delivered["motion"])
     exported = _run_bridge(root, job, "export", request, "shared", progress)
-    return dict(motion_file=str(motion_file), bvh_file=exported["bvh_file"],
-                fbx_file=exported["fbx_file"], project_dir=request["project_dir"],
-                engine=engine, include_shape=include_shape,
-                frame_count=captured["frame_count"], fps=captured["motion"]["fps"])
+    output = dict(motion_file=str(motion_file), bvh_file=exported["bvh_file"],
+                  fbx_file=exported["fbx_file"], project_dir=request["project_dir"],
+                  engine=engine, include_shape=include_shape, motion_correction=motion_correction,
+                  frame_count=captured["frame_count"], fps=captured["motion"]["fps"])
+    if motion_correction:
+        output["correction"] = delivered["correction"]
+    return output

@@ -45,7 +45,8 @@ available. Writing and rendering receive the same exact duration.
 
 Advanced contains the writer endpoint/model, load-and-release policy, review,
 seed, and all capture controls: engine, static camera, smoothing, GPU index,
-include shape, and stage timeout. The capture defaults and meaning come from
+include shape, stage timeout, and motion correction (on: every take's feet stand
+on one floor). The capture defaults and meaning come from
 [Video motion capture](../MOTION.md). The mannequin uses that block's default
 female body and render shape. Seed is shared with performer generation and each
 clip; it does not make the external writer deterministic.

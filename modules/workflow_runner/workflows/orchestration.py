@@ -792,6 +792,7 @@ def _pose_shoot_inputs() -> tuple[WorkflowCell, ...]:
     ]
     advanced.extend(_input_cell(video_to_mocap, name) for name in (
         "engine", "static_camera", "smoothing", "gpu_index", "include_shape", "stage_timeout_seconds",
+        "motion_correction",
     ))
     for cell in advanced:
         cell.advanced = True
@@ -877,6 +878,7 @@ def _pose_shoot_stages(inputs: Mapping[str, Any]) -> tuple[WorkflowSequenceStage
                 WorkflowSequenceArtifactBinding("video_path", "video", f"{pose_id}.render_video"),
                 *(WorkflowSequencePublicInputBinding(field, field) for field in (
                     "engine", "static_camera", "smoothing", "gpu_index", "include_shape", "stage_timeout_seconds",
+                    "motion_correction",
                 )),
             ),
         ))

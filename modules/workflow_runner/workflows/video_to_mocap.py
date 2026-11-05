@@ -29,8 +29,9 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
     static_camera = inputs.get("static_camera", True)
     smoothing = inputs.get("smoothing", True)
     include_shape = inputs.get("include_shape", False)
+    motion_correction = inputs.get("motion_correction", True)
     for name, value in (("static_camera", static_camera), ("smoothing", smoothing),
-                        ("include_shape", include_shape)):
+                        ("include_shape", include_shape), ("motion_correction", motion_correction)):
         if not isinstance(value, bool):
             raise InputValidationError(name)
     timeout = inputs.get("stage_timeout_seconds", 0.0)
@@ -59,7 +60,7 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
     prompt["extract_motion"]["inputs"].update(
         video_path=video_path, engine=engine, static_camera=static_camera,
         smoothing=smoothing, gpu_index=gpu_index, include_shape=include_shape,
-        stage_timeout_seconds=timeout,
+        stage_timeout_seconds=timeout, motion_correction=motion_correction,
     )
     prompt["render_motion"]["inputs"].update(
         body=body, betas=betas, width=width, height=height, source_video=video_path,
@@ -91,7 +92,8 @@ WORKFLOW = WorkflowNode(
     category="Motion",
     description=(
         "Extract body and hand motion from one video with a configured local RGB-Mocap ExMR runtime, "
-        "then render a source comparison on a separately chosen SMPL-X body. "
+        "ground it with the app's Motion Correction, then render a source comparison on a separately "
+        "chosen SMPL-X body. "
         "Requires RGB_MOCAP_PATH and licensed SMPL-X model files; no runtime or model downloads are started."
     ),
     card=WorkflowCardPresentation(summary="Extract motion and inspect it on a body you choose."),
@@ -136,6 +138,11 @@ WORKFLOW = WorkflowNode(
             id="include_shape", node_id="extract_motion", shape="toggle", required=False,
             description="Include inferred performer shape in motion JSON and BVH/FBX exports.",
             props={"lfLabel": "Include performer shape", "lfValue": False},
+        ),
+        WorkflowCell(
+            id="motion_correction", node_id="extract_motion", shape="toggle", required=False,
+            description="Ground the motion with RGB MoCap's Motion Correction: one floor, each standing foot held on it.",
+            props={"lfLabel": "Motion correction", "lfValue": True},
         ),
         _number("stage_timeout_seconds", "extract_motion", "Stage timeout (seconds; 0 = automatic)", 0, 0, 86400),
     ),

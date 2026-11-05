@@ -2,6 +2,17 @@
 
 Changes since [LF Nodes 5.1.0](https://github.com/lucafoscili/lf-nodes/blob/v5.1.0/docs/releases/5.1.0.md).
 
+## Changed nodes
+
+- **Video to motion** runs RGB MoCap's Motion Correction after the engine,
+  on by default (`motion_correction`, appended last): one floor found from the
+  feet's contacts, each standing foot held on it, so a foot on tiptoe keeps its
+  toes on the floor instead of sinking below the other foot's plane. The motion
+  JSON, BVH and FBX carry the corrected motion, and the result details report
+  the floor and any warning of the app's. Off returns the engine's motion as
+  before. Video to Motion Capture and Pose Shoot expose it with the other
+  capture controls. See [Video motion capture](https://github.com/lucafoscili/lf-nodes/blob/main/docs/MOTION.md#motion-correction).
+
 ## Workflow Runner
 
 - **Pose Shoot** (Orchestras, MiniMax H3) shoots poses written one per line,

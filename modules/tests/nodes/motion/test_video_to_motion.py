@@ -14,7 +14,7 @@ import pytest
 from modules.nodes.motion import video_to_motion as node_module
 from modules.utils.helpers.motion import rgb_mocap as adapter
 from modules.utils.helpers.motion import rgb_mocap_bridge as bridge_module
-from modules.utils.helpers.motion.format import JOINT_NAMES, POSE_WIDTHS, read_motion
+from modules.utils.helpers.motion.format import JOINT_NAMES, POSE_WIDTHS, read_motion, validate_motion
 
 
 def motion_fixture():
@@ -36,6 +36,10 @@ def test_schema_and_output_contract():
     assert schema["optional"]["ui_widget"][0] == "LF_CODE"
     assert schema["optional"]["stage_timeout_seconds"][0] == "FLOAT"
     assert schema["optional"]["stage_timeout_seconds"][1]["default"] == 0.0
+    # Appended last: saved graphs keep their widget order.
+    assert list(schema["optional"]) == ["include_shape", "ui_widget", "stage_timeout_seconds", "motion_correction"]
+    assert schema["optional"]["motion_correction"][0] == "BOOLEAN"
+    assert schema["optional"]["motion_correction"][1]["default"] is True
     assert node.INPUT_IS_LIST is False
     assert node.RETURN_TYPES == ("STRING",) * 4
     assert node.RETURN_NAMES == ("motion_file", "bvh_file", "fbx_file", "project_dir")
@@ -54,6 +58,7 @@ def test_headless_node_returns_live_and_durable_artifacts(tmp_path, monkeypatch)
         assert path == "source.mp4"
         assert options["include_shape"] is False
         assert options["stage_timeout_seconds"] == 0.0
+        assert options["motion_correction"] is True
         options["progress"]({"type": "progress", "message": "Capturing"})
         return output
     monkeypatch.setattr(node_module, "run_video_to_motion", run)
@@ -90,6 +95,7 @@ def test_missing_runtime_is_actionable(tmp_path):
     ({"gpu_index": -1}, "gpu_index"),
     ({"gpu_index": True}, "gpu_index"),
     ({"smoothing": "global"}, "smoothing must be a boolean"),
+    ({"motion_correction": 1}, "motion_correction must be a boolean"),
     ({"stage_timeout_seconds": -1}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": True}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": float("inf")}, "stage_timeout_seconds"),
@@ -100,7 +106,8 @@ def test_invalid_controls_fail_before_installation(tmp_path, options, message):
         adapter.run_video_to_motion("missing.mp4", tmp_path, **options)
 
 
-def test_capture_pipeline_preserves_motion_and_explicit_shape(tmp_path, monkeypatch):
+@pytest.mark.parametrize("motion_correction", [True, False])
+def test_capture_pipeline_preserves_motion_and_explicit_shape(tmp_path, monkeypatch, motion_correction):
     source = tmp_path / "source.mp4"
     source.touch()
     monkeypatch.setattr(adapter, "installation_path", lambda: tmp_path)
@@ -109,6 +116,9 @@ def test_capture_pipeline_preserves_motion_and_explicit_shape(tmp_path, monkeypa
     monkeypatch.setattr(adapter, "_clip_duration", lambda *args: 2.0)
     calls = []
     motion = motion_fixture()
+    corrected = motion_fixture()
+    corrected["world"]["transl"] = [[0.0, -0.18, 0.0]] * 4
+    correction = {"result": "corrected_initial", "floor": 0.003, "warning": "", "options": {"mode": "flat"}}
     def bridge(root, job, action, request, profile, progress):
         calls.append((action, profile, dict(request)))
         assert job.is_relative_to(tmp_path)
@@ -116,18 +126,26 @@ def test_capture_pipeline_preserves_motion_and_explicit_shape(tmp_path, monkeypa
             return {"project_dir": str(job / "project" / "exmr")}
         if action == "capture":
             return {"motion": motion, "frame_count": 4}
+        if action == "correct":
+            return {"motion": corrected, "frame_count": 4, "correction": correction}
         if action == "export":
             return {"bvh_file": str(job / "motion.bvh"), "fbx_file": str(job / "motion.fbx")}
         return {}
     monkeypatch.setattr(adapter, "_run_bridge", bridge)
-    output = adapter.run_video_to_motion(source, tmp_path)
-    assert [(stage, profile) for stage, profile, _ in calls] == [
-        ("prepare", "shared"), ("track", "shared"), ("capture", "exmr"), ("export", "shared")]
+    output = adapter.run_video_to_motion(source, tmp_path, motion_correction=motion_correction)
+    stages = [("prepare", "shared"), ("track", "shared"), ("capture", "exmr"), ("export", "shared")]
+    if motion_correction:
+        stages.insert(3, ("correct", "shared"))
+    assert [(stage, profile) for stage, profile, _ in calls] == stages
     assert calls[0][2]["include_shape"] is False
+    # Every stage, the export included, names the one result the motion file carries.
+    assert {request["result"] for _, _, request in calls} == {"corrected_initial" if motion_correction else "initial"}
     saved = read_motion(output["motion_file"])
-    assert saved == motion
+    assert saved == (corrected if motion_correction else motion)
     assert "betas" not in saved
     assert len(saved["world"]["left_hand_pose"][0]) == 45
+    assert output["motion_correction"] is motion_correction
+    assert output.get("correction") == (correction if motion_correction else None)
 
 
 def test_stage_failure_does_not_continue_to_export(tmp_path, monkeypatch):
@@ -319,6 +337,87 @@ def test_export_shape_option_preserves_native_and_pose(tmp_path, monkeypatch, in
         assert source.read_bytes() == original_bytes
 
 
+def test_neutral_export_representation_is_not_rewritten(tmp_path, monkeypatch):
+    """Motion Correction stamps hmr4d_results.pt, so the export's own pass must not rewrite it again."""
+    import torch
+    mocap = types.ModuleType("mocap")
+    engines = types.ModuleType("mocap.engines")
+    saves = []
+    engines.save_tensor = lambda parameters, path: saves.append(path) or torch.save(parameters, path)
+    mocap.engines = engines
+    monkeypatch.setitem(sys.modules, "mocap", mocap)
+    monkeypatch.setitem(sys.modules, "mocap.engines", engines)
+    source = tmp_path / "hmr4d_results.pt"
+    torch.save({space: {"betas": torch.ones(4, 10)} for space in ("smpl_params_global", "smpl_params_incam")}, source)
+    bridge_module.prepare_export_parameters(tmp_path, False)
+    neutral = source.read_bytes()
+    bridge_module.prepare_export_parameters(tmp_path, False)
+    assert source.read_bytes() == neutral
+    assert saves == [source]
+
+
+def test_corrected_result_carries_the_app_default_correction(monkeypatch):
+    settings = types.ModuleType("mocap.correction_settings")
+    settings.correction_options = lambda options=None: {"auto_floor": True, "preset": "normal", "mode": "flat",
+                                                        "foot_lock": True, "hand_lock": False}
+    monkeypatch.setitem(sys.modules, "mocap", types.ModuleType("mocap"))
+    monkeypatch.setitem(sys.modules, "mocap.correction_settings", settings)
+    state = bridge_module.select_result({"frames": 4}, "corrected_initial")
+    assert state == {"frames": 4, "pipeline": {"model": "exmr", "result": "corrected_initial"},
+                     "correction": settings.correction_options()}
+    assert bridge_module.select_result({"frames": 4}, "initial") == {
+        "frames": 4, "pipeline": {"model": "exmr", "result": "initial"}}
+
+
+def synthetic_capture(yaw, frames=3):
+    """ExMR's world and camera results and a corrected record, the camera turned by a known yaw."""
+    import numpy as np
+    import torch
+    from scipy.spatial.transform import Rotation
+    rng = np.random.default_rng(7)
+    tensor = lambda value: torch.tensor(np.asarray(value), dtype=torch.float32)
+    random = lambda width: tensor(rng.normal(scale=0.3, size=(frames, width)))
+    orient = rng.normal(scale=0.3, size=(frames, 3))
+    turn = Rotation.from_euler("y", yaw, degrees=True)
+    world = dict(global_orient=tensor(orient), transl=random(3), body_pose=random(63), betas=random(10),
+                 left_hand_pose=random(45), right_hand_pose=random(45))
+    camera = dict(global_orient=tensor((turn * Rotation.from_rotvec(orient)).as_rotvec()), transl=random(3),
+                  body_pose=random(63), betas=world["betas"], left_hand_pose=random(45), right_hand_pose=random(45))
+    shift = torch.tensor([[0.01, -0.18, 0.02]] * frames)
+    corrected = dict(global_orient=world["global_orient"].clone(), transl=world["transl"] + shift,
+                     body_pose=random(63), betas=world["betas"], left_hand_pose=random(45), right_hand_pose=random(45))
+    return {"fps": 30.0, "smplx_global": world, "smplx_incam": camera}, corrected
+
+
+@pytest.mark.parametrize("yaw,seen", [(0.0, [0.01, -0.18, 0.02]), (90.0, [0.02, -0.18, -0.01])])
+def test_corrected_motion_moves_the_camera_root_by_the_rotated_shift(yaw, seen):
+    import numpy as np
+    native, corrected = synthetic_capture(yaw)
+    motion = validate_motion(bridge_module.corrected_motion(native, corrected, JOINT_NAMES, False))
+    world, camera = native["smplx_global"], native["smplx_incam"]
+    def close(value, expected):
+        np.testing.assert_allclose(np.asarray(value), np.asarray(expected, dtype=np.float64), atol=1e-5)
+    close(motion["world"]["global_orient"], world["global_orient"])
+    close(motion["world"]["transl"], corrected["transl"])
+    close(motion["camera"]["global_orient"], camera["global_orient"])
+    # The correction's root shift, turned into the camera: a quarter yaw carries its x into -z.
+    close(np.asarray(motion["camera"]["transl"]) - camera["transl"].numpy(), [seen] * 3)
+    for space in ("world", "camera"):
+        close(motion[space]["body_pose"], corrected["body_pose"])
+        for hand in ("left_hand_pose", "right_hand_pose"):
+            close(motion[space][hand], world[hand])  # ExMR's flat hands, never the corrected record's
+    assert "betas" not in motion
+    shaped = bridge_module.corrected_motion(native, corrected, JOINT_NAMES, True)
+    close(shaped["betas"], world["betas"][:1])
+
+
+def test_corrected_motion_refuses_another_capture():
+    native, corrected = synthetic_capture(0.0)
+    corrected["global_orient"] = corrected["global_orient"] + 0.1
+    with pytest.raises(RuntimeError, match="does not match this ExMR capture"):
+        bridge_module.corrected_motion(native, corrected, JOINT_NAMES, False)
+
+
 def test_git_missing_from_path_is_actionable(tmp_path, monkeypatch):
     (tmp_path / "worker_boot.py").touch()
     monkeypatch.setenv("RGB_MOCAP_PATH", str(tmp_path))
@@ -390,7 +489,7 @@ def test_cuda_probe_timeout_names_index_and_recovery(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("action,short,long", [
     ("prepare", 120, 400), ("track", 300, 3000),
-    ("capture", 600, 12000), ("export", 300, 2000),
+    ("capture", 600, 12000), ("correct", 300, 2000), ("export", 300, 2000),
 ])
 def test_stage_bounds_scale_with_duration_and_honor_override(action, short, long):
     assert adapter._stage_timeout(action, {"duration_seconds": 1}) == short

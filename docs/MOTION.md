@@ -14,8 +14,9 @@ does not initialize the extraction runtime.
 
 The adapter targets RGB MoCap commit
 `ef05127a0dbddb3f3ac672a0722dddeae42ea651` and rejects other revisions. It calls
-the app's project preparation, actor tracking, `exmr_batch`, BVH export and
-headless Blender FBX export under the app's own runtimes. Those internals are
+the app's project preparation, actor tracking, `exmr_batch`, Motion Correction
+(its `correct` stage, on by default), BVH export and headless Blender FBX export
+under the app's own runtimes. Those internals are
 not a supported upstream CLI. GVHMR extraction is not exposed: it requires a
 separate reconstruction and hand-refinement path.
 Git must be on ComfyUI's `PATH` to verify that revision; install Git or add its
@@ -50,6 +51,9 @@ and IMAGE batch are two views wide, or three with the source comparison.
 `static_camera` (default true), `smoothing` (true), and `gpu_index` (0).
 The optional `include_shape` defaults to false. `stage_timeout_seconds` defaults
 to 0 (automatic); a positive value sets the timeout of each worker stage in seconds.
+The optional `motion_correction` defaults to true: the app's Motion Correction runs
+after the engine and every output carries its result ([below](#motion-correction)).
+False returns the engine's motion as it came.
 Automatic bounds use the source clip duration `D` in seconds:
 
 | Stage | Timeout in seconds |
@@ -57,6 +61,7 @@ Automatic bounds use the source clip duration `D` in seconds:
 | prepare | `max(120, 4 * D)` |
 | track | `max(300, 30 * D)` |
 | capture | `max(600, 120 * D)` |
+| correct | `max(300, 20 * D)` |
 | export | `max(300, 20 * D)` |
 
 Each bound covers the whole stage, including startup. On timeout the worker's
@@ -70,6 +75,33 @@ BVH/FBX use neutral shape coefficients by default. The app project retains its
 native inference result; its derived export representation uses the selected
 shape policy.
 BVH/FBX are runtime exports, not guarantees of compatibility with a particular rig.
+
+### Motion Correction
+
+ExMR places the body without a floor: a foot can sink below the other foot's
+plane, and a foot on tiptoe reads as standing on a lower level instead of lifted.
+The app's Motion Correction finds one flat floor from the feet's contacts, holds
+each foot on it while the engine marks it standing (heel or forefoot, whichever
+carries the weight, so tiptoe toes stay down with the heel up), and solves the
+hips, knees, ankles and root translation to keep them there. The node runs it
+through the app's own `correct` worker stage with the app's own defaults
+(`mocap/correction_settings.py::correction_options`: automatic floor, preset
+`normal`, flat mode, foot lock on, hand lock off) and names the corrected result
+in the project's pipeline, so the BVH and FBX are the app's corrected export.
+
+The correction solves on the body the exports describe. With `include_shape`
+off, the project's derived export representation is made neutral first, so the
+neutral shape's feet are grounded; with it on, the estimated performer shape's.
+In the motion file, `world` carries the corrected legs and root translation with
+ExMR's root orientation and native flat-hand fingers. `camera` carries the same
+corrected motion through ExMR's per-frame camera: its in-camera root
+orientation, its in-camera translation moved by the correction's root shift
+rotated into the camera, and the corrected, globally smoothed pose (without the
+correction, `camera` is ExMR's unsmoothed in-camera prediction). The result
+details add `correction`: the result name, the floor height in metres (world
+Y), the app's warning text (empty when it has none), its options, method and
+which shape it solved on. A warning names a contact it could not resolve;
+inspect those frames.
 
 `LF_MotionToVideo` accepts `motion_file`, `body` (`female`, `neutral`, or `male`;
 default `female`), `betas` (comma-separated render-shape coefficients; default
@@ -136,6 +168,8 @@ World coordinates retain ExMR's gravity-aligned reconstruction frame:
   the posed pelvis is offset by the shape-dependent rest pelvis.
 - RGB MoCap calls ExMR with `normalize_world=False` and `snap_to_ground=False`.
   It does not rotate the first pose to face +Z or re-center its pelvis at X=Z=0.
+- With Motion Correction the floor is the correction's, reported as
+  `correction.floor`; standing feet rest on it rather than on the lowest vertex.
 
 These conventions come from the pinned application's `mocap/exmr_backend.py`
 and `third_party/ExMR/exmr/model/{exmr,global_traj}.py`, especially

@@ -27,6 +27,7 @@ BLOCKS = {block.id: block for block in (
 MOTION_OPTIONS = {
     "engine": "ExMR", "static_camera": False, "smoothing": False,
     "gpu_index": "2", "include_shape": True, "stage_timeout_seconds": "123.5",
+    "motion_correction": False,
 }
 EXPECTED_FRAMING = (
     "The camera sits on a locked tripod and keeps exactly the same framing for "

@@ -26,6 +26,7 @@ class LF_VideoToMotion:
                 "include_shape": (Input.BOOLEAN, {"default": False, "tooltip": "Include inferred body shape in JSON and BVH/FBX. Off uses a neutral export skeleton and pose/root/hand motion only."}),
                 "ui_widget": (Input.LF_CODE, {"default": ""}),
                 "stage_timeout_seconds": (Input.FLOAT, {"default": 0.0, "min": 0.0, "max": 86400.0, "step": 1.0, "tooltip": "Time limit for each worker stage. 0 derives limits from clip duration; a positive value overrides every stage. Timeout stops the worker and its children, retains logs, and does not retry."}),
+                "motion_correction": (Input.BOOLEAN, {"default": True, "tooltip": "Run RGB MoCap's Motion Correction after the engine, with the app's defaults: one flat floor found automatically, and each foot held on it while it stands, so a foot on tiptoe keeps its toes on the floor. The JSON, BVH and FBX carry the corrected motion. Off returns the engine's motion as it came."}),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -42,18 +43,19 @@ class LF_VideoToMotion:
         "RGB MoCap FBX motion export under ComfyUI output.",
         "RGB MoCap model project containing inference artifacts and stage diagnostics.",
     )
-    DESCRIPTION = "Capture ExMR body, root and finger motion from a local video using isolated RGB MoCap workers. Requires RGB_MOCAP_PATH and installed registered models; never installs or downloads dependencies."
+    DESCRIPTION = "Capture ExMR body, root and finger motion from a local video using isolated RGB MoCap workers, then ground it with the app's Motion Correction (on by default). Requires RGB_MOCAP_PATH and installed registered models; never installs or downloads dependencies."
 
     def on_exec(self, video_path, engine="ExMR", static_camera=True, smoothing=True,
                 gpu_index=0, include_shape=False, ui_widget=None, node_id=None,
-                stage_timeout_seconds=0.0):
+                stage_timeout_seconds=0.0, motion_correction=True):
         def progress(event):
             if event.get("type") == "progress":
                 safe_send_sync("videotomotion", {"value": event.get("message", "Processing motion...")}, node_id)
 
         output = run_video_to_motion(video_path, folder_paths.get_output_directory(), engine=engine,
             static_camera=static_camera, smoothing=smoothing, gpu_index=gpu_index,
-            include_shape=include_shape, progress=progress, stage_timeout_seconds=stage_timeout_seconds)
+            include_shape=include_shape, progress=progress, stage_timeout_seconds=stage_timeout_seconds,
+            motion_correction=motion_correction)
         root = Path(folder_paths.get_output_directory()).resolve()
         files = [Path(output[key]).resolve().relative_to(root).as_posix()
                  for key in ("motion_file", "bvh_file", "fbx_file")]

@@ -29,9 +29,11 @@ def test_block_is_registered_and_exposes_upload_and_result_cards():
     ]
     assert cells["include_shape"].shape == "toggle"
     assert cells["include_shape"].props["lfValue"] is False
+    assert cells["motion_correction"].shape == "toggle"
+    assert cells["motion_correction"].props["lfValue"] is True
     assert cells["stage_timeout_seconds"].props["lfValue"] == "0"
     assert cells["stage_timeout_seconds"].props["lfHtmlAttributes"]["max"] == 86400
-    for name in ("engine", "include_shape", "stage_timeout_seconds"):
+    for name in ("engine", "include_shape", "motion_correction", "stage_timeout_seconds"):
         assert cells[name].node_id == "extract_motion"
         assert cells[name].required is False
 
@@ -43,7 +45,7 @@ def test_download_is_portable_and_shape_is_independent():
     assert prompt["extract_motion"]["inputs"] == {
         "video_path": "video.mp4", "engine": "ExMR", "static_camera": True,
         "smoothing": True, "gpu_index": 0, "include_shape": False,
-        "stage_timeout_seconds": 0.0,
+        "stage_timeout_seconds": 0.0, "motion_correction": True,
     }
     assert prompt["render_motion"]["inputs"] == {
         "motion_file": ["extract_motion", 0], "body": "neutral", "betas": "0,1",
@@ -71,12 +73,13 @@ def test_all_capture_options_are_forwarded(configure_name, tmp_path, monkeypatch
     getattr(WORKFLOW, configure_name)(prompt, {
         "video_path": [video], "engine": "ExMR", "static_camera": False,
         "smoothing": False, "gpu_index": "2", "include_shape": True,
-        "stage_timeout_seconds": "17.5",
+        "stage_timeout_seconds": "17.5", "motion_correction": False,
     })
     assert prompt["extract_motion"]["inputs"] == {
         "video_path": str(video) if configure_name == "configure_prompt" else "video.mp4",
         "engine": "ExMR", "static_camera": False, "smoothing": False,
         "gpu_index": 2, "include_shape": True, "stage_timeout_seconds": 17.5,
+        "motion_correction": False,
     }
     assert prompt["render_motion"]["inputs"]["motion_file"] == ["extract_motion", 0]
 
@@ -101,6 +104,7 @@ def test_multiple_uploads_are_rejected(monkeypatch):
     ({"width": "0"}, "width"), ({"width": "321"}, "width"),
     ({"height": "561"}, "height"), ({"gpu_index": True}, "gpu_index"),
     ({"engine": "GVHMR"}, "engine"), ({"include_shape": "true"}, "include_shape"),
+    ({"motion_correction": "true"}, "motion_correction"),
     ({"stage_timeout_seconds": True}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": -1}, "stage_timeout_seconds"),
     ({"stage_timeout_seconds": "nan"}, "stage_timeout_seconds"),
