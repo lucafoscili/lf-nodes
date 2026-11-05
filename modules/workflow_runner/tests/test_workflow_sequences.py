@@ -280,7 +280,7 @@ def test_sequence_shape_rejects_duplicate_and_out_of_range_declarations() -> Non
     with pytest.raises(ValueError, match="stage ids must be unique"):
         _sequence(stages=(duplicate_stage, duplicate_stage))
 
-    with pytest.raises(ValueError, match="between 2 and 8"):
+    with pytest.raises(ValueError, match="between 2 and 64"):
         _sequence(stages=(duplicate_stage,))
 
     with pytest.raises(ValueError, match="final output ids must be unique"):
@@ -871,6 +871,7 @@ def test_sequence_readiness_checks_a_fixed_optional_block_recipe(
     assert readiness_calls["optional_restage"]["inputs"] == {
         "guidance": "3.5",
         "profile": "quality",
+        "character": "pending-orchestra-artifact",
     }
     assert readiness_calls["optional_restage"]["replaceable_input_ids"] == set()
 

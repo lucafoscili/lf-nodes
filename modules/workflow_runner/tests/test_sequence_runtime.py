@@ -881,7 +881,7 @@ async def test_child_failure_stops_before_the_next_stage() -> None:
     assert calls == ["first_workflow"]
     parent = await job_store.get_job(parent_id)
     assert parent is not None and parent.status == job_store.JobStatus.FAILED
-    assert parent.error == "model exploded"
+    assert parent.error == "stage 'first' ended with failed: model exploded"
 
 
 async def test_nonfinal_child_failure_preserves_diagnostics_without_partial_outputs() -> None:
@@ -939,7 +939,7 @@ async def test_nonfinal_child_failure_preserves_diagnostics_without_partial_outp
     parent = await job_store.get_job(parent_id)
     child = await job_store.get_job("partial-failure-child")
     assert parent is not None and child is not None
-    assert parent.error == "model exploded"
+    assert parent.error == "stage 'first' ended with failed: model exploded"
     assert parent.result["http_status"] == 500
     assert parent.result["body"]["status"] == "error"
     payload = parent.result["body"]["payload"]
@@ -2139,3 +2139,37 @@ def test_history_filter_helpers_distinguish_parent_child_and_ordinary_jobs() -> 
     assert not sequence_runtime.is_sequence_parent_job(child)
     assert not sequence_runtime.is_sequence_child_job(ordinary)
     assert not sequence_runtime.is_sequence_child_job(spoof)
+
+
+async def test_later_child_failure_names_stage_and_retains_prior_results() -> None:
+    definition = _sequence(
+        _stage("pose_1_render", "render"),
+        _stage("pose_2_capture", "capture"),
+        _stage("never", "preview"),
+    )
+    calls = []
+
+    async def run_child(payload, *, owner_id):
+        calls.append(payload)
+        run_id = f"retained-child-{len(calls)}"
+        await _create_bound_child(payload, run_id, owner_id)
+        await job_store.set_job_status(
+            run_id,
+            job_store.JobStatus.SUCCEEDED if len(calls) == 1 else job_store.JobStatus.FAILED,
+            result=_result(payload["workflowId"]),
+            error=None if len(calls) == 1 else "capture failed",
+        )
+        return {"run_id": run_id}
+
+    parent_id = "lf-sequence:retain-earlier"
+    await sequence_runtime.create_sequence_execution(
+        definition, {}, parent_run_id=parent_id, workflow_resolver=_empty_block,
+    )
+    terminal = await sequence_runtime.drive_sequence_execution(
+        parent_id, child_runner=run_child, poll_interval=0,
+    )
+    assert terminal["error"] == "stage 'pose_2_capture' ended with failed: capture failed"
+    assert len(calls) == 2
+    earlier = await job_store.get_job("retained-child-1")
+    assert earlier.status == job_store.JobStatus.SUCCEEDED
+    assert earlier.result == _result("render")

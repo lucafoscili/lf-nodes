@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,7 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
     # Imported per run: catalogue declarations load without the node helper package.
     from ...utils.helpers.motion.render import parse_betas
 
+    engine = choice(inputs, "engine", "ExMR", ("ExMR",))
     body = choice(inputs, "body", "female", ("female", "neutral", "male"))
     betas = inputs.get("betas", "0.5,-1.5")
     try:
@@ -26,9 +28,22 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
         raise InputValidationError("betas") from error
     static_camera = inputs.get("static_camera", True)
     smoothing = inputs.get("smoothing", True)
-    for name, value in (("static_camera", static_camera), ("smoothing", smoothing)):
+    include_shape = inputs.get("include_shape", False)
+    for name, value in (("static_camera", static_camera), ("smoothing", smoothing),
+                        ("include_shape", include_shape)):
         if not isinstance(value, bool):
             raise InputValidationError(name)
+    timeout = inputs.get("stage_timeout_seconds", 0.0)
+    if timeout in (None, ""):
+        timeout = 0.0
+    if isinstance(timeout, bool):
+        raise InputValidationError("stage_timeout_seconds")
+    try:
+        timeout = float(timeout)
+    except (TypeError, ValueError) as error:
+        raise InputValidationError("stage_timeout_seconds") from error
+    if not math.isfinite(timeout) or not 0.0 <= timeout <= 86400.0:
+        raise InputValidationError("stage_timeout_seconds")
     gpu_index = integer(inputs, "gpu_index", 0, minimum=0, maximum=31)
     width = integer(inputs, "width", 320, minimum=64, maximum=2048)
     height = integer(inputs, "height", 560, minimum=64, maximum=2048)
@@ -42,7 +57,9 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
             raise InputValidationError("video_path")
         video_path = paths[0]
     prompt["extract_motion"]["inputs"].update(
-        video_path=video_path, static_camera=static_camera, smoothing=smoothing, gpu_index=gpu_index,
+        video_path=video_path, engine=engine, static_camera=static_camera,
+        smoothing=smoothing, gpu_index=gpu_index, include_shape=include_shape,
+        stage_timeout_seconds=timeout,
     )
     prompt["render_motion"]["inputs"].update(
         body=body, betas=betas, width=width, height=height, source_video=video_path,
@@ -99,6 +116,12 @@ WORKFLOW = WorkflowNode(
         _number("width", "render_motion", "Render width", 320, 64, 2048),
         _number("height", "render_motion", "Render height", 560, 64, 2048),
         WorkflowCell(
+            id="engine", node_id="extract_motion", shape="select", required=False,
+            description="Installed motion extraction engine.",
+            props={"lfValue": "ExMR", "lfTextfieldProps": {"lfLabel": "Capture engine"},
+                   "lfDataset": {"nodes": [{"id": "ExMR", "value": "ExMR", "workflowValue": "ExMR"}]}},
+        ),
+        WorkflowCell(
             id="static_camera", node_id="extract_motion", shape="toggle", required=False,
             description="Enable when the source camera is fixed.",
             props={"lfLabel": "Static camera", "lfValue": True},
@@ -109,6 +132,12 @@ WORKFLOW = WorkflowNode(
             props={"lfLabel": "Smooth motion", "lfValue": True},
         ),
         _number("gpu_index", "extract_motion", "Extraction GPU", 0, 0, 31),
+        WorkflowCell(
+            id="include_shape", node_id="extract_motion", shape="toggle", required=False,
+            description="Include inferred performer shape in motion JSON and BVH/FBX exports.",
+            props={"lfLabel": "Include performer shape", "lfValue": False},
+        ),
+        _number("stage_timeout_seconds", "extract_motion", "Stage timeout (seconds; 0 = automatic)", 0, 0, 86400),
     ),
     outputs=(
         WorkflowCell(

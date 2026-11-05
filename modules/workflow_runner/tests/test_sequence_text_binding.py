@@ -134,10 +134,17 @@ def test_text_binding_cannot_read_undeclared_output_or_target_nontext_input():
 
 @pytest.mark.parametrize("payload_key", ["string", "value"])
 @pytest.mark.anyio
-async def test_durable_text_handoff_preserves_verbatim_named_source(payload_key):
+@pytest.mark.parametrize("suffix", ["", "\n\nFixed camera.\t  "])
+async def test_durable_text_handoff_preserves_verbatim_named_source(payload_key, suffix):
     writer, renderer, sequence = _declarations(source_stage_id="write")
     sequence = replace(sequence, stages=(
         sequence.stages[0], WorkflowSequenceStage("middle", "writer"), sequence.stages[1],
+    ))
+    sequence = replace(sequence, stages=(
+        *sequence.stages[:-1],
+        replace(sequence.stages[-1], bindings=(
+            replace(sequence.stages[-1].bindings[0], text_suffix=suffix),
+        )),
     ))
     registry = _registry(writer, renderer)
     registry.register(sequence)
@@ -168,8 +175,14 @@ async def test_durable_text_handoff_preserves_verbatim_named_source(payload_key)
         parent_id, child_runner=run_child, poll_interval=0,
     )
     assert terminal["status"] == "succeeded", terminal
-    assert calls[2]["inputs"] == {"prompt": text}
+    assert calls[2]["inputs"] == {"prompt": text + suffix}
     assert "Pending text" not in str(calls)
+
+
+@pytest.mark.parametrize("suffix", [17, None, "\x00", "x" * 100_001], ids=["number", "none", "nul", "overlong"])
+def test_text_suffix_rejects_invalid_literal_values(suffix):
+    with pytest.raises((TypeError, ValueError), match="text_suffix"):
+        WorkflowSequenceTextBinding("prompt", "text", text_suffix=suffix)
 
 
 @pytest.mark.parametrize(("items", "message"), [

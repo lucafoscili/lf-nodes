@@ -343,11 +343,12 @@ class WorkflowSequenceArtifactBinding:
 
 @dataclass(frozen=True, slots=True)
 class WorkflowSequenceTextBinding:
-    """Feed one durable text output from an earlier block into a text input."""
+    """Feed durable text into a text input, followed by the exact text_suffix."""
 
     target_input_id: str
     output_id: str
     source_stage_id: str | None = None
+    text_suffix: str = ""
 
     def __post_init__(self) -> None:
         for name in ("target_input_id", "output_id", "source_stage_id"):
@@ -358,6 +359,10 @@ class WorkflowSequenceTextBinding:
                 self, name,
                 _normalized_identifier(value, label=f"sequence text {name}"),
             )
+        if not isinstance(self.text_suffix, str):
+            raise TypeError("sequence text_suffix must be a string")
+        if len(self.text_suffix) > 100_000 or "\x00" in self.text_suffix:
+            raise ValueError("sequence text_suffix must be bounded and contain no NUL")
 
 
 WorkflowSequenceBinding = (
@@ -370,13 +375,16 @@ WorkflowSequenceBinding = (
 
 @dataclass(frozen=True, slots=True)
 class WorkflowSequenceStage:
-    """One ordinary workflow block in a linear sequence."""
+    """One ordinary block; expose_in_history keeps its result in normal history."""
 
     id: str
     workflow_id: str
     bindings: tuple[WorkflowSequenceBinding, ...] = ()
+    expose_in_history: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.expose_in_history) is not bool:
+            raise TypeError("sequence stage expose_in_history must be a boolean")
         object.__setattr__(
             self,
             "id",
@@ -421,6 +429,10 @@ class WorkflowSequenceNode:
     A sequence deliberately owns no prompt graph, model declarations,
     configuration callback, or download callback. Each
     stage keeps those responsibilities in its referenced workflow block.
+
+    ``stages`` declares the catalogue template. An optional ``stages_factory``
+    expands normalized public inputs into ordinary stages before validation
+    and persistence; recovery uses only that frozen expanded plan.
     """
 
     id: str
@@ -433,8 +445,11 @@ class WorkflowSequenceNode:
     origin: str = "custom"
     collection: str = "Custom"
     card: WorkflowCardPresentation | None = None
+    stages_factory: Callable[[Mapping[str, Any]], tuple[WorkflowSequenceStage, ...]] | None = None
 
     def __post_init__(self) -> None:
+        if self.stages_factory is not None and not callable(self.stages_factory):
+            raise TypeError("sequence stages_factory must be callable or None")
         if self.card is not None and not isinstance(self.card, WorkflowCardPresentation):
             raise TypeError("card must be a WorkflowCardPresentation or None")
         object.__setattr__(
@@ -485,8 +500,8 @@ class WorkflowSequenceNode:
         if isinstance(self.stages, (str, bytes)):
             raise TypeError("sequence stages must be a sequence")
         stages = tuple(self.stages)
-        if not 2 <= len(stages) <= 8:
-            raise ValueError("a workflow sequence must contain between 2 and 8 stages")
+        if not 2 <= len(stages) <= 64:
+            raise ValueError("a workflow sequence must contain between 2 and 64 stages")
         if not all(isinstance(stage, WorkflowSequenceStage) for stage in stages):
             raise TypeError("sequence stages must contain WorkflowSequenceStage values")
         stage_ids = [stage.id for stage in stages]
@@ -894,6 +909,8 @@ class WorkflowRegistry:
         *,
         scanner: WorkflowReadinessScanner,
     ) -> Dict[str, Any]:
+        from .sequence_runtime import sequence_binding_preflight_inputs
+
         blocking_issues: list[dict[str, str]] = []
         warning_issues: list[dict[str, str]] = []
         public_defaults = self._sequence_public_defaults(sequence)
@@ -917,6 +934,7 @@ class WorkflowRegistry:
                     and binding.public_input_id in public_defaults
                 }
             )
+            configured_stage_inputs.update(sequence_binding_preflight_inputs(stage.bindings))
             replaceable_stage_input_ids = {
                 binding.target_input_id
                 for binding in stage.bindings
@@ -963,11 +981,13 @@ class WorkflowRegistry:
 
         status = (
             READINESS_SETUP_REQUIRED
-            if blocking_issues
+            if blocking_issues and sequence.stages_factory is None
             else READINESS_WARNING
-            if warning_issues
+            if blocking_issues or warning_issues
             else READINESS_READY
         )
+        # A dynamic template includes branches the submitted inputs may omit.
+        # Report their setup needs here; execution preflights the expanded plan.
         issues = blocking_issues + warning_issues
         if len(issues) > MAX_READINESS_ISSUES:
             omitted = len(issues) - (MAX_READINESS_ISSUES - 1)

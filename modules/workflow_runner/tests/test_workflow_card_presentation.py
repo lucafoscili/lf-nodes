@@ -214,6 +214,7 @@ def test_card_field_appends_to_every_existing_declaration_slot() -> None:
         "origin",
         "collection",
         "card",
+        "stages_factory",
     ]
     configure = lambda _prompt, _inputs: None
     block = WorkflowNode(

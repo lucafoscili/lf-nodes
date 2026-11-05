@@ -586,7 +586,7 @@ async def run_workflow(
     ):
         raise SubmissionConflictError(
             "submission_id_conflict",
-            "the lfseq submission namespace is reserved for Runner orchestration",
+            "the sequence child submission namespace is reserved for Runner orchestration",
         )
     caller_supplied_submission_id = (
         payload.get("submissionId") is not None

@@ -161,8 +161,9 @@ def test_sequence_preflight_uses_only_a_temporary_deferred_text_value(run_servic
     assert "prompt" not in plan["stages"][1]["defaults"]
 
 
+@pytest.mark.parametrize("prefix", ["lfseq", "lfstage"])
 async def test_external_call_cannot_claim_private_sequence_child_namespace(
-    run_service_module,
+    run_service_module, prefix,
 ):
     with pytest.raises(
         lifecycle.SubmissionConflictError,
@@ -171,7 +172,7 @@ async def test_external_call_cannot_claim_private_sequence_child_namespace(
         await run_service_module.run_workflow(
             {
                 "workflowId": "remove_bg",
-                "submissionId": "lfseq:0123456789abcdef0123456789abcdef:00",
+                "submissionId": f"{prefix}:0123456789abcdef0123456789abcdef:00",
                 "inputs": {},
             }
         )

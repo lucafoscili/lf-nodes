@@ -27,9 +27,9 @@ from .remix_inputs import project_public_output_artifacts
 
 SEQUENCE_PARENT_RUN_PREFIX = "lf-sequence:"
 _ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
-_CHILD_SUBMISSION_PATTERN = re.compile(r"^lfseq:[0-9a-f]{32}:0[0-7]$")
+_CHILD_SUBMISSION_PATTERN = re.compile(r"^lf(?:seq|stage):[0-9a-f]{32}:(?:[0-5][0-9]|6[0-3])$")
 _MIN_STAGES = 2
-_MAX_STAGES = 8
+_MAX_STAGES = 64
 _MAX_BINDINGS_PER_STAGE = 128
 _TERMINAL_STATUSES = frozenset({"succeeded", "failed", "cancelled", "timeout"})
 _ACTIVE_CHILD_STATUSES = frozenset({"pending", "running"})
@@ -67,7 +67,7 @@ def is_sequence_parent_job(job: Any) -> bool:
 
 
 def is_sequence_child_submission_id(submission_id: Any) -> bool:
-    """Identify private child runs so list/SSE projections can hide plumbing."""
+    """Reserve both hidden and visible stage submissions for the runtime."""
 
     return (
         isinstance(submission_id, str)
@@ -76,24 +76,32 @@ def is_sequence_child_submission_id(submission_id: Any) -> bool:
 
 
 def is_sequence_child_job(job: Any) -> bool:
+    """Identify private stage plumbing omitted from ordinary history and SSE."""
     submission_id = (
         job.get("submission_id")
         if isinstance(job, Mapping)
         else getattr(job, "submission_id", None)
     )
-    return is_sequence_child_submission_id(submission_id)
+    return (
+        isinstance(submission_id, str)
+        and submission_id.startswith("lfseq:")
+        and is_sequence_child_submission_id(submission_id)
+    )
 
 
 def make_sequence_parent_run_id() -> str:
     return f"{SEQUENCE_PARENT_RUN_PREFIX}{uuid.uuid4().hex}"
 
 
-def child_submission_id(parent_run_id: str, stage_index: int, stage_id: str) -> str:
+def child_submission_id(
+    parent_run_id: str, stage_index: int, stage_id: str, *, expose_in_history: bool = False,
+) -> str:
     """Return one portable stable id derived solely from parent and stage."""
 
     authority = f"{parent_run_id}\0{stage_index}\0{stage_id}".encode("utf-8")
     digest = hashlib.sha256(authority).hexdigest()
-    return f"lfseq:{digest[:32]}:{stage_index:02d}"
+    prefix = "lfstage" if expose_in_history else "lfseq"
+    return f"{prefix}:{digest[:32]}:{stage_index:02d}"
 
 
 def _read(value: Any, name: str, default: Any = None) -> Any:
@@ -297,6 +305,25 @@ def normalize_sequence_definition(
                 "sequence is missing required public input(s): "
                 + ", ".join(missing_required)
             )
+    resolve_workflow = workflow_resolver or _default_workflow_resolver
+    stages_factory = _read(definition, "stages_factory")
+    if stages_factory is not None:
+        from dataclasses import replace
+        from .registry import WorkflowRegistry, WorkflowSequenceNode
+
+        if not isinstance(definition, WorkflowSequenceNode):
+            raise TypeError("dynamic stages require a WorkflowSequenceNode declaration")
+        # Only the expanded ordinary plan is persisted; recovery never invokes
+        # authoring code or reconstructs the factory from user inputs.
+        definition = replace(
+            definition,
+            stages=stages_factory(deepcopy(normalized_inputs)),
+            stages_factory=None,
+        )
+        WorkflowRegistry._validate_sequence(definition, {
+            stage.workflow_id: resolve_workflow(stage.workflow_id)
+            for stage in definition.stages
+        })
     raw_stages = _read(definition, "stages")
     if isinstance(raw_stages, (str, bytes)):
         raise TypeError("sequence stages must be a sequence")
@@ -316,7 +343,6 @@ def normalize_sequence_definition(
         raise ValueError("sequence stage ids must be unique")
 
     resolve_output = output_node_resolver or _default_output_node_resolver
-    resolve_workflow = workflow_resolver or _default_workflow_resolver
     normalized_stages: list[dict[str, Any]] = []
     for stage_index, stage in enumerate(stages):
         stage_id = declared_stage_ids[stage_index]
@@ -424,6 +450,8 @@ def normalize_sequence_definition(
                     raise ValueError(f"{kind} output resolver returned an invalid node id")
                 normalized["output_id"] = output_id
                 normalized["output_node_id"] = output_node_id
+                if kind == "text" and _read(binding, "text_suffix", ""):
+                    normalized["text_suffix"] = _read(binding, "text_suffix")
             normalized_bindings.append(normalized)
 
         required_unbound_uploads = [
@@ -452,6 +480,8 @@ def normalize_sequence_definition(
                 "error": None,
             }
         )
+        if _read(stage, "expose_in_history", False):
+            normalized_stages[-1]["expose_in_history"] = True
 
     raw_final_output_ids = _read(definition, "final_output_ids", None)
     if raw_final_output_ids is None:
@@ -483,6 +513,7 @@ def normalize_sequence_definition(
                 "workflow_id": stage["workflow_id"],
                 "defaults": stage["defaults"],
                 "bindings": stage["bindings"],
+                **({"expose_in_history": True} if stage.get("expose_in_history") else {}),
             }
             for stage in normalized_stages
         ],
@@ -1000,10 +1031,21 @@ def sequence_stage_preflight_inputs(
     """Exercise portable graph configuration without submitting a placeholder."""
 
     inputs = sequence_stage_declared_inputs(state, stage_index)
-    for binding in state["stages"][stage_index]["bindings"]:
-        if binding["kind"] == "text":
-            inputs[binding["target_input_id"]] = "Pending text from an earlier orchestra stage."
+    inputs.update(sequence_binding_preflight_inputs(state["stages"][stage_index]["bindings"]))
     return inputs
+
+
+def sequence_binding_preflight_inputs(bindings: Any) -> dict[str, str]:
+    """Represent declared earlier outputs for portable configuration and readiness."""
+
+    placeholders = {
+        "text": "Pending text from an earlier orchestra stage.",
+        "artifact": "pending-orchestra-artifact",
+    }
+    return {
+        _read(binding, "target_input_id"): placeholders[_binding_kind(binding)]
+        for binding in bindings if _binding_kind(binding) in placeholders
+    }
 
 
 async def _stage_inputs(
@@ -1064,7 +1106,7 @@ async def _stage_inputs(
         if kind == "text":
             inputs[target] = _text_output(
                 source_job.result, binding["output_node_id"], binding["output_id"],
-            )
+            ) + binding.get("text_suffix", "")
         else:
             inputs[target] = _artifact_reference(
                 source_run_id,
@@ -1214,7 +1256,8 @@ async def advance_sequence_execution(
 
         if stage["status"] == "pending":
             stage["child_submission_id"] = child_submission_id(
-                parent_run_id, stage_index, stage["id"]
+                parent_run_id, stage_index, stage["id"],
+                expose_in_history=stage.get("expose_in_history", False),
             )
             assert stage_inputs is not None
             stage["child_request_fingerprint"] = _child_request_fingerprint(
@@ -1389,9 +1432,10 @@ async def advance_sequence_execution(
             state["cancel_requested"] = False
             state["cancel_dispatched"] = False
         if child_status != "succeeded":
-            error = getattr(child, "error", None) or (
-                f"stage '{stage['id']}' ended with {child_status}"
-            )
+            child_error = getattr(child, "error", None)
+            error = f"stage '{stage['id']}' ended with {child_status}"
+            if child_error:
+                error += f": {child_error}"
             record = await _save_and_project_terminal(
                 record,
                 state,

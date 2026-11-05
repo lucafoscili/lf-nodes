@@ -7,7 +7,8 @@
       "static_camera": true,
       "smoothing": true,
       "gpu_index": 0,
-      "include_shape": false
+      "include_shape": false,
+      "stage_timeout_seconds": 0.0
     },
     "_meta": {"title": "Extract motion from one video"}
   },

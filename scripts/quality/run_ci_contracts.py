@@ -134,12 +134,16 @@ ISOLATED_BEHAVIOR_TESTS: tuple[tuple[str, ...], ...] = (
         "modules/workflow_runner/tests/test_minimax_h3_hd.py",
     ),
     ("modules/workflow_runner/tests/test_minimax_h3_prompt_video.py",),
+    ("modules/workflow_runner/tests/test_h3_pose_shoot_orchestra.py",),
+    ("modules/workflow_runner/tests/test_caption_image_vision_workflow.py",),
+    ("modules/workflow_runner/tests/test_video_to_mocap_workflow.py",),
     (
         "modules/workflow_runner/tests/test_h3_video_orchestra.py",
         "modules/workflow_runner/tests/test_orchestration_workflows.py",
     ),
     (
         "modules/workflow_runner/tests/test_sequence_text_binding.py",
+        "modules/workflow_runner/tests/test_sequence_dynamic_stages.py",
         "modules/workflow_runner/tests/test_sequence_runtime.py",
         "modules/workflow_runner/tests/test_sequence_store_sqlite.py",
         "modules/workflow_runner/tests/test_workflow_sequences.py",
