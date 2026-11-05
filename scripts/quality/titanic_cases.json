@@ -2,7 +2,7 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "fc21c5638accfb2416ca50f7bc6e3b6c0a9049a9610a0d5986c75d6ba9444850",
+    "expectedSha256": "72ac1a945bc08ae052353154e59f929b67d846740f26e8df637c523b552b307e",
     "expectedNodeCount": 436,
     "expectedLinkCount": 576
   },
@@ -680,7 +680,7 @@
       }
     }
   ],
-  "dormantNodeIds": [13, 278, 380, 429, 438, 439, 440, 453, 478, 492, 495, 496, 537, 538, 671, 672, 673],
+  "dormantNodeIds": [13, 278, 380, 429, 438, 439, 440, 453, 478, 492, 495, 496, 537, 538],
   "coverageExemptions": [
     {"type": "LF_ONNXSelector", "nodeIds": [492], "reason": "dormant selector has no consumer in a coverage target branch; model fixture wiring is deferred"},
     {"type": "LF_DetectRegions", "nodeIds": [537], "reason": "dormant detection branch has no coverage target consumer; model fixture wiring is deferred"},
@@ -688,12 +688,12 @@
     {"type": "LF_StringTemplate", "nodeIds": [453], "reason": "dormant template has no coverage target consumer; connected fixture coverage is deferred"},
     {"type": "LF_LoadAndEditImages", "nodeIds": [429], "reason": "dormant interactive loader has no coverage target consumer; a separate editing fixture is required"},
     {"type": "LF_ControlPanel", "nodeIds": [13], "reason": "dormant frontend control has no execution target branch; widget interaction coverage is deferred"},
-    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"},
-    {"type": "LF_FaceAlign", "nodeIds": [671], "reason": "dormant face branch: the public stock example has no detectable face; a licensed stock face fixture is deferred"},
-    {"type": "LF_FaceIdentity", "nodeIds": [672], "reason": "dormant face branch: the public stock example has no detectable face; a licensed stock face fixture is deferred"}
+    {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"}
   ],
   "disabledNodes": [
     {"id": 669, "type": "LF_VideoToMotion", "reason": "pinned source video and configured isolated RGB MoCap runtime required; inventory only"},
+    {"id": 671, "type": "LF_FaceAlign", "reason": "public stock face fixture required: the stock example has no detectable face; inventory only"},
+    {"id": 672, "type": "LF_FaceIdentity", "reason": "public stock face fixture required: the stock example has no detectable face; inventory only"},
     {"id": 670, "type": "LF_MotionToVideo", "reason": "pinned motion capture and registered licensed SMPL-X model required; inventory only"},
     {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},
     {"id": 574, "type": "LF_UploadImages", "reason": "pinned upload fixture required"},

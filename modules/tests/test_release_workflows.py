@@ -115,12 +115,13 @@ def test_titanic_face_icon_and_motion_inventory_has_explicit_execution_boundarie
     assert upstream(672, "image") == [671, 0]
     assert upstream(672, "metadata") == [671, 2]
     assert upstream(673, "json_input") == [672, 0]
-    # The stock example has no detectable face: the branch stays dormant until a face fixture exists.
+    # The stock example has no detectable face: the branch stays disabled until a face fixture exists.
     assert "model.face-align-identity" not in cases
-    assert {671, 672, 673} <= set(manifest["dormantNodeIds"])
-    exempted = {item["type"]: item["nodeIds"] for item in manifest["coverageExemptions"]}
-    assert exempted["LF_FaceAlign"] == [671]
-    assert exempted["LF_FaceIdentity"] == [672]
+    for identifier, kind in ((671, "LF_FaceAlign"), (672, "LF_FaceIdentity")):
+        assert nodes[identifier]["mode"] == 2
+        assert disabled[identifier]["type"] == kind
+    assert nodes[673]["mode"] == 2  # its viewer; LF_DisplayJSON is covered elsewhere
+    assert "face fixture" in disabled[671]["reason"]
     assert not ({671, 672, 673} & {target for case in cases.values() for target in case["targets"]})
 
     assert nodes[674]["type"] == "LF_IconFramer"
