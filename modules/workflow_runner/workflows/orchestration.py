@@ -733,12 +733,12 @@ minimax_h3_video_orchestra = WorkflowOrchestraNode(
 
 # This paragraph is appended AFTER writing/review, never entrusted to the writer.
 POSE_SHOOT_FRAMING = (
-    "The camera sits on a tripod that never moves, zooms or pushes in. "
-    "A full-length shot size for the whole clip: her bare feet stay a hand's width "
-    "above the bottom edge of the frame and her head stays clear of the top, even "
-    "when she raises her arms overhead, and her whole figure stays the same size "
-    "in the frame from the first frame to the last; she never steps toward the "
-    "edges of the frame."
+    "The camera sits on a locked tripod and keeps exactly the same framing for "
+    "the whole clip, whatever she does: it never moves, pans, tilts, zooms or "
+    "pushes in. A full-length shot size with room to spare: her feet a hand's "
+    "width above the bottom edge of the frame, and enough space above her head "
+    "for her full reach, so her hands always stay inside the frame. Her whole "
+    "figure stays the same size in the frame from the first frame to the last."
 )
 _POSE_DESCRIPTION = (
     "Describe only the person's pose: body orientation, balance, weight-bearing "

@@ -29,12 +29,12 @@ MOTION_OPTIONS = {
     "gpu_index": "2", "include_shape": True, "stage_timeout_seconds": "123.5",
 }
 EXPECTED_FRAMING = (
-    "The camera sits on a tripod that never moves, zooms or pushes in. "
-    "A full-length shot size for the whole clip: her bare feet stay a hand's width "
-    "above the bottom edge of the frame and her head stays clear of the top, even "
-    "when she raises her arms overhead, and her whole figure stays the same size "
-    "in the frame from the first frame to the last; she never steps toward the "
-    "edges of the frame."
+    "The camera sits on a locked tripod and keeps exactly the same framing for "
+    "the whole clip, whatever she does: it never moves, pans, tilts, zooms or "
+    "pushes in. A full-length shot size with room to spare: her feet a hand's "
+    "width above the bottom edge of the frame, and enough space above her head "
+    "for her full reach, so her hands always stay inside the frame. Her whole "
+    "figure stays the same size in the frame from the first frame to the last."
 )
 
 
@@ -406,3 +406,16 @@ def test_titanic_inventory_covers_expanded_lf_nodes_without_claiming_motion_exec
         assert disabled[name]["id"] == identifier
         assert "inventory only" in disabled[name]["reason"]
         assert next(node for node in fixture["nodes"] if node["id"] == identifier)["mode"] == 2
+
+
+def test_framing_locks_the_camera_and_names_no_movement_of_hers():
+    # H3 reads a movement named in the camera paragraph as an action: "even when
+    # she raises her arms overhead" raised an arm in a contrapposto take.
+    import re
+
+    framing = orchestration.POSE_SHOOT_FRAMING
+    assert "whatever she does" in framing and "full reach" in framing
+    assert not re.search(
+        r"\b(raise[sd]?|lift[s]?|step[s]?|turn[s]?|walk[s]?|arms?|overhead|toward)\b",
+        framing, re.IGNORECASE,
+    )
