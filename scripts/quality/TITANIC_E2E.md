@@ -247,6 +247,26 @@ reject their cached execution. They never download weights. With no running,
 coordinated Comfy service, offline fixture tests establish **inventory** only;
 widget hydration and real SAM3/DINOv3 inference remain separate live checks.
 
+### Generated face alignment and identity
+
+The `model.face-align-identity` case uses two 512 x 512 portraits of the same
+fictional adult, generated with Z-Image-Turbo. The model files, licence,
+prompts, seed and sampler are recorded with the
+[face fixtures](fixtures/titanic-face/README.md). Loader 676 is bound to that
+directory at submission; the shared stock-example loader is unchanged.
+
+```powershell
+corepack yarn test:titanic -- --full --case model.face-align-identity --allow-models --save-payloads
+```
+
+Face Align (671) and Face Identity (672) use the installed `antelopev2`
+InsightFace pack on CPU; the case never downloads it. It requires execution
+events from both nodes, two live alignment Compare entries, their durable
+preview images and a two-image identity receipt with cross-image cosine at
+least 0.65. The threshold admits this fixture, not arbitrary identity claims.
+The achieved gate must be `targeted-branch-execution`. On a warm service,
+follow the cache and queue coordination guidance above.
+
 ### Texture tools
 
 The texture slice reuses the SAM3 case's pinned stock example

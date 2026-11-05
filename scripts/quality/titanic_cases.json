@@ -2,8 +2,8 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "72ac1a945bc08ae052353154e59f929b67d846740f26e8df637c523b552b307e",
-    "expectedNodeCount": 436,
+    "expectedSha256": "33c3fa2c69ded81dbe1a7987c542cfdaac3b5fd16370ac7cd9c8602951334b88",
+    "expectedNodeCount": 437,
     "expectedLinkCount": 576
   },
   "fixtures": [
@@ -22,6 +22,14 @@
     {
       "path": "scripts/quality/fixtures/titanic-sam3/comfy-example.png",
       "expectedSha256": "a8e215ad32a0052fc4190e9c5863428d5ee35cd98b246243842ba8360511b7c4"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-face/portrait-a.png",
+      "expectedSha256": "fab42554dffe1211a07ae9d81c9a041fc2641b4d2066572080494578ae4220c0"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-face/portrait-b.png",
+      "expectedSha256": "e5f659facd7c06ce8e833a884c17613db1d4a768ba217793566367d8e0fea658"
     }
   ],
   "smokeCases": [
@@ -75,6 +83,26 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "model.face-align-identity",
+      "title": "Align two generated portraits and compare their face identity",
+      "resourceClass": "model-cpu",
+      "targets": [673],
+      "timeoutSeconds": 300,
+      "bindings": {"fixtureFaceSourceNodeIds": [676]},
+      "execution": {
+        "requiredNodeIds": [671, 672],
+        "forbiddenCachedNodeIds": [671, 672]
+      },
+      "expect": {
+        "671": {
+          "minimumPreviewCount": 4,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input"
+        },
+        "672": {"faceIdentity": {"minimumCrossCosine": 0.65}}
+      }
+    },
     {
       "id": "cpu.icon-framer",
       "title": "Frame the public stock example central square at master and icon sizes",
@@ -692,8 +720,6 @@
   ],
   "disabledNodes": [
     {"id": 669, "type": "LF_VideoToMotion", "reason": "pinned source video and configured isolated RGB MoCap runtime required; inventory only"},
-    {"id": 671, "type": "LF_FaceAlign", "reason": "public stock face fixture required: the stock example has no detectable face; inventory only"},
-    {"id": 672, "type": "LF_FaceIdentity", "reason": "public stock face fixture required: the stock example has no detectable face; inventory only"},
     {"id": 670, "type": "LF_MotionToVideo", "reason": "pinned motion capture and registered licensed SMPL-X model required; inventory only"},
     {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},
     {"id": 574, "type": "LF_UploadImages", "reason": "pinned upload fixture required"},

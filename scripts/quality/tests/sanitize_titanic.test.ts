@@ -196,6 +196,7 @@ describe('Titanic publication sanitizer', () => {
     }
     expect(manifest.fixtures.map((asset: any) => asset.path.split('/').at(-1))).toEqual([
       'lower.png', 'upper.png', 'synthetic.glb', 'comfy-example.png',
+      'portrait-a.png', 'portrait-b.png',
     ]);
     expect(byId(612).widgets_values_named.source_glb).toBe('titanic-cpu/synthetic.glb');
     expect(byId(614).widgets_values_named.percent).toBe(75);

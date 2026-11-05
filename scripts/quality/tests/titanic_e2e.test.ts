@@ -296,6 +296,72 @@ describe('Titanic E2E pure contracts', () => {
     expect(() => buildCpuFixturePromptBindings({ '667': { class_type: 'LoadImage', inputs: { image } } },
       bindings, '/checkout')).toThrow('PNG fixture binding node 667 drifted');
   });
+  it('binds only the reviewed two-image face fixture without changing serialized inputs', () => {
+    const prompt = { '673': { class_type: 'LF_LoadImages', inputs: {
+      dir: 'scripts/quality/fixtures/titanic-face', load_cap: 2,
+      subdir: false, dummy_output: false, copy_into_input_dir: false,
+    } } };
+    const original = structuredClone(prompt);
+    const bindings = { fixtureFaceSourceNodeIds: [673] };
+    expect(buildCpuFixturePromptBindings(prompt, bindings, 'C:\\checkout\\lf-nodes\\')).toEqual([
+      { nodeId: '673', classType: 'LF_LoadImages', input: 'dir',
+        value: 'C:\\checkout\\lf-nodes/scripts/quality/fixtures/titanic-face' },
+    ]);
+    expect(prompt).toEqual(original);
+    for (const inputs of [{ dir: '/private' }, { load_cap: 1 }, { load_cap: 0 },
+      { subdir: true }, { dummy_output: true }, { copy_into_input_dir: true }]) {
+      expect(() => buildCpuFixturePromptBindings({ '673': {
+        ...prompt['673'], inputs: { ...prompt['673'].inputs, ...inputs },
+      } }, bindings, '/checkout')).toThrow('face fixture binding node 673 drifted');
+    }
+    expect(() => buildCpuFixturePromptBindings({ '673': {
+      ...prompt['673'], class_type: 'LF_LoadFileOnce',
+    } }, bindings, '/checkout')).toThrow('face fixture binding node 673 drifted');
+  });
+  it('requires cross-image face identity from the direct two-image receipt', () => {
+    const identity = {
+      schema: 'lf.face-identity.v1', metric: 'arcface_cosine', reference_index: 0,
+      pairs: [{ reference: 0, image: 0, cosine: 1 }, { reference: 0, image: 1, cosine: 0.72 }],
+      matrix: [[1, 0.72], [0.72, 1]],
+    };
+    const manifestCase = { expect: { '672': { faceIdentity: { minimumCrossCosine: 0.65 } } } } as any;
+    const check = (output: unknown) => validateCaseOutputs(manifestCase, { outputs: { '672': output } });
+    const receipt = (value: unknown) => ({ lf_output: [{ identity: value }] });
+    expect(check(receipt(identity))).toEqual([]);
+    expect(check(receipt({ ...identity, reference_index: 1,
+      pairs: [{ reference: 1, image: 0, cosine: 0.72 }, { reference: 1, image: 1, cosine: 1 }],
+    }))).toEqual([]);
+    expect(check(receipt({ ...identity,
+      pairs: [{ reference: 0, image: 0, cosine: 1 }, { reference: 0, image: 1, cosine: 0.64 }],
+      matrix: [[1, 0.64], [0.64, 1]],
+    }))).toEqual(['node 672 cross-image cosine 0.64 is below 0.65']);
+    for (const invalid of [
+      { ...identity, pairs: [identity.pairs[0]], matrix: [[1]] },
+      { ...identity, pairs: [identity.pairs[0], identity.pairs[0]] },
+      { ...identity, matrix: [[1, 0.72], [0.71, 1]] },
+      { ...identity, matrix: [[1, NaN], [NaN, 1]] },
+      { ...identity, matrix: [[Infinity, 0.72], [0.72, 1]] },
+      { ...identity, matrix: [[1, 0.72, 0.72], [0.72, 1, 0.72]] },
+      { ...identity, pairs: [{ ...identity.pairs[0] }, { ...identity.pairs[1], cosine: 1 }] },
+      { ...identity, schema: 'unrelated' },
+      { ...identity, metric: 'unrelated' },
+    ]) {
+      expect(check(receipt(invalid))).toEqual([
+        'node 672 must expose one face identity receipt with two image pairs and a finite symmetric 2x2 cosine matrix',
+      ]);
+    }
+    for (const output of [
+      { dataset: { identity } },
+      { lf_output: [{ dataset: { identity } }] },
+      { lf_output: [{ identity }, { identity }] },
+    ]) expect(check(output)).toHaveLength(1);
+    for (const minimumCrossCosine of [NaN, Infinity, -1.1, 1.1]) {
+      expect(validateCaseOutputs({ expect: { '672': { faceIdentity: { minimumCrossCosine } } } } as any,
+        { outputs: { '672': receipt(identity) } })).toEqual([
+        'node 672 face identity minimumCrossCosine must be finite and between -1 and 1',
+      ]);
+    }
+  });
   it('finds only a named Comfy argv with relative, Windows, or POSIX main.py paths', () => {
     expect(findComfyArgv({ system: { argv: ['main.py', '--cache-none'] } })).toEqual([
       'main.py',

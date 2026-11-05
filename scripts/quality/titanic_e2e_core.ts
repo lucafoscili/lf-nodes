@@ -33,6 +33,7 @@ export interface ManifestCase {
     fixtureGlbSourceNodeIds?: number[];
     fixtureLayerManifestNodeIds?: number[];
     fixtureImageSourceNodeIds?: number[];
+    fixtureFaceSourceNodeIds?: number[];
     fixturePngSourceNodeIds?: number[];
   };
   expect?: Record<
@@ -46,6 +47,7 @@ export interface ManifestCase {
       forbidTopLevelJsonKeys?: string[];
       minimumStringLength?: number;
       forbiddenStringPrefixes?: string[];
+      faceIdentity?: { minimumCrossCosine: number };
       requiredNamedValues?: Record<
         string,
         string | number | boolean | null
@@ -169,6 +171,17 @@ export const buildCpuFixturePromptBindings = (
     }
     result.push({ nodeId: String(id), classType: node.class_type, input: 'image',
       value: `${repoRoot.replace(/[\\/]+$/, '')}/scripts/quality/fixtures/titanic-sam3/comfy-example.png` });
+  }
+  for (const id of bindings?.fixtureFaceSourceNodeIds ?? []) {
+    const node = prompt[String(id)];
+    if (node?.class_type !== 'LF_LoadImages' ||
+        node.inputs?.dir !== 'scripts/quality/fixtures/titanic-face' ||
+        node.inputs?.load_cap !== 2 || node.inputs?.subdir !== false ||
+        node.inputs?.dummy_output !== false || node.inputs?.copy_into_input_dir !== false) {
+      throw new Error(`face fixture binding node ${id} drifted`);
+    }
+    result.push({ nodeId: String(id), classType: node.class_type,
+      input: 'dir', value: `${repoRoot.replace(/[\\/]+$/, '')}/scripts/quality/fixtures/titanic-face` });
   }
   return result;
 };
@@ -821,6 +834,34 @@ export const validateCaseOutputs = (
         errors.push(
           `node ${nodeId} is missing receipt schema ${expectation.receiptSchema}`,
         );
+      }
+    }
+    if (expectation.faceIdentity) {
+      // Read the node's receipt directly: nested preview/tree values cannot prove identity.
+      const payloads = asRecord(output)?.lf_output;
+      const identity = Array.isArray(payloads) && payloads.length === 1
+        ? asRecord(asRecord(payloads[0])?.identity) : null;
+      const matrix = identity?.matrix;
+      const pairs = identity?.pairs;
+      const reference = identity?.reference_index;
+      const floor = expectation.faceIdentity.minimumCrossCosine;
+      const validMatrix = Array.isArray(matrix) && matrix.length === 2 &&
+        matrix.every((row) => Array.isArray(row) && row.length === 2 &&
+          row.every((value) => typeof value === 'number' && Number.isFinite(value) && value >= -1 && value <= 1)) &&
+        Math.abs(matrix[0][1] - matrix[1][0]) <= 0.000001;
+      const validPairs = validMatrix && (reference === 0 || reference === 1) &&
+        Array.isArray(pairs) && pairs.length === 2 && pairs.every((pair, index) => {
+          const item = asRecord(pair);
+          return item?.image === index && item?.reference === reference &&
+            typeof item?.cosine === 'number' && Number.isFinite(item.cosine) &&
+            Math.abs(item.cosine - matrix[reference][index]) <= 0.000001;
+        });
+      if (!Number.isFinite(floor) || floor < -1 || floor > 1) {
+        errors.push(`node ${nodeId} face identity minimumCrossCosine must be finite and between -1 and 1`);
+      } else if (identity?.schema !== 'lf.face-identity.v1' || identity?.metric !== 'arcface_cosine' || !validPairs) {
+        errors.push(`node ${nodeId} must expose one face identity receipt with two image pairs and a finite symmetric 2x2 cosine matrix`);
+      } else if (matrix[0][1] < floor || matrix[1][0] < floor) {
+        errors.push(`node ${nodeId} cross-image cosine ${matrix[0][1]} is below ${floor}`);
       }
     }
     if (expectation.minimumPreviewCount !== undefined) {

@@ -111,18 +111,23 @@ def test_titanic_face_icon_and_motion_inventory_has_explicit_execution_boundarie
 
     assert nodes[671]["type"] == "LF_FaceAlign"
     assert nodes[672]["type"] == "LF_FaceIdentity"
-    assert upstream(671, "image") == [654, 0]
+    assert nodes[676]["type"] == "LF_LoadImages"
+    assert nodes[676]["widgets_values_named"]["dir"] == "scripts/quality/fixtures/titanic-face"
+    assert nodes[676]["widgets_values_named"]["load_cap"] == 2
+    assert upstream(671, "image") == [676, 1]
     assert upstream(672, "image") == [671, 0]
     assert upstream(672, "metadata") == [671, 2]
     assert upstream(673, "json_input") == [672, 0]
-    # The stock example has no detectable face: the branch stays disabled until a face fixture exists.
-    assert "model.face-align-identity" not in cases
-    for identifier, kind in ((671, "LF_FaceAlign"), (672, "LF_FaceIdentity")):
-        assert nodes[identifier]["mode"] == 2
-        assert disabled[identifier]["type"] == kind
-    assert nodes[673]["mode"] == 2  # its viewer; LF_DisplayJSON is covered elsewhere
-    assert "face fixture" in disabled[671]["reason"]
-    assert not ({671, 672, 673} & {target for case in cases.values() for target in case["targets"]})
+    face_case = cases["model.face-align-identity"]
+    assert face_case["resourceClass"] == "model-cpu"
+    assert face_case["targets"] == [673]
+    assert face_case["bindings"] == {"fixtureFaceSourceNodeIds": [676]}
+    assert face_case["execution"]["requiredNodeIds"] == [671, 672]
+    assert face_case["execution"]["forbiddenCachedNodeIds"] == [671, 672]
+    assert face_case["expect"]["672"]["faceIdentity"]["minimumCrossCosine"] == 0.65
+    for identifier in (671, 672, 673, 676):
+        assert nodes[identifier]["mode"] == 0
+        assert identifier not in disabled
 
     assert nodes[674]["type"] == "LF_IconFramer"
     assert upstream(674, "image") == [654, 0]
