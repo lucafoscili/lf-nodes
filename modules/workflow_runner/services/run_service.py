@@ -420,6 +420,19 @@ async def _run_sequence_workflow(
     return _submission_response(lifecycle_snapshot, replayed=False)
 
 
+def _failed_run_error(response_body: Any) -> str:
+    """Why a failed run failed, for its caller: the failure's code and Core's bounded message."""
+
+    payload = response_body.get("payload") if isinstance(response_body, Mapping) else None
+    if not isinstance(payload, Mapping):
+        return "execution_failed"
+    error = payload.get("error")
+    code = error.get("message") if isinstance(error, Mapping) else None
+    code = code if isinstance(code, str) and code else "execution_failed"
+    detail = payload.get("detail")
+    return f"{code}: {detail}" if isinstance(detail, str) and detail else code
+
+
 async def _finalize_queued_workflow(
     *,
     prompt_id: str,
@@ -447,14 +460,25 @@ async def _finalize_queued_workflow(
         # final status still comes from exact Core cancellation proof or exact
         # terminal history. Preserve a genuine failure/success race.
         job_result = {"http_status": http_status, "body": response_body}
+        run_error = (
+            _failed_run_error(response_body)
+            if final_status == JobStatus.FAILED
+            else None
+        )
         if persist_job:
             current_job = await get_job(prompt_id)
             if current_job is None or current_job.status != final_status:
-                await set_job_status(prompt_id, final_status, result=job_result)
+                await set_job_status(
+                    prompt_id,
+                    final_status,
+                    result=job_result,
+                    error=run_error,
+                )
         await record_terminal(
             prompt_id,
             final_status.value,
             result=job_result,
+            error=run_error,
         )
         _emit_run_progress(
             prompt_id,

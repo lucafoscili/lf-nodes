@@ -1044,3 +1044,57 @@ async def test_cancel_request_does_not_relabel_proven_failure(run_service_module
     )
     assert snapshot is not None
     assert snapshot["status"] == "failed"
+
+
+async def test_failed_run_tells_its_caller_why(run_service_module):
+    run_service = run_service_module
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": "example:failed-reason:001",
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        "example:failed-reason:001",
+        "prompt-failed-reason",
+        "http://comfy:8188",
+    )
+    await lifecycle.record_running("prompt-failed-reason")
+    body = {
+        "message": "Allocation on device",
+        "payload": {
+            "detail": "Allocation on device",
+            "error": {"message": "execution_failed"},
+            "history": {"outputs": {}},
+        },
+        "status": "error",
+    }
+
+    with patch.object(
+        run_service,
+        "finalize_workflow",
+        new=AsyncMock(return_value=(job_store.JobStatus.FAILED, body, 500)),
+    ), patch.object(
+        run_service,
+        "set_job_status",
+        new=AsyncMock(),
+    ) as set_status, patch.object(
+        run_service,
+        "_emit_run_progress",
+    ):
+        await run_service._finalize_queued_workflow(
+            prompt_id="prompt-failed-reason",
+            client_id="client-1",
+            comfy_url="http://comfy:8188",
+            validation=(True, "", [], []),
+            submission_id="example:failed-reason:001",
+        )
+
+    assert set_status.await_args.kwargs["error"] == "execution_failed: Allocation on device"
+    snapshot = await lifecycle.get_submission(
+        "example:failed-reason:001",
+        include_events=False,
+    )
+    assert snapshot is not None
+    assert snapshot["status"] == "failed"
+    assert snapshot["error"] == "execution_failed: Allocation on device"
