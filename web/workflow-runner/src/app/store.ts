@@ -188,61 +188,17 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       },
       upsert: (entry: WorkflowRunEntryUpdate) =>
         applyMutation((draft) => {
-          const now = entry.updatedAt ?? Date.now();
-          const existingIndex = draft.runs.findIndex((run) => run.runId === entry.runId);
-
-          if (existingIndex >= 0) {
-            const current = draft.runs[existingIndex];
-            const createdAt = entry.createdAt ?? current.createdAt;
-            const nextRuns = draft.runs.slice();
-            nextRuns[existingIndex] = {
-              ...current,
-              ...entry,
-              artifacts: entry.artifacts !== undefined ? entry.artifacts : current.artifacts,
-              createdAt,
-              updatedAt: now,
-              status: entry.status ?? current.status,
-              submissionId:
-                entry.submissionId !== undefined ? entry.submissionId : current.submissionId,
-              cancelRequested:
-                entry.cancelRequested !== undefined
-                  ? entry.cancelRequested
-                  : current.cancelRequested,
-              workflowId: entry.workflowId ?? current.workflowId,
-              workflowName: entry.workflowName ?? current.workflowName,
-              inputs: entry.inputs ?? current.inputs,
-              outputs: entry.outputs ?? current.outputs,
-              error: entry.error ?? current.error ?? null,
-              httpStatus: entry.httpStatus !== undefined ? entry.httpStatus : current.httpStatus,
-              resultPayload:
-                entry.resultPayload !== undefined ? entry.resultPayload : current.resultPayload,
-            };
-            draft.runs = nextRuns.sort(compareWorkflowRuns);
-          } else {
-            const createdAt = entry.createdAt ?? now;
-            const nextRuns = draft.runs.filter((run) => run.runId !== entry.runId);
-            draft.runs = [
-              {
-                runId: entry.runId,
-                artifacts: entry.artifacts ?? [],
-                submissionId: entry.submissionId ?? null,
-                cancelRequested: entry.cancelRequested ?? false,
-                createdAt,
-                updatedAt: now,
-                status: (entry.status ?? 'pending') as WorkflowRunStatus,
-                workflowId: entry.workflowId ?? null,
-                workflowName: entry.workflowName ?? 'Unnamed workflow',
-                inputs: entry.inputs ?? {},
-                outputs: entry.outputs ?? null,
-                error: entry.error ?? null,
-                httpStatus: entry.httpStatus ?? null,
-                resultPayload:
-                  entry.resultPayload === undefined ? null : entry.resultPayload ?? null,
-              },
-              ...nextRuns,
-            ].sort(compareWorkflowRuns);
-          }
+          draft.runs = mergeRunEntry(draft.runs, entry).sort(compareWorkflowRuns);
         }),
+      // One mutation for many entries: one sort and one notification, however many runs change.
+      upsertMany: (entries: WorkflowRunEntryUpdate[]) => {
+        if (entries.length === 0) return;
+        applyMutation((draft) => {
+          let runs = draft.runs;
+          for (const entry of entries) runs = mergeRunEntry(runs, entry);
+          draft.runs = runs.sort(compareWorkflowRuns);
+        });
+      },
     },
     selectRun: (runId: string | null) =>
       applyMutation((draft) => {
@@ -288,6 +244,69 @@ const setStatus = (
       } satisfies WorkflowState),
   );
 };
+//#region Merge run entry
+// Merges one update into the runs, unsorted: callers sort once after every merge.
+const mergeRunEntry = (
+  runs: WorkflowRunEntry[],
+  entry: WorkflowRunEntryUpdate,
+): WorkflowRunEntry[] => {
+  const now = entry.updatedAt ?? Date.now();
+  const existingIndex = runs.findIndex((run) => run.runId === entry.runId);
+
+  if (existingIndex >= 0) {
+    const current = runs[existingIndex];
+    const createdAt = entry.createdAt ?? current.createdAt;
+    const nextRuns = runs.slice();
+    nextRuns[existingIndex] = {
+      ...current,
+      ...entry,
+      artifacts: entry.artifacts !== undefined ? entry.artifacts : current.artifacts,
+      createdAt,
+      updatedAt: now,
+      status: entry.status ?? current.status,
+      submissionId:
+        entry.submissionId !== undefined ? entry.submissionId : current.submissionId,
+      cancelRequested:
+        entry.cancelRequested !== undefined
+          ? entry.cancelRequested
+          : current.cancelRequested,
+      workflowId: entry.workflowId ?? current.workflowId,
+      workflowName: entry.workflowName ?? current.workflowName,
+      inputs: entry.inputs ?? current.inputs,
+      outputs: entry.outputs ?? current.outputs,
+      error: entry.error ?? current.error ?? null,
+      httpStatus: entry.httpStatus !== undefined ? entry.httpStatus : current.httpStatus,
+      resultPayload:
+        entry.resultPayload !== undefined ? entry.resultPayload : current.resultPayload,
+    };
+    return nextRuns;
+  } else {
+    const createdAt = entry.createdAt ?? now;
+    const nextRuns = runs.filter((run) => run.runId !== entry.runId);
+    return [
+      {
+        runId: entry.runId,
+        artifacts: entry.artifacts ?? [],
+        submissionId: entry.submissionId ?? null,
+        cancelRequested: entry.cancelRequested ?? false,
+        createdAt,
+        updatedAt: now,
+        status: (entry.status ?? 'pending') as WorkflowRunStatus,
+        workflowId: entry.workflowId ?? null,
+        workflowName: entry.workflowName ?? 'Unnamed workflow',
+        inputs: entry.inputs ?? {},
+        outputs: entry.outputs ?? null,
+        error: entry.error ?? null,
+        httpStatus: entry.httpStatus ?? null,
+        resultPayload:
+          entry.resultPayload === undefined ? null : entry.resultPayload ?? null,
+      },
+      ...nextRuns,
+    ];
+  }
+};
+//#endregion
+
 const setWorkflow = (id: string, setState: (updater: WorkflowStateUpdater) => void) => {
   setState(
     (state) =>

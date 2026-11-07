@@ -67,6 +67,9 @@ const selectRun = (store, runId, options) => {
 const upsertRun = (store, entry) => {
   store.getState().mutate.runs.upsert(entry);
 };
+const upsertRuns = (store, entries) => {
+  store.getState().mutate.runs.upsertMany(entries);
+};
 const ACTIVE_STATUSES = /* @__PURE__ */ new Set(["pending", "running"]);
 const ensureActiveRun = (store, preferredRunId) => {
   const state = store.getState();
@@ -4436,7 +4439,7 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_WORKFLOW_PENDING, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_RECONNECT_TIMER, _WorkflowRunnerClient_STOPPED, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, _WorkflowRunnerClient_REMOVED_RUN_IDS;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_WORKFLOW_PENDING, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_RECONNECT_TIMER, _WorkflowRunnerClient_STOPPED, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, _WorkflowRunnerClient_REMOVED_RUN_IDS, _WorkflowRunnerClient_APPLIED_RUNS;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
@@ -4470,6 +4473,7 @@ class WorkflowRunnerClient {
     _WorkflowRunnerClient_LOADED_DETAILS.set(this, /* @__PURE__ */ new Set());
     _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID.set(this, null);
     _WorkflowRunnerClient_REMOVED_RUN_IDS.set(this, /* @__PURE__ */ new Set());
+    _WorkflowRunnerClient_APPLIED_RUNS.set(this, /* @__PURE__ */ new Map());
     this.onUpdate = (runs) => {
       var _a2;
       if (Object.keys(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")).length === 0) {
@@ -4479,10 +4483,14 @@ class WorkflowRunnerClient {
           __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")[w.id] = String(w.value);
         }
       }
+      const changed = [];
       for (const rec of runs.values()) {
-        const uiEntry = recordToUI(rec, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f"));
-        upsertRun(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"), uiEntry);
+        if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_APPLIED_RUNS, "f").get(rec.run_id) === rec)
+          continue;
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_APPLIED_RUNS, "f").set(rec.run_id, rec);
+        changed.push(recordToUI(rec, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")));
       }
+      upsertRuns(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"), changed);
       ensureActiveRun(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"));
     };
     this.queueHandler = (pending, running) => {
@@ -5275,7 +5283,7 @@ class WorkflowRunnerClient {
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_PENDING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RECONNECT_TIMER = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STOPPED = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_REMOVED_RUN_IDS = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_PENDING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RECONNECT_TIMER = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STOPPED = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_REMOVED_RUN_IDS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_APPLIED_RUNS = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
@@ -5517,7 +5525,8 @@ const initState = () => ({
     runs: {
       clear: INIT_CB,
       removeMany: INIT_CB,
-      upsert: INIT_CB
+      upsert: INIT_CB,
+      upsertMany: INIT_CB
     },
     runId: INIT_CB,
     selectRun: INIT_CB,
@@ -5677,54 +5686,19 @@ const createWorkflowRunnerStore = (initialState) => {
         });
       },
       upsert: (entry) => applyMutation((draft) => {
-        const now = entry.updatedAt ?? Date.now();
-        const existingIndex = draft.runs.findIndex((run) => run.runId === entry.runId);
-        if (existingIndex >= 0) {
-          const current = draft.runs[existingIndex];
-          const createdAt = entry.createdAt ?? current.createdAt;
-          const nextRuns = draft.runs.slice();
-          nextRuns[existingIndex] = {
-            ...current,
-            ...entry,
-            artifacts: entry.artifacts !== void 0 ? entry.artifacts : current.artifacts,
-            createdAt,
-            updatedAt: now,
-            status: entry.status ?? current.status,
-            submissionId: entry.submissionId !== void 0 ? entry.submissionId : current.submissionId,
-            cancelRequested: entry.cancelRequested !== void 0 ? entry.cancelRequested : current.cancelRequested,
-            workflowId: entry.workflowId ?? current.workflowId,
-            workflowName: entry.workflowName ?? current.workflowName,
-            inputs: entry.inputs ?? current.inputs,
-            outputs: entry.outputs ?? current.outputs,
-            error: entry.error ?? current.error ?? null,
-            httpStatus: entry.httpStatus !== void 0 ? entry.httpStatus : current.httpStatus,
-            resultPayload: entry.resultPayload !== void 0 ? entry.resultPayload : current.resultPayload
-          };
-          draft.runs = nextRuns.sort(compareWorkflowRuns);
-        } else {
-          const createdAt = entry.createdAt ?? now;
-          const nextRuns = draft.runs.filter((run) => run.runId !== entry.runId);
-          draft.runs = [
-            {
-              runId: entry.runId,
-              artifacts: entry.artifacts ?? [],
-              submissionId: entry.submissionId ?? null,
-              cancelRequested: entry.cancelRequested ?? false,
-              createdAt,
-              updatedAt: now,
-              status: entry.status ?? "pending",
-              workflowId: entry.workflowId ?? null,
-              workflowName: entry.workflowName ?? "Unnamed workflow",
-              inputs: entry.inputs ?? {},
-              outputs: entry.outputs ?? null,
-              error: entry.error ?? null,
-              httpStatus: entry.httpStatus ?? null,
-              resultPayload: entry.resultPayload === void 0 ? null : entry.resultPayload ?? null
-            },
-            ...nextRuns
-          ].sort(compareWorkflowRuns);
-        }
-      })
+        draft.runs = mergeRunEntry(draft.runs, entry).sort(compareWorkflowRuns);
+      }),
+      // One mutation for many entries: one sort and one notification, however many runs change.
+      upsertMany: (entries) => {
+        if (entries.length === 0)
+          return;
+        applyMutation((draft) => {
+          let runs = draft.runs;
+          for (const entry of entries)
+            runs = mergeRunEntry(runs, entry);
+          draft.runs = runs.sort(compareWorkflowRuns);
+        });
+      }
     },
     selectRun: (runId) => applyMutation((draft) => {
       draft.selectedRunId = runId;
@@ -5754,6 +5728,55 @@ const setStatus = (status, message, setState) => {
       message: message ?? DEFAULT_STATUS_MESSAGES[status]
     }
   }));
+};
+const mergeRunEntry = (runs, entry) => {
+  const now = entry.updatedAt ?? Date.now();
+  const existingIndex = runs.findIndex((run) => run.runId === entry.runId);
+  if (existingIndex >= 0) {
+    const current = runs[existingIndex];
+    const createdAt = entry.createdAt ?? current.createdAt;
+    const nextRuns = runs.slice();
+    nextRuns[existingIndex] = {
+      ...current,
+      ...entry,
+      artifacts: entry.artifacts !== void 0 ? entry.artifacts : current.artifacts,
+      createdAt,
+      updatedAt: now,
+      status: entry.status ?? current.status,
+      submissionId: entry.submissionId !== void 0 ? entry.submissionId : current.submissionId,
+      cancelRequested: entry.cancelRequested !== void 0 ? entry.cancelRequested : current.cancelRequested,
+      workflowId: entry.workflowId ?? current.workflowId,
+      workflowName: entry.workflowName ?? current.workflowName,
+      inputs: entry.inputs ?? current.inputs,
+      outputs: entry.outputs ?? current.outputs,
+      error: entry.error ?? current.error ?? null,
+      httpStatus: entry.httpStatus !== void 0 ? entry.httpStatus : current.httpStatus,
+      resultPayload: entry.resultPayload !== void 0 ? entry.resultPayload : current.resultPayload
+    };
+    return nextRuns;
+  } else {
+    const createdAt = entry.createdAt ?? now;
+    const nextRuns = runs.filter((run) => run.runId !== entry.runId);
+    return [
+      {
+        runId: entry.runId,
+        artifacts: entry.artifacts ?? [],
+        submissionId: entry.submissionId ?? null,
+        cancelRequested: entry.cancelRequested ?? false,
+        createdAt,
+        updatedAt: now,
+        status: entry.status ?? "pending",
+        workflowId: entry.workflowId ?? null,
+        workflowName: entry.workflowName ?? "Unnamed workflow",
+        inputs: entry.inputs ?? {},
+        outputs: entry.outputs ?? null,
+        error: entry.error ?? null,
+        httpStatus: entry.httpStatus ?? null,
+        resultPayload: entry.resultPayload === void 0 ? null : entry.resultPayload ?? null
+      },
+      ...nextRuns
+    ];
+  }
 };
 const setWorkflow = (id, setState) => {
   setState((state) => ({

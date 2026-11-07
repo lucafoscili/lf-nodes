@@ -97,6 +97,7 @@ export interface WorkflowStateRunMutators {
   clear: () => void;
   removeMany: (runIds: string[]) => void;
   upsert: (entry: WorkflowRunEntryUpdate) => void;
+  upsertMany: (entries: WorkflowRunEntryUpdate[]) => void;
 }
 export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;
 export type WorkflowStatus = 'running' | 'idle' | 'error';

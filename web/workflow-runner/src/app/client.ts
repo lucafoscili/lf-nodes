@@ -13,7 +13,7 @@ import { WorkflowStore } from '../types/state';
 import type { ClientInternals, ClientInternalsMethods } from '../types/test-utils';
 import { recordToUI } from '../utils/common';
 import { debugLog } from '../utils/debug';
-import { ensureActiveRun, upsertRun } from './store-actions';
+import { ensureActiveRun, upsertRuns } from './store-actions';
 
 export class WorkflowRunnerClient {
   // Core
@@ -72,6 +72,11 @@ export class WorkflowRunnerClient {
     this.#STORE = store;
   }
 
+  // The default handler pushes runs into the store. Every client event used to re-upsert every
+  // run, one store update and re-render each, so N runs cost N x N and froze a phone: it applies
+  // only the records that changed since the last call, in one store update.
+  #APPLIED_RUNS: Map<string, RunRecord> = new Map();
+
   onUpdate = (runs: Map<string, RunRecord>) => {
     if (Object.keys(this.#WORKFLOW_NAMES).length === 0) {
       const workflows = this.#STORE.getState().workflows?.nodes || [];
@@ -81,10 +86,14 @@ export class WorkflowRunnerClient {
       }
     }
 
+    const changed = [];
     for (const rec of runs.values()) {
-      const uiEntry = recordToUI(rec, this.#WORKFLOW_NAMES);
-      upsertRun(this.#STORE, uiEntry);
+      // Records are replaced, never mutated, when they change: identity says whether to re-apply.
+      if (this.#APPLIED_RUNS.get(rec.run_id) === rec) continue;
+      this.#APPLIED_RUNS.set(rec.run_id, rec);
+      changed.push(recordToUI(rec, this.#WORKFLOW_NAMES));
     }
+    upsertRuns(this.#STORE, changed);
 
     ensureActiveRun(this.#STORE);
   };

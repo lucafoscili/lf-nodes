@@ -62,6 +62,9 @@ export const selectRun = (
 export const upsertRun = (store: WorkflowStore, entry: WorkflowRunEntryUpdate) => {
   store.getState().mutate.runs.upsert(entry);
 };
+export const upsertRuns = (store: WorkflowStore, entries: WorkflowRunEntryUpdate[]) => {
+  store.getState().mutate.runs.upsertMany(entries);
+};
 
 const ACTIVE_STATUSES = new Set<WorkflowRunEntry['status']>(['pending', 'running']);
 

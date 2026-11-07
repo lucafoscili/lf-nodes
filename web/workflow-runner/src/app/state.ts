@@ -35,6 +35,7 @@ export const initState = (): WorkflowState => ({
       clear: INIT_CB,
       removeMany: INIT_CB,
       upsert: INIT_CB,
+      upsertMany: INIT_CB,
     },
     runId: INIT_CB,
     selectRun: INIT_CB,
