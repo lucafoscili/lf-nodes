@@ -329,6 +329,23 @@ def test_raster_depth_occlusion_survives_face_order_and_chunk_boundary() -> None
         np.testing.assert_array_equal(actual, expected)
 
 
+def test_raster_draws_given_normals_across_a_split_seam() -> None:
+    # Two triangles of one bent surface, split at their shared edge: each copy of the edge
+    # smooths over its own face only, unless the author's normals are given.
+    vertices = np.array([[-1, -1, 1], [0, -1, 1.5], [0, 1, 1.5], [0, -1, 1.5], [1, -1, 1], [0, 1, 1.5]],
+                        dtype=np.float32)
+    faces = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
+    centre = np.zeros(3, dtype=np.float32)
+    computed = render._rasterize(vertices, faces, centre, 12, 32, 32)
+    left, right = computed[16, 14].astype(int), computed[16, 18].astype(int)
+    assert np.abs(left - right).max() > 10
+    welded = np.tile(np.array([[0, 0, -1]], dtype=np.float32), (6, 1))
+    given = render._rasterize(vertices, faces, centre, 12, 32, 32, welded)
+    np.testing.assert_array_equal(given[16, 14], given[16, 18])
+    with pytest.raises(ValueError, match="one VEC3 per vertex"):
+        render._rasterize(vertices, faces, centre, 12, 32, 32, welded[:3])
+
+
 @pytest.mark.parametrize("limit,expected", [(0, list(range(7))), (1, [0]), (3, [0, 3, 6]), (32, list(range(7)))])
 def test_image_frame_selection_is_explicit_and_ordered(limit, expected) -> None:
     assert render.select_image_frames(7, 128, 64, limit).tolist() == expected
@@ -484,6 +501,7 @@ def test_body_glb_uses_camera_transform_and_its_own_scaled_pelvis(monkeypatch, t
     frames, timing = render.render_motion(path, tmp_path / "model.npz", "female", "0", 64, 64,
                                           tmp_path / "glb-preview.mp4", str(source), body_glb=str(glb_path))
     assert frames.shape == (3, 64, 192, 3) and timing["frames"] == 3
+    assert timing["normals"] == ("stored" if raw.normals == "stored" else "faces")
     np.testing.assert_array_equal(frames[:, 40, 32], [[255, 0, 0]] * 3)
     assert np.any(frames[:, 24:, 64:] != [238, 239, 242])
 

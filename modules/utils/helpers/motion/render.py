@@ -96,16 +96,25 @@ def pose_meshes(motion: dict, model_path: Path, body: str, betas: np.ndarray):
         raise RuntimeError(f"SMPL-X body evaluation failed for {model_path.name}: {error}") from error
 
 
-def _rasterize(vertices, faces, centre, scale, width, height):
-    """Rasterize smooth normals with a true depth buffer, in bounded face chunks."""
+def _rasterize(vertices, faces, centre, scale, width, height, normals=None):
+    """Rasterize smooth normals with a true depth buffer, in bounded face chunks.
+
+    ``normals`` (unit, one per vertex, in the vertices' frame) are drawn as
+    given; without them each vertex takes its faces' area-weighted normal,
+    which splits shading wherever the mesh splits its vertices.
+    """
     points = vertices.copy()
     points[:, :2] = (points[:, :2] - centre[:2]) * scale + (width / 2, height / 2)
-    triangles = vertices[faces]
-    normals = np.zeros_like(vertices)
-    face_normals = np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0])
-    for corner in range(3):
-        np.add.at(normals, faces[:, corner], face_normals)
-    normals /= np.maximum(np.linalg.norm(normals, axis=1, keepdims=True), 1e-12)
+    if normals is not None:
+        if normals.shape != vertices.shape:
+            raise ValueError("Render normals must be one VEC3 per vertex.")
+    else:
+        triangles = vertices[faces]
+        normals = np.zeros_like(vertices)
+        face_normals = np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0])
+        for corner in range(3):
+            np.add.at(normals, faces[:, corner], face_normals)
+        normals /= np.maximum(np.linalg.norm(normals, axis=1, keepdims=True), 1e-12)
     light = np.array([-0.4, -0.7, -1.0], dtype=np.float32)
     light /= np.linalg.norm(light)
     rim = np.array([0.8, -0.3, 0.6], dtype=np.float32)
@@ -234,13 +243,17 @@ def pose_glb_meshes(motion, model_path, body, body_glb):
         if not np.isfinite(scale) or scale <= 0:
             raise ValueError("Retargeted animation scale must be positive and finite.")
         rotation, translation, camera_root = camera_from_world(motion, load_body_model(model_path, body))
-        def mesh_batches():
+        def mesh_batches(normals=False):
             start = 0
-            for meshes in world_batches():
+            for batch in world_batches(normals=normals):
+                meshes, turned = batch if normals else (batch, None)
                 stop = start + len(meshes)
-                yield (np.einsum("fij,fvj->fvi", rotation[start:stop], meshes / scale)
-                       + translation[start:stop, None]).astype(np.float32)
+                placed = (np.einsum("fij,fvj->fvi", rotation[start:stop], meshes / scale)
+                          + translation[start:stop, None]).astype(np.float32)
+                yield ((placed, np.einsum("fij,fvj->fvi", rotation[start:stop], turned).astype(np.float32))
+                       if normals else placed)
                 start = stop
+        mesh_batches.normals = world_batches.normals
         mesh_batches.root_positions = (np.einsum("fij,fj->fi", rotation, world_batches.root_positions / scale)
                                        + translation).astype(np.float32)
         mesh_batches.depth_positions = camera_root
@@ -317,8 +330,15 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
             stream.width, stream.height = total_width, height
             stream.pix_fmt = "yuv420p"
             stream.options = {"crf": "20", "preset": "fast"}
-            mesh_frames = (mesh for batch in mesh_batches() for mesh in batch)
-            for index, mesh in enumerate(mesh_frames):
+            def mesh_frames():
+                # (positions, normals) per frame; normals None where the rasterizer smooths the faces.
+                if getattr(mesh_batches, "normals", None) == "stored":
+                    for meshes, normals in mesh_batches(normals=True):
+                        yield from zip(meshes, normals)
+                else:
+                    for meshes in mesh_batches():
+                        yield from ((mesh, None) for mesh in meshes)
+            for index, (mesh, normals) in enumerate(mesh_frames()):
                 canvas = Image.new("RGB", (total_width, height), (238, 239, 242))
                 offset = 0
                 if sources is not None:
@@ -326,12 +346,13 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
                     canvas.paste(source, (0, 0))
                     offset = width
                 pivot = roots[index] if following else origin
-                views = (mesh, (mesh - pivot) @ turn.T + pivot)
-                for view, centre in zip(views, centres):
+                views = ((mesh, normals),
+                         ((mesh - pivot) @ turn.T + pivot, None if normals is None else normals @ turn.T))
+                for (view, view_normals), centre in zip(views, centres):
                     if following:
                         centre = _following_centre(view, smoothed_roots[index] + centre, scale, width, height)
                     # Supersample edges without a graphics context.
-                    rendered = _rasterize(view, faces, centre, scale * 2, width * 2, height * 2)
+                    rendered = _rasterize(view, faces, centre, scale * 2, width * 2, height * 2, view_normals)
                     panel = Image.fromarray(rendered).resize((width, height), Image.Resampling.LANCZOS)
                     canvas.paste(panel, (offset, 0))
                     offset += width
@@ -364,6 +385,9 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
     timing = {"frames": count, "image_frames": len(indices), "frame_indices": indices.tolist(), "fps": float(motion["fps"])}
     if following:
         timing["framing"] = "following"
+    if body_glb:
+        # The body GLB's own normals, skinned, or (it carries none) its faces' smoothed normals.
+        timing["normals"] = mesh_batches.normals
     if warning:
         timing["warnings"] = [warning]
     return frames, timing

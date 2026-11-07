@@ -294,12 +294,27 @@ def append_glb_animation(target, solved, fps, pelvis_name, report=None):
     return pack_glb(document, binary)
 
 
+def _cofactors(matrices):
+    """Cofactor matrices of 3x3 ``matrices``: what carries a normal through each (the inverse transpose scaled by
+    the determinant, defined for a singular matrix too); a rotation's is itself."""
+    c0, c1, c2 = matrices[..., :, 0], matrices[..., :, 1], matrices[..., :, 2]
+    return np.stack([np.cross(c1, c2), np.cross(c2, c0), np.cross(c0, c1)], axis=-1)
+
+
 def glb_meshes(source, batch_size=16):
     """Return repeatable world-space mesh batches, combined faces, clip metadata.
 
     Only the latest appended LF animation is evaluated. Original clips remain
     intact and inactive. All JOINTS_n/WEIGHTS_n sets contribute, normalized once
     per vertex across sets. Mesh nodes follow the selected glTF scene.
+    Primitives of one node drawing the same vertex accessors (one buffer split
+    by material) share their vertices once.
+
+    ``mesh_batches.normals`` is ``'stored'`` when every primitive carries
+    NORMAL, else ``'faces'``. ``mesh_batches(normals=True)`` (stored only)
+    yields ``(positions, unit normals)``: each vertex's NORMAL skinned as its
+    position is, so a mesh split at UV seams or between parts shades as its
+    author smoothed it, creases and back-to-back cards kept.
     """
     target = load_glb_target(source)
     document, binary = target['document'], target['binary']
@@ -344,7 +359,7 @@ def glb_meshes(source, batch_size=16):
                if 'inverseBindMatrices' in skin else np.repeat(np.eye(4)[None], len(target['joint_nodes']), axis=0))
     if inverse.shape != (len(target['joint_nodes']), 4, 4):
         raise ValueError('GLB inverse bind matrix count must match skin joints.')
-    primitives, all_faces, vertex_offset = [], [], 0
+    primitives, all_faces, vertex_offset, shared = [], [], 0, {}
     for node_index in sorted(active):
         node = nodes[node_index]
         if 'mesh' not in node:
@@ -355,6 +370,14 @@ def glb_meshes(source, batch_size=16):
             if 'KHR_draco_mesh_compression' in primitive.get('extensions', {}):
                 raise ValueError('GLB KHR_draco_mesh_compression geometry requires a separate decoder.')
             attributes = primitive['attributes']
+            key = (node_index, tuple(sorted(attributes.items())), repr(primitive.get('targets', [])))
+            if key in shared:
+                offset, size = shared[key]
+                faces = (_accessor(document, binary, primitive['indices']) if 'indices' in primitive else np.arange(size))
+                if faces.dtype.kind not in 'iu' or faces.size % 3 or np.any(faces < 0) or np.any(faces >= size):
+                    raise ValueError('GLB triangle indices are invalid.')
+                all_faces.append(faces.reshape(-1, 3).astype(np.int32) + offset)
+                continue
             positions = _accessor(document, binary, attributes['POSITION'])
             if positions.ndim != 2 or positions.shape[1] != 3:
                 raise ValueError('GLB POSITION must be VEC3.')
@@ -369,10 +392,22 @@ def glb_meshes(source, batch_size=16):
                     if delta.shape != positions.shape:
                         raise ValueError('GLB morph POSITION must match its base POSITION shape.')
                     positions += weight * delta
+            normals = None
+            if 'NORMAL' in attributes:
+                normals = _accessor(document, binary, attributes['NORMAL']).astype(np.float64)
+                if normals.shape != positions.shape or not np.isfinite(normals).all():
+                    raise ValueError('GLB NORMAL must be one finite VEC3 per vertex.')
+                for weight, morph in zip(rest_weights, morphs):
+                    if weight and 'NORMAL' in morph:
+                        delta = _accessor(document, binary, morph['NORMAL'])
+                        if delta.shape != normals.shape:
+                            raise ValueError('GLB morph NORMAL must match its base NORMAL shape.')
+                        normals += weight * delta
             faces = (_accessor(document, binary, primitive['indices']) if 'indices' in primitive else np.arange(len(positions)))
             if faces.dtype.kind not in 'iu' or faces.size % 3 or np.any(faces < 0) or np.any(faces >= len(positions)):
                 raise ValueError('GLB triangle indices are invalid.')
             all_faces.append(faces.reshape(-1, 3).astype(np.int32) + vertex_offset)
+            shared[key] = (vertex_offset, len(positions))
             vertex_offset += len(positions)
             joints, weights = None, None
             if 'skin' in node:
@@ -390,7 +425,8 @@ def glb_meshes(source, batch_size=16):
                 if np.any(total <= 1e-12):
                     raise ValueError('Every skinned GLB vertex needs a positive total weight.')
                 weights = weights / total
-            primitives.append((node_index, np.column_stack([positions, np.ones(len(positions))]), joints, weights))
+            primitives.append((node_index, np.column_stack([positions, np.ones(len(positions))]), joints, weights,
+                               normals))
     if not primitives or not any(len(face) for face in all_faces):
         raise ValueError('GLB selected scene has no renderable triangles.')
     faces = np.concatenate(all_faces)
@@ -403,23 +439,36 @@ def glb_meshes(source, batch_size=16):
             else:
                 local[node, :3, 3] = values[frame]
         return _world_matrices(local, target['parents'])
-    def mesh_batches():
+    stored = all(row[4] is not None for row in primitives)
+    def mesh_batches(normals=False):
+        if normals and not stored:
+            raise ValueError('GLB primitives without NORMAL have no stored normals to skin.')
         for start in range(0, count, batch_size):
-            batch = []
+            batch, turned = [], []
             for frame in range(start, min(start + batch_size, count)):
                 world = frame_world(frame)
                 skin_matrices = world[target['joint_nodes']] @ inverse
-                meshes = []
-                for node, positions, joints, weights in primitives:
+                cofactors = _cofactors(skin_matrices[:, :3, :3]) if normals else None
+                meshes, rows = [], []
+                for node, positions, joints, weights, vertex_normals in primitives:
                     if joints is None:
                         vertices = positions @ world[node].T
+                        if normals:
+                            rows.append(vertex_normals @ _cofactors(world[node, :3, :3]).T)
                     else:
                         # glTF local palette inv(meshWorld)*jointWorld*IBM,
                         # followed by meshWorld, cancels to jointWorld*IBM.
                         vertices = np.einsum('vwij,vj,vw->vi', skin_matrices[joints], positions, weights)
+                        if normals:
+                            rows.append(np.einsum('vwij,vj,vw->vi', cofactors[joints], vertex_normals, weights))
                     meshes.append(vertices[:, :3])
                 batch.append(np.concatenate(meshes).astype(np.float32))
-            yield np.stack(batch)
+                if normals:
+                    rows = np.concatenate(rows)
+                    turned.append((rows / np.maximum(np.linalg.norm(rows, axis=1, keepdims=True), 1e-12))
+                                  .astype(np.float32))
+            yield (np.stack(batch), np.stack(turned)) if normals else np.stack(batch)
+    mesh_batches.normals = 'stored' if stored else 'faces'
     root_node = metadata.get('root_node')
     if type(root_node) is not int or root_node not in target['joint_nodes']:
         raise ValueError('LF GLB animation must identify its pelvis skin joint.')

@@ -30,7 +30,7 @@ load_glb_target, validate_glb_axes = _glb.load_glb_target, _glb.validate_glb_axe
 PAIRS = [('pelvis', 'Hips'), ('head', 'Head'), ('left_hip', 'LeftHip')]
 
 
-def rig(turn=0, tilt=0, skin_mesh=True):
+def rig(turn=0, tilt=0, skin_mesh=True, normals=False, split=False):
     """Nonidentity local bone rests, scene transform, mesh transform, two sets."""
     binary = bytearray(b'OLD!')
     document = {
@@ -62,9 +62,15 @@ def rig(turn=0, tilt=0, skin_mesh=True):
     primitive = document['meshes'][0]['primitives'][0]
     attrs = primitive['attributes']
     attrs['POSITION'] = accessor([[0, 0, 0], [1, 0, 0], [0, 1, 0]], 'VEC3')
+    if normals:
+        attrs['NORMAL'] = accessor([[0, 0, 1]] * 3, 'VEC3')
     primitive['indices'] = accessor([0, 1, 2], 'SCALAR', '<u2', 5123)
     # Alignment before the next float accessor.
     binary.extend(b'\0' * (-len(binary) % 4))
+    if split:  # a second draw of the same vertex buffer, as one mesh split by material
+        document['meshes'][0]['primitives'].append({'attributes': attrs,
+                                                    'indices': accessor([2, 1, 0], 'SCALAR', '<u2', 5123)})
+        binary.extend(b'\0' * (-len(binary) % 4))
     if skin_mesh:
         document['nodes'][4]['skin'] = 0
         for index in range(2):
@@ -157,6 +163,34 @@ def test_skinning_uses_both_weight_sets_ibm_columns_and_scene_world_without_doub
     assert metadata['frame_count'] == 2 and metadata['scale'] == 1.25
     np.testing.assert_allclose(batches.root_positions, solved['root_positions'], atol=1e-6)
     np.testing.assert_allclose(np.concatenate(list(batches())), vertices)
+
+
+def test_stored_normals_are_skinned_as_their_vertices():
+    target = load_glb_target(rig(turn=0.4, normals=True))
+    batches, faces, _ = glb_meshes(append_glb_animation(target, solved_rest(target), 30, 'Hips'))
+    assert batches.normals == 'stored'
+    positions, normals = next(batches(normals=True))
+    np.testing.assert_allclose(positions, next(batches()))
+    triangle = positions[0][faces[0]]
+    facing = np.cross(triangle[1] - triangle[0], triangle[2] - triangle[0])
+    # The scene's turn and the hips' rest turn carry the stored +Z exactly as they carry the triangle.
+    np.testing.assert_allclose(normals[0], np.repeat([facing / np.linalg.norm(facing)], 3, axis=0), atol=1e-6)
+    assert not np.allclose(normals[0], [0, 0, 1])
+
+
+def test_without_normal_the_faces_shade_and_stored_normals_are_refused():
+    target = load_glb_target(rig())
+    batches, _, _ = glb_meshes(append_glb_animation(target, solved_rest(target), 30, 'Hips'))
+    assert batches.normals == 'faces'
+    with pytest.raises(ValueError, match='no stored normals'):
+        next(batches(normals=True))
+
+
+def test_draws_of_one_vertex_buffer_share_its_vertices():
+    target = load_glb_target(rig(split=True))
+    batches, faces, _ = glb_meshes(append_glb_animation(target, solved_rest(target), 30, 'Hips'))
+    assert next(batches()).shape == (2, 3, 3)
+    np.testing.assert_array_equal(faces, [[0, 1, 2], [2, 1, 0]])
 
 
 def test_unskinned_mesh_scene_transform_is_applied():
