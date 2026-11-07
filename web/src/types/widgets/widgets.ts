@@ -58,6 +58,7 @@ export enum CustomWidgetName {
 export enum NodeName {
   videoToMotion = 'LF_VideoToMotion',
   motionToVideo = 'LF_MotionToVideo',
+  retargetMotion = 'LF_RetargetMotion',
   aceStepRemix = 'LF_ACEStepRemix',
   applyTextureToGLB = 'LF_ApplyTextureToGLB',
   scaleGLBNodes = 'LF_ScaleGLBNodes',

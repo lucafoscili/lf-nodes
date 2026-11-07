@@ -138,6 +138,7 @@ def test_backend_and_frontend_node_widget_registries_are_exact() -> None:
     assert widget_map["LF_LMSLoadModel"] == []
     assert widget_map["LF_LMSUnloadModel"] == []
     assert widget_map["LF_SaveAudio"] == ["LF_MASONRY"]
+    assert widget_map["LF_RetargetMotion"] == ["LF_CODE"]
     assert "LF_Brush" not in widget_map
     assert "LF_ExtractFaceEmbedding" not in widget_map
     assert widget_map["LF_RegionFeatureSimilarity"] == ["LF_TREE"]

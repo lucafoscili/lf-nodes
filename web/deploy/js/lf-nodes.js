@@ -1279,6 +1279,7 @@ var NodeName;
 (function(NodeName2) {
   NodeName2["videoToMotion"] = "LF_VideoToMotion";
   NodeName2["motionToVideo"] = "LF_MotionToVideo";
+  NodeName2["retargetMotion"] = "LF_RetargetMotion";
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
   NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
   NodeName2["scaleGLBNodes"] = "LF_ScaleGLBNodes";
@@ -1737,6 +1738,7 @@ function installH3References(node) {
 const NODE_WIDGET_MAP = {
   LF_VideoToMotion: [CustomWidgetName.code],
   LF_MotionToVideo: [CustomWidgetName.code],
+  LF_RetargetMotion: [CustomWidgetName.code],
   LF_ACEStepRemix: [],
   LF_ApplyTextureToGLB: [],
   LF_ScaleGLBNodes: [],
@@ -7763,6 +7765,7 @@ const codeFactory = {
     switch (node.comfyClass) {
       case NodeName.videoToMotion:
       case NodeName.motionToVideo:
+      case NodeName.retargetMotion:
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
       case NodeName.shuffleJsonKeys:
@@ -7780,7 +7783,7 @@ const codeFactory = {
     wrapper.appendChild(content);
     const options = codeFactory.options(wrapper);
     STATE$b.set(wrapper, { code, node, wrapper });
-    if (node.comfyClass === NodeName.getKeyFromJsonByIndex) {
+    if (node.comfyClass === NodeName.getKeyFromJsonByIndex || node.comfyClass === NodeName.retargetMotion) {
       const outputNode = node;
       const previous = outputNode.onExecuted;
       outputNode.onExecuted = function(output, ...args) {

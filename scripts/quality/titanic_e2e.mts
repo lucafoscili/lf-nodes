@@ -3149,7 +3149,7 @@ const main = async () => {
     if (manifest.schema !== 'lf.titanic-e2e.manifest.v1') inventoryErrors.push('manifest schema mismatch');
     for (const fixture of manifest.fixtures ?? []) {
       try {
-        if (!/^scripts\/quality\/fixtures\/(?:titanic-cpu\/(?:lower\.png|upper\.png|synthetic\.glb)|titanic-sam3\/comfy-example\.png|titanic-face\/portrait-[ab]\.png)$/.test(fixture.path)) {
+        if (!/^scripts\/quality\/fixtures\/(?:titanic-cpu\/(?:lower\.png|upper\.png|synthetic\.glb)|titanic-sam3\/comfy-example\.png|titanic-face\/portrait-[ab]\.png|titanic-motion\/(?:rig\.glb|motion\.json|bone-map\.json))$/.test(fixture.path)) {
           throw new Error('unreviewed fixture path');
         }
         const bytes = await readFile(resolve(repoRoot, fixture.path));

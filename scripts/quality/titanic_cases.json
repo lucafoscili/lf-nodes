@@ -2,8 +2,8 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "33c3fa2c69ded81dbe1a7987c542cfdaac3b5fd16370ac7cd9c8602951334b88",
-    "expectedNodeCount": 437,
+    "expectedSha256": "89d33f39a338d7be9d4da6ee65010bdde2dbf3a4c47b16a09c3f45ff1e410c6e",
+    "expectedNodeCount": 438,
     "expectedLinkCount": 576
   },
   "fixtures": [
@@ -30,6 +30,18 @@
     {
       "path": "scripts/quality/fixtures/titanic-face/portrait-b.png",
       "expectedSha256": "e5f659facd7c06ce8e833a884c17613db1d4a768ba217793566367d8e0fea658"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-motion/rig.glb",
+      "expectedSha256": "2de66e690a2261134680d0daf5c29471d298faf06a6fd5c653d656ff85d0a85d"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-motion/motion.json",
+      "expectedSha256": "fb7ae4827303ebaeb9ca658af0ed7aaade8054408d71b33e01eb99351a9a5272"
+    },
+    {
+      "path": "scripts/quality/fixtures/titanic-motion/bone-map.json",
+      "expectedSha256": "75791f7d4782fd8973fe81f432d3e41cb75ed66590e441feed2da272a4945f1c"
     }
   ],
   "smokeCases": [
@@ -719,6 +731,7 @@
     {"type": "LF_UsageStatistics", "nodeIds": [380], "reason": "dormant statistics output is intentionally excluded from coverage targets; a bounded statistics fixture is deferred"}
   ],
   "disabledNodes": [
+    {"id": 677, "type": "LF_RetargetMotion", "reason": "generated motion, rig and map available; registered licensed SMPL-X model and local input paths required; inventory only"},
     {"id": 669, "type": "LF_VideoToMotion", "reason": "pinned source video and configured isolated RGB MoCap runtime required; inventory only"},
     {"id": 670, "type": "LF_MotionToVideo", "reason": "pinned motion capture and registered licensed SMPL-X model required; inventory only"},
     {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},

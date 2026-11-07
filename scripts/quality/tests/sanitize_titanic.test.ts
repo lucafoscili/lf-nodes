@@ -197,6 +197,7 @@ describe('Titanic publication sanitizer', () => {
     expect(manifest.fixtures.map((asset: any) => asset.path.split('/').at(-1))).toEqual([
       'lower.png', 'upper.png', 'synthetic.glb', 'comfy-example.png',
       'portrait-a.png', 'portrait-b.png',
+      'rig.glb', 'motion.json', 'bone-map.json',
     ]);
     expect(byId(612).widgets_values_named.source_glb).toBe('titanic-cpu/synthetic.glb');
     expect(byId(614).widgets_values_named.percent).toBe(75);
@@ -227,6 +228,21 @@ describe('Titanic publication sanitizer', () => {
       expect((nodes.get(destination) as any).inputs[destinationSlot].link).toBe(id);
       expect((nodes.get(source) as any).outputs[sourceSlot].type).toBe(type);
     }
+  });
+
+  it('keeps the synthetic motion retarget specimen explicit about its pending model prerequisite', () => {
+    const node = readFixture().nodes.find((item: any) => item.id === 677);
+    expect(node.type).toBe('LF_RetargetMotion');
+    expect(node.mode).toBe(2);
+    expect(node.widgets_values_named).toMatchObject({
+      motion_file: 'scripts/quality/fixtures/titanic-motion/motion.json',
+      glb_path: 'scripts/quality/fixtures/titanic-motion/rig.glb',
+      bone_map_path: 'scripts/quality/fixtures/titanic-motion/bone-map.json',
+      keep_rest_facing: '[]', flatten_slope: '[]',
+    });
+    expect(readManifest().disabledNodes.find((item: any) => item.id === 677)).toMatchObject({
+      type: 'LF_RetargetMotion', reason: expect.stringContaining('inventory only'),
+    });
   });
 
   it('connects synthetic regional diagnostics and independent core SAM3/DINOv3 cases', () => {

@@ -1,12 +1,13 @@
-"""Headless SMPL-X preview: CPU skinning, smooth shaded z-buffer, PyAV MP4.
+"""Headless motion preview: CPU skinning, smooth shaded z-buffer, PyAV MP4.
 
 No graphics context, external application, or model download is needed. The
-camera is a fixed orthographic framing of the entire motion in camera space.
+camera keeps fixed orthographic framing unless travel requires root following.
 """
 
 from __future__ import annotations
 
 from fractions import Fraction
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +19,8 @@ DEFAULT_BETAS = "0.5,-1.5"
 DEFAULT_IMAGE_FRAME_LIMIT = 32
 # Both selected uint8 frames and the node's float32 IMAGE conversion coexist.
 IMAGE_OUTPUT_BUDGET_BYTES = 256 * 1024 * 1024
+# Normal captures stay below 3 m/s; monocular depth failures can exceed 700 m/s.
+DEPTH_SPEED_LIMIT = 10.0
 
 
 def parse_betas(value: str) -> np.ndarray:
@@ -43,22 +46,31 @@ def resolve_body_model(body: str) -> Path:
     return Path(path)
 
 
-def pose_meshes(motion: dict, model_path: Path, body: str, betas: np.ndarray):
-    import torch
-
+def load_body_model(model_path: Path, body: str):
+    """Shared lazy CPU model construction for rendering and the SMPL-X adapter."""
     try:
         import smplx
     except ImportError as error:
         raise RuntimeError("Motion renderer requires smplx>=0.1.28 to evaluate the body model.") from error
     try:
-        model = smplx.SMPLX(
+        return smplx.SMPLX(
             str(model_path), gender=body, use_pca=False, flat_hand_mean=True,
         ).eval()
+    except Exception as error:
+        raise RuntimeError(f"SMPL-X body evaluation failed for {model_path.name}: {error}") from error
+
+
+def pose_meshes(motion: dict, model_path: Path, body: str, betas: np.ndarray):
+    import torch
+
+    try:
+        model = load_body_model(model_path, body)
         parameters = {
             key: torch.as_tensor(motion["camera"][key], dtype=torch.float32)
             for key in POSE_WIDTHS
         }
         shape = torch.as_tensor(betas, dtype=torch.float32).reshape(1, 10)
+        roots = np.empty((len(parameters["body_pose"]), 3), dtype=np.float32)
         def mesh_batches():
             # Re-evaluate bounded batches for framing and rendering. Retaining
             # all vertices (and their turned copy) scales with clip duration.
@@ -74,9 +86,11 @@ def pose_meshes(motion: dict, model_path: Path, body: str, betas: np.ndarray):
                             expression=torch.zeros(count, 10),
                         )
                         vertices = result.vertices.cpu().numpy()
+                        roots[start:start + count] = result.joints[:, 0].cpu().numpy()
                     yield vertices
             except Exception as error:
                 raise RuntimeError(f"SMPL-X body evaluation failed for {model_path.name}: {error}") from error
+        mesh_batches.root_positions = roots
         return mesh_batches, np.asarray(model.faces, dtype=np.int32)
     except Exception as error:
         raise RuntimeError(f"SMPL-X body evaluation failed for {model_path.name}: {error}") from error
@@ -171,7 +185,71 @@ def select_image_frames(count, width, height, image_frame_limit):
     return np.linspace(0, count - 1, selected, dtype=np.int64)
 
 
-def render_motion(motion_file, model_path, body, betas, width, height, output_path, source_video="", image_frame_limit=DEFAULT_IMAGE_FRAME_LIMIT):
+def _depth_warning(motion_file, roots, fps):
+    """One diagnostic for the clip; depth is the posed pelvis, in camera metres."""
+    speeds = np.abs(np.diff(roots[:, 2])) * fps
+    if not len(speeds) or speeds.max() <= DEPTH_SPEED_LIMIT:
+        return None
+    frame = int(np.argmax(speeds)) + 1
+    message = (
+        f"Motion {Path(motion_file).name}: camera root depth speed {speeds[frame - 1]:.2f} m/s "
+        f"at frame {frame}; near {roots[:, 2].min():.2f} m, far {roots[:, 2].max():.2f} m "
+        f"(limit {DEPTH_SPEED_LIMIT:g} m/s)."
+    )
+    logging.getLogger(__name__).warning(message)
+    return message
+
+
+def _smooth_roots(roots, fps):
+    """Symmetric 0.1-second smoothing; the framing pass bounds its visible lag."""
+    radius = min(len(roots) - 1, max(1, round(fps * 0.1)))
+    weights = radius + 1 - np.abs(np.arange(-radius, radius + 1))
+    weights = weights / weights.sum()
+    padded = np.pad(roots, ((radius, radius), (0, 0)), mode="edge")
+    return np.stack([np.convolve(padded[:, axis], weights, mode="valid") for axis in range(3)], axis=1)
+
+
+def _following_centre(view, proposed, scale, width, height):
+    # A depth discontinuity must not leave the body outside its smoothed frame.
+    # Bound lag by the actual free margins, including the panel's label strip.
+    low, high = view.min(axis=0), view.max(axis=0)
+    lower = high[:2] - np.array([width / 2 - 2, height / 2 - 2]) / scale
+    upper = low[:2] + np.array([width / 2 - 2, height / 2 - 24]) / scale
+    centre = proposed.copy()
+    centre[:2] = np.clip(centre[:2], lower, upper)
+    return centre
+
+
+def pose_glb_meshes(motion, model_path, body, body_glb):
+    """Place the target in the clip's camera frame, retaining its own pelvis."""
+    from .retarget_glb import glb_meshes
+    from .retarget_smplx import camera_from_world
+
+    try:
+        world_batches, faces, metadata = glb_meshes(body_glb)
+        count = len(motion["camera"]["transl"])
+        if metadata["frame_count"] != count or not np.isclose(metadata["fps"], motion["fps"]):
+            raise ValueError("Retargeted animation frame count and fps must match the motion.")
+        scale = float(metadata["scale"])
+        if not np.isfinite(scale) or scale <= 0:
+            raise ValueError("Retargeted animation scale must be positive and finite.")
+        rotation, translation, camera_root = camera_from_world(motion, load_body_model(model_path, body))
+        def mesh_batches():
+            start = 0
+            for meshes in world_batches():
+                stop = start + len(meshes)
+                yield (np.einsum("fij,fvj->fvi", rotation[start:stop], meshes / scale)
+                       + translation[start:stop, None]).astype(np.float32)
+                start = stop
+        mesh_batches.root_positions = (np.einsum("fij,fj->fi", rotation, world_batches.root_positions / scale)
+                                       + translation).astype(np.float32)
+        mesh_batches.depth_positions = camera_root
+        return mesh_batches, faces
+    except (OSError, ValueError, KeyError) as error:
+        raise ValueError(f"Body GLB {body_glb}: {error}") from error
+
+
+def render_motion(motion_file, model_path, body, betas, width, height, output_path, source_video="", image_frame_limit=DEFAULT_IMAGE_FRAME_LIMIT, body_glb=""):
     """Stream every RGB frame to H.264; return selected uint8 frames and timing."""
     import av
     from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -185,30 +263,53 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
     count = len(motion["camera"]["body_pose"])
     total_width = width * (3 if source_video else 2)
     indices = select_image_frames(count, total_width, height, image_frame_limit)
-    mesh_batches, faces = pose_meshes(motion, Path(model_path), body, shape)
+    mesh_batches, faces = (pose_glb_meshes(motion, Path(model_path), body, body_glb) if body_glb
+                           else pose_meshes(motion, Path(model_path), body, shape))
     # Preserve translation over time; turn around the clip's shared centre.
     low, high = np.full(3, np.inf, dtype=np.float32), np.full(3, -np.inf, dtype=np.float32)
+    relative_low, relative_high = low.copy(), high.copy()
+    minimum_height = np.inf
+    start = 0
     for meshes in mesh_batches():
         low = np.minimum(low, meshes.min(axis=(0, 1)))
         high = np.maximum(high, meshes.max(axis=(0, 1)))
+        minimum_height = min(minimum_height, np.ptp(meshes[:, :, 1], axis=1).min())
+        relative = meshes - mesh_batches.root_positions[start:start + len(meshes), None]
+        relative_low = np.minimum(relative_low, relative.min(axis=(0, 1)))
+        relative_high = np.maximum(relative_high, relative.max(axis=(0, 1)))
+        start += len(meshes)
+    roots = mesh_batches.root_positions
+    warning = _depth_warning(motion_file, getattr(mesh_batches, "depth_positions", roots), float(motion["fps"]))
     origin = (low + high) / 2
     angle = np.deg2rad(45)
     turn = np.array([[np.cos(angle), 0, np.sin(angle)], [0, 1, 0], [-np.sin(angle), 0, np.cos(angle)]], dtype=np.float32)
     turned_low, turned_high = np.full(3, np.inf, dtype=np.float32), np.full(3, -np.inf, dtype=np.float32)
+    relative_turned_low, relative_turned_high = turned_low.copy(), turned_high.copy()
+    start = 0
     for meshes in mesh_batches():
         turned = (meshes - origin) @ turn.T + origin
         turned_low = np.minimum(turned_low, turned.min(axis=(0, 1)))
         turned_high = np.maximum(turned_high, turned.max(axis=(0, 1)))
+        relative = (meshes - roots[start:start + len(meshes), None]) @ turn.T
+        relative_turned_low = np.minimum(relative_turned_low, relative.min(axis=(0, 1)))
+        relative_turned_high = np.maximum(relative_turned_high, relative.max(axis=(0, 1)))
+        start += len(meshes)
     bounds = [(low, high), (turned_low, turned_high)]
     # One scale for both views, one fixed frame across time. Leave room for labels.
     scale = min(min(width / (high[0] - low[0]), (height - 24) / (high[1] - low[1])) for low, high in bounds) / 1.12
     centres = [(low + high) / 2 for low, high in bounds]
+    following = minimum_height * scale < height / 2
+    if following:
+        bounds = [(relative_low, relative_high), (relative_turned_low, relative_turned_high)]
+        scale = min(min(width / (hi[0] - lo[0]), (height - 24) / (hi[1] - lo[1])) for lo, hi in bounds) / 1.12
+        centres = [(lo + hi) / 2 for lo, hi in bounds]
+        smoothed_roots = _smooth_roots(roots, float(motion["fps"]))
     sources = _source_frames(source_video, float(motion["fps"]), count) if source_video else None
     frames = np.empty((len(indices), height, total_width, 3), dtype=np.uint8)
     selected = iter(enumerate(indices))
     next_selection = next(selected, None)
     # Release framing batches before encoding begins.
-    del meshes, turned
+    del meshes, turned, relative
     font = ImageFont.load_default(size=13)
     try:
         with av.open(str(output_path), mode="w") as container:
@@ -224,18 +325,29 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
                     source = ImageOps.pad(next(sources), (width, height), color=(238, 239, 242))
                     canvas.paste(source, (0, 0))
                     offset = width
-                views = (mesh, (mesh - origin) @ turn.T + origin)
+                pivot = roots[index] if following else origin
+                views = (mesh, (mesh - pivot) @ turn.T + pivot)
                 for view, centre in zip(views, centres):
+                    if following:
+                        centre = _following_centre(view, smoothed_roots[index] + centre, scale, width, height)
                     # Supersample edges without a graphics context.
                     rendered = _rasterize(view, faces, centre, scale * 2, width * 2, height * 2)
                     panel = Image.fromarray(rendered).resize((width, height), Image.Resampling.LANCZOS)
                     canvas.paste(panel, (offset, 0))
                     offset += width
                 labels = (["Source"] if sources is not None else []) + ["Camera", "Turned 45 degrees"]
+                if following:
+                    labels = [label if label == "Source" else f"{label} (following)" for label in labels]
                 draw = ImageDraw.Draw(canvas)
                 for panel, label in enumerate(labels):
                     draw.rectangle((panel * width, 0, (panel + 1) * width, 22), fill=(238, 239, 242))
-                    draw.text((panel * width + 7, 4), label, fill=(45, 46, 50), font=font)
+                    label_font = font
+                    if following and label != "Source":
+                        size = 13
+                        while draw.textlength(label, font=label_font) > width - 14 and size > 1:
+                            size -= 1
+                            label_font = ImageFont.load_default(size=size)
+                    draw.text((panel * width + 7, 4), label, fill=(45, 46, 50), font=label_font)
                 pixels = np.asarray(canvas)
                 if next_selection is not None and index == next_selection[1]:
                     frames[next_selection[0]] = pixels
@@ -249,4 +361,9 @@ def render_motion(motion_file, model_path, body, betas, width, height, output_pa
     finally:
         if sources is not None:
             sources.close()
-    return frames, {"frames": count, "image_frames": len(indices), "frame_indices": indices.tolist(), "fps": float(motion["fps"])}
+    timing = {"frames": count, "image_frames": len(indices), "frame_indices": indices.tolist(), "fps": float(motion["fps"])}
+    if following:
+        timing["framing"] = "following"
+    if warning:
+        timing["warnings"] = [warning]
+    return frames, timing

@@ -13,7 +13,7 @@ from modules.nodes.motion import motion_to_video
 from modules.nodes.motion.motion_to_video import LF_MotionToVideo
 from modules.utils.constants import Input
 from modules.utils.helpers.motion import render
-from modules.utils.helpers.motion.format import JOINT_NAMES, POSE_WIDTHS, write_motion
+from modules.utils.helpers.motion.format import JOINT_NAMES, POSE_WIDTHS, read_motion, write_motion
 
 
 @pytest.fixture
@@ -39,7 +39,8 @@ def synthetic_motion(monkeypatch, tmp_path):
                 vertices = torch.zeros(count, vertex_count, 3)
                 vertices[:, :4] = torch.tensor([[-0.5, -1, 2], [0.5, -1, 2], [0, 1, 2], [0, 0, 3]])
                 vertices += kwargs["transl"][:, None, :]
-                return SimpleNamespace(vertices=vertices)
+                joints = (kwargs["transl"][:, None, :] + torch.tensor([0, 0, 2])).expand(-1, 55, -1)
+                return SimpleNamespace(vertices=vertices, joints=joints)
 
         monkeypatch.setitem(sys.modules, "smplx", SimpleNamespace(SMPLX=Body))
         return path, motion, Body, calls
@@ -89,7 +90,7 @@ def test_motion_to_video_snapshots_public_schema_and_mapped_execution() -> None:
             "width": (Input.INTEGER, 320),
             "height": (Input.INTEGER, 560),
         },
-        "optional": {"source_video": (Input.STRING, ""), "ui_widget": (Input.LF_CODE, ""), "image_frame_limit": (Input.INTEGER, 32)},
+        "optional": {"source_video": (Input.STRING, ""), "ui_widget": (Input.LF_CODE, ""), "image_frame_limit": (Input.INTEGER, 32), "body_glb": (Input.STRING, "")},
     }
     assert schema["hidden"] == {"node_id": "UNIQUE_ID"}
     assert LF_MotionToVideo.INPUT_IS_LIST is False
@@ -380,6 +381,7 @@ def test_real_pyav_preserves_legacy_pixels_and_all_frame_timing(tmp_path, synthe
                 container.mux(packet)
         for packet in stream.encode():
             container.mux(packet)
+    assert output.read_bytes() == legacy.read_bytes()
     def decoded(video):
         with av.open(str(video)) as container:
             rate = container.streams.video[0].average_rate
@@ -417,3 +419,79 @@ def test_long_clip_bounds_mesh_and_image_memory_through_real_node(monkeypatch, t
     # conversion/list creation. tracemalloc excludes native torch storage.
     assert peaks[1] < 40 * 1024**2
     assert peaks[1] < peaks[0] + 20 * 1024**2
+
+
+def test_off_axis_depth_jump_follows_body_and_warns_once_in_node_history(monkeypatch, tmp_path, synthetic_motion, caplog):
+    path, motion, _, _ = synthetic_motion(count=5)
+    depths = [1, 1, 26, 26, 26]
+    motion["camera"]["transl"] = [[0.8 * z, 0.4 * z, z - 2] for z in depths]
+    write_motion(path, motion)
+    output = tmp_path / "following.mp4"
+    monkeypatch.setattr(motion_to_video, "resolve_body_model", lambda _: tmp_path / "model.npz")
+    monkeypatch.setattr(motion_to_video.folder_paths, "get_output_directory", lambda: str(tmp_path))
+    monkeypatch.setattr(motion_to_video, "resolve_filepath", lambda **_: (str(output), None, None))
+    response = LF_MotionToVideo().on_exec(str(path), width=128, height=192)
+    summary = response["ui"]["lf_output"][0]["json"]
+    assert summary["framing"] == "following"
+    assert summary["warnings"] == [
+        "Motion motion-5.json: camera root depth speed 750.00 m/s at frame 2; near 1.00 m, far 26.00 m (limit 10 m/s)."
+    ]
+    assert [record.message for record in caplog.records] == summary["warnings"]
+    pixels = response["result"][1].mul(255).round().byte().numpy()
+    for frame in pixels:
+        for panel in (frame[:, :128], frame[:, 128:]):
+            # Exclude the label strip; count the actual shaded body, not its bounds.
+            rows = np.where(np.any(np.max(np.abs(panel[24:].astype(int) - [238, 239, 242]), axis=2) > 30, axis=1))[0]
+            assert rows[-1] - rows[0] + 1 >= 192 / 2
+    assert read_motion(path) == motion
+
+
+def test_body_glb_uses_camera_transform_and_its_own_scaled_pelvis(monkeypatch, tmp_path, synthetic_motion):
+    import runpy
+    from pathlib import Path
+    from modules.utils.helpers.motion.retarget import world_to_local_rotations
+    from modules.utils.helpers.motion.retarget_glb import load_glb_target, append_glb_animation, glb_meshes
+    from PIL import Image
+
+    path, motion, _, _ = synthetic_motion()
+    # Camera faces the opposite Y/Z axes. J0 is [0, 0, 2], not zero.
+    motion["world"] = {key: np.zeros((3, width)).tolist() for key, width in POSE_WIDTHS.items()}
+    motion["world"]["transl"] = [[1, 0, 0]] * 3
+    motion["camera"]["transl"] = [[2, 0, 5]] * 3
+    motion["camera"]["global_orient"] = [[np.pi, 0, 0]] * 3
+    write_motion(path, motion)
+    generate = runpy.run_path(str(Path(__file__).resolve().parents[4] / "scripts/quality/update_titanic_motion_coverage.py"))["synthetic_assets"]
+    target = load_glb_target(generate()["rig.glb"])
+    skeleton = target["skeleton"]
+    local = world_to_local_rotations(skeleton["rest_rotations"], skeleton["parents"])
+    solved = {"local_rotations": np.repeat(local[None], 3, axis=0),
+              "root_positions": np.repeat([[0, 1, 0]], 3, axis=0), "scale": 2}
+    glb_path = tmp_path / "body.glb"
+    glb_path.write_bytes(append_glb_animation(target, solved, 30, "pelvis"))
+    meshes, faces = render.pose_glb_meshes(motion, tmp_path / "model.npz", "female", glb_path)
+    raw, _, _ = glb_meshes(glb_path)
+    expected = next(raw()) / 2 * [1, -1, -1] + [1, 0, 9]
+    np.testing.assert_allclose(next(meshes()), expected, atol=1e-6)
+    np.testing.assert_allclose(meshes.root_positions, [[1, -.5, 9]] * 3, atol=1e-6)
+    assert not np.allclose(meshes.root_positions, meshes.depth_positions)
+    assert faces.shape == (1, 3)
+    monkeypatch.setattr(render, "pose_meshes", lambda *_: pytest.fail("GLB override used sample body"))
+    source = tmp_path / "source.mp4"
+    source.touch()
+    def source_frames(*_):
+        yield from (Image.new("RGB", (64, 64), "red") for _ in range(3))
+    monkeypatch.setattr(render, "_source_frames", source_frames)
+    frames, timing = render.render_motion(path, tmp_path / "model.npz", "female", "0", 64, 64,
+                                          tmp_path / "glb-preview.mp4", str(source), body_glb=str(glb_path))
+    assert frames.shape == (3, 64, 192, 3) and timing["frames"] == 3
+    np.testing.assert_array_equal(frames[:, 40, 32], [[255, 0, 0]] * 3)
+    assert np.any(frames[:, 24:, 64:] != [238, 239, 242])
+
+
+def test_failed_glb_override_never_falls_back(monkeypatch, tmp_path, synthetic_motion):
+    path, _, _, _ = synthetic_motion()
+    monkeypatch.setattr(render, "pose_meshes", lambda *_: pytest.fail("Failed override used sample body"))
+    with pytest.raises(ValueError, match="Body GLB.*missing.glb"):
+        render.render_motion(path, tmp_path / "model.npz", "female", "0", 64, 64,
+                             tmp_path / "failed.mp4", body_glb=str(tmp_path / "missing.glb"))
+    assert not (tmp_path / "failed.mp4").exists()

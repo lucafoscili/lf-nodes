@@ -52,6 +52,7 @@ export const codeFactory: CodeFactory = {
     switch (node.comfyClass) {
       case NodeName.videoToMotion:
       case NodeName.motionToVideo:
+      case NodeName.retargetMotion:
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
       case NodeName.shuffleJsonKeys:
@@ -73,7 +74,7 @@ export const codeFactory: CodeFactory = {
 
     STATE.set(wrapper, { code, node, wrapper });
 
-    if (node.comfyClass === NodeName.getKeyFromJsonByIndex) {
+    if (node.comfyClass === NodeName.getKeyFromJsonByIndex || node.comfyClass === NodeName.retargetMotion) {
       const outputNode = node as NodeType & {
         onExecuted?: (output: unknown, ...args: unknown[]) => unknown;
       };

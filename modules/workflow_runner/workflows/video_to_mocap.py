@@ -68,6 +68,19 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
         if len(paths) != 1 or not Path(paths[0]).is_file():
             raise InputValidationError("video_path")
         video_path = paths[0]
+    target_fields = ("glb_path", "bone_map_path")
+    supplied = {name: inputs.get(name) not in (None, "", []) for name in target_fields}
+    if any(supplied.values()) and not all(supplied.values()):
+        raise InputValidationError(next(name for name in target_fields if not supplied[name]))
+    target_paths = {}
+    if all(supplied.values()):
+        for name, suffix, portable in (("glb_path", ".glb", "target.glb"),
+                                       ("bone_map_path", ".json", "bone-map.json")):
+            paths = resolve_upload_paths(inputs, name, allow_multiple=True, must_exist=resolve_upload)
+            if (len(paths) != 1 or Path(paths[0]).suffix.lower() != suffix
+                    or (resolve_upload and not Path(paths[0]).is_file())):
+                raise InputValidationError(name)
+            target_paths[name] = paths[0] if resolve_upload else portable
     prompt["extract_motion"]["inputs"].update(
         video_path=video_path, engine=engine, static_camera=static_camera,
         smoothing=smoothing, gpu_index=gpu_index, include_shape=include_shape,
@@ -77,6 +90,14 @@ def _configure(prompt: dict[str, Any], inputs: dict[str, Any], *, resolve_upload
     prompt["render_motion"]["inputs"].update(
         body=body, betas=betas, width=width, height=height, source_video=video_path,
     )
+    if target_paths:
+        prompt["retarget_motion"] = {
+            "class_type": "LF_RetargetMotion",
+            "inputs": {"motion_file": ["extract_motion", 0], "body": body, "betas": betas,
+                       **target_paths, "keep_rest_facing": "[]", "flatten_slope": "[]"},
+            "_meta": {"title": "Retarget motion onto the uploaded rig"},
+        }
+        prompt["render_motion"]["inputs"]["body_glb"] = ["retarget_motion", 0]
 
 
 def _configure_run(prompt: dict[str, Any], inputs: dict[str, Any]) -> None:
@@ -126,6 +147,16 @@ WORKFLOW = WorkflowNode(
             id="betas", node_id="render_motion", shape="textfield", required=False,
             description="Comma-separated SMPL-X shape coefficients for the render body.",
             props={"lfLabel": "Render shape", "lfValue": "0.5,-1.5"},
+        ),
+        WorkflowCell(
+            id="glb_path", node_id="retarget_motion", shape="upload", required=False,
+            value="Target rig", description="Optional rigged GLB; also upload its bone map.",
+            props={"lfLabel": "Target rig (optional)", "lfHtmlAttributes": {"accept": ".glb"}},
+        ),
+        WorkflowCell(
+            id="bone_map_path", node_id="retarget_motion", shape="upload", required=False,
+            value="Bone map", description="Explicit SMPL-X to target bone map JSON for the target rig.",
+            props={"lfLabel": "Bone map (with target rig)", "lfHtmlAttributes": {"accept": ".json"}},
         ),
         _number("width", "render_motion", "Render width", 320, 64, 2048),
         _number("height", "render_motion", "Render height", 560, 64, 2048),

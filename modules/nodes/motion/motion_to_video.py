@@ -27,6 +27,7 @@ class LF_MotionToVideo:
                 "source_video": (Input.STRING, {"default": "", "tooltip": "Optional source video path for a synchronized comparison."}),
                 "ui_widget": (Input.LF_CODE, {"default": ""}),
                 "image_frame_limit": (Input.INTEGER, {"default": DEFAULT_IMAGE_FRAME_LIMIT, "min": 0, "tooltip": "Maximum evenly spaced IMAGE frames, including first and last when at least two are selected. 0 requests all. Combined uint8/float32 selection is limited to 256 MiB; MP4 always retains every frame."}),
+                "body_glb": (Input.STRING, {"default": "", "tooltip": "Optional GLB from LF_RetargetMotion, replacing the sample body. A failed override raises."}),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -44,7 +45,7 @@ class LF_MotionToVideo:
         "Selected individual preview frames [1,H,W,3] in playback order, sharing batch storage.",
     )
 
-    def on_exec(self, motion_file, body="female", betas=DEFAULT_BETAS, width=320, height=560, source_video="", image_frame_limit=DEFAULT_IMAGE_FRAME_LIMIT, **kwargs):
+    def on_exec(self, motion_file, body="female", betas=DEFAULT_BETAS, width=320, height=560, source_video="", image_frame_limit=DEFAULT_IMAGE_FRAME_LIMIT, body_glb="", **kwargs):
         model_path = resolve_body_model(body)
         output_root = Path(folder_paths.get_output_directory()).resolve()
         output_file, _, _ = resolve_filepath(
@@ -52,12 +53,14 @@ class LF_MotionToVideo:
             extension="mp4", add_counter=True,
         )
         frames, timing = render_motion(
-            motion_file, model_path, body, betas, width, height, output_file, source_video, image_frame_limit,
+            motion_file, model_path, body, betas, width, height, output_file, source_video, image_frame_limit, body_glb,
         )
         batch = torch.from_numpy(frames).to(dtype=torch.float32).div_(255)
         frame_list = [batch[index:index + 1] for index in range(len(batch))]
         relative = Path(output_file).resolve().relative_to(output_root).as_posix()
         summary = {"video_file": relative, **timing, "body": body, "betas": betas}
+        if body_glb:
+            summary["body_glb"] = str(body_glb)
         payload = {"value": json.dumps(summary), "json": summary, "file_names": [relative]}
         safe_send_sync("motiontovideo", payload, kwargs.get("node_id"))
         return {"ui": {"lf_output": [payload]}, "result": (str(output_file), batch, frame_list)}
