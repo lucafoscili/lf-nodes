@@ -370,28 +370,67 @@ def leg_scale(source_skeleton, target_skeleton, pairs):
     return float(lengths[1] / lengths[0])
 
 
-def follow_pairs(follow, driven, target_names):
-    """Validate ``follow`` ({follower: leader} target bone names, or pairs) against the driven target bones.
+_FOLLOW_KEYS = {"leader", "weight", "twist", "axis"}
 
-    A follower is driven by no source: it rides its leader rigidly. Refused by
-    name: an unknown bone, a follower named twice or also driven by a pair or
-    chain, a leader that is itself a follower, and a leader nothing drives.
+
+def _share(follower, key, value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not np.isfinite(value) or not 0 <= value <= 1:
+        raise ValueError(f"follower {follower!r}: {key} must be a number from 0 to 1, got {value!r}")
+    return float(value)
+
+
+def follow_rules(follow, driven, target_names):
+    """Validate ``follow`` against the driven target bones; returns ``[(follower, rule)]``.
+
+    ``follow`` is ``{follower: leader or rule}`` (or such pairs), target bone
+    names. A bare leader name rides it rigidly. A rule object is ``leader``,
+    ``weight`` (0 to 1, default 1: the share of the leader's turn from rest)
+    and optionally ``twist`` (0 to 1) with ``axis`` (two target bone names, the
+    twist axis from the first's rest position to the second's): the leader's
+    turn then splits into swing and twist about that axis, ``weight`` scaling
+    the swing and ``twist`` the twist. Each rule comes back as
+    ``dict(leader, weight, twist, axis)``, ``twist``/``axis`` None when absent.
+    Refused by name: an unknown bone or rule key, a follower named twice or also
+    driven by a pair or chain, a leader that is itself a follower, a leader
+    nothing drives, a share out of range, and a twist without an axis or the
+    reverse.
     """
     rows = list(follow.items()) if isinstance(follow, dict) else [tuple(row) for row in follow]
     known, driven, followers = set(target_names), set(driven), {}
     for row in rows:
         if len(row) != 2:
             raise ValueError(f"follow entry {row!r} must name a follower and its leader")
-        follower, leader = row
-        for role, name in (("follower", follower), ("leader", leader)):
-            if not isinstance(name, str) or name not in known:
-                raise ValueError(f"follow names an unknown {role} bone {name!r}")
+        follower, spec = row
+        if not isinstance(follower, str) or follower not in known:
+            raise ValueError(f"follow names an unknown follower bone {follower!r}")
+        rule = dict(leader=spec) if isinstance(spec, str) else spec
+        if not isinstance(rule, dict):
+            raise ValueError(f"follower {follower!r} needs a leader name or a rule object, got {spec!r}")
+        unknown = sorted(set(rule) - _FOLLOW_KEYS)
+        if unknown:
+            raise ValueError(f"follower {follower!r}: unknown rule key {unknown[0]!r} "
+                             f"(a rule takes {', '.join(sorted(_FOLLOW_KEYS))})")
+        leader = rule.get("leader")
+        if not isinstance(leader, str) or leader not in known:
+            raise ValueError(f"follow names an unknown leader bone {leader!r}")
+        weight = _share(follower, "weight", rule.get("weight", 1))
+        twist, axis = rule.get("twist"), rule.get("axis")
+        if (twist is None) != (axis is None):
+            raise ValueError(f"follower {follower!r}: twist and axis go together; it names only "
+                             f"{'twist' if axis is None else 'axis'}")
+        if twist is not None:
+            twist = _share(follower, "twist", twist)
+            if (not isinstance(axis, (list, tuple)) or len(axis) != 2
+                    or any(not isinstance(name, str) or name not in known for name in axis)):
+                raise ValueError(f"follower {follower!r}: axis must name two target bones, got {axis!r}")
+            axis = tuple(axis)
         if follower in followers:
             raise ValueError(f"follow names follower {follower!r} twice")
         if follower in driven:
             raise ValueError(f"follower {follower!r} is also driven by a pair or chain")
-        followers[follower] = leader
-    for follower, leader in followers.items():
+        followers[follower] = dict(leader=leader, weight=weight, twist=twist, axis=axis)
+    for follower, rule in followers.items():
+        leader = rule["leader"]
         if leader in followers:
             raise ValueError(f"leader {leader!r} of follower {follower!r} is itself a follower")
         if leader not in driven:
@@ -399,8 +438,43 @@ def follow_pairs(follow, driven, target_names):
     return list(followers.items())
 
 
-def _follower_positions(target, output_world, root_index, root_positions, followers):
-    """World positions of each follower: its rest offset from its leader carried by the leader's rotation delta.
+def follow_pairs(follow, driven, target_names):
+    """``follow_rules``' validation, returning (follower, leader) pairs."""
+    return [(follower, rule["leader"]) for follower, rule in follow_rules(follow, driven, target_names)]
+
+
+def _rigid(rule):
+    return rule["weight"] == 1 and rule["twist"] is None
+
+
+def swing_twist(turn, axis):
+    """Split xyzw ``turn`` into (swing, twist) with turn = swing * twist, twist about unit ``axis``.
+
+    A turn that is a pure half-turn perpendicular to the axis has no twist: identity.
+    """
+    turn = quaternion_normalize(turn)
+    axis = np.asarray(axis, dtype=np.float64)
+    twist = np.concatenate((axis * np.sum(turn[..., :3] * axis, axis=-1, keepdims=True), turn[..., 3:]), axis=-1)
+    norm = np.linalg.norm(twist, axis=-1, keepdims=True)
+    twist = np.where(norm < 1e-12, _IDENTITY, twist / np.maximum(norm, 1e-12))
+    return quaternion_multiply(turn, quaternion_inverse(twist)), twist
+
+
+def _partial_delta(rule, leader_delta, base_delta, axis):
+    """D_F = D_base * share(delta), delta = inverse(D_base) * D_leader: the leader's turn from rest in rest axes."""
+    turn = quaternion_multiply(quaternion_inverse(base_delta), leader_delta)
+    if rule["twist"] is None:
+        part = quaternion_slerp(_IDENTITY, turn, rule["weight"])
+    else:
+        swing, twist = swing_twist(turn, axis)
+        part = quaternion_multiply(quaternion_slerp(_IDENTITY, swing, rule["weight"]),
+                                   quaternion_slerp(_IDENTITY, twist, rule["twist"]))
+    return quaternion_normalize(quaternion_multiply(base_delta, part))
+
+
+def _follower_positions(target, output_world, root_index, root_positions, followers, partial=()):
+    """World positions of each follower: its rest offset from its leader carried by the leader's rotation delta,
+    or, for a ``partial`` follower, by its own delta (its share of the leader's turn about the leader's joint).
 
     Joints translate only as their ancestors move them (rest local translations),
     except the root track's joint and the followers, so a leader's position is
@@ -434,7 +508,8 @@ def _follower_positions(target, output_world, root_index, root_positions, follow
             if index == root_index:
                 positions[:, index] = root_positions
             elif anchor >= 0:
-                delta = quaternion_multiply(output_world[:, anchor], quaternion_inverse(rest_rotations[anchor]))
+                own = index if index in partial else anchor
+                delta = quaternion_multiply(output_world[:, own], quaternion_inverse(rest_rotations[own]))
                 positions[:, index] = positions[:, anchor] + quaternion_rotate(
                     delta, rest_positions[index] - rest_positions[anchor])
         placed.update(ready)
@@ -449,11 +524,18 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
     W_target = W_source * inverse(W_source_rest) * A * W_target_rest.
     Unmapped joints retain their true target rest LOCAL rotation while following
     their animated parent. A target bone belongs to one pair or one chain.
-    A ``follow`` bone ({follower: leader}, see ``follow_pairs``) rides its
-    leader rigidly, as if its skin were weighted to the leader:
-    W_follower = W_leader * inverse(W_leader_rest) * W_follower_rest, and its
-    rest offset from the leader turns with the leader. Its WORLD positions are
-    returned under ``follower_positions``, by name.
+    A ``follow`` bone ({follower: leader or rule}, see ``follow_rules``) named
+    with a bare leader rides it rigidly, as if its skin were weighted to the
+    leader: W_follower = W_leader * inverse(W_leader_rest) * W_follower_rest,
+    and its rest offset from the leader turns with the leader. A rule with a
+    share takes part of the leader's turn from rest, measured against the
+    leader's parent (B): turn = inverse(D_B) * D_leader with D = W * inverse(W_rest),
+    D_follower = D_B * share(turn), W_follower = D_follower * W_follower_rest,
+    and its rest offset from the leader turns by D_follower. The share is
+    slerp(1, turn, weight), or with a twist axis slerp(1, swing, weight) *
+    slerp(1, twist, twist) of turn = swing * twist. ``weight`` 1 with no twist
+    is the rigid ride. Followers' WORLD positions are returned under
+    ``follower_positions``, by name.
     """
     source, target = _skeleton(source_skeleton), _skeleton(target_skeleton)
     world = quaternion_normalize(source_world_rotations)
@@ -508,19 +590,51 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
                 delta = quaternion_multiply(world[:, si], quaternion_inverse(source["rest_rotations"][si]))
                 samples.append(quaternion_multiply(quaternion_multiply(delta, alignment), target["rest_rotations"][ti]))
             desired[ti] = quaternion_slerp(samples[0], samples[1], weight)
-    followers = [(target["names"].index(follower), target["names"].index(leader)) for follower, leader in
-                 follow_pairs(follow, [target["names"][ti] for ti in desired], target["names"])]
-    for fi, li in followers:
-        delta = quaternion_multiply(desired[li], quaternion_inverse(target["rest_rotations"][li]))
-        desired[fi] = quaternion_multiply(delta, target["rest_rotations"][fi])
-    rest_local = world_to_local_rotations(target["rest_rotations"], target["parents"])
-    output = np.broadcast_to(rest_local, (len(world), len(rest_local), 4)).copy()
-    output_world = output.copy()
-    for ti in _parent_order(target["parents"]):
-        parent = target["parents"][ti]
-        if ti in desired:
-            output[:, ti] = desired[ti] if parent < 0 else quaternion_multiply(quaternion_inverse(output_world[:, parent]), desired[ti])
-        output_world[:, ti] = output[:, ti] if parent < 0 else quaternion_multiply(output_world[:, parent], output[:, ti])
+    names, rests, parents = target["names"], target["rest_rotations"], target["parents"]
+    rules = [(names.index(follower), names.index(rule["leader"]), rule)
+             for follower, rule in follow_rules(follow, [names[ti] for ti in desired], names)]
+    followers = [(fi, li) for fi, li, _ in rules]
+    partial = [(fi, li, rule) for fi, li, rule in rules if not _rigid(rule)]
+    for fi, li, rule in rules:
+        if _rigid(rule):
+            delta = quaternion_multiply(desired[li], quaternion_inverse(rests[li]))
+            desired[fi] = quaternion_multiply(delta, rests[fi])
+    partial_ids = {fi for fi, _, _ in partial}
+    axes = {}
+    for fi, li, rule in partial:
+        # The share is of the leader's turn from its parent's: that parent's pose comes from the first pass.
+        index = parents[li]
+        while index >= 0:
+            if index in partial_ids:
+                raise ValueError(f"leader {names[li]!r} of follower {names[fi]!r} hangs from follower "
+                                 f"{names[index]!r}, which turns by a share; a share is taken from a leader's parent")
+            index = parents[index]
+        if rule["axis"] is not None:
+            ray = target["rest_positions"][names.index(rule["axis"][1])] - target["rest_positions"][names.index(rule["axis"][0])]
+            if np.linalg.norm(ray) < _EPS:
+                raise ValueError(f"follower {names[fi]!r}: twist axis {rule['axis'][0]!r} -> {rule['axis'][1]!r} is "
+                                 "degenerate: its joints coincide at rest")
+            axes[fi] = ray / np.linalg.norm(ray)
+    rest_local = world_to_local_rotations(rests, parents)
+
+    def pose():
+        local = np.broadcast_to(rest_local, (len(world), len(rest_local), 4)).copy()
+        posed = local.copy()
+        for ti in _parent_order(parents):
+            parent = parents[ti]
+            if ti in desired:
+                local[:, ti] = desired[ti] if parent < 0 else quaternion_multiply(quaternion_inverse(posed[:, parent]), desired[ti])
+            posed[:, ti] = local[:, ti] if parent < 0 else quaternion_multiply(posed[:, parent], local[:, ti])
+        return local, posed
+    output, output_world = pose()
+    if partial:
+        for fi, li, rule in partial:
+            base = parents[li]
+            base_delta = (quaternion_multiply(output_world[:, base], quaternion_inverse(rests[base])) if base >= 0
+                          else np.broadcast_to(_IDENTITY, (len(world), 4)))
+            leader_delta = quaternion_multiply(desired[li], quaternion_inverse(rests[li]))
+            desired[fi] = quaternion_multiply(_partial_delta(rule, leader_delta, base_delta, axes.get(fi)), rests[fi])
+        output, output_world = pose()
     root_row = next((i for i, (name, _) in enumerate(pairs) if name == "pelvis"), None)
     if root_row is None:
         root_row = next((i for i, si in enumerate(source_ids) if source["parents"][si] < 0), None)
@@ -533,5 +647,6 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
     root_positions = target["rest_positions"][ti] + (root-source["rest_positions"][si])*scale
     result = {"local_rotations": quaternion_normalize(output), "root_positions": root_positions, "scale": scale}
     if followers:
-        result["follower_positions"] = _follower_positions(target, output_world, ti, root_positions, followers)
+        result["follower_positions"] = _follower_positions(target, output_world, ti, root_positions, followers,
+                                                           partial_ids)
     return result

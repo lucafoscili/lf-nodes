@@ -315,3 +315,60 @@ def test_a_posed_follower_rides_its_leader_rigidly_through_the_written_clip():
         assert not np.allclose(posed[hip, :3, :3], rest_world[hip, :3, :3]) or frame == 0
         np.testing.assert_allclose(posed[head], posed[hip] @ np.linalg.inv(rest_world[hip]) @ rest_world[head],
                                    atol=1e-5)
+
+
+def _turn_angle(rotation):
+    return np.degrees(np.arccos(np.clip((np.trace(rotation) - 1) / 2, -1, 1)))
+
+
+@pytest.mark.parametrize('rule', [{'leader': 'LeftHip', 'weight': .5},
+                                  {'leader': 'LeftHip', 'weight': 0, 'twist': .5, 'axis': ['Hips', 'LeftHip']}])
+def test_a_posed_share_follower_through_the_written_clip(rule):
+    """Core solve to GLB channels to posed node matrices, with the scene turned and the pelvis moving: a weighted
+    follower turns halfway from its leader's parent to its leader about the leader's joint; a twist follower takes
+    half the leader's twist about the axis and none of its swing."""
+    target = load_glb_target(rig(turn=0.4), PAIRS)
+    skeleton = target['skeleton']
+    source = dict(names=['root', 'pelvis', 'head', 'left_hip'], parents=skeleton['parents'],
+                  rest_positions=skeleton['rest_positions'], rest_rotations=skeleton['rest_rotations'])
+    rng = np.random.default_rng(5)
+    frames = 3
+    world = np.repeat(skeleton['rest_rotations'][None], frames, axis=0)
+    turns = rng.normal(size=(frames - 1, len(source['names']) - 1, 4))
+    world[1:, 1:] = turns / np.linalg.norm(turns, axis=-1, keepdims=True)
+    roots = skeleton['rest_positions'][1] + rng.normal(size=(frames, 3))
+    solved = _core.retarget_motion(world, roots, source, skeleton, [('pelvis', 'Hips'), ('left_hip', 'LeftHip')],
+                                   follow={'Head': rule}, scale=1)
+    document, binary = read_glb(append_glb_animation(target, solved, 30, 'Hips'))
+    clip = document['animations'][-1]
+    assert {(row['target']['node'], row['target']['path']) for row in clip['channels']} >= {(2, 'translation')}
+    rest_world = _glb._world_matrices(target['local_matrices'].copy(), target['parents'])
+    hips, head, hip = 1, 2, 3
+    axis = rest_world[hip, :3, 3] - rest_world[hips, :3, 3]
+    axis /= np.linalg.norm(axis)
+    for frame in range(1, frames):
+        local = target['local_matrices'].copy()
+        for channel in clip['channels']:
+            node, path = channel['target']['node'], channel['target']['path']
+            value = _accessor(document, binary, clip['samplers'][channel['sampler']]['output'])[frame]
+            if path == 'rotation':
+                local[node, :3, :3] = _glb._rotations()[1](value)
+            else:
+                local[node, :3, 3] = value
+        posed = _glb._world_matrices(local, target['parents'])
+        delta = {i: posed[i, :3, :3] @ rest_world[i, :3, :3].T for i in (hips, head, hip)}
+        turn = delta[hips].T @ delta[hip]  # the leader's turn from its parent's, in rest axes
+        own = delta[hips].T @ delta[head]
+        if 'twist' in rule:
+            # A pure twist about the axis, half the leader's twist (turn = swing * twist).
+            np.testing.assert_allclose(own @ axis, axis, atol=1e-5)
+            quaternion = _core.quaternion_from_matrix(turn)
+            _, twist = _core.swing_twist(quaternion, axis)
+            assert _turn_angle(own) == pytest.approx(_turn_angle(_core.quaternion_to_matrix(twist)) / 2, abs=1e-3)
+        else:
+            assert _turn_angle(turn) > 20
+            assert _turn_angle(own) == pytest.approx(_turn_angle(turn) / 2, abs=1e-3)
+            assert _turn_angle(own.T @ turn) == pytest.approx(_turn_angle(turn) / 2, abs=1e-3)
+        # Its rest offset from the leader's joint turns by its own delta.
+        np.testing.assert_allclose(posed[head, :3, 3], posed[hip, :3, 3] + delta[head] @ (
+            rest_world[head, :3, 3] - rest_world[hip, :3, 3]), atol=1e-5)

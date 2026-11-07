@@ -123,6 +123,10 @@ def write_map(tmp_path, document):
     (lambda doc: doc.update(follow={"Rig_left_index1": "Rig_left_index2"}), "follow", "'Rig_left_index2' of follower"),
     (lambda doc: doc.update(follow={"Rig_left_index1": "Rig_left_wrist", "Rig_left_index2": "Rig_left_index1"}),
      "follow", "is itself a follower"),
+    (lambda doc: doc.update(follow={"Rig_left_index1": {"leader": "Rig_left_wrist", "weight": 2}}), "follow",
+     "'Rig_left_index1': weight must be a number from 0 to 1"),
+    (lambda doc: doc.update(follow={"Rig_left_index1": {"leader": "Rig_left_wrist", "twist": .5}}), "follow",
+     "twist and axis go together"),
 ])
 def test_map_errors_name_path_field_and_offending_contract(tmp_path, edit, field, reason):
     document = bone_map()

@@ -276,6 +276,121 @@ def test_follow_refusals_name_the_bone(follow, message):
         core.retarget_motion(world, [[0, 1, 0]] * 2, source, target, pairs, follow=follow, scale=1)
 
 
+def delta(world, rest):
+    return core.quaternion_multiply(world, core.quaternion_inverse(rest))
+
+
+def test_a_weighted_follower_takes_its_share_of_the_leaders_turn_about_the_leaders_joint():
+    source, target, pairs, world = follow_rig()
+    world[1, 0] = q([0, 1, 0], 35)  # the pelvis turns too: the share is of the thigh's own turn, not the body's
+    root = [[0, 1, 0], [0, 1.2, 0]]
+    rule = {"muscle": {"leader": "thigh", "weight": .5}}
+    result = core.retarget_motion(world, root, source, target, pairs, follow=rule, scale=1)
+    posed = core.local_to_world_rotations(result["local_rotations"], target["parents"])
+    rests, positions = target["rest_rotations"], target["rest_positions"]
+    for frame in range(2):
+        hips, thigh = delta(posed[frame, 0], rests[0]), delta(posed[frame, 1], rests[1])
+        turn = core.quaternion_multiply(core.quaternion_inverse(hips), thigh)
+        share = core.quaternion_multiply(hips, core.quaternion_slerp([0, 0, 0, 1], turn, .5))
+        same_rotation(posed[frame, 4], core.quaternion_multiply(share, rests[4]))
+        at_thigh = np.asarray(root[frame]) + core.quaternion_rotate(hips, positions[1] - positions[0])
+        np.testing.assert_allclose(result["follower_positions"]["muscle"][frame],
+                                   at_thigh + core.quaternion_rotate(share, positions[4] - positions[1]), atol=1e-9)
+    # Halfway between riding the hips and riding the thigh, on the turn between them.
+    muscle, hips, thigh = (delta(posed[1, i], rests[i]) for i in (4, 0, 1))
+    def angle(a, b):
+        return np.degrees(2 * np.arccos(min(1, abs(float(np.dot(a, b))))))
+    assert angle(hips, thigh) > 60
+    assert angle(muscle, hips) == pytest.approx(angle(hips, thigh) / 2, abs=1e-6)
+    assert angle(muscle, thigh) == pytest.approx(angle(hips, thigh) / 2, abs=1e-6)
+    rigid = core.retarget_motion(world, root, source, target, pairs, follow={"muscle": "thigh"}, scale=1)
+    whole = core.retarget_motion(world, root, source, target, pairs,
+                                 follow={"muscle": {"leader": "thigh", "weight": 1}}, scale=1)
+    np.testing.assert_array_equal(whole["local_rotations"], rigid["local_rotations"])
+    np.testing.assert_array_equal(whole["follower_positions"]["muscle"], rigid["follower_positions"]["muscle"])
+
+
+def forearm_rig():
+    """A forearm (radius) with twist helpers at stations 0, 1/2 and 1 toward the wrist, leaning, nonidentity rests."""
+    source = skeleton(["pelvis", "left_elbow", "left_wrist", "left_index1"], [-1, 0, 1, 2],
+                      [[0, 1, 0], [.3, 1.2, 0], [.6, 1., .1], [.7, .95, .12]])
+    rests = np.array([q([0, 1, 0], 10), q([0, 0, 1], 25), q([1, 0, 0], -15), q([0, 1, 0], 40), q([1, 0, 0], 5),
+                      q([0, 0, 1], -30), q([1, 1, 0] / np.sqrt(2), 20)])
+    elbow, wrist = np.array([.3, 1.2, 0]), np.array([.6, 1., .1])
+    target = skeleton(["hips", "radius", "wrist", "twist_0", "twist_1", "twist_2", "finger"], [-1, 0, 1, 1, 1, 1, 2],
+                      [[0, 1, 0], elbow, wrist, elbow, (elbow + wrist) / 2, wrist, [.7, .95, .12]], rests)
+    pairs = [("pelvis", "hips"), ("left_elbow", "radius"), ("left_wrist", "wrist"), ("left_index1", "finger")]
+    return source, target, pairs, (wrist - elbow) / np.linalg.norm(wrist - elbow)
+
+
+def test_twist_helpers_take_their_station_of_the_wrists_twist_and_none_of_its_bend():
+    source, target, pairs, axis = forearm_rig()
+    world = np.tile(source["rest_rotations"], (3, 1, 1))
+    world[1:, 0] = q([0, 1, 0], 20)
+    world[1:, 1] = core.quaternion_multiply(q([0, 1, 0], 20), q([0, 0, 1], 40))  # the elbow bends with the body
+    bend = q(np.cross(axis, [0, 1, 0]) / np.linalg.norm(np.cross(axis, [0, 1, 0])), 35)
+    wrist_turns = [core.quaternion_multiply(bend, q(axis, 80)), bend]  # twisted and bent, then bent only
+    for frame, turn in enumerate(wrist_turns, 1):
+        world[frame, 2] = world[frame, 3] = core.quaternion_multiply(world[frame, 1], turn)
+    stations = {"twist_0": 0, "twist_1": .5, "twist_2": 1}
+    follow = {name: {"leader": "wrist", "weight": 0, "twist": share, "axis": ["radius", "wrist"]}
+              for name, share in stations.items()}
+    root = [[0, 1, 0]] * 3
+    result = core.retarget_motion(world, root, source, target, pairs, follow=follow, scale=1)
+    posed = core.local_to_world_rotations(result["local_rotations"], target["parents"])
+    rests = target["rest_rotations"]
+    for frame, expected_twist in ((0, 0), (1, 80), (2, 0)):
+        radius = delta(posed[frame, 1], rests[1])
+        for index, (name, share) in enumerate(stations.items(), 3):
+            relative = core.quaternion_multiply(core.quaternion_inverse(radius), delta(posed[frame, index], rests[index]))
+            relative = relative if relative[3] >= 0 else -relative
+            # A pure twist about the forearm: its axis part lies along the forearm, its angle the station's share.
+            np.testing.assert_allclose(np.cross(relative[:3], axis), 0, atol=1e-9)
+            angle = np.degrees(2 * np.arctan2(np.dot(relative[:3], axis), relative[3]))
+            assert angle == pytest.approx(share * expected_twist, abs=1e-6)
+            # On the forearm's line, a twist helper stays where the radius carries it.
+            carried = (core.quaternion_rotate(delta(posed[frame, 0], rests[0]), target["rest_positions"][1] - [0, 1, 0])
+                       + root[frame] + core.quaternion_rotate(radius, target["rest_positions"][index] - target["rest_positions"][1]))
+            np.testing.assert_allclose(result["follower_positions"][name][frame], carried, atol=1e-9)
+
+
+def test_swing_twist_recomposes_and_a_perpendicular_half_turn_has_no_twist():
+    turn = core.quaternion_multiply(q([1, 0, 0], 50), q([0, 1, 0], 70))
+    swing, twist = core.swing_twist(turn, [0, 1, 0])
+    same_rotation(core.quaternion_multiply(swing, twist), turn)
+    np.testing.assert_allclose(core.quaternion_rotate(twist, [0, 1, 0]), [0, 1, 0], atol=1e-12)
+    np.testing.assert_allclose(core.swing_twist(q([1, 0, 0], 180), [0, 1, 0])[1], [0, 0, 0, 1], atol=1e-12)
+
+
+@pytest.mark.parametrize("rule,message", [
+    ({"leader": "thigh", "weight": 1.5}, "'muscle': weight must be a number from 0 to 1, got 1.5"),
+    ({"leader": "thigh", "weight": -.1}, "weight must be a number from 0 to 1"),
+    ({"leader": "thigh", "weight": True}, "weight must be a number from 0 to 1, got True"),
+    ({"leader": "thigh", "twist": 2, "axis": ["hips", "thigh"]}, "twist must be a number from 0 to 1, got 2"),
+    ({"leader": "thigh", "twist": .5}, "'muscle': twist and axis go together; it names only twist"),
+    ({"leader": "thigh", "axis": ["thigh", "shin"]}, "it names only axis"),
+    ({"leader": "thigh", "twist": .5, "axis": ["thigh"]}, "axis must name two target bones"),
+    ({"leader": "thigh", "twist": .5, "axis": ["thigh", "missing"]}, "axis must name two target bones"),
+    ({"leader": "thigh", "twist": .5, "axis": ["thigh", "thigh"]}, "twist axis 'thigh' -> 'thigh' is degenerate"),
+    ({"leader": "thigh", "share": .5}, "unknown rule key 'share'"),
+    ({"weight": .5}, "unknown leader bone None"),
+    (.5, "needs a leader name or a rule object"),
+])
+def test_share_refusals_name_the_follower(rule, message):
+    source, target, pairs, world = follow_rig()
+    with pytest.raises(ValueError, match=message.replace("(", r"\(").replace(")", r"\)")):
+        core.retarget_motion(world, [[0, 1, 0]] * 2, source, target, pairs, follow={"muscle": rule}, scale=1)
+
+
+def test_a_share_taken_from_a_leader_whose_parent_turns_by_a_share_is_refused():
+    source = skeleton(["pelvis", "left_hip", "left_knee"], [-1, 0, 1], [[0, 1, 0], [.1, .9, 0], [.1, .5, 0]])
+    target = skeleton(["hips", "neck", "head", "thigh"], [-1, 0, 1, 0], [[0, 1, 0], [0, 1.4, 0], [0, 1.6, 0], [.1, .9, 0]])
+    with pytest.raises(ValueError, match="leader 'head' of follower 'neck' hangs from follower 'neck'"):
+        core.retarget_motion(source["rest_rotations"][None], [[0, 1, 0]], source, target,
+                             [("pelvis", "hips"), ("left_hip", "head"), ("left_knee", "thigh")],
+                             follow={"neck": {"leader": "head", "weight": .5}}, scale=1)
+
+
 def test_a_follower_placed_by_its_own_descendant_is_refused():
     source = skeleton(["pelvis", "left_hip"], [-1, 0], [[0, 1, 0], [.1, .9, 0]])
     target = skeleton(["hips", "helper", "thigh"], [-1, 0, 1], [[0, 1, 0], [.1, .95, 0], [.1, .9, 0]])

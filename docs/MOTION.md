@@ -214,7 +214,11 @@ The bone map is a UTF-8 JSON document:
   "chains": [
     {"source": ["spine1", "spine2", "spine3"], "target": ["Spine", "Chest"]}
   ],
-  "follow": {"LeftUpLegTwist": "LeftUpLeg"}
+  "follow": {
+    "LeftUpLegMuscle": "LeftUpLeg",
+    "LeftDeltoid": {"leader": "LeftArm", "weight": 0.5},
+    "LeftForeArmTwist": {"leader": "LeftHand", "weight": 0, "twist": 0.5, "axis": ["LeftForeArm", "LeftHand"]}
+  }
 }
 ```
 
@@ -233,17 +237,44 @@ Chains list parent-to-child source and target runs. Equal-length runs pair in
 order. Unequal runs interpolate cumulative world orientations at normalized
 target bind arc-length stations.
 
-`follow` (optional) is a `{"follower": "leader"}` object of target bone names
+`follow` (optional) is an object of target bone names, `{"follower": leader}`,
 for a bone no source joint drives but whose skin should move with another
-target bone, such as a helper on a sibling branch of the thigh it belongs to.
-A follower rides its leader rigidly, as if its weights were the leader's:
+target bone: a helper on a sibling branch of the thigh it belongs to, a
+deltoid that turns part way with the upper arm, a forearm twist bone. A bare
+leader name rides it rigidly, as if the follower's weights were the leader's:
 `W_follower = W_leader * inverse(W_leader_rest) * W_follower_rest`, and its
 rest offset from the leader turns with the leader, so the output writes a
-translation channel for it beside the pelvis's. Its descendants follow it as
-unmapped bones do. A follower named in `bones` or a chain, an unknown name, a
-leader that is itself a follower, a leader no pair or chain drives, and a
-follower whose leader descends from it are refused by name. The report lists
-followers under `followers`, never as held. Fingers use ordinary bone pairs. A hand with
+translation channel for it beside the pelvis's.
+
+A rule object takes a share of the leader's turn instead. `leader` names it;
+`weight` (0 to 1, default 1) is the share of its turn from rest, measured
+against the leader's parent `B`: with `D = W * inverse(W_rest)` for each bone,
+`turn = inverse(D_B) * D_leader`, `D_follower = D_B * slerp(1, turn, weight)`
+and `W_follower = D_follower * W_follower_rest`. Weight 0 rides the leader's
+parent, weight 1 the leader (the rigid ride), and a torso turn moves the
+follower with the body whatever its weight. Adding `twist` (0 to 1) and `axis`
+(two target bone names, the twist axis from the first's rest position to the
+second's) splits the turn into swing and twist about that axis
+(`turn = swing * twist`): the follower takes `weight` of the swing and `twist`
+of the twist. That is twist distribution along a limb: forearm twist bones
+take the hand's twist about the forearm by their station and none of its bend
+(`weight 0`); upper-arm twist bones take the arm's swing and part of its twist
+(`weight 1`). Shares are measured from the leader's parent, so the same rule
+means the same thing wherever the helper hangs, and none needs a negative
+counter-share. A share follower's rest offset from the leader's joint turns by
+its own `D_follower`, so it also gets a translation channel; on its leader's
+axis that is where its ancestry carries it. A twist is read as its shortest
+turn, so one that crosses half a turn between frames flips the side its share
+takes; limb twists stay well inside it.
+
+Its descendants follow a follower as unmapped bones do. Refused by name: a
+follower named in `bones` or a chain, an unknown bone or rule key, a leader
+that is itself a follower, a leader no pair or chain drives, a follower whose
+leader descends from it, a weight or twist outside 0 to 1, a twist without an
+axis or an axis without a twist, an axis whose two bones coincide at rest, and
+a share whose leader's parent is or descends from another share follower. The
+report lists followers under `followers` as the map names them, never as held.
+Fingers use ordinary bone pairs. A hand with
 a mapped wrist and no mapped fingers is reported once as `fingers: rest`.
 Every unmapped target retains its rest local translation, rotation, and scale
 while following its parent's motion; every unmapped source joint is reported
