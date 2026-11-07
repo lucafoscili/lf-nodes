@@ -307,7 +307,12 @@ both rest pelvis positions, and the motion file's SHA-256 fingerprint. The
 fingerprint is reporting data, not a render-time binding check.
 
 Rendering skins every `JOINTS_n`/`WEIGHTS_n` set on the CPU, normalizing combined
-weights per vertex, and uses the existing shaded rasterizer. Static morph
+weights per vertex, and uses the existing shaded rasterizer. Where every primitive
+carries `NORMAL`, those normals are skinned with their vertices and drawn as
+stored, so a mesh split at UV seams or between parts shades as its author
+smoothed it; otherwise each vertex smooths over its own faces. The report's
+`normals` names which (`stored` or `faces`). Primitives of one node drawing the
+same vertex accessors share their vertices once. Static morph
 weights are retained. Compressed geometry needs a decoder and raises by name.
 The appended animation carries its scale and pelvis metadata. The renderer
 converts target units through `s` and applies each frame's camera-from-world
