@@ -256,3 +256,62 @@ def test_matrix_nonjoint_ancestor_rest_is_preserved():
     np.testing.assert_allclose(vertices[1] - vertices[0], [[1, 0, 0]] * 3, atol=1e-6)
     changed, _ = read_glb(output)
     assert changed['nodes'] == document['nodes']
+
+
+def test_follower_translation_channel_places_it_in_world_after_the_translated_pelvis():
+    target = load_glb_target(rig(turn=0.4), PAIRS)
+    solved = solved_rest(target)
+    placed = np.array([[3.5, 2.8, 5.2], [4.0, 3.1, 4.9]])
+    solved['follower_positions'] = {'LeftHip': placed}
+    document, binary = read_glb(append_glb_animation(target, solved, 30, 'Hips'))
+    clip = document['animations'][-1]
+    translations = [row for row in clip['channels'] if row['target']['path'] == 'translation']
+    assert [row['target']['node'] for row in translations] == [1, 3]
+    values = {row['target']['node']: _accessor(document, binary, clip['samplers'][row['sampler']]['output'])
+              for row in translations}
+    for frame in range(2):
+        local = target['local_matrices'].copy()
+        for node, value in values.items():
+            local[node, :3, 3] = value[frame]
+        world = _glb._world_matrices(local, target['parents'])
+        np.testing.assert_allclose(world[1, :3, 3], solved['root_positions'][frame], atol=1e-6)
+        np.testing.assert_allclose(world[3, :3, 3], placed[frame], atol=1e-6)
+    without = read_glb(append_glb_animation(target, solved_rest(target), 30, 'Hips'))
+    assert len([row for row in without[0]['animations'][-1]['channels']
+                if row['target']['path'] == 'translation']) == 1
+    with pytest.raises(ValueError, match="Follower 'Scene'"):
+        append_glb_animation(target, dict(solved, follower_positions={'Scene': placed}), 30, 'Hips')
+
+
+def test_a_posed_follower_rides_its_leader_rigidly_through_the_written_clip():
+    """Core solve to GLB channels to posed node matrices: the follower's world is its leader's delta times its rest,
+    with every parent away from rest (the turned scene, a rotated and translated pelvis)."""
+    target = load_glb_target(rig(turn=0.4), PAIRS)
+    skeleton = target['skeleton']
+    source = dict(names=['root', 'pelvis', 'head', 'left_hip'], parents=skeleton['parents'],
+                  rest_positions=skeleton['rest_positions'], rest_rotations=skeleton['rest_rotations'])
+    rng = np.random.default_rng(3)
+    frames = 3
+    world = np.repeat(skeleton['rest_rotations'][None], frames, axis=0)
+    turns = rng.normal(size=(frames - 1, len(source['names']) - 1, 4))
+    world[1:, 1:] = turns / np.linalg.norm(turns, axis=-1, keepdims=True)
+    roots = skeleton['rest_positions'][1] + rng.normal(size=(frames, 3))
+    solved = _core.retarget_motion(world, roots, source, skeleton, [('pelvis', 'Hips'), ('left_hip', 'LeftHip')],
+                                   follow={'Head': 'LeftHip'}, scale=1)
+    document, binary = read_glb(append_glb_animation(target, solved, 30, 'Hips'))
+    clip = document['animations'][-1]
+    rest_world = _glb._world_matrices(target['local_matrices'].copy(), target['parents'])
+    head, hip = 2, 3
+    for frame in range(frames):
+        local = target['local_matrices'].copy()
+        for channel in clip['channels']:
+            node, path = channel['target']['node'], channel['target']['path']
+            value = _accessor(document, binary, clip['samplers'][channel['sampler']]['output'])[frame]
+            if path == 'rotation':
+                local[node, :3, :3] = _glb._rotations()[1](value)
+            else:
+                local[node, :3, 3] = value
+        posed = _glb._world_matrices(local, target['parents'])
+        assert not np.allclose(posed[hip, :3, :3], rest_world[hip, :3, :3]) or frame == 0
+        np.testing.assert_allclose(posed[head], posed[hip] @ np.linalg.inv(rest_world[hip]) @ rest_world[head],
+                                   atol=1e-5)

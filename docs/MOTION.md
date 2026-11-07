@@ -213,7 +213,8 @@ The bone map is a UTF-8 JSON document:
   "unmapped": "rest",
   "chains": [
     {"source": ["spine1", "spine2", "spine3"], "target": ["Spine", "Chest"]}
-  ]
+  ],
+  "follow": {"LeftUpLegTwist": "LeftUpLeg"}
 }
 ```
 
@@ -230,7 +231,19 @@ when the map has no head.
 
 Chains list parent-to-child source and target runs. Equal-length runs pair in
 order. Unequal runs interpolate cumulative world orientations at normalized
-target bind arc-length stations. Fingers use ordinary bone pairs. A hand with
+target bind arc-length stations.
+
+`follow` (optional) is a `{"follower": "leader"}` object of target bone names
+for a bone no source joint drives but whose skin should move with another
+target bone, such as a helper on a sibling branch of the thigh it belongs to.
+A follower rides its leader rigidly, as if its weights were the leader's:
+`W_follower = W_leader * inverse(W_leader_rest) * W_follower_rest`, and its
+rest offset from the leader turns with the leader, so the output writes a
+translation channel for it beside the pelvis's. Its descendants follow it as
+unmapped bones do. A follower named in `bones` or a chain, an unknown name, a
+leader that is itself a follower, a leader no pair or chain drives, and a
+follower whose leader descends from it are refused by name. The report lists
+followers under `followers`, never as held. Fingers use ordinary bone pairs. A hand with
 a mapped wrist and no mapped fingers is reported once as `fingers: rest`.
 Every unmapped target retains its rest local translation, rotation, and scale
 while following its parent's motion; every unmapped source joint is reported
@@ -256,9 +269,9 @@ SMPL-X source pelvis is `transl + J0(betas)`. No floor, foot locking, or IK is
 part of this solve.
 
 The output appends one LINEAR animation at the motion fps, with every skin
-joint's rotation and the pelvis translation. Original BIN bytes remain a prefix;
+joint's rotation and the pelvis translation (and each follower's). Original BIN bytes remain a prefix;
 only animations, accessors, buffer views, and the embedded buffer length change.
-The report lists held target bones, dropped source joints, finger notes, `s`,
+The report lists held target bones, followers, dropped source joints, finger notes, `s`,
 both rest pelvis positions, and the motion file's SHA-256 fingerprint. The
 fingerprint is reporting data, not a render-time binding check.
 

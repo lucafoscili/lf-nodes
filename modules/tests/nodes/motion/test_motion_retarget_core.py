@@ -228,3 +228,57 @@ def test_arbitrary_parent_order_and_rejection_of_cycle_unknown_bones_and_bad_fra
         core.retarget_motion(rig["rest_rotations"][None], [[0, 0, 0]], rig, rig, [("missing", "pelvis")], scale=1)
     with pytest.raises(ValueError, match="root positions"):
         core.retarget_motion(rig["rest_rotations"][None], [[np.nan, 0, 0]], rig, rig, [("pelvis", "pelvis")], scale=1)
+
+
+def follow_rig():
+    """A thigh driven by left_hip, a muscle sibling under its own offset joint, non-identity rests throughout."""
+    source = skeleton(["pelvis", "left_hip", "left_knee"], [-1, 0, 1], [[0, 1, 0], [.1, .9, 0], [.1, .5, 0]])
+    rests = np.array([q([0, 1, 0], 10), q([0, 0, 1], 25), q([1, 0, 0], -15), q([0, 1, 0], 40), q([1, 0, 0], 5)])
+    target = skeleton(["hips", "thigh", "shin", "offset", "muscle"], [-1, 0, 1, 0, 3],
+                      [[0, 1, 0], [.1, .9, 0], [.1, .5, 0], [.05, .95, .05], [.12, .82, .07]], rests)
+    pairs = [("pelvis", "hips"), ("left_hip", "thigh"), ("left_knee", "shin")]
+    world = np.tile(source["rest_rotations"], (2, 1, 1))
+    world[1, 1] = world[1, 2] = q([1, 0, 0], 70)
+    return source, target, pairs, world
+
+
+def test_follower_rides_its_leader_rigidly_in_rotation_and_rest_offset():
+    source, target, pairs, world = follow_rig()
+    root = [[0, 1, 0], [0, 1.2, 0]]
+    result = core.retarget_motion(world, root, source, target, pairs, follow={"muscle": "thigh"}, scale=1)
+    posed = core.local_to_world_rotations(result["local_rotations"], target["parents"])
+    rests, positions = target["rest_rotations"], target["rest_positions"]
+    for frame in range(2):
+        delta = core.quaternion_multiply(posed[frame, 1], core.quaternion_inverse(rests[1]))
+        same_rotation(posed[frame, 4], core.quaternion_multiply(delta, rests[4]))
+        thigh = np.asarray(root[frame]) + core.quaternion_rotate(
+            core.quaternion_multiply(posed[frame, 0], core.quaternion_inverse(rests[0])), positions[1] - positions[0])
+        np.testing.assert_allclose(result["follower_positions"]["muscle"][frame],
+                                   thigh + core.quaternion_rotate(delta, positions[4] - positions[1]), atol=1e-9)
+    # The thigh lifts 70 degrees: the muscle's offset turns with it, away from where its own parent holds it.
+    assert np.linalg.norm(result["follower_positions"]["muscle"][1] - [.12, 1.02, .07]) > .05
+    held = core.retarget_motion(world, root, source, target, pairs, scale=1)
+    assert "follower_positions" not in held
+    np.testing.assert_allclose(held["local_rotations"][:, :4], result["local_rotations"][:, :4], atol=1e-12)
+
+
+@pytest.mark.parametrize("follow,message", [
+    ({"thigh": "shin"}, "'thigh' is also driven"),
+    ({"missing": "thigh"}, "unknown follower bone 'missing'"),
+    ({"muscle": "missing"}, "unknown leader bone 'missing'"),
+    ({"muscle": "offset", "offset": "thigh"}, "leader 'offset' of follower 'muscle' is itself a follower"),
+    ({"muscle": "offset"}, "leader 'offset' of follower 'muscle' is held"),
+    ([("muscle", "thigh"), ("muscle", "shin")], "'muscle' twice"),
+])
+def test_follow_refusals_name_the_bone(follow, message):
+    source, target, pairs, world = follow_rig()
+    with pytest.raises(ValueError, match=message):
+        core.retarget_motion(world, [[0, 1, 0]] * 2, source, target, pairs, follow=follow, scale=1)
+
+
+def test_a_follower_placed_by_its_own_descendant_is_refused():
+    source = skeleton(["pelvis", "left_hip"], [-1, 0], [[0, 1, 0], [.1, .9, 0]])
+    target = skeleton(["hips", "helper", "thigh"], [-1, 0, 1], [[0, 1, 0], [.1, .95, 0], [.1, .9, 0]])
+    with pytest.raises(ValueError, match="'helper' and its leader place each other"):
+        core.retarget_motion(source["rest_rotations"][None], [[0, 1, 0]], source, target,
+                             [("pelvis", "hips"), ("left_hip", "thigh")], follow={"helper": "thigh"}, scale=1)

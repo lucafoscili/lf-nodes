@@ -370,13 +370,90 @@ def leg_scale(source_skeleton, target_skeleton, pairs):
     return float(lengths[1] / lengths[0])
 
 
+def follow_pairs(follow, driven, target_names):
+    """Validate ``follow`` ({follower: leader} target bone names, or pairs) against the driven target bones.
+
+    A follower is driven by no source: it rides its leader rigidly. Refused by
+    name: an unknown bone, a follower named twice or also driven by a pair or
+    chain, a leader that is itself a follower, and a leader nothing drives.
+    """
+    rows = list(follow.items()) if isinstance(follow, dict) else [tuple(row) for row in follow]
+    known, driven, followers = set(target_names), set(driven), {}
+    for row in rows:
+        if len(row) != 2:
+            raise ValueError(f"follow entry {row!r} must name a follower and its leader")
+        follower, leader = row
+        for role, name in (("follower", follower), ("leader", leader)):
+            if not isinstance(name, str) or name not in known:
+                raise ValueError(f"follow names an unknown {role} bone {name!r}")
+        if follower in followers:
+            raise ValueError(f"follow names follower {follower!r} twice")
+        if follower in driven:
+            raise ValueError(f"follower {follower!r} is also driven by a pair or chain")
+        followers[follower] = leader
+    for follower, leader in followers.items():
+        if leader in followers:
+            raise ValueError(f"leader {leader!r} of follower {follower!r} is itself a follower")
+        if leader not in driven:
+            raise ValueError(f"leader {leader!r} of follower {follower!r} is held: no pair or chain drives it")
+    return list(followers.items())
+
+
+def _follower_positions(target, output_world, root_index, root_positions, followers):
+    """World positions of each follower: its rest offset from its leader carried by the leader's rotation delta.
+
+    Joints translate only as their ancestors move them (rest local translations),
+    except the root track's joint and the followers, so a leader's position is
+    resolved before its follower even across branches.
+    """
+    parents, rest_positions, rest_rotations = target["parents"], target["rest_positions"], target["rest_rotations"]
+    leaders = dict(followers)
+    positions = np.broadcast_to(rest_positions, output_world.shape[:2] + (3,)).copy()
+    placed, pending = set(), set(range(len(parents)))
+    while pending:
+        ready = [i for i in sorted(pending) if (parents[i] < 0 or parents[i] in placed)
+                 and (i not in leaders or leaders[i] in placed)]
+        if not ready:
+            def waits_on(index):  # the joints still pending that place this one
+                return [j for j in (parents[index], leaders.get(index, -1)) if j in pending]
+
+            def in_cycle(start):
+                seen, stack = set(), waits_on(start)
+                while stack:
+                    index = stack.pop()
+                    if index == start:
+                        return True
+                    if index not in seen:
+                        seen.add(index)
+                        stack.extend(waits_on(index))
+                return False
+            stuck = sorted(target["names"][i] for i in pending if i in leaders and in_cycle(i))
+            raise ValueError(f"follower {stuck[0]!r} and its leader place each other through their ancestry")
+        for index in ready:
+            anchor = leaders.get(index, parents[index])
+            if index == root_index:
+                positions[:, index] = root_positions
+            elif anchor >= 0:
+                delta = quaternion_multiply(output_world[:, anchor], quaternion_inverse(rest_rotations[anchor]))
+                positions[:, index] = positions[:, anchor] + quaternion_rotate(
+                    delta, rest_positions[index] - rest_positions[anchor])
+        placed.update(ready)
+        pending.difference_update(ready)
+    return {target["names"][index]: positions[:, index] for index in leaders}
+
+
 def retarget_motion(source_world_rotations, source_root_positions, source_skeleton, target_skeleton, pairs,
-                    *, chains=(), keep_rest_facing=(), flatten_slope=(), scale=None):
+                    *, chains=(), follow=(), keep_rest_facing=(), flatten_slope=(), scale=None):
     """Transfer mapped world motion and return target locals and WORLD root track.
 
     W_target = W_source * inverse(W_source_rest) * A * W_target_rest.
     Unmapped joints retain their true target rest LOCAL rotation while following
     their animated parent. A target bone belongs to one pair or one chain.
+    A ``follow`` bone ({follower: leader}, see ``follow_pairs``) rides its
+    leader rigidly, as if its skin were weighted to the leader:
+    W_follower = W_leader * inverse(W_leader_rest) * W_follower_rest, and its
+    rest offset from the leader turns with the leader. Its WORLD positions are
+    returned under ``follower_positions``, by name.
     """
     source, target = _skeleton(source_skeleton), _skeleton(target_skeleton)
     world = quaternion_normalize(source_world_rotations)
@@ -431,6 +508,11 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
                 delta = quaternion_multiply(world[:, si], quaternion_inverse(source["rest_rotations"][si]))
                 samples.append(quaternion_multiply(quaternion_multiply(delta, alignment), target["rest_rotations"][ti]))
             desired[ti] = quaternion_slerp(samples[0], samples[1], weight)
+    followers = [(target["names"].index(follower), target["names"].index(leader)) for follower, leader in
+                 follow_pairs(follow, [target["names"][ti] for ti in desired], target["names"])]
+    for fi, li in followers:
+        delta = quaternion_multiply(desired[li], quaternion_inverse(target["rest_rotations"][li]))
+        desired[fi] = quaternion_multiply(delta, target["rest_rotations"][fi])
     rest_local = world_to_local_rotations(target["rest_rotations"], target["parents"])
     output = np.broadcast_to(rest_local, (len(world), len(rest_local), 4)).copy()
     output_world = output.copy()
@@ -448,6 +530,8 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
     scale = leg_scale(source, target, pairs) if scale is None else float(scale)
     if not np.isfinite(scale) or scale <= 0:
         raise ValueError("Root motion scale must be positive and finite.")
-    return {"local_rotations": quaternion_normalize(output),
-            "root_positions": target["rest_positions"][ti] + (root-source["rest_positions"][si])*scale,
-            "scale": scale}
+    root_positions = target["rest_positions"][ti] + (root-source["rest_positions"][si])*scale
+    result = {"local_rotations": quaternion_normalize(output), "root_positions": root_positions, "scale": scale}
+    if followers:
+        result["follower_positions"] = _follower_positions(target, output_world, ti, root_positions, followers)
+    return result

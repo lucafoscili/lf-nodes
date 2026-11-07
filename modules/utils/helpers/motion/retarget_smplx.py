@@ -71,6 +71,13 @@ def read_bone_map(path, target_names):
     # Injective across both fields: a target bone belongs to one pair or one chain.
     for name in sorted(chain_targets & targets):
         fail("chains", f"target bone {name!r} is also a bones target")
+    follow = document.get("follow", {})
+    if not isinstance(follow, dict):
+        fail("follow", "expected a follower-to-leader object")
+    try:
+        core.follow_pairs(follow, targets | chain_targets, target_names)
+    except ValueError as error:
+        fail("follow", str(error))
     # Anchors the solve reads by name (root, leg scale, axis check) belong to
     # bones; the spine may arrive through a chain.
     covered = set(bones)
@@ -161,18 +168,21 @@ def retarget_motion(motion_file, model_path, body, betas, glb_path, bone_map_pat
     source, rotations, roots = source_skeleton(motion, model, parse_betas(betas))
     try:
         solved = core.retarget_motion(rotations, roots, source, target["skeleton"], pairs,
-                                      chains=mapping.get("chains", []), keep_rest_facing=keep_rest_facing,
-                                      flatten_slope=flatten_slope)
+                                      chains=mapping.get("chains", []), follow=mapping.get("follow", {}),
+                                      keep_rest_facing=keep_rest_facing, flatten_slope=flatten_slope)
     except ValueError as error:
         raise ValueError(f"Retarget solve (bone map {bone_map_path}, target {glb_path}): {error}") from error
     covered_source, covered_target = set(mapping["bones"]), set(mapping["bones"].values())
     for chain in mapping.get("chains", []):
         covered_source.update(chain["source"])
         covered_target.update(chain["target"])
+    followers = dict(mapping.get("follow", {}))
+    covered_target.update(followers)
     root_name = mapping["bones"]["pelvis"]
     target_root = target["skeleton"]["names"].index(root_name)
     report = {
         "held_target_bones": [name for name in target_names if name not in covered_target],
+        "followers": followers,
         "dropped_source_joints": [name for name in SOURCE_NAMES if name not in covered_source],
         "fingers": {side: "rest" for side in ("left", "right")
                     if f"{side}_wrist" in covered_source and not covered_source.intersection(JOINT_NAMES[f"{side}_hand"])},

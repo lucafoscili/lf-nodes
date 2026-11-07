@@ -117,6 +117,12 @@ def write_map(tmp_path, document):
     (lambda doc: doc.pop("unmapped"), "unmapped", "equal rest"),
     (lambda doc: doc.update(chains=[{"source": ["unknown"], "target": ["Rig_spine1"]}]), "chains", "unknown joint"),
     (lambda doc: doc.update(chains=[{"source": ["spine1"], "target": ["Missing"]}]), "chains", "unknown joint"),
+    (lambda doc: doc.update(follow=["Rig_left_index1"]), "follow", "follower-to-leader object"),
+    (lambda doc: doc.update(follow={"Missing": "Rig_left_wrist"}), "follow", "unknown follower bone 'Missing'"),
+    (lambda doc: doc.update(follow={"Rig_left_knee": "Rig_left_hip"}), "follow", "'Rig_left_knee' is also driven"),
+    (lambda doc: doc.update(follow={"Rig_left_index1": "Rig_left_index2"}), "follow", "'Rig_left_index2' of follower"),
+    (lambda doc: doc.update(follow={"Rig_left_index1": "Rig_left_wrist", "Rig_left_index2": "Rig_left_index1"}),
+     "follow", "is itself a follower"),
 ])
 def test_map_errors_name_path_field_and_offending_contract(tmp_path, edit, field, reason):
     document = bone_map()
@@ -301,3 +307,26 @@ def test_fully_mapped_fingers_are_animated_with_no_held_or_dropped_bones(tmp_pat
     channel = next(row for row in clip["channels"] if row["target"] == {"node": index, "path": "rotation"})
     values = glb._accessor(document, binary, clip["samplers"][channel["sampler"]]["output"])
     assert not np.allclose(values[0], values[1])
+
+
+def test_followers_are_reported_as_followers_never_held(tmp_path, model, monkeypatch):
+    render = importlib.import_module(NAMESPACE + ".utils.helpers.motion.render")
+    monkeypatch.setattr(render, "load_body_model", lambda *_args: model)
+    clip = motion()
+    clip["world"]["body_pose"][1][57:60] = [0, 0, .6]  # the left wrist turns
+    path = tmp_path / "follow.json"
+    format_module.write_motion(path, clip)
+    target_path = tmp_path / "target.glb"
+    target_path.write_bytes(generated_target()[0])
+    mapping = bone_map()
+    mapping["follow"] = {"Rig_left_index1": "Rig_left_wrist"}
+    output, report = adapter.retarget_motion(path, tmp_path / "unused.npz", "neutral", "0",
+                                             target_path, write_map(tmp_path, mapping))
+    assert report["followers"] == {"Rig_left_index1": "Rig_left_wrist"}
+    assert "Rig_left_index1" not in report["held_target_bones"]
+    assert "Rig_left_index2" in report["held_target_bones"]
+    document, binary = codec.read_glb(output)
+    latest = document["animations"][-1]
+    index = adapter.SOURCE_NAMES.index("left_index1")
+    assert {row["target"]["path"] for row in latest["channels"] if row["target"]["node"] == index} == {
+        "rotation", "translation"}

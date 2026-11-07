@@ -205,7 +205,11 @@ def validate_glb_axes(target, pairs):
 
 
 def append_glb_animation(target, solved, fps, pelvis_name, report=None):
-    """Append one LINEAR clip; only joints rotate and only pelvis translates."""
+    """Append one LINEAR clip; joints rotate, and only the pelvis and any followers translate.
+
+    ``solved['follower_positions']`` (optional, {joint name: [frames, 3]} WORLD
+    positions) becomes a translation channel per follower, after the pelvis's.
+    """
     fps = float(fps)
     if not np.isfinite(fps) or fps <= 0:
         raise ValueError('Animation fps must be positive and finite.')
@@ -224,17 +228,33 @@ def append_glb_animation(target, solved, fps, pelvis_name, report=None):
         raise ValueError('Pelvis must identify a named GLB skin joint.') from error
     if root_node not in target['joint_nodes']:
         raise ValueError('Pelvis must identify a named GLB skin joint.')
-    root_parent = target['parents'].get(root_node)
-    translations = []
+    placed = {root_node: positions}
+    for name, values in (solved.get('follower_positions') or {}).items():
+        values = np.asarray(values, dtype=np.float64)
+        index = skeleton['names'].index(name) if name in skeleton['names'] else None
+        if (index is None or target['node_indices'][index] not in target['joint_nodes'] or values.shape != (count, 3)
+                or not np.isfinite(values).all() or target['node_indices'][index] in placed):
+            raise ValueError(f'Follower {name!r} must be a named GLB skin joint with finite world positions per frame.')
+        placed[target['node_indices'][index]] = values
+    def depth(node):
+        return 0 if node not in target['parents'] else 1 + depth(target['parents'][node])
+    # Ancestors first: a translated joint's parent matrix includes any translated ancestor.
+    order = sorted(placed, key=lambda node: (depth(node), node != root_node, node))
+    translations = {node: [] for node in order}
     for frame in range(count):
         local = target['local_matrices'].copy()
         for index, node in enumerate(target['node_indices']):
             if node in target['joint_nodes']:
                 scale = np.asarray(target['document']['nodes'][node].get('scale', [1, 1, 1]), dtype=np.float64)
                 local[node, :3, :3] = _rotations()[1](rotations[frame, index]) * scale[None, :]
-        world = _world_matrices(local, target['parents'])
-        parent = np.eye(4) if root_parent is None else world[root_parent]
-        translations.append((np.linalg.inv(parent) @ np.append(positions[frame], 1))[:3])
+        for position, node in enumerate(order):
+            if position == 0 or depth(node) > depth(order[position - 1]):
+                world = _world_matrices(local, target['parents'])
+            node_parent = target['parents'].get(node)
+            parent = np.eye(4) if node_parent is None else world[node_parent]
+            translation = (np.linalg.inv(parent) @ np.append(placed[node][frame], 1))[:3]
+            translations[node].append(translation)
+            local[node, :3, 3] = translation
     document = copy.deepcopy(target['document'])
     binary = bytearray(target['binary'])
     accessors, views = document.setdefault('accessors', []), document.setdefault('bufferViews', [])
@@ -265,7 +285,10 @@ def append_glb_animation(target, solved, fps, pelvis_name, report=None):
                 if values[frame - 1] @ values[frame] < 0:
                     values[frame] *= -1
             channel(node, 'rotation', values, 'VEC4')
-    channel(root_node, 'translation', translations, 'VEC3')
+    channel(root_node, 'translation', translations[root_node], 'VEC3')
+    for node in order:
+        if node != root_node:
+            channel(node, 'translation', translations[node], 'VEC3')
     document.setdefault('animations', []).append(animation)
     document['buffers'][0]['byteLength'] = len(binary)
     return pack_glb(document, binary)
