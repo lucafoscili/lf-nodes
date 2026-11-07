@@ -275,6 +275,11 @@ Implementation owners are `retarget.py` (NumPy-only skeleton math, loadable by
 file path), `retarget_smplx.py` (one bone-map reader and SMPL-X adapter), and
 `retarget_glb.py` (scene transforms, animation, CPU skinning), using the existing
 `glb_texture.py` codec. `render.py` owns framing, warnings, and rasterization.
+A caller with its own skeleton format and per-frame loop plans through the same
+core rather than a copy: `bind_alignment` (one bind ray onto another, optionally
+flattened, refusing a zero ray by bone name), `chain_stations` (normalized bind
+arc length along ancestry) and `station_bracket` (the two source controls and
+weight around a station) are public alongside `retarget_motion`.
 
 ## Motion interchange
 

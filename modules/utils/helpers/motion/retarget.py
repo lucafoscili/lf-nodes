@@ -127,14 +127,18 @@ def shortest_arc_rotation(start, end):
     return quaternion_normalize(np.where(valid, q, _IDENTITY))
 
 
-def _bind_alignment(target_ray, source_ray, flatten, target_name):
-    """A = shortest arc from target to source bind ray; a zero ray is refused, never identity."""
+def bind_alignment(target_ray, source_ray, *, flatten=False, name):
+    """A = shortest arc carrying a target bind ray onto a source bind ray (Y-up).
+
+    ``flatten`` projects both rays onto the horizontal XZ plane first. A zero
+    ray is refused, naming the target bone ``name``, never aligned as identity.
+    """
     if flatten:
         target_ray, source_ray = np.array(target_ray, float), np.array(source_ray, float)
         target_ray[1] = source_ray[1] = 0
     for side, ray in (("target", target_ray), ("source", source_ray)):
         if np.linalg.norm(ray) < _EPS:
-            raise ValueError(f"Bind ray for target bone {target_name!r} has zero {side} length"
+            raise ValueError(f"Bind ray for target bone {name!r} has zero length on its {side} side"
                              f"{' after flatten_slope' if flatten else ''}; its joints coincide.")
     return shortest_arc_rotation(target_ray, source_ray)
 
@@ -145,12 +149,13 @@ def _parent_order(parents):
         raise ValueError("Skeleton parents must be an integer array.")
     if np.any(parents < -1) or np.any(parents >= len(parents)):
         raise ValueError("Skeleton parent index is out of range.")
-    order, pending = [], set(range(len(parents)))
+    order, placed, pending = [], set(), set(range(len(parents)))
     while pending:
-        ready = [i for i in sorted(pending) if parents[i] == -1 or parents[i] in order]
+        ready = [i for i in sorted(pending) if parents[i] == -1 or parents[i] in placed]
         if not ready:
             raise ValueError("Skeleton parents contain a cycle.")
         order.extend(ready)
+        placed.update(ready)
         pending.difference_update(ready)
     return order
 
@@ -257,7 +262,7 @@ def alignment_rotations(source_skeleton, target_skeleton, pairs, *, keep_rest_fa
             ds = _direction(source, si, source_ids, source["names"][si])
             dt = _direction(target, ti, target_ids, source["names"][si], target_semantics)
             if ds is not None and dt is not None:
-                result[row] = _bind_alignment(dt, ds, target["names"][ti] in flat, target["names"][ti])
+                result[row] = bind_alignment(dt, ds, flatten=target["names"][ti] in flat, name=target["names"][ti])
             else:
                 parent = target["parents"][ti]
                 while parent >= 0 and parent not in by_target:
@@ -290,18 +295,27 @@ def _chain_alignment(source, target, si, ti, source_ids, target_ids, target_sema
                 return _IDENTITY
             dt = _direction(target, ti, target_ids, target_semantics.get(ti, source["names"][si]), target_semantics)
     flatten = target["names"][original_target] in flat or target["names"][ti] in flat
-    return _bind_alignment(dt, ds, flatten, target["names"][original_target])
+    return bind_alignment(dt, ds, flatten=flatten, name=target["names"][original_target])
 
 
-def _chain_stations(skeleton, controls):
+def chain_stations(skeleton, controls):
+    """Normalized bind arc length of each control along its actual ancestry, 0 to 1.
+
+    ``skeleton`` needs ``parents`` and world ``rest_positions``; ``controls`` are
+    joint indices, parent to child. Unmapped joints between two controls add
+    their segments. A control that is not a descendant of the one before it, or
+    two controls at one position, is refused.
+    """
+    parents, positions = skeleton["parents"], np.asarray(skeleton["rest_positions"], dtype=np.float64)
     stations = [0.]
     for previous, current in zip(controls, controls[1:]):
-        length, index = 0., current
+        length, index, steps = 0., current, 0
         while index != previous:
-            parent = skeleton["parents"][index]
-            if parent < 0:
+            parent = parents[index]
+            steps += 1
+            if parent < 0 or steps > len(parents):
                 raise ValueError("Chain controls must follow parent-child ancestry.")
-            length += np.linalg.norm(skeleton["rest_positions"][index] - skeleton["rest_positions"][parent])
+            length += np.linalg.norm(positions[index] - positions[parent])
             index = parent
         if length < _EPS:
             raise ValueError("Chain controls have coincident bind stations.")
@@ -309,7 +323,7 @@ def _chain_stations(skeleton, controls):
     return np.asarray(stations) / stations[-1] if len(stations) > 1 else np.array([0.])
 
 
-def _station_bracket(source_stations, station):
+def station_bracket(source_stations, station):
     """The two source controls around a bind station and the slerp weight between them."""
     count = len(source_stations)
     lower = max(0, min(int(np.searchsorted(source_stations, station, side="right")) - 1, count - 1))
@@ -336,7 +350,7 @@ def resample_chain_rotations(world_rotations, source_stations, target_stations):
         return rotations.copy()
     result = []
     for station in target_stations:
-        lower, upper, weight = _station_bracket(source_stations, station)
+        lower, upper, weight = station_bracket(source_stations, station)
         result.append(quaternion_slerp(rotations[..., lower, :], rotations[..., upper, :], weight))
     return np.stack(result, axis=-2)
 
@@ -388,7 +402,7 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
         shared = [name for name in tn if name in direction_mapping]
         if shared:
             raise ValueError(f"Target bone {shared[0]!r} is named by more than one pair or chain.")
-        ss, ts = _chain_stations(source, sis), _chain_stations(target, tis)
+        ss, ts = chain_stations(source, sis), chain_stations(target, tis)
         plans.append((sis, tis, ss, ts))
         for position, target_name in enumerate(tn):
             nearest = position if len(sis) == len(tis) else int(np.argmin(np.abs(ss-ts[position])))
@@ -409,7 +423,7 @@ def retarget_motion(source_world_rotations, source_root_positions, source_skelet
         # Alignment of each source control to each target station precedes slerp.
         for position, ti in enumerate(tis):
             station = ss[position] if len(sis) == len(tis) else ts[position]
-            lower, upper, weight = _station_bracket(ss, station)
+            lower, upper, weight = station_bracket(ss, station)
             samples = []
             for si in (sis[lower], sis[upper]):
                 alignment = _chain_alignment(source, target, si, ti, mapped_source, mapped_target,

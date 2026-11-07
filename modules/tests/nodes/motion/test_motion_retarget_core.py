@@ -142,16 +142,16 @@ def test_target_bone_in_a_pair_and_a_chain_is_refused_by_name():
 def test_coincident_bind_joints_are_refused_not_given_identity_alignment():
     source = skeleton(["pelvis", "spine1"], [-1, 0], [[0, 0, 0], [0, 1, 0]])
     target = skeleton(["hips", "torso"], [-1, 0], [[0, 1, 0], [0, 1, 0]])
-    with pytest.raises(ValueError, match="'hips' has zero target length"):
+    with pytest.raises(ValueError, match="'hips' has zero length on its target side"):
         core.retarget_motion(source["rest_rotations"][None], [[0, 0, 0]], source, target,
                              [("pelvis", "hips"), ("spine1", "torso")], scale=1)
 
 
 def test_chain_stations_measure_ancestral_arc_not_endpoint_distance():
     rig = skeleton(["a", "helper", "b"], [-1, 0, 1], [[0, 0, 0], [1, 0, 0], [1, 1, 0]])
-    np.testing.assert_allclose(core._chain_stations(rig, [0, 1, 2]), [0, .5, 1])
+    np.testing.assert_allclose(core.chain_stations(rig, [0, 1, 2]), [0, .5, 1])
     with pytest.raises(ValueError, match="ancestry"):
-        core._chain_stations(rig, [2, 0])
+        core.chain_stations(rig, [2, 0])
 
 
 def test_leaf_inherits_nearest_mapped_ancestor_alignment_through_unmapped_parent():
