@@ -37,6 +37,9 @@ export class WorkflowRunnerClient {
   #LAST_SEQ: Map<string, number> = new Map();
   #RUNS: Map<string, RunRecord> = new Map();
   #WORKFLOW_CACHE: Map<string, string> = new Map();
+  // Ids whose name request is in flight: hundreds of runs share a handful of workflows, and the
+  // registry answers every request with its whole list, so one request per id at a time.
+  #WORKFLOW_PENDING: Set<string> = new Set();
 
   // Runtime state
   #STATE = {
@@ -516,8 +519,11 @@ export class WorkflowRunnerClient {
   // Fetch human-friendly workflow names for given ids and cache them
   private async fetchWorkflowNames(ids: string[]) {
     // filter out ids we already have
-    const needs = ids.filter((id) => !!id && !this.#WORKFLOW_CACHE.has(id));
+    const needs = [...new Set(ids)].filter(
+      (id) => !!id && !this.#WORKFLOW_CACHE.has(id) && !this.#WORKFLOW_PENDING.has(id),
+    );
     if (needs.length === 0) return;
+    for (const id of needs) this.#WORKFLOW_PENDING.add(id);
     try {
       const resp = await fetch(`${API_ROOT}/workflows?ids=${encodeURIComponent(needs.join(','))}`, {
         credentials: 'include',
@@ -584,6 +590,8 @@ export class WorkflowRunnerClient {
       this.emitUpdate();
     } catch (e) {
       debugLog('fetchWorkflowNames error', 'warning', e);
+    } finally {
+      for (const id of needs) this.#WORKFLOW_PENDING.delete(id);
     }
   }
 

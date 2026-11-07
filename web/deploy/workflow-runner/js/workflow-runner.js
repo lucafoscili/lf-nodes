@@ -4436,7 +4436,7 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_RECONNECT_TIMER, _WorkflowRunnerClient_STOPPED, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, _WorkflowRunnerClient_REMOVED_RUN_IDS;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_WORKFLOW_PENDING, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_RECONNECT_TIMER, _WorkflowRunnerClient_STOPPED, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, _WorkflowRunnerClient_REMOVED_RUN_IDS;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
@@ -4453,6 +4453,7 @@ class WorkflowRunnerClient {
     _WorkflowRunnerClient_LAST_SEQ.set(this, /* @__PURE__ */ new Map());
     _WorkflowRunnerClient_RUNS.set(this, /* @__PURE__ */ new Map());
     _WorkflowRunnerClient_WORKFLOW_CACHE.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_WORKFLOW_PENDING.set(this, /* @__PURE__ */ new Set());
     _WorkflowRunnerClient_STATE.set(this, {
       connecting: false,
       processingSnapshot: false
@@ -4818,9 +4819,11 @@ class WorkflowRunnerClient {
   }
   // Fetch human-friendly workflow names for given ids and cache them
   async fetchWorkflowNames(ids) {
-    const needs = ids.filter((id) => !!id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(id));
+    const needs = [...new Set(ids)].filter((id) => !!id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(id) && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_PENDING, "f").has(id));
     if (needs.length === 0)
       return;
+    for (const id of needs)
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_PENDING, "f").add(id);
     try {
       const resp = await fetch(`${API_ROOT}/workflows?ids=${encodeURIComponent(needs.join(","))}`, {
         credentials: "include"
@@ -4876,6 +4879,9 @@ class WorkflowRunnerClient {
       this.emitUpdate();
     } catch (e) {
       debugLog("fetchWorkflowNames error", "warning", e);
+    } finally {
+      for (const id of needs)
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_PENDING, "f").delete(id);
     }
   }
   // Save active runs to localStorage (IDs-only for schema stability)
@@ -5269,7 +5275,7 @@ class WorkflowRunnerClient {
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RECONNECT_TIMER = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STOPPED = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_REMOVED_RUN_IDS = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_PENDING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RECONNECT_TIMER = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STOPPED = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_REMOVED_RUN_IDS = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
