@@ -70,6 +70,12 @@ export enum NodeName {
   regionFeatureSimilarity = 'LF_RegionFeatureSimilarity',
   visionPatchEncode = 'LF_VisionPatchEncode',
   faceAlign = 'LF_FaceAlign',
+  faceZones = 'LF_FaceZones',
+  gradeSplit = 'LF_GradeSplit',
+  lumaRatioMap = 'LF_LumaRatioMap',
+  toneProfile = 'LF_ToneProfile',
+  regionReads = 'LF_RegionReads',
+  intrinsicLayers = 'LF_IntrinsicLayers',
   faceIdentity = 'LF_FaceIdentity',
   edgePadding = 'LF_EdgePadding',
   maskedLabGrade = 'LF_MaskedLabGrade',
@@ -233,6 +239,14 @@ export const TEXTURE_RESULT_NODES: readonly NodeName[] = [
   NodeName.maskedLabGrade,
   NodeName.detailTransfer,
   NodeName.normalMapRepack,
+];
+// Tone-reading results: compare grids whose labels carry the measured numbers.
+export const READING_RESULT_NODES: readonly NodeName[] = [
+  NodeName.gradeSplit,
+  NodeName.lumaRatioMap,
+  NodeName.regionReads,
+  NodeName.faceZones,
+  NodeName.intrinsicLayers,
 ];
 export enum TagName {
   Div = 'div',

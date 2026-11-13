@@ -5,7 +5,13 @@ import {
   CompareNormalizeCallback,
   CompareState,
 } from '../types/widgets/compare';
-import { CustomWidgetName, NodeName, TagName, TEXTURE_RESULT_NODES } from '../types/widgets/widgets';
+import {
+  CustomWidgetName,
+  NodeName,
+  READING_RESULT_NODES,
+  TagName,
+  TEXTURE_RESULT_NODES,
+} from '../types/widgets/widgets';
 import { createDOMWidget, normalizeValue } from '../utils/common';
 
 const STATE = new WeakMap<HTMLDivElement, CompareState>();
@@ -56,7 +62,7 @@ export const compareFactory: CompareFactory = {
     content.appendChild(compare);
     let summary: HTMLLfTreeElement;
     if ([NodeName.textRegionMasks, NodeName.regionColorStats, NodeName.visionPatchEncode,
-      ...TEXTURE_RESULT_NODES].includes(node.comfyClass as NodeName)) {
+      ...TEXTURE_RESULT_NODES, ...READING_RESULT_NODES].includes(node.comfyClass as NodeName)) {
       // Compare's image selectors are closed by default. Keep result labels visible.
       summary = document.createElement(TagName.LfTree);
       summary.classList.add(CompareCSS.Summary);

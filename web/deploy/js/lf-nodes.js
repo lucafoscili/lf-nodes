@@ -1291,6 +1291,12 @@ var NodeName;
   NodeName2["regionFeatureSimilarity"] = "LF_RegionFeatureSimilarity";
   NodeName2["visionPatchEncode"] = "LF_VisionPatchEncode";
   NodeName2["faceAlign"] = "LF_FaceAlign";
+  NodeName2["faceZones"] = "LF_FaceZones";
+  NodeName2["gradeSplit"] = "LF_GradeSplit";
+  NodeName2["lumaRatioMap"] = "LF_LumaRatioMap";
+  NodeName2["toneProfile"] = "LF_ToneProfile";
+  NodeName2["regionReads"] = "LF_RegionReads";
+  NodeName2["intrinsicLayers"] = "LF_IntrinsicLayers";
   NodeName2["faceIdentity"] = "LF_FaceIdentity";
   NodeName2["edgePadding"] = "LF_EdgePadding";
   NodeName2["maskedLabGrade"] = "LF_MaskedLabGrade";
@@ -1453,6 +1459,13 @@ const TEXTURE_RESULT_NODES = [
   NodeName.maskedLabGrade,
   NodeName.detailTransfer,
   NodeName.normalMapRepack
+];
+const READING_RESULT_NODES = [
+  NodeName.gradeSplit,
+  NodeName.lumaRatioMap,
+  NodeName.regionReads,
+  NodeName.faceZones,
+  NodeName.intrinsicLayers
 ];
 var TagName;
 (function(TagName2) {
@@ -1750,6 +1763,12 @@ const NODE_WIDGET_MAP = {
   LF_RegionFeatureSimilarity: [CustomWidgetName.tree],
   LF_VisionPatchEncode: [CustomWidgetName.compare],
   LF_FaceAlign: [CustomWidgetName.compare],
+  LF_FaceZones: [CustomWidgetName.compare],
+  LF_GradeSplit: [CustomWidgetName.compare],
+  LF_LumaRatioMap: [CustomWidgetName.compare],
+  LF_ToneProfile: [CustomWidgetName.tree],
+  LF_RegionReads: [CustomWidgetName.compare],
+  LF_IntrinsicLayers: [CustomWidgetName.compare],
   LF_FaceIdentity: [CustomWidgetName.tree],
   LF_EdgePadding: [CustomWidgetName.compare],
   LF_MaskedLabGrade: [CustomWidgetName.compare],
@@ -7854,7 +7873,8 @@ const compareFactory = {
       NodeName.textRegionMasks,
       NodeName.regionColorStats,
       NodeName.visionPatchEncode,
-      ...TEXTURE_RESULT_NODES
+      ...TEXTURE_RESULT_NODES,
+      ...READING_RESULT_NODES
     ].includes(node.comfyClass)) {
       summary = document.createElement(TagName.LfTree);
       summary.classList.add(CompareCSS.Summary);
@@ -10866,7 +10886,9 @@ class LFWidgets {
         NodeName.regionColorStats,
         NodeName.regionFeatureSimilarity,
         NodeName.visionPatchEncode,
-        ...TEXTURE_RESULT_NODES
+        ...TEXTURE_RESULT_NODES,
+        ...READING_RESULT_NODES,
+        NodeName.toneProfile
       ].includes(nodeName);
       const rendered = __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[name].render(node, ...args);
       if (regionResult) {

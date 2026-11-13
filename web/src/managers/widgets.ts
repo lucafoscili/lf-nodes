@@ -10,6 +10,7 @@ import {
   CustomWidgetConstructor,
   CustomWidgetName,
   NodeName,
+  READING_RESULT_NODES,
   TEXTURE_RESULT_NODES,
   WidgetFactory,
 } from '../types/widgets/widgets';
@@ -74,6 +75,8 @@ export class LFWidgets {
       NodeName.regionFeatureSimilarity,
       NodeName.visionPatchEncode,
       ...TEXTURE_RESULT_NODES,
+      ...READING_RESULT_NODES,
+      NodeName.toneProfile,
     ].includes(nodeName);
     const rendered = this.#FACTORIES[name].render(node, ...args);
     if (regionResult) {

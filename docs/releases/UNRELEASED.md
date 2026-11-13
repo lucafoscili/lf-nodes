@@ -2,6 +2,40 @@
 
 Changes since [LF Nodes 5.1.0](https://github.com/lucafoscili/lf-nodes/blob/v5.1.0/docs/releases/5.1.0.md).
 
+## New nodes
+
+Six readers measure how a rendered frame looks rather than eyeballing it. Each
+returns a JSON report with its own schema and shows its result in the Compare
+widget (Tone profile in a tree).
+
+- **Grade split** (`lf.grade-split.v1`) fits a 3D colour lookup from a before
+  frame to an after frame of the same view and reports how much of the change
+  the lookup (a global grade) explains, how much a local tone operator (the
+  lookup keyed by the neighbourhood's brightness too) adds, and what is left by
+  spatial band; with the grade's tone curve and its saturation by luma band.
+- **Luma ratio map** (`lf.luma-ratio-map.v1`) pictures after over before as a
+  signed map and reports the median ratio per luma band, inside and outside an
+  optional mask and over the whole frame.
+- **Tone profile** (`lf.tone-profile.v1`) reads luma, saturation and percentiles
+  per region of a Text region masks set, and against a reference profile gives
+  each region's ratio. Its UI shows the profile as a tree; the report itself
+  travels on its socket.
+- **Region reads** (`lf.region-reads.v1`) evaluates lines such as
+  `face / ring(face) - near(hair)`: regions combined with `&`, `|` and `-`, a
+  ring, edge, inside or near band around a region or a union of them
+  (`ring(face|hair)`), and `facing<v` or `facing>v`
+  on an optional facing (N·V) map.
+- **Face zones** (`lf.face-zones.v1`) places under-eye, cheek, fold, forehead
+  and chin zones from 68 landmarks, sized by the eyes' distance (never less
+  than about half the face's height, so a turned face keeps its zones; the far
+  side's under-eye and cheek go once its eye hides behind the nose), as a
+  region mask set (InsightFace packs on ONNX Runtime, like Face align).
+- **Intrinsic layers** (`lf.intrinsic-layers.v1`) splits an image into albedo,
+  diffuse shading and residual with Careaga and Aksoy's pipeline. Neither the
+  `intrinsic` package nor its weights ship with LF Nodes, and their authors
+  provide them for academic use only. Its loader fails loud instead of waiting
+  on torch hub's console trust prompt.
+
 ## Changed nodes
 
 - **Video to motion** runs RGB MoCap's Motion Correction after the engine,
@@ -47,3 +81,7 @@ workflow, and its test checks that inventory. Titanic executes ComfyUI graphs,
 not Runner orchestras, so **no Titanic case runs Pose Shoot**; the motion pair
 stays disabled inventory, as in 5.1.0. Its offline tests stub only the model
 boundary.
+
+The six readers have offline tests on synthetic images and a Compare
+registration, but **no Titanic case and no place in the canonical E2E workflow
+yet**: they are not ready to release until they have both.
