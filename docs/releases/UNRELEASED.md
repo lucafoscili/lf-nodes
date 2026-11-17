@@ -42,7 +42,7 @@ what ran (model, revision, settings, seconds of audio, load and run time):
 
 - **Voice clone speech** (`lf.voice_clone_speech.receipt.v1`) says a text in
   the voice of a reference recording and its transcript, or in a voice designed
-  from words alone (`female, low pitch, british accent`), with OmniVoice.
+  from words alone (`male, elderly, american accent`), with OmniVoice.
 - **Voice convert** (`lf.voice_convert.receipt.v1`) keeps a recording's words
   and timing and gives them the voice of a target recording (its first ten
   seconds), with Chatterbox's converter; its output carries Chatterbox's
@@ -52,7 +52,7 @@ what ran (model, revision, settings, seconds of audio, load and run time):
   expected text (Whisper's transcript and its word error rate).
 
 None of their packages or weights ship with LF Nodes. OmniVoice's weights are
-licensed CC BY-NC 4.0 (non-commercial) and WavLM's CC BY-SA 3.0; Chatterbox
+licensed CC BY-NC (non-commercial, by their training data's terms) and WavLM's CC BY-SA 3.0; Chatterbox
 and Whisper are MIT. Only clone a voice you have the right to use.
 
 ## Changed nodes
@@ -104,3 +104,7 @@ boundary.
 The six readers have offline tests on synthetic images and a Compare
 registration, but **no Titanic case and no place in the canonical E2E workflow
 yet**: they are not ready to release until they have both.
+
+The three speech nodes have offline tests on synthetic tones with their models
+stubbed, but **no widget, no Titanic case and no place in the canonical E2E
+workflow yet**: they are not ready to release until they have all three.

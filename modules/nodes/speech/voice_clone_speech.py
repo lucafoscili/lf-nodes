@@ -36,7 +36,7 @@ class LF_VoiceCloneSpeech:
                                                   "tooltip": "Exactly what the reference recording says."}),
                 "voice_design": (Input.STRING, {"default": "",
                                                 "tooltip": "Without a reference: comma-separated attributes of the voice "
-                                                           "to design (female, young adult, low pitch, british accent...)."}),
+                                                           "to design (male, elderly, high pitch, american accent...)."}),
             },
         }
 

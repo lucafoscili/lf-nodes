@@ -126,7 +126,22 @@ def test_match_refuses_an_empty_text():
 
 def test_words_and_error_rate():
     assert words("It’s  DONE, isn't it?") == ["it's", "done", "isn't", "it"]
-    assert word_error_rate("Lead the way.", "lead the way") == 0.0
-    assert word_error_rate("Lead the way.", "lead way then") == round(2 / 3, 4)
+    assert word_error_rate("Follow the river.", "follow the river") == 0.0
+    assert word_error_rate("Follow the river.", "follow river now") == round(2 / 3, 4)
     with pytest.raises(ValueError, match="no words"):
         word_error_rate("...", "anything")
+
+
+def test_every_model_has_its_room_and_a_load_that_leaves_weights_out_is_refused() -> None:
+    families = {**models.SPEAKERS, **models.CONVERTERS, **models.SPEAKER_ENCODERS, **models.RECOGNIZERS}
+    assert set(families) == set(models._ROOM), "each model frees its room before it loads"
+
+    class Report:
+        def __init__(self, missing, unexpected=()):
+            self.missing_keys, self.unexpected_keys = list(missing), list(unexpected)
+
+    models.loaded_whole(Report(["tokenizer.window"]), models.S3GEN_BUILT, "a/converter")
+    with pytest.raises(RuntimeError, match="missing \\['flow.decoder'\\]"):
+        models.loaded_whole(Report(["tokenizer.window", "flow.decoder"]), models.S3GEN_BUILT, "a/converter")
+    with pytest.raises(RuntimeError, match="unexpected"):
+        models.loaded_whole(Report([], ["extra"]), models.S3GEN_BUILT, "a/converter")

@@ -30,7 +30,17 @@ _ROOM = {
 }
 OMNIVOICE_RATE = 24000
 CHATTERBOX_REFERENCE_SECONDS = 10.0  # ChatterboxVC.DEC_COND_LEN: the target voice it reads
+S3GEN_BUILT = frozenset({"tokenizer.window"})  # the one S3Gen tensor its weights leave out: a window it computes
 WAVLM_RATE = WHISPER_RATE = 16000
+
+
+def loaded_whole(report, built: frozenset, repo: str) -> None:
+    """A non-strict `load_state_dict`'s report, refused unless it left out only the tensors the model builds itself:
+    weights that moved at a revision would otherwise run half loaded and say noise."""
+    missing = sorted(set(report.missing_keys) - built)
+    if missing or report.unexpected_keys:
+        raise RuntimeError(f"{repo}'s weights do not fit its model: missing {missing[:5]} ({len(missing)}), "
+                           f"unexpected {list(report.unexpected_keys)[:5]} ({len(report.unexpected_keys)}).")
 
 
 def revision_of(family: dict, repo: str, revision: str) -> str:
@@ -130,7 +140,7 @@ def chatterbox_convert(source: torch.Tensor, source_rate: int, target: torch.Ten
     started = time.perf_counter()
     with running(repo) as where:
         model = S3Gen()
-        model.load_state_dict(load_file(folder / "s3gen.safetensors"), strict=False)
+        loaded_whole(model.load_state_dict(load_file(folder / "s3gen.safetensors"), strict=False), S3GEN_BUILT, repo)
         model.to(where).eval()
         loaded = time.perf_counter()
         try:
