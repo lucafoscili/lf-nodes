@@ -114,7 +114,8 @@ def _fit(features, labels, l2, max_iter):
     sample = torch.where(labels > 0.5, 0.5 / positives, 0.5 / negatives)
     weight = torch.zeros(features.shape[1], requires_grad=True)
     bias = torch.zeros((), requires_grad=True)
-    optimizer = torch.optim.LBFGS([weight, bias], lr=1.0, max_iter=max_iter, history_size=20,
+    max_eval = max_iter * 5 // 4
+    optimizer = torch.optim.LBFGS([weight, bias], lr=1.0, max_iter=max_iter, max_eval=max_eval, history_size=20,
                                   tolerance_grad=1e-7, tolerance_change=1e-10, line_search_fn='strong_wolfe')
 
     def closure():
@@ -126,7 +127,11 @@ def _fit(features, labels, l2, max_iter):
         return loss
 
     optimizer.step(closure)
-    return {'mean': mean, 'scale': scale, 'weight': weight.detach(), 'bias': bias.detach()}
+    # LBFGS stops at a tolerance (converged) or at a cap on its iterations or evaluations (not converged).
+    state = optimizer.state[weight]
+    iterations, evaluations = int(state.get('n_iter', 0)), int(state.get('func_evals', 0))
+    return {'mean': mean, 'scale': scale, 'weight': weight.detach(), 'bias': bias.detach(), 'iterations': iterations,
+            'converged': iterations < max_iter and evaluations < max_eval}
 
 
 def probe_logits(probe, features):
@@ -162,7 +167,7 @@ def _patch_labels(labels, patches):
 
 def held_out(tokens, labels, groups, l2):
     """Each group held out once: its images read by the probe the other groups taught. Returns folds and probes."""
-    count, patches, features = tokens.shape
+    _, patches, features = tokens.shape
     folds, probes = [], {}
     for group in dict.fromkeys(groups):
         held = [index for index, name in enumerate(groups) if name == group]
@@ -181,8 +186,11 @@ def held_out(tokens, labels, groups, l2):
                    'mean_logit': round(float(per_logit[k].mean()), 3),
                    'positive_share': round(float((per_image[k] > 0.5).float().mean()), 4)}
                   for k, index in enumerate(held)]
-        ones = [image['mean_probability'] for image in images if image['label'] == 1]
-        zeros = [image['mean_probability'] for image in images if image['label'] == 0]
+        # the order of the group's images by their mean logits, which keep counting where probabilities saturate
+        means = [float(value) for value in per_logit.mean(1)]
+        ones = [mean for mean, index in zip(means, held) if labels[index] == 1]
+        zeros = [mean for mean, index in zip(means, held) if labels[index] == 0]
+        # per patch, over the held-out group's images
         auc = roc_auc(probability, truth)
         folds.append({
             'group': group, 'images': images,
@@ -191,6 +199,7 @@ def held_out(tokens, labels, groups, l2):
             'log_loss': round(_balanced(loss, truth), 4),
             # every label-1 image reads above every label-0 image of the group (a pair's on above its off)
             'ordered': (min(ones) > max(zeros)) if ones and zeros else None,
+            'converged': probe['converged'],
         })
     return folds, probes
 
@@ -307,6 +316,9 @@ def read_patch_probe(teach, labels, groups, frames, frame_images, *, crop='none'
                      'auc': round(sum(aucs) / len(aucs), 4) if aucs else None,
                      'auc_min': min(aucs) if aucs else None,
                      'ordered': f'{sum(ordered)}/{len(ordered)}' if ordered else None},
+        # each fit stopped at a tolerance; a fit stopped at its cap names it in the node's title
+        'converged': {'held_out': f"{sum(fold['converged'] for fold in folds)}/{len(folds)}",
+                      'all_groups': whole['converged']},
         'frames': rows,
     }
     return report, torch.stack(painted), torch.stack(maps)

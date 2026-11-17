@@ -48,6 +48,7 @@ class LF_PatchProbe:
             frame_masks=frame_masks, names=names)
         negative, positive = report["names"]
         held = report["held_out"]
+        converged = report["converged"]["all_groups"] and all(fold["converged"] for fold in held["folds"])
         nodes = []
         for row in report["frames"]:
             index = row["index"]
@@ -56,6 +57,9 @@ class LF_PatchProbe:
                 title += f" | in mask {row['mask_probability']:.2f}"
             if index == 0 and held["auc"] is not None:
                 title += f" | held out: AUC {held['auc']:.2f}, ordered {held['ordered']}"
+            if index == 0 and not converged:
+                title += (f" | NOT CONVERGED: held out {report['converged']['held_out']}, "
+                          f"all groups {report['converged']['all_groups']} (raise l2)")
             nodes.append(create_cached_compare_node(frame_images[index:index + 1], painted[index:index + 1],
                                                     index=index, title=title))
         # The patch grids travel on the socket; the UI keeps the summary.

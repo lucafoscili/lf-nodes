@@ -142,3 +142,24 @@ def test_the_probe_learns_inside_comfys_inference_mode():
         frames = _encode([_scene(9, 4.0)])
         report, _, _ = helper.read_patch_probe(teach, labels, groups, frames, torch.full((1, 8, 8, 3), 0.5))
     assert report["frames"][0]["mean_probability"] > 0.75
+
+
+def test_a_pair_both_read_far_on_is_ordered_by_its_logits():
+    """Probabilities saturate where a frame reads far to one side; the order of a pair is its logits'."""
+    images = [_scene(0, 0.0), _scene(0, 4.0), _scene(1, 0.0), _scene(1, 4.0), _scene(2, 40.0), _scene(2, 60.0)]
+    tokens = helper.patch_tokens(_encode(images), "teach")[0]
+    folds, _ = helper.held_out(tokens, [0, 1, 0, 1, 0, 1], ["a", "a", "b", "b", "c", "c"], 0.01)
+    far = next(fold for fold in folds if fold["group"] == "c")
+    off, on = far["images"]
+    assert off["mean_probability"] == on["mean_probability"] and on["mean_logit"] > off["mean_logit"]
+    assert far["ordered"] is True
+
+
+def test_the_fit_says_whether_it_converged():
+    images = [_scene(seed, shift) for seed in range(3) for shift in (0.0, 4.0)]
+    tokens = helper.patch_tokens(_encode(images), "teach")[0].reshape(-1, FEATURES)
+    labels = helper._patch_labels([0, 1] * 3, ROWS * COLS)
+    fitted = helper.fit_probe(tokens, labels, 0.01)
+    assert fitted["converged"] and 0 < fitted["iterations"] < helper.MAX_ITER
+    capped = helper.fit_probe(tokens, labels, 0.01, max_iter=1)
+    assert not capped["converged"] and capped["iterations"] == 1

@@ -46,10 +46,12 @@ scene it never saw (accuracy, AUC, log loss and each image's mean). A frame
 naming a teaching group is read by the probe that held that group out; any
 other is read by the probe every group taught, with the range of the held-out
 probes' readings beside it. A frame's score is its mean probability and its
-patches' mean logit, which keeps counting where the probabilities saturate.
-Each frame comes back painted (orange label 1, blue label 0, by how sure the
-probe is), as a probability mask, and as its patch grid of logits in the
-report.
+patches' mean logit, which keeps counting where the probabilities saturate
+(a held-out pair's order is its logits'; the AUC is per patch). Each fit says
+whether it converged, and the first frame's title names any that stopped at
+its cap. Each frame comes back painted (orange label 1, blue label 0, by how
+sure the probe is), as a probability mask, and as its patch grid of logits in
+the report.
 
 Three speech nodes, each loading its model from a pinned Hugging Face revision
 for its run and freeing the GPU after it, and each returning a JSON receipt of
