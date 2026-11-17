@@ -1,9 +1,10 @@
 """How close a recording is to a voice and to its text: the cosine of the two voices' speaker embeddings (WavLM), and
-the word error rate of what Whisper hears against the text it should say."""
+the word error rate of what Whisper hears against the text it should say; and how the recording moves, its pitch and
+loudness ranges (its prosody, in the receipt)."""
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.speech import models
+from ...utils.helpers.speech import models, prosody
 from ...utils.helpers.speech.audio import mono, seconds
 from ...utils.helpers.speech.text import word_error_rate
 
@@ -37,13 +38,15 @@ class LF_SpeechMatch:
         "Cosine of the two recordings' speaker embeddings: 1 is the same voice.",
         "What the speech recognition model heard.",
         "Word edits from the expected text to the transcript, per expected word: 0 is every word said.",
-        "Both measures with the models, revisions, lengths and timings that made them.",
+        "Both measures with the models, revisions, lengths and timings that made them, and the recording's prosody: "
+        "its pitch median, range and spread, its loudness range and its voiced share.",
     )
 
     def on_exec(self, audio, reference_audio, expected_text, language, speaker_model, speaker_revision, asr_model,
                 asr_revision, **kwargs):
         if not isinstance(expected_text, str) or not expected_text.strip():
             raise ValueError("expected_text is empty: there is no text to measure the recording against.")
+        prosody.require()
         speaker_revision = models.revision_of(models.SPEAKER_ENCODERS, speaker_model, speaker_revision)
         asr_revision = models.revision_of(models.RECOGNIZERS, asr_model, asr_revision)
         heard, heard_rate = mono(audio, name="audio")
@@ -60,6 +63,7 @@ class LF_SpeechMatch:
             "asr_model": asr_model, "asr_revision": asr_revision, "language": (language or "").strip() or None,
             "seconds": seconds(heard, heard_rate), "reference_seconds": seconds(voice, voice_rate),
             "speaker_seconds": speaker_timing["seconds"], "asr_seconds": asr_timing["seconds"],
+            "prosody": prosody.prosody(heard, heard_rate),
         }
         return (similarity, transcript, error_rate, receipt)
 

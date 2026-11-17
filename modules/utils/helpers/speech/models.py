@@ -7,6 +7,7 @@ speech run never leaves weights behind for the next workflow. Every heavy import
 
 from __future__ import annotations
 
+import gc
 import random
 import time
 from contextlib import contextmanager
@@ -69,7 +70,8 @@ def device() -> torch.device:
 
 @contextmanager
 def running(repo: str):
-    """ComfyUI's device with room made for `repo`; its cache emptied after, whatever happened."""
+    """ComfyUI's device with room made for `repo`; after it, whatever happened, the run's objects collected (a model
+    whose modules refer to each other outlives `del` until the collector runs) and the device's cache emptied."""
     target = device()
     try:
         from comfy import model_management
@@ -80,10 +82,26 @@ def running(repo: str):
     try:
         yield target
     finally:
+        gc.collect()
         if model_management is not None:
             model_management.soft_empty_cache()
         elif torch.cuda.is_available():
             torch.cuda.empty_cache()
+
+
+def let_go(model) -> None:
+    """Clear the method caches of `model`'s classes, and of every class they derive from, across its modules: a method
+    cached with functools.lru_cache keeps each instance it was called on for good (transformers 5.10's Higgs audio
+    tokenizer caches `_get_conv1d_layers` on its base class, which kept each OmniVoice run's decoder on the GPU)."""
+    seen = set()
+    for module in model.modules() if isinstance(model, torch.nn.Module) else (model,):
+        for kind in type(module).__mro__:
+            if kind in seen:
+                continue
+            seen.add(kind)
+            for value in vars(kind).values():
+                if callable(getattr(value, "cache_clear", None)):
+                    value.cache_clear()
 
 
 def seeded(seed: int) -> None:
@@ -96,8 +114,9 @@ def seeded(seed: int) -> None:
 
 def omnivoice_speak(text: str, *, revision: str, language: str, seed: int, num_step: int, guidance_scale: float,
                     speed: float, reference: tuple[torch.Tensor, int] | None = None, reference_text: str = "",
-                    design: str = "") -> tuple[np.ndarray, int, dict]:
-    """OmniVoice saying `text`: in the voice of `reference` (with its transcript), or of the voice `design` describes."""
+                    design: str = "", t_shift: float = 0.1) -> tuple[np.ndarray, int, dict]:
+    """OmniVoice saying `text`: in the voice of `reference` (with its transcript), or of the voice `design` describes,
+    decoded on the time-step shift asked."""
     repo = "k2-fsa/OmniVoice"
     folder = snapshot(repo, revision)
     from omnivoice import OmniVoice
@@ -110,7 +129,7 @@ def omnivoice_speak(text: str, *, revision: str, language: str, seed: int, num_s
         try:
             seeded(seed)
             options = dict(language=language or None, num_step=num_step, guidance_scale=guidance_scale,
-                           speed=speed if speed > 0 else None)
+                           speed=speed if speed > 0 else None, t_shift=t_shift)
             if reference is not None:
                 prompt = model.create_voice_clone_prompt(ref_audio=reference, ref_text=reference_text)
                 audio = model.generate(text=text, voice_clone_prompt=prompt, **options)
@@ -118,6 +137,7 @@ def omnivoice_speak(text: str, *, revision: str, language: str, seed: int, num_s
                 audio = model.generate(text=text, instruct=design, **options)
             rate = int(getattr(model, "sampling_rate", OMNIVOICE_RATE))
         finally:
+            let_go(model)
             del model
     done = time.perf_counter()
     return np.asarray(audio[0], dtype=np.float32), rate, {
@@ -152,6 +172,7 @@ def chatterbox_convert(source: torch.Tensor, source_rate: int, target: torch.Ten
                 converted, _ = model.inference(speech_tokens=tokens, ref_dict=reference)
             converted = converted.squeeze(0).detach().cpu().numpy()
         finally:
+            let_go(model)
             del model
     marked = perth.PerthImplicitWatermarker().apply_watermark(converted, sample_rate=S3GEN_SR)
     done = time.perf_counter()
@@ -181,6 +202,7 @@ def speaker_similarity(audio: torch.Tensor, audio_rate: int, reference: torch.Te
                 with torch.inference_mode():
                     embeddings.append(model(**inputs).embeddings[0].float().cpu())
         finally:
+            let_go(model)
             del model
     cosine = torch.nn.functional.cosine_similarity(embeddings[0], embeddings[1], dim=-1).item()
     return round(float(cosine), 4), {"seconds": round(time.perf_counter() - started, 2)}
@@ -205,5 +227,6 @@ def transcribe(audio: torch.Tensor, audio_rate: int, *, repo: str, revision: str
                 tokens = model.generate(features, language=language or None, task="transcribe")
             heard = processor.batch_decode(tokens, skip_special_tokens=True)[0].strip()
         finally:
+            let_go(model)
             del model
     return heard, {"seconds": round(time.perf_counter() - started, 2)}

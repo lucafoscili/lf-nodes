@@ -7,6 +7,13 @@ from ...utils.helpers.speech import models
 from ...utils.helpers.speech.audio import mono, seconds, to_audio
 
 RECEIPT_SCHEMA = "lf.voice_clone_speech.receipt.v1"
+# The decoding's schedule, at the model's own default: (default, lowest, highest, step, tooltip). Its sampling
+# temperatures stay at the model's defaults: on a cloned voice they moved a reading no more than another seed did,
+# while this shift livened one line on most seeds.
+DECODING = {
+    "t_shift": (0.1, 0.01, 1.0, 0.01, "Time-step shift of the decoding schedule: smaller dwells on the noisiest "
+                                      "steps; higher can read a line livelier."),
+}
 
 
 class LF_VoiceCloneSpeech:
@@ -37,6 +44,8 @@ class LF_VoiceCloneSpeech:
                 "voice_design": (Input.STRING, {"default": "",
                                                 "tooltip": "Without a reference: comma-separated attributes of the voice "
                                                            "to design (male, elderly, high pitch, american accent...)."}),
+                **{name: (Input.FLOAT, {"default": default, "min": low, "max": high, "step": step, "tooltip": tip})
+                   for name, (default, low, high, step, tip) in DECODING.items()},
             },
         }
 
@@ -53,6 +62,12 @@ class LF_VoiceCloneSpeech:
                 reference_audio=None, reference_text="", voice_design="", **kwargs):
         if not isinstance(text, str) or not text.strip():
             raise ValueError("text is empty: there is nothing to say.")
+        decoding = {}
+        for name, (default, low, high, _, _) in DECODING.items():
+            value = float(default if kwargs.get(name) is None else kwargs[name])
+            if not low <= value <= high:
+                raise ValueError(f"{name} must be from {low} to {high}, not {value}.")
+            decoding[name] = value
         revision = models.revision_of(models.SPEAKERS, model, revision)
         design = (voice_design or "").strip()
         reference = None
@@ -67,13 +82,13 @@ class LF_VoiceCloneSpeech:
         waveform, rate, timings = models.omnivoice_speak(
             text.strip(), revision=revision, language=(language or "").strip(), seed=int(seed), num_step=int(num_step),
             guidance_scale=float(guidance_scale), speed=float(speed), reference=reference,
-            reference_text=(reference_text or "").strip(), design=design)
+            reference_text=(reference_text or "").strip(), design=design, **decoding)
         audio = to_audio(waveform, rate)
         receipt = {
             "schema": RECEIPT_SCHEMA, "model": model, "revision": revision,
             "mode": "clone" if reference is not None else "design", "text": text.strip(),
             "language": (language or "").strip() or None, "seed": int(seed), "num_step": int(num_step),
-            "guidance_scale": float(guidance_scale), "speed": float(speed) or None,
+            "guidance_scale": float(guidance_scale), "speed": float(speed) or None, **decoding,
             "reference_seconds": seconds(*reference) if reference is not None else None,
             "voice_design": design or None, "sample_rate": rate,
             "seconds": seconds(audio["waveform"], rate), **timings,

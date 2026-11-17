@@ -59,16 +59,27 @@ what ran (model, revision, settings, seconds of audio, load and run time):
 
 - **Voice clone speech** (`lf.voice_clone_speech.receipt.v1`) says a text in
   the voice of a reference recording and its transcript, or in a voice designed
-  from words alone (`male, elderly, american accent`), with OmniVoice.
+  from words alone (`male, elderly, american accent`), with OmniVoice. Its text
+  reads OmniVoice's inline tags (`[laughter]`, `[sigh]`) and pronunciations
+  (`[B EY1 S]`), and its decoding's time-step shift is a setting (`t_shift`,
+  OmniVoice's 0.1 by default; higher can read a line livelier).
 - **Voice convert** (`lf.voice_convert.receipt.v1`) keeps a recording's words
   and timing and gives them the voice of a target recording (its first ten
   seconds), with Chatterbox's converter; its output carries Chatterbox's
   implicit watermark.
 - **Speech match** (`lf.speech_match.receipt.v1`) measures a recording against
   a reference voice (WavLM's speaker embedding, their cosine) and against its
-  expected text (Whisper's transcript and its word error rate).
+  expected text (Whisper's transcript and its word error rate), and reads how it
+  moves: its prosody in the receipt (pitch median, range and spread in
+  semitones, loudness range in decibels and voiced share, over the frames where
+  a voice sounds; librosa's probabilistic YIN).
 
-None of their packages or weights ship with LF Nodes. OmniVoice's weights are
+Each run lets go of its model before the GPU's cache is emptied: the
+collector runs, and method caches that would keep the model (transformers'
+Higgs audio tokenizer caches one, which kept each OmniVoice run's decoder) are
+cleared. None of their packages or weights ship with LF Nodes; Speech match
+needs librosa for its prosody, and says so before any model loads where it is
+missing. OmniVoice's weights are
 licensed CC BY-NC (non-commercial, by their training data's terms) and WavLM's CC BY-SA 3.0; Chatterbox
 and Whisper are MIT. Only clone a voice you have the right to use.
 
