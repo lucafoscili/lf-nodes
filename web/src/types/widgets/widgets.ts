@@ -79,6 +79,7 @@ export enum NodeName {
   toneProfile = 'LF_ToneProfile',
   regionReads = 'LF_RegionReads',
   intrinsicLayers = 'LF_IntrinsicLayers',
+  patchProbe = 'LF_PatchProbe',
   faceIdentity = 'LF_FaceIdentity',
   edgePadding = 'LF_EdgePadding',
   maskedLabGrade = 'LF_MaskedLabGrade',
@@ -250,6 +251,7 @@ export const READING_RESULT_NODES: readonly NodeName[] = [
   NodeName.regionReads,
   NodeName.faceZones,
   NodeName.intrinsicLayers,
+  NodeName.patchProbe,
 ];
 export enum TagName {
   Div = 'div',

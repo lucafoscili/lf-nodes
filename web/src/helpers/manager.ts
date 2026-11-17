@@ -45,6 +45,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ToneProfile: [CustomWidgetName.tree],
   LF_RegionReads: [CustomWidgetName.compare],
   LF_IntrinsicLayers: [CustomWidgetName.compare],
+  LF_PatchProbe: [CustomWidgetName.compare],
   LF_FaceIdentity: [CustomWidgetName.tree],
   LF_EdgePadding: [CustomWidgetName.compare],
   LF_MaskedLabGrade: [CustomWidgetName.compare],

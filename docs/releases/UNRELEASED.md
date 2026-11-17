@@ -36,6 +36,21 @@ widget (Tone profile in a tree).
   provide them for academic use only. Its loader fails loud instead of waiting
   on torch hub's console trust prompt.
 
+**Patch probe** (`lf.patch-probe.v1`) learns what tells two kinds of image
+apart from their encoded patches (Vision Patch Encode with DINOv3) and paints
+where new frames read as each. Teaching images carry a label, 0 or 1, and a
+group (a scene, or a pair of shots of it); the probe is a class-balanced
+logistic regression on standardized patch tokens, and each group is held out
+once while the others teach, so its report says whether the probe reads a
+scene it never saw (accuracy, AUC, log loss and each image's mean). A frame
+naming a teaching group is read by the probe that held that group out; any
+other is read by the probe every group taught, with the range of the held-out
+probes' readings beside it. A frame's score is its mean probability and its
+patches' mean logit, which keeps counting where the probabilities saturate.
+Each frame comes back painted (orange label 1, blue label 0, by how sure the
+probe is), as a probability mask, and as its patch grid of logits in the
+report.
+
 Three speech nodes, each loading its model from a pinned Hugging Face revision
 for its run and freeing the GPU after it, and each returning a JSON receipt of
 what ran (model, revision, settings, seconds of audio, load and run time):
@@ -101,9 +116,9 @@ not Runner orchestras, so **no Titanic case runs Pose Shoot**; the motion pair
 stays disabled inventory, as in 5.1.0. Its offline tests stub only the model
 boundary.
 
-The six readers have offline tests on synthetic images and a Compare
-registration, but **no Titanic case and no place in the canonical E2E workflow
-yet**: they are not ready to release until they have both.
+The six readers and Patch probe have offline tests on synthetic inputs and a
+Compare registration, but **no Titanic case and no place in the canonical E2E
+workflow yet**: they are not ready to release until they have both.
 
 The three speech nodes have offline tests on synthetic tones with their models
 stubbed, but **no widget, no Titanic case and no place in the canonical E2E

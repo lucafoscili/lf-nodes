@@ -1300,6 +1300,7 @@ var NodeName;
   NodeName2["toneProfile"] = "LF_ToneProfile";
   NodeName2["regionReads"] = "LF_RegionReads";
   NodeName2["intrinsicLayers"] = "LF_IntrinsicLayers";
+  NodeName2["patchProbe"] = "LF_PatchProbe";
   NodeName2["faceIdentity"] = "LF_FaceIdentity";
   NodeName2["edgePadding"] = "LF_EdgePadding";
   NodeName2["maskedLabGrade"] = "LF_MaskedLabGrade";
@@ -1468,7 +1469,8 @@ const READING_RESULT_NODES = [
   NodeName.lumaRatioMap,
   NodeName.regionReads,
   NodeName.faceZones,
-  NodeName.intrinsicLayers
+  NodeName.intrinsicLayers,
+  NodeName.patchProbe
 ];
 var TagName;
 (function(TagName2) {
@@ -1775,6 +1777,7 @@ const NODE_WIDGET_MAP = {
   LF_ToneProfile: [CustomWidgetName.tree],
   LF_RegionReads: [CustomWidgetName.compare],
   LF_IntrinsicLayers: [CustomWidgetName.compare],
+  LF_PatchProbe: [CustomWidgetName.compare],
   LF_FaceIdentity: [CustomWidgetName.tree],
   LF_EdgePadding: [CustomWidgetName.compare],
   LF_MaskedLabGrade: [CustomWidgetName.compare],
