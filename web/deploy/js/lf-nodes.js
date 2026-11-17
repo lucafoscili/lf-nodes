@@ -1281,6 +1281,9 @@ var NodeName;
   NodeName2["motionToVideo"] = "LF_MotionToVideo";
   NodeName2["retargetMotion"] = "LF_RetargetMotion";
   NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
+  NodeName2["voiceCloneSpeech"] = "LF_VoiceCloneSpeech";
+  NodeName2["voiceConvert"] = "LF_VoiceConvert";
+  NodeName2["speechMatch"] = "LF_SpeechMatch";
   NodeName2["applyTextureToGLB"] = "LF_ApplyTextureToGLB";
   NodeName2["scaleGLBNodes"] = "LF_ScaleGLBNodes";
   NodeName2["composeImageLayers"] = "LF_ComposeImageLayers";
@@ -1753,6 +1756,9 @@ const NODE_WIDGET_MAP = {
   LF_MotionToVideo: [CustomWidgetName.code],
   LF_RetargetMotion: [CustomWidgetName.code],
   LF_ACEStepRemix: [],
+  LF_VoiceCloneSpeech: [],
+  LF_VoiceConvert: [],
+  LF_SpeechMatch: [],
   LF_ApplyTextureToGLB: [],
   LF_ScaleGLBNodes: [],
   LF_ComposeImageLayers: [],

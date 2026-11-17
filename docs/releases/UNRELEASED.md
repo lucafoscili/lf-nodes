@@ -36,6 +36,25 @@ widget (Tone profile in a tree).
   provide them for academic use only. Its loader fails loud instead of waiting
   on torch hub's console trust prompt.
 
+Three speech nodes, each loading its model from a pinned Hugging Face revision
+for its run and freeing the GPU after it, and each returning a JSON receipt of
+what ran (model, revision, settings, seconds of audio, load and run time):
+
+- **Voice clone speech** (`lf.voice_clone_speech.receipt.v1`) says a text in
+  the voice of a reference recording and its transcript, or in a voice designed
+  from words alone (`female, low pitch, british accent`), with OmniVoice.
+- **Voice convert** (`lf.voice_convert.receipt.v1`) keeps a recording's words
+  and timing and gives them the voice of a target recording (its first ten
+  seconds), with Chatterbox's converter; its output carries Chatterbox's
+  implicit watermark.
+- **Speech match** (`lf.speech_match.receipt.v1`) measures a recording against
+  a reference voice (WavLM's speaker embedding, their cosine) and against its
+  expected text (Whisper's transcript and its word error rate).
+
+None of their packages or weights ship with LF Nodes. OmniVoice's weights are
+licensed CC BY-NC 4.0 (non-commercial) and WavLM's CC BY-SA 3.0; Chatterbox
+and Whisper are MIT. Only clone a voice you have the right to use.
+
 ## Changed nodes
 
 - **Video to motion** runs RGB MoCap's Motion Correction after the engine,
