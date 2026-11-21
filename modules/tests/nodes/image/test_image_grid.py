@@ -391,3 +391,7 @@ def test_captions_must_match_the_images() -> None:
 def test_caption_text_splits_by_line() -> None:
     assert image_grid_module.parse_captions("a\n\nc", 3) == ["a", "", "c"]
     assert image_grid_module.parse_captions("", 3) is None
+
+
+def test_a_trailing_blank_caption_keeps_its_cell() -> None:
+    assert image_grid_module.parse_captions("a\nb\n", 3) == ["a", "b", ""]

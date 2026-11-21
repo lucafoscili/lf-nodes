@@ -201,7 +201,7 @@ def parse_captions(text: Any, image_count: int) -> list[str] | None:
         raise ValueError("captions must be a string.")
     if not text.strip():
         return None
-    lines = [_normalize_text(line, maximum=_MAX_HEADER_LENGTH) for line in text.splitlines()]
+    lines = [_normalize_text(line, maximum=_MAX_HEADER_LENGTH) for line in text.replace("\r\n", "\n").split("\n")]
     while len(lines) > image_count and not lines[-1]:
         lines.pop()
     return lines

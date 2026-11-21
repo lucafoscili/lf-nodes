@@ -128,6 +128,7 @@ def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_lab
         raise ValueError(f"kind must be one of {', '.join(KINDS)}, not {kind!r}.")
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
+    from matplotlib.ticker import MaxNLocator
     from PIL import Image
 
     dpi = 100
@@ -153,6 +154,8 @@ def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_lab
                 axes.scatter(x, y, s=10, label=item["name"])
             if item.get("labels") and not item.get("x"):
                 axes.set_xticks(range(len(y)), item["labels"], rotation=60 if len(y) > 8 else 0, fontsize=8)
+            elif not item.get("x"):
+                axes.xaxis.set_major_locator(MaxNLocator(integer=True))
     if log_y:
         axes.set_yscale("log")
     axes.set_title(title)
