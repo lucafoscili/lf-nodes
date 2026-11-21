@@ -369,3 +369,25 @@ def test_public_schema_and_mapping_use_lf_dataset_vocabulary() -> None:
     }
     public_contract = repr(schema).lower()
     assert "lora" not in public_contract
+
+
+def test_captions_mark_each_cell_in_image_order() -> None:
+    images = torch.cat((_solid(64, 64, (0.5, 0.5, 0.5)), _solid(64, 64, (0.5, 0.5, 0.5))), dim=0)
+    plain, _, _ = image_grid_module.compose_image_grid(images, cell_width=64, cell_height=64, gap_px=0,
+                                                       show_headers=False)
+    marked, _, receipt = image_grid_module.compose_image_grid(images, cell_width=64, cell_height=64, gap_px=0,
+                                                              show_headers=False, captions=["first", ""])
+    assert not torch.equal(marked[:, :, :64], plain[:, :, :64])
+    torch.testing.assert_close(marked[:, :, 64:], plain[:, :, 64:])
+    assert [item["caption"] for item in receipt["items"]] == ["first", ""]
+
+
+def test_captions_must_match_the_images() -> None:
+    images = torch.cat((_solid(32, 32, (0.5, 0.5, 0.5)), _solid(32, 32, (0.5, 0.5, 0.5))), dim=0)
+    with pytest.raises(ValueError, match="captions hold 1 lines for 2 images"):
+        image_grid_module.compose_image_grid(images, cell_width=32, cell_height=32, captions=["only"])
+
+
+def test_caption_text_splits_by_line() -> None:
+    assert image_grid_module.parse_captions("a\n\nc", 3) == ["a", "", "c"]
+    assert image_grid_module.parse_captions("", 3) is None

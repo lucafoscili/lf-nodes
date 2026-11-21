@@ -195,6 +195,18 @@ def _paint_opaque_black(
         canvas[:, y : y + height, x : x + width, 3] = 1.0
 
 
+def parse_captions(text: Any, image_count: int) -> list[str] | None:
+    """One caption per line, in image order; blank lines leave a cell bare. Empty text gives no captions."""
+    if not isinstance(text, str):
+        raise ValueError("captions must be a string.")
+    if not text.strip():
+        return None
+    lines = [_normalize_text(line, maximum=_MAX_HEADER_LENGTH) for line in text.splitlines()]
+    while len(lines) > image_count and not lines[-1]:
+        lines.pop()
+    return lines
+
+
 def compose_image_grid(
     image: Any,
     *,
@@ -205,11 +217,19 @@ def compose_image_grid(
     gap_px: int = 8,
     background: str = "black",
     show_headers: bool = True,
+    captions: list[str] | None = None,
 ) -> tuple[torch.Tensor, dict, dict]:
-    """Render an ordered image list using an LfDataDataset as its matrix schema."""
+    """Render an ordered image list using an LfDataDataset as its matrix schema.
+
+    ``captions`` holds one line per image (blank for none), burnt into its cell's upper-left corner.
+    """
     images = normalize_input_image(image)
     if not images:
         raise ValueError("image must contain at least one image.")
+    if captions is not None and len(captions) != len(images):
+        raise ValueError(
+            f"captions hold {len(captions)} lines for {len(images)} images: give one line per image."
+        )
 
     cell_width = validate_composite_integer(cell_width, "cell_width", minimum=32)
     cell_height = validate_composite_integer(cell_height, "cell_height", minimum=32)
@@ -413,6 +433,24 @@ def compose_image_grid(
             image_x : image_x + target_width,
             :,
         ] = resized
+        caption = captions[index] if captions is not None else ""
+        if caption:
+            margin = max(1, min(8, target_height // 40))
+            chip = render_label_chip(
+                caption,
+                max_width=max(1, target_width - margin * 2),
+                max_height=max(1, target_height - margin * 2),
+                channels=output_channels,
+            )
+            if chip is not None:
+                chip = chip.to(device=device, dtype=grid.dtype)
+                chip_y, chip_x = image_y + margin, image_x + margin
+                grid[
+                    :,
+                    chip_y : chip_y + chip.shape[0],
+                    chip_x : chip_x + chip.shape[1],
+                    :,
+                ] = chip.unsqueeze(0)
 
         receipt_items.append(
             {
@@ -421,6 +459,7 @@ def compose_image_grid(
                 "column": column,
                 "nodeId": nodes[row]["id"],
                 "columnId": columns[column]["id"],
+                "caption": caption,
                 "source": {
                     "width": source_width,
                     "height": source_height,
@@ -572,6 +611,14 @@ class LF_ImageGrid:
                     },
                 ),
                 "ui_widget": (Input.LF_MASONRY, {"default": {}}),
+                "captions": (
+                    Input.STRING,
+                    {
+                        "default": "",
+                        "multiline": True,
+                        "tooltip": "Optional captions, one line per image in order (blank lines leave a cell bare), burnt into each cell's upper-left corner.",
+                    },
+                ),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -601,6 +648,10 @@ class LF_ImageGrid:
             gap_px=normalize_list_to_value(kwargs.get("gap_px", 8)),
             background=normalize_list_to_value(kwargs.get("background", "black")),
             show_headers=normalize_list_to_value(kwargs.get("show_headers", True)),
+            captions=parse_captions(
+                normalize_list_to_value(kwargs.get("captions", "")) or "",
+                len(normalize_input_image(raw_images)),
+            ),
         )
         images = [
             validate_composite_image(candidate, f"image[{index}]")

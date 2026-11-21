@@ -80,6 +80,9 @@ export enum NodeName {
   regionReads = 'LF_RegionReads',
   intrinsicLayers = 'LF_IntrinsicLayers',
   patchProbe = 'LF_PatchProbe',
+  imageDiff = 'LF_ImageDiff',
+  regionMeasure = 'LF_RegionMeasure',
+  plotChart = 'LF_PlotChart',
   faceIdentity = 'LF_FaceIdentity',
   edgePadding = 'LF_EdgePadding',
   maskedLabGrade = 'LF_MaskedLabGrade',
@@ -252,6 +255,7 @@ export const READING_RESULT_NODES: readonly NodeName[] = [
   NodeName.faceZones,
   NodeName.intrinsicLayers,
   NodeName.patchProbe,
+  NodeName.imageDiff,
 ];
 export enum TagName {
   Div = 'div',

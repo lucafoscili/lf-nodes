@@ -83,8 +83,32 @@ missing. OmniVoice's weights are
 licensed CC BY-NC (non-commercial, by their training data's terms) and WavLM's CC BY-SA 3.0; Chatterbox
 and Whisper are MIT. Only clone a voice you have the right to use.
 
+Three inspection nodes answer the questions a contact sheet raises (what changed
+between two renders, how a region reads across frames, how a set of numbers is
+spread) with a picture and the numbers behind it.
+
+- **Image diff** (`lf.image-diff.v1`) compares registered images pair by pair,
+  or one reference against many: a heat picture of where they differ over the
+  reference in grey, every pair on one scale, and per pair the difference in
+  8-bit levels (mean, median, p95, p99, max), the share and box of the pixels
+  changed past a threshold, and the shift in mean luma; over an optional pixel
+  box and mask. Images of different sizes, an empty box or a region without
+  pixels are refused by name. Its result shows in the Compare widget.
+- **Region measure** (`lf.region-measure.v1`) reads named pixel boxes across
+  frames, optionally narrowed by a mask: per frame and box, Tone profile's
+  numbers (luma mean, median, deciles, shade, sheen, detail, saturation) with
+  the RGB mean and median, and the frames with their boxes outlined.
+- **Plot chart** (`lf.plot-chart.v1`) draws any JSON report as a line, scatter,
+  histogram or bar chart: each series is picked by a dotted path (`*` for every
+  item, so `frames.*.regions.face.mean` follows a region across frames), and
+  each series' count, range, mean, median and 5th and 95th percentiles come back
+  beside the picture.
+
 ## Changed nodes
 
+- **Image grid** takes optional `captions` (appended last): one line per image,
+  burnt into its cell's upper-left corner, so a contact sheet names each frame.
+  The layout receipt records each item's caption.
 - **Video to motion** runs RGB MoCap's Motion Correction after the engine,
   on by default (`motion_correction`, appended last): one floor found from the
   feet's contacts, each standing foot held on it, so a foot on tiptoe keeps its
@@ -132,6 +156,11 @@ boundary.
 The six readers and Patch probe have offline tests on synthetic inputs and a
 Compare registration, but **no Titanic case and no place in the canonical E2E
 workflow yet**: they are not ready to release until they have both.
+
+Image diff, Region measure and Plot chart have offline tests on synthetic
+images and a widget registration (Compare, Masonry and Masonry), but **no
+Titanic case and no place in the canonical E2E workflow yet**: they are not
+ready to release until they have both.
 
 The three speech nodes have offline tests on synthetic tones with their models
 stubbed, but **no widget, no Titanic case and no place in the canonical E2E
