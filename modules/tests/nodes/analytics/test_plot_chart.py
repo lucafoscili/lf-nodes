@@ -72,3 +72,51 @@ def test_node_returns_image_list_and_numbers():
     image, image_list, numbers = out["result"]
     assert image.shape == (1, 200, 320, 3) and len(image_list) == 1
     assert numbers["schema"] == "lf.plot-chart.v1"
+
+
+COUNTS = {"kinds": [{"kind": "apples", "count": 12}, {"kind": "pears", "count": 7}, {"kind": "plums", "count": 3}]}
+NAMED = "fruit = kinds.*.kind, kinds.*.count"
+
+
+def test_a_bar_chart_takes_names_on_its_x_path():
+    series = chart_series(COUNTS, NAMED, kind="bar")
+    assert series == [{"name": "fruit", "labels": ["apples", "pears", "plums"], "y": [12, 7, 3]}]
+    image, numbers = plot_chart(series, kind="bar", width=320, height=200)
+    assert image.shape == (1, 200, 320, 3)
+    assert numbers["series"][0]["n"] == 3 and numbers["series"][0]["labels"] == ["apples", "pears", "plums"]
+
+
+@pytest.mark.parametrize("kind", ["line", "scatter", "histogram", None])
+def test_names_on_x_are_refused_off_a_bar_chart(kind):
+    with pytest.raises(ValueError, match=r"kinds\.\*\.kind holds a non-number: 'apples'; names on x draw only as bars"):
+        chart_series(COUNTS, NAMED, kind=kind)
+
+
+def test_names_mixed_with_numbers_on_x_are_refused():
+    mixed = {"kinds": [{"kind": "apples", "count": 1}, {"kind": 2, "count": 2}]}
+    with pytest.raises(ValueError, match=r"kinds\.\*\.kind mixes names and numbers: 2"):
+        chart_series(mixed, NAMED, kind="bar")
+
+
+def test_names_that_do_not_match_the_values_count_are_refused():
+    with pytest.raises(ValueError, match="series fruit: x holds 3 values and y 1"):
+        chart_series(COUNTS, "fruit = kinds.*.kind, kinds.0.count", kind="bar")
+
+
+def test_bar_series_on_different_names_are_refused():
+    fruit = chart_series(COUNTS, NAMED, kind="bar")
+    other = chart_series({"k": {"apples": 1, "figs": 2, "plums": 3}}, "other = k")
+    with pytest.raises(ValueError, match="series other's names differ from series fruit's"):
+        plot_chart(fruit + other, kind="bar", width=320, height=200)
+
+
+def test_a_bar_chart_names_its_bars_by_a_numeric_x():
+    series = chart_series(REPORT, "pairs = frames.*.regions.hair.mean, frames.*.regions.face.mean", kind="bar")
+    _, numbers = plot_chart(series, kind="bar", width=320, height=200)
+    assert numbers["series"][0]["labels"] == ["0.1", "0.3"]
+
+
+def test_the_node_reads_names_on_a_bar_chart():
+    out = LF_PlotChart().on_exec(data=[COUNTS], kind=["bar"], paths=[NAMED], title=[""], x_label=[""],
+                                 y_label=[""], width=[320], height=[200], bins=[10], log_y=[False], node_id=["1"])
+    assert out["result"][2]["series"][0]["labels"] == ["apples", "pears", "plums"]

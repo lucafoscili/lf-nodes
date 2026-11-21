@@ -102,7 +102,11 @@ spread) with a picture and the numbers behind it.
   histogram or bar chart: each series is picked by a dotted path (`*` for every
   item, so `frames.*.regions.face.mean` follows a region across frames), and
   each series' count, range, mean, median and 5th and 95th percentiles come back
-  beside the picture.
+  beside the picture. On a bar chart, `name = x_path, y_path` may take names on
+  its x path (`kinds.*.kind, kinds.*.count`): one bar per name, the name under
+  it, and the names in the series' numbers. Names on a line, scatter or
+  histogram, names mixed with numbers, and bar series on different names are
+  refused by name.
 
 ## Changed nodes
 

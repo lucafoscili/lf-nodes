@@ -56,19 +56,30 @@ def resolve_path(data, path: str):
     return flat
 
 
-def _numbers(values, where: str) -> list[float]:
+def _numbers(values, where: str, hint: str = "") -> list[float]:
     numbers = []
     for value in values:
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-            raise ValueError(f"{where} holds a non-number: {value!r}.")
+            raise ValueError(f"{where} holds a non-number: {value!r}{hint if isinstance(value, str) else ''}.")
         numbers.append(value)
     return numbers
 
 
-def chart_series(data, paths: str) -> list[dict]:
+def _x_axis(values, where: str, kind: str | None) -> tuple[str, list]:
+    """An x path's values: numbers, or (on a bar chart only) names, one per bar; never the two mixed."""
+    if kind != "bar" or not any(isinstance(value, str) for value in values):
+        return "x", _numbers(values, where, "; names on x draw only as bars")
+    for value in values:
+        if not isinstance(value, str):
+            raise ValueError(f"{where} mixes names and numbers: {value!r}.")
+    return "labels", list(values)
+
+
+def chart_series(data, paths: str, kind: str | None = None) -> list[dict]:
     """Series from ``name = path`` (or ``name = x_path, y_path``) lines, or a ``{"series": [...]}`` document.
 
-    A document's series hold ``values`` (or ``y``), and optionally ``x`` or ``labels``.
+    A document's series hold ``values`` (or ``y``), and optionally ``x`` or ``labels``. On a bar chart (``kind``
+    "bar") an x path may hold names instead of numbers: one bar per name, the name under it.
     """
     series = []
     lines = [line.strip() for line in str(paths or "").splitlines() if line.strip()]
@@ -86,10 +97,11 @@ def chart_series(data, paths: str) -> list[dict]:
                 else:
                     series.append({"name": name.strip(), "y": _numbers(found, parts[0])})
             elif len(parts) == 2:
-                x, y = (_numbers(resolve_path(data, part), part) for part in parts)
+                axis, x = _x_axis(resolve_path(data, parts[0]), parts[0], kind)
+                y = _numbers(resolve_path(data, parts[1]), parts[1])
                 if len(x) != len(y):
                     raise ValueError(f"series {name.strip()}: x holds {len(x)} values and y {len(y)}.")
-                series.append({"name": name.strip(), "x": x, "y": y})
+                series.append({"name": name.strip(), axis: x, "y": y})
             else:
                 raise ValueError(f"paths line {line!r} holds {len(parts)} paths; give one or two.")
     else:
@@ -121,6 +133,18 @@ def _summary(values: list[float]) -> dict:
             "p95": float(np.quantile(array, 0.95))}
 
 
+def _bar_names(series: list[dict]) -> list[list[str] | None]:
+    """Each bar series' names (its labels, or its x values written out); series sharing an axis share its names."""
+    names = [item.get("labels") or ([f"{value:g}" for value in item["x"]] if item.get("x") else None)
+             for item in series]
+    if any(names):
+        for item, found in zip(series[1:], names[1:]):
+            if found != names[0]:
+                raise ValueError(f"series {item['name']}'s names differ from series {series[0]['name']}'s; bars on "
+                                 "one chart share their names.")
+    return names
+
+
 def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_label: str = "", y_label: str = "",
                width: int = 960, height: int = 540, bins: int = 40, log_y: bool = False) -> tuple[torch.Tensor, dict]:
     """Draw the series with Matplotlib's Agg canvas; return the RGB image and each series' numbers."""
@@ -135,12 +159,13 @@ def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_lab
     figure = Figure(figsize=(width / dpi, height / dpi), dpi=dpi)
     FigureCanvasAgg(figure)
     axes = figure.add_subplot(1, 1, 1)
+    names = _bar_names(series) if kind == "bar" else [None] * len(series)
     for index, item in enumerate(series):
         y = item["y"]
         if kind == "histogram":
             axes.hist(y, bins=int(bins), alpha=0.6 if len(series) > 1 else 0.9, label=item["name"])
         elif kind == "bar":
-            labels = item.get("labels") or [str(position) for position in range(len(y))]
+            labels = names[index] or [str(position) for position in range(len(y))]
             offset = (index - (len(series) - 1) / 2) * 0.8 / len(series)
             positions = np.arange(len(y)) + offset
             axes.bar(positions, y, width=0.8 / len(series), label=item["name"])
@@ -173,8 +198,9 @@ def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_lab
         if rgb.size != (width, height):
             rgb = rgb.resize((width, height), Image.LANCZOS)
         array = np.asarray(rgb, dtype=np.float32) / 255.0
-    numbers = {"schema": SCHEMA, "kind": kind, "series": [{"name": item["name"], **_summary(item["y"])}
-                                                          for item in series]}
+    numbers = {"schema": SCHEMA, "kind": kind,
+               "series": [{"name": item["name"], **_summary(item["y"]),
+                           **({"labels": found} if found else {})} for item, found in zip(series, names)]}
     return torch.from_numpy(array)[None], numbers
 
 
@@ -185,7 +211,7 @@ class LF_PlotChart:
             "required": {
                 "data": (Input.JSON, {"tooltip": "Any JSON report, or a chart document {\"series\": [{\"name\", \"values\", \"x\"?, \"labels\"?}]}."}),
                 "kind": (KINDS, {"default": "line", "tooltip": "Line or scatter (y over x or its index), histogram of the values, or bars."}),
-                "paths": (Input.STRING, {"default": "", "multiline": True, "tooltip": "One series per line: name = path, or name = x_path, y_path. A path is dotted keys and indices, '*' for every item. Empty reads a chart document."}),
+                "paths": (Input.STRING, {"default": "", "multiline": True, "tooltip": "One series per line: name = path, or name = x_path, y_path (on bars, x may hold names: one bar each). A path is dotted keys and indices, '*' for every item. Empty reads a chart document."}),
                 "title": (Input.STRING, {"default": "", "tooltip": "Chart title."}),
                 "x_label": (Input.STRING, {"default": "", "tooltip": "X axis label."}),
                 "y_label": (Input.STRING, {"default": "", "tooltip": "Y axis label."}),
@@ -218,9 +244,10 @@ class LF_PlotChart:
         document = normalize_list_to_value(data)
         if document is None:
             raise ValueError("data must hold a JSON report.")
-        series = chart_series(document, normalize_list_to_value(paths) or "")
+        kind = str(normalize_list_to_value(kind))
+        series = chart_series(document, normalize_list_to_value(paths) or "", kind=kind)
         image, numbers = plot_chart(
-            series, kind=str(normalize_list_to_value(kind)), title=str(normalize_list_to_value(title) or ""),
+            series, kind=kind, title=str(normalize_list_to_value(title) or ""),
             x_label=str(normalize_list_to_value(x_label) or ""), y_label=str(normalize_list_to_value(y_label) or ""),
             width=int(normalize_list_to_value(width)), height=int(normalize_list_to_value(height)),
             bins=int(normalize_list_to_value(bins)), log_y=bool(normalize_list_to_value(log_y)))
