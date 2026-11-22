@@ -123,9 +123,39 @@ def cache_generated_preview(
         max_long_edge=max_long_edge,
     )
     png_bytes, width, height, mode = _encode_png(preview)
-    digest = hashlib.sha256(png_bytes).hexdigest()
+    destination, subfolder, filename, digest = _store_generated(png_bytes, "png")
+
+    return GeneratedPreview(
+        absolute_path=destination,
+        subfolder=subfolder,
+        filename=filename,
+        url=get_resource_url(subfolder, filename, "input", cache_bust=False),
+        sha256=digest,
+        width=width,
+        height=height,
+        mode=mode,
+    )
+
+
+def cache_generated_audio(audio: dict, *, label: str = "") -> dict:
+    """Persist one AUDIO item as a restart-stable WAV preview under Comfy input.
+
+    Returns the descriptor LF's Masonry plays (``filename``, ``subfolder``, ``type`` "input" and its ``label``).
+    """
+    from ...audio import encode_float_wav, normalize_audio
+
+    waveform, sample_rate = normalize_audio(audio)
+    if waveform.shape[0] != 1:
+        raise ValueError(f"An audio preview holds one item, not {waveform.shape[0]}.")
+    _, subfolder, filename, _ = _store_generated(encode_float_wav(waveform[0], sample_rate), "wav")
+    return {"filename": filename, "subfolder": subfolder, "type": "input", "label": label}
+
+
+def _store_generated(data: bytes, extension: str) -> tuple[str, str, str, str]:
+    """Write bytes once by content hash under Comfy input: (absolute path, subfolder, filename, sha256)."""
+    digest = hashlib.sha256(data).hexdigest()
     subfolder = f"{GENERATED_PREVIEW_SUBDIR}/{digest[:2]}"
-    filename = f"{digest}.png"
+    filename = f"{digest}.{extension}"
 
     input_root = os.path.abspath(get_comfy_dir("input"))
     destination_dir = os.path.abspath(
@@ -139,7 +169,7 @@ def cache_generated_preview(
     existing_matches = False
     try:
         with open(destination, "rb") as existing:
-            existing_matches = existing.read() == png_bytes
+            existing_matches = existing.read() == data
     except FileNotFoundError:
         pass
 
@@ -153,7 +183,7 @@ def cache_generated_preview(
                 dir=destination_dir,
                 delete=False,
             ) as temporary:
-                temporary.write(png_bytes)
+                temporary.write(data)
                 temporary.flush()
                 os.fsync(temporary.fileno())
                 temporary_path = temporary.name
@@ -161,17 +191,7 @@ def cache_generated_preview(
         finally:
             if temporary_path and os.path.exists(temporary_path):
                 os.unlink(temporary_path)
-
-    return GeneratedPreview(
-        absolute_path=destination,
-        subfolder=subfolder,
-        filename=filename,
-        url=get_resource_url(subfolder, filename, "input", cache_bust=False),
-        sha256=digest,
-        width=width,
-        height=height,
-        mode=mode,
-    )
+    return destination, subfolder, filename, digest
 
 
 def create_cached_masonry_node(

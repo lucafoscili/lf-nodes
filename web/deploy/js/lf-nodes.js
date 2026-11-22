@@ -1301,6 +1301,9 @@ var NodeName;
   NodeName2["regionReads"] = "LF_RegionReads";
   NodeName2["intrinsicLayers"] = "LF_IntrinsicLayers";
   NodeName2["patchProbe"] = "LF_PatchProbe";
+  NodeName2["imageDiff"] = "LF_ImageDiff";
+  NodeName2["regionMeasure"] = "LF_RegionMeasure";
+  NodeName2["plotChart"] = "LF_PlotChart";
   NodeName2["faceIdentity"] = "LF_FaceIdentity";
   NodeName2["edgePadding"] = "LF_EdgePadding";
   NodeName2["maskedLabGrade"] = "LF_MaskedLabGrade";
@@ -1470,8 +1473,15 @@ const READING_RESULT_NODES = [
   NodeName.regionReads,
   NodeName.faceZones,
   NodeName.intrinsicLayers,
-  NodeName.patchProbe
+  NodeName.patchProbe,
+  NodeName.imageDiff
 ];
+const AUDIO_RESULT_NODES = [
+  NodeName.saveAudio,
+  NodeName.voiceCloneSpeech,
+  NodeName.voiceConvert
+];
+const CHART_RESULT_NODES = [NodeName.regionMeasure, NodeName.plotChart];
 var TagName;
 (function(TagName2) {
   TagName2["Div"] = "div";
@@ -1758,9 +1768,9 @@ const NODE_WIDGET_MAP = {
   LF_MotionToVideo: [CustomWidgetName.code],
   LF_RetargetMotion: [CustomWidgetName.code],
   LF_ACEStepRemix: [],
-  LF_VoiceCloneSpeech: [],
-  LF_VoiceConvert: [],
-  LF_SpeechMatch: [],
+  LF_VoiceCloneSpeech: [CustomWidgetName.masonry],
+  LF_VoiceConvert: [CustomWidgetName.masonry],
+  LF_SpeechMatch: [CustomWidgetName.tree],
   LF_ApplyTextureToGLB: [],
   LF_ScaleGLBNodes: [],
   LF_ComposeImageLayers: [],
@@ -1778,6 +1788,9 @@ const NODE_WIDGET_MAP = {
   LF_RegionReads: [CustomWidgetName.compare],
   LF_IntrinsicLayers: [CustomWidgetName.compare],
   LF_PatchProbe: [CustomWidgetName.compare],
+  LF_ImageDiff: [CustomWidgetName.compare],
+  LF_RegionMeasure: [CustomWidgetName.tabBarChart],
+  LF_PlotChart: [CustomWidgetName.tabBarChart],
   LF_FaceIdentity: [CustomWidgetName.tree],
   LF_EdgePadding: [CustomWidgetName.compare],
   LF_MaskedLabGrade: [CustomWidgetName.compare],
@@ -9930,10 +9943,11 @@ const normalizeAudioFiles = (value) => value.flatMap((item) => {
   if (!item || typeof item !== "object")
     return [];
   const file = item;
-  if (typeof file.filename !== "string" || !file.filename || typeof file.subfolder !== "string" || file.type !== "output") {
+  if (typeof file.filename !== "string" || !file.filename || typeof file.subfolder !== "string" || file.type !== "output" && file.type !== "input") {
     return [];
   }
-  return [{ filename: file.filename, subfolder: file.subfolder, type: "output" }];
+  const { filename, subfolder, type } = file;
+  return [{ filename, subfolder, type, ...typeof file.label === "string" && file.label ? { label: file.label } : {} }];
 });
 const releaseAudioPreview = (masonry) => {
   masonry.querySelectorAll("audio").forEach((audio) => {
@@ -9955,8 +9969,9 @@ const setMasonryAudio = (state, value) => {
   masonry.lfDataset = {
     nodes: files.map((file, index) => {
       const slotName = `lf-audio-${index}`;
-      const reference = [file.subfolder, file.filename].filter(Boolean).join("/");
-      const url = `/view?${new URLSearchParams({ ...file })}`;
+      const reference = file.label || [file.subfolder, file.filename].filter(Boolean).join("/");
+      const { filename, subfolder, type } = file;
+      const url = `/view?${new URLSearchParams({ filename, subfolder, type })}`;
       const slot = document.createElement("div");
       slot.slot = slotName;
       slot.classList.add(MasonryCSS.Slot);
@@ -10129,21 +10144,19 @@ const masonryFactory = {
     masonry.addEventListener(LfEventName.LfMasonry, (e) => EV_HANDLERS$3.masonry(STATE$6.get(wrapper), e));
     masonry.lfActions = true;
     masonry.lfColumns = 3;
-    switch (node.comfyClass) {
-      case NodeName.saveAudio:
-        masonry.lfActions = false;
-        masonry.lfColumns = 1;
-        break;
-      case NodeName.loadImages:
-        masonry.lfSelectable = true;
-        break;
+    const audioResult = AUDIO_RESULT_NODES.includes(node.comfyClass);
+    if (audioResult) {
+      masonry.lfActions = false;
+      masonry.lfColumns = 1;
+    } else if (node.comfyClass === NodeName.loadImages) {
+      masonry.lfSelectable = true;
     }
     content.classList.add(MasonryCSS.Content);
     content.appendChild(masonry);
     wrapper.appendChild(content);
     const options = masonryFactory.options(wrapper);
     STATE$6.set(wrapper, { masonry, node, selected: { index: NaN, name: "" }, wrapper });
-    if (node.comfyClass === NodeName.saveAudio) {
+    if (audioResult) {
       installAudioPreviewHistory(node, (audio) => options.setValue(JSON.stringify({ audio })));
       const onRemoved = node.onRemoved;
       node.onRemoved = function() {
@@ -10332,7 +10345,7 @@ const EV_HANDLERS$1 = {
             chart.lfDataset = getLfManager().getCachedDatasets().usage[node.id];
             break;
           default:
-            chart.lfDataset = node.cells.lfChart.lfDataset;
+            applyChartDataset(chart, node.cells.lfChart.lfDataset);
             break;
         }
         break;
@@ -10359,7 +10372,10 @@ const apiCall = async (state) => {
       if ((r == null ? void 0 : r.data) && Object.entries(r.data).length > 0) {
         const firstKey = selected || Object.keys(r.data)[0];
         chart.lfDataset = r.data[firstKey];
-        tabbar.lfDataset = prepareTabbarDataset(r.data);
+        tabbar.lfDataset = prepareTabbarDataset(r.data, (filename) => {
+          var _a;
+          return ((_a = filename.split("_")) == null ? void 0 : _a[0]) || filename;
+        });
         requestAnimationFrame(async () => {
           if (directory !== await textfield.getValue()) {
             textfield.setValue(directory);
@@ -10372,15 +10388,23 @@ const apiCall = async (state) => {
     }
   });
 };
-const prepareTabbarDataset = (data) => {
-  var _a;
+const applyChartDataset = (chart, dataset) => {
+  const layout = dataset == null ? void 0 : dataset.chart;
+  if (layout) {
+    chart.lfAxis = [layout.axis];
+    chart.lfSeries = layout.series;
+    chart.lfTypes = layout.types;
+  }
+  chart.lfDataset = dataset || {};
+};
+const prepareTabbarDataset = (data, label = (key) => key) => {
   const dataset = { nodes: [] };
-  for (const filename in data) {
-    if (Object.prototype.hasOwnProperty.call(data, filename)) {
+  for (const key in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
       const node = {
-        cells: { lfChart: { lfDataset: data[filename], shape: "chart", value: "" } },
-        id: filename,
-        value: ((_a = filename.split("_")) == null ? void 0 : _a[0]) || filename
+        cells: { lfChart: { lfDataset: data[key], shape: "chart", value: "" } },
+        id: key,
+        value: label(key)
       };
       dataset.nodes.push(node);
     }
@@ -10438,14 +10462,15 @@ const tabBarChartFactory = {
               state.directory = parsedValue.directory;
               apiCall(state);
               break;
-            default:
-              for (const key in parsedValue) {
-                const dataset = parsedValue[key];
-                chart.lfDataset = dataset || {};
+            default: {
+              const first = Object.keys(parsedValue)[0];
+              if (first !== void 0) {
+                applyChartDataset(chart, parsedValue[first]);
                 tabbar.lfDataset = prepareTabbarDataset(parsedValue) || {};
                 requestAnimationFrame(async () => tabbar.setValue(0));
               }
               break;
+            }
           }
         };
         normalizeValue(value, callback, CustomWidgetName.tabBarChart);
@@ -10477,6 +10502,11 @@ const tabBarChartFactory = {
         chart.lfColors = [TabBarChartIds.Red, TabBarChartIds.Green, TabBarChartIds.Blue];
         chart.lfSeries = [TabBarChartIds.Red, TabBarChartIds.Green, TabBarChartIds.Blue];
         chart.lfTypes = ["area"];
+        grid.classList.add(TabBarChartCSS.GridNoDirectory);
+        textfield.classList.add(TabBarChartCSS.DirectoryHidden);
+        break;
+      case NodeName.plotChart:
+      case NodeName.regionMeasure:
         grid.classList.add(TabBarChartCSS.GridNoDirectory);
         textfield.classList.add(TabBarChartCSS.DirectoryHidden);
         break;
@@ -10897,7 +10927,9 @@ class LFWidgets {
         NodeName.visionPatchEncode,
         ...TEXTURE_RESULT_NODES,
         ...READING_RESULT_NODES,
-        NodeName.toneProfile
+        ...CHART_RESULT_NODES,
+        NodeName.toneProfile,
+        NodeName.speechMatch
       ].includes(nodeName);
       const rendered = __classPrivateFieldGet$1(this, _LFWidgets_FACTORIES, "f")[name].render(node, ...args);
       if (regionResult) {

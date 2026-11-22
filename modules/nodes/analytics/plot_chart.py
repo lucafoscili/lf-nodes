@@ -12,7 +12,7 @@ from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, normalize_output_image
-from ...utils.helpers.ui import cache_generated_preview, create_masonry_node
+from ...utils.helpers.ui import axis_labels, create_chart_dataset
 
 SCHEMA = "lf.plot-chart.v1"
 KINDS = ["line", "scatter", "histogram", "bar"]
@@ -145,6 +145,45 @@ def _bar_names(series: list[dict]) -> list[list[str] | None]:
     return names
 
 
+def histogram_edges(series: list[dict], bins: int) -> np.ndarray:
+    """One set of bin edges over every series' values, so their counts compare bin for bin."""
+    return np.histogram_bin_edges(np.concatenate([np.asarray(item["y"], dtype=np.float64) for item in series]),
+                                  bins=int(bins))
+
+
+def _categories(item: dict, kind: str, names: list[str] | None) -> tuple[str, list, list[float]]:
+    """A series on the widget's category axis: its axis title, its categories and its values, in axis order."""
+    y = item["y"]
+    if kind == "bar":
+        return ("Name", names, y) if names else ("Index", list(range(len(y))), y)
+    if item.get("x"):
+        # lf-chart's axis is categorical: points go in x order, each its own step (the picture keeps the scale).
+        order = sorted(range(len(y)), key=lambda index: item["x"][index])
+        return "x", [item["x"][index] for index in order], [y[index] for index in order]
+    if item.get("labels"):
+        return "Name", item["labels"], y
+    return "Index", list(range(len(y))), y
+
+
+def widget_datasets(series: list[dict], *, kind: str, bins: int, x_label: str = "") -> dict:
+    """The widget's charts: series on the same categories share a tab ("Chart" when all do), others take their own."""
+    if kind == "histogram":
+        edges = histogram_edges(series, bins)
+        counts = [(item["name"], np.histogram(item["y"], bins=edges)[0].tolist()) for item in series]
+        return {"Chart": create_chart_dataset(x_label or "Bin start", [float(edge) for edge in edges[:-1]], counts,
+                                              "bar")}
+    names = _bar_names(series) if kind == "bar" else [None] * len(series)
+    groups: dict[tuple, dict] = {}
+    for item, found in zip(series, names):
+        title, categories, values = _categories(item, kind, found)
+        group = groups.setdefault(tuple(categories), {"title": title, "categories": categories, "series": []})
+        group["series"].append((item["name"], values))
+    tabs = ["Chart"] if len(groups) == 1 else axis_labels(
+        [", ".join(name for name, _ in group["series"]) for group in groups.values()])
+    return {tab: create_chart_dataset(x_label or group["title"], group["categories"], group["series"], kind)
+            for tab, group in zip(tabs, groups.values())}
+
+
 def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_label: str = "", y_label: str = "",
                width: int = 960, height: int = 540, bins: int = 40, log_y: bool = False) -> tuple[torch.Tensor, dict]:
     """Draw the series with Matplotlib's Agg canvas; return the RGB image and each series' numbers."""
@@ -160,10 +199,11 @@ def plot_chart(series: list[dict], *, kind: str = "line", title: str = "", x_lab
     FigureCanvasAgg(figure)
     axes = figure.add_subplot(1, 1, 1)
     names = _bar_names(series) if kind == "bar" else [None] * len(series)
+    edges = histogram_edges(series, bins) if kind == "histogram" else None
     for index, item in enumerate(series):
         y = item["y"]
         if kind == "histogram":
-            axes.hist(y, bins=int(bins), alpha=0.6 if len(series) > 1 else 0.9, label=item["name"])
+            axes.hist(y, bins=edges, alpha=0.6 if len(series) > 1 else 0.9, label=item["name"])
         elif kind == "bar":
             labels = names[index] or [str(position) for position in range(len(y))]
             offset = (index - (len(series) - 1) / 2) * 0.8 / len(series)
@@ -220,7 +260,7 @@ class LF_PlotChart:
                 "bins": (Input.INTEGER, {"default": 40, "min": 2, "max": 1000, "tooltip": "Histogram bins."}),
                 "log_y": (Input.BOOLEAN, {"default": False, "tooltip": "Logarithmic Y axis."}),
             },
-            "optional": {"ui_widget": (Input.LF_MASONRY, {"default": {}})},
+            "optional": {"ui_widget": (Input.LF_TAB_BAR_CHART, {"default": {}})},
             "hidden": {"node_id": "UNIQUE_ID"},
         }
 
@@ -246,13 +286,13 @@ class LF_PlotChart:
             raise ValueError("data must hold a JSON report.")
         kind = str(normalize_list_to_value(kind))
         series = chart_series(document, normalize_list_to_value(paths) or "", kind=kind)
+        x_label, bins = str(normalize_list_to_value(x_label) or ""), int(normalize_list_to_value(bins))
         image, numbers = plot_chart(
             series, kind=kind, title=str(normalize_list_to_value(title) or ""),
-            x_label=str(normalize_list_to_value(x_label) or ""), y_label=str(normalize_list_to_value(y_label) or ""),
+            x_label=x_label, y_label=str(normalize_list_to_value(y_label) or ""),
             width=int(normalize_list_to_value(width)), height=int(normalize_list_to_value(height)),
-            bins=int(normalize_list_to_value(bins)), log_y=bool(normalize_list_to_value(log_y)))
-        payload = {"dataset": {"nodes": [create_masonry_node("Chart", cache_generated_preview(image).url, 0)]},
-                   "numbers": numbers}
+            bins=bins, log_y=bool(normalize_list_to_value(log_y)))
+        payload = {"datasets": widget_datasets(series, kind=kind, bins=bins, x_label=x_label)}
         safe_send_sync("plotchart", payload, normalize_list_to_value(kwargs.get("node_id")))
         batch_groups, image_list = normalize_output_image([image])
         return {"ui": {"lf_output": [payload]}, "result": (batch_groups[0], image_list, numbers)}

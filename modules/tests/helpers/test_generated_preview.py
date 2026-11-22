@@ -116,3 +116,19 @@ def test_invalid_preview_shapes_fail_closed(
         preview_module.cache_generated_preview(image)
 
     assert not list(input_root.rglob("*.png"))
+
+
+def test_audio_previews_are_restart_stable_wav_resources(input_root: Path) -> None:
+    samples = torch.linspace(-0.5, 0.5, 2400)
+    audio = {"waveform": samples.reshape(1, 1, -1), "sample_rate": 24000}
+
+    first = preview_module.cache_generated_audio(audio, label="Line one")
+    second = preview_module.cache_generated_audio({"waveform": samples.clone().reshape(1, 1, -1),
+                                                   "sample_rate": 24000}, label="Line one")
+
+    assert first == second
+    assert first["type"] == "input" and first["label"] == "Line one"
+    assert first["subfolder"].startswith("_lf_external_previews/generated/v1/")
+    written = list(input_root.rglob("*.wav"))
+    assert [path.name for path in written] == [first["filename"]]
+    assert written[0].read_bytes()[:4] == b"RIFF"

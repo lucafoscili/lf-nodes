@@ -1,7 +1,8 @@
 """Plot chart from JSON: path selection, the four kinds, the chart's numbers and failures."""
 import pytest
 
-from modules.nodes.analytics.plot_chart import LF_PlotChart, chart_series, plot_chart, resolve_path
+from modules.nodes.analytics.plot_chart import (LF_PlotChart, chart_series, histogram_edges, plot_chart, resolve_path,
+                                               widget_datasets)
 from modules.utils.helpers.ui import generated_preview
 
 
@@ -120,3 +121,55 @@ def test_the_node_reads_names_on_a_bar_chart():
     out = LF_PlotChart().on_exec(data=[COUNTS], kind=["bar"], paths=[NAMED], title=[""], x_label=[""],
                                  y_label=[""], width=[320], height=[200], bins=[10], log_y=[False], node_id=["1"])
     assert out["result"][2]["series"][0]["labels"] == ["apples", "pears", "plums"]
+
+
+def _cells(dataset, column):
+    return [node["cells"][column]["value"] for node in dataset["nodes"]]
+
+
+def test_series_on_one_axis_share_the_widget_chart():
+    series = chart_series(REPORT, "face = frames.*.regions.face.mean\nhair = frames.*.regions.hair.mean")
+    datasets = widget_datasets(series, kind="line", bins=10)
+    assert list(datasets) == ["Chart"]
+    chart = datasets["Chart"]
+    assert chart["chart"] == {"axis": "x", "series": ["s0", "s1"], "types": ["line", "line"]}
+    assert [column["title"] for column in chart["columns"]] == ["Index", "face", "hair"]
+    assert _cells(chart, "x") == ["0", "1"] and _cells(chart, "s1") == [0.1, 0.3]
+
+
+def test_series_on_different_axes_take_a_tab_each():
+    series = chart_series({"a": [1, 2, 3], "b": [4, 5]}, "a = a\nb = b")
+    datasets = widget_datasets(series, kind="line", bins=10)
+    assert list(datasets) == ["a", "b"]
+    assert _cells(datasets["b"], "x") == ["0", "1"] and _cells(datasets["b"], "s0") == [4, 5]
+
+
+def test_a_scatter_is_drawn_in_x_order_each_point_its_own_step():
+    series = chart_series({"x": [0.3, 0.1, 0.3], "y": [1, 2, 3]}, "pts = x, y")
+    chart = widget_datasets(series, kind="scatter", bins=10, x_label="width")["Chart"]
+    assert chart["chart"]["types"] == ["scatter"]
+    assert chart["columns"][0]["title"] == "width"
+    assert _cells(chart, "x") == ["0.1", "0.3", "0.3 (2)"] and _cells(chart, "s0") == [2, 1, 3]
+
+
+def test_a_histogram_counts_every_series_on_the_same_bins_as_its_picture():
+    series = chart_series({"series": [{"name": "a", "values": [0, 1, 1, 2]}, {"name": "b", "values": [2, 3]}]}, "")
+    edges = histogram_edges(series, 3)
+    assert list(edges) == pytest.approx([0, 1, 2, 3])
+    chart = widget_datasets(series, kind="histogram", bins=3)["Chart"]
+    assert chart["chart"]["types"] == ["bar", "bar"]
+    assert chart["columns"][0]["title"] == "Bin start"
+    assert _cells(chart, "x") == ["0", "1", "2"]
+    assert _cells(chart, "s0") == [1, 2, 1] and _cells(chart, "s1") == [0, 0, 2]
+
+
+def test_bars_on_names_draw_one_bar_each():
+    chart = widget_datasets(chart_series(COUNTS, NAMED, kind="bar"), kind="bar", bins=10)["Chart"]
+    assert chart["chart"]["types"] == ["bar"]
+    assert _cells(chart, "x") == ["apples", "pears", "plums"] and _cells(chart, "s0") == [12, 7, 3]
+
+
+def test_the_node_sends_its_charts_to_the_widget():
+    out = LF_PlotChart().on_exec(data=[COUNTS], kind=["bar"], paths=[NAMED], title=[""], x_label=[""],
+                                 y_label=[""], width=[320], height=[200], bins=[10], log_y=[False], node_id=["1"])
+    assert list(out["ui"]["lf_output"][0]["datasets"]) == ["Chart"]

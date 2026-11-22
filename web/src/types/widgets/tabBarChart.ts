@@ -1,4 +1,4 @@
-import { LfDataDataset } from '@lf-widgets/foundations';
+import { LfChartType, LfDataDataset } from '@lf-widgets/foundations';
 import { AnalyticsType } from '../api/api';
 import {
   BaseWidgetState,
@@ -29,10 +29,17 @@ export type TabBarChartNormalizeCallback = NormalizeValueCallback<
 //#endregion
 
 //#region Value
+/** How a dataset is drawn: lf-chart keeps the layout it loaded with, so each dataset may carry its own. */
+export interface TabBarChartLayout {
+  axis: string;
+  series: string[];
+  types: LfChartType[];
+}
+export type TabBarChartDataset = LfDataDataset & { chart?: TabBarChartLayout };
 export type TabBarChartDeserializedValue = {
   directory?: string;
 } & {
-  [index: string]: LfDataDataset;
+  [index: string]: TabBarChartDataset;
 };
 //#endregion
 

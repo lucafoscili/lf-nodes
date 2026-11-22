@@ -1,4 +1,4 @@
-import { apiCall, EV_HANDLERS, prepareTabbarDataset } from '../helpers/tabBarChart';
+import { apiCall, applyChartDataset, EV_HANDLERS, prepareTabbarDataset } from '../helpers/tabBarChart';
 import { AnalyticsType } from '../types/api/api';
 import { LfEventName } from '../types/events/events';
 import {
@@ -44,14 +44,15 @@ export const tabBarChartFactory: TabBarChartFactory = {
 
               apiCall(state);
               break;
-            default:
-              for (const key in parsedValue) {
-                const dataset = parsedValue[key];
-                chart.lfDataset = dataset || {};
+            default: {
+              const first = Object.keys(parsedValue)[0];
+              if (first !== undefined) {
+                applyChartDataset(chart, parsedValue[first]);
                 tabbar.lfDataset = prepareTabbarDataset(parsedValue) || {};
                 requestAnimationFrame(async () => tabbar.setValue(0));
               }
               break;
+            }
           }
         };
 
@@ -87,6 +88,12 @@ export const tabBarChartFactory: TabBarChartFactory = {
         chart.lfColors = [TabBarChartIds.Red, TabBarChartIds.Green, TabBarChartIds.Blue];
         chart.lfSeries = [TabBarChartIds.Red, TabBarChartIds.Green, TabBarChartIds.Blue];
         chart.lfTypes = ['area'];
+        grid.classList.add(TabBarChartCSS.GridNoDirectory);
+        textfield.classList.add(TabBarChartCSS.DirectoryHidden);
+        break;
+      case NodeName.plotChart:
+      case NodeName.regionMeasure:
+        // Each dataset carries its own layout (applyChartDataset).
         grid.classList.add(TabBarChartCSS.GridNoDirectory);
         textfield.classList.add(TabBarChartCSS.DirectoryHidden);
         break;

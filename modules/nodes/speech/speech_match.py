@@ -4,6 +4,7 @@ loudness ranges (its prosody, in the receipt)."""
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.speech import models, prosody
 from ...utils.helpers.speech.audio import mono, seconds
 from ...utils.helpers.speech.text import word_error_rate
@@ -28,6 +29,8 @@ class LF_SpeechMatch:
                 "asr_model": (recognizers, {"default": recognizers[0], "tooltip": "The speech recognition model."}),
                 "asr_revision": (Input.STRING, {"default": models.RECOGNIZERS[recognizers[0]]}),
             },
+            "optional": {"ui_widget": (Input.LF_TREE, {"default": {}})},
+            "hidden": {"node_id": "UNIQUE_ID"},
         }
 
     CATEGORY = CATEGORY
@@ -65,7 +68,24 @@ class LF_SpeechMatch:
             "speaker_seconds": speaker_timing["seconds"], "asr_seconds": asr_timing["seconds"],
             "prosody": prosody.prosody(heard, heard_rate),
         }
-        return (similarity, transcript, error_rate, receipt)
+        payload = {"receipt": receipt, "dataset": {"nodes": [{"id": str(index), "value": line}
+                                                             for index, line in enumerate(_lines(receipt))]}}
+        safe_send_sync("speechmatch", payload, kwargs.get("node_id"))
+        return {"ui": {"lf_output": [payload]}, "result": (similarity, transcript, error_rate, receipt)}
+
+
+def _lines(receipt: dict) -> list[str]:
+    """The widget's reading: both measures, what was heard, and the delivery's numbers that were found."""
+    reading = receipt["prosody"]
+    lines = [f"Speaker similarity: {receipt['speaker_similarity']:.4f}",
+             f"Word error rate: {receipt['word_error_rate']:.3f}", f"Heard: {receipt['transcript']}"]
+    for key, title, unit in (("pitch_median_hz", "Pitch median", " Hz"),
+                             ("pitch_range_semitones", "Pitch range", " semitones"),
+                             ("pitch_spread_semitones", "Pitch spread", " semitones"),
+                             ("energy_range_db", "Loudness range", " dB"), ("voiced_fraction", "Voiced share", "")):
+        value = reading.get(key)
+        lines.append(f"{title}: {value:g}{unit}" if value is not None else f"{title}: none (too little voice)")
+    return lines
 
 
 NODE_CLASS_MAPPINGS = {"LF_SpeechMatch": LF_SpeechMatch}

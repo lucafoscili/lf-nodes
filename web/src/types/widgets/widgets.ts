@@ -257,6 +257,14 @@ export const READING_RESULT_NODES: readonly NodeName[] = [
   NodeName.patchProbe,
   NodeName.imageDiff,
 ];
+// Nodes whose Masonry plays their audio results and restores them from history.
+export const AUDIO_RESULT_NODES: readonly NodeName[] = [
+  NodeName.saveAudio,
+  NodeName.voiceCloneSpeech,
+  NodeName.voiceConvert,
+];
+// Results drawn as charts from their numbers, each dataset with its own layout; they hydrate from history.
+export const CHART_RESULT_NODES: readonly NodeName[] = [NodeName.regionMeasure, NodeName.plotChart];
 export enum TagName {
   Div = 'div',
   LfAccordion = 'lf-accordion',

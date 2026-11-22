@@ -4,7 +4,9 @@ to clone; without one, a few attributes describe the voice to design."""
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.speech import models
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.speech.audio import mono, seconds, to_audio
+from ...utils.helpers.ui import cache_generated_audio
 
 RECEIPT_SCHEMA = "lf.voice_clone_speech.receipt.v1"
 # The decoding's schedule, at the model's own default: (default, lowest, highest, step, tooltip). Its sampling
@@ -46,7 +48,9 @@ class LF_VoiceCloneSpeech:
                                                            "to design (male, elderly, high pitch, american accent...)."}),
                 **{name: (Input.FLOAT, {"default": default, "min": low, "max": high, "step": step, "tooltip": tip})
                    for name, (default, low, high, step, tip) in DECODING.items()},
+                "ui_widget": (Input.LF_MASONRY, {"default": {}}),
             },
+            "hidden": {"node_id": "UNIQUE_ID"},
         }
 
     CATEGORY = CATEGORY
@@ -93,7 +97,9 @@ class LF_VoiceCloneSpeech:
             "voice_design": design or None, "sample_rate": rate,
             "seconds": seconds(audio["waveform"], rate), **timings,
         }
-        return (audio, receipt)
+        payload = {"audio": [cache_generated_audio(audio, label=text.strip())], "receipt": receipt}
+        safe_send_sync("voiceclonespeech", payload, kwargs.get("node_id"))
+        return {"ui": {"lf_output": [payload]}, "result": (audio, receipt)}
 
 
 NODE_CLASS_MAPPINGS = {"LF_VoiceCloneSpeech": LF_VoiceCloneSpeech}

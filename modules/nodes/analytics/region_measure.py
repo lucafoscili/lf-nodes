@@ -12,10 +12,14 @@ from ...utils.helpers.tone.boxes import box_mask, check_box, mask_set, parse_box
 from ...utils.helpers.tone.common import as_rgb
 from ...utils.helpers.tone.region_reads import tone_profile
 from ...utils.helpers.torch.image_composite import render_label_chip
-from ...utils.helpers.ui import cache_generated_preview, create_masonry_node
+from ...utils.helpers.ui import create_chart_dataset
 
 SCHEMA = "lf.region-measure.v1"
 # Outline colours, one per box in order.
+# The widget's charts, one per measure: (the profile's key, the tab's title).
+_MEASURES = (("mean", "Luma mean"), ("median", "Luma median"), ("shade", "Shade"), ("fill", "Fill"),
+             ("sheen", "Sheen"), ("detail", "Detail"), ("saturation", "Saturation"), ("rb", "Red/blue"),
+             ("shade_rb", "Shade red/blue"), ("n", "Pixels"))
 _COLOURS = ((1.0, 0.2, 0.2), (0.2, 0.9, 0.2), (0.2, 0.5, 1.0), (1.0, 0.85, 0.1), (1.0, 0.3, 1.0), (0.1, 0.9, 0.9))
 
 
@@ -81,6 +85,15 @@ def region_measure(image, *, boxes: str = "", labels: str = "", mask=None) -> tu
     return report, overlays
 
 
+def measure_datasets(report: dict) -> dict:
+    """The widget's charts: a tab per measure, the frames on its axis and a bar series per region."""
+    frames = report["frames"]
+    labels = [frame["label"] for frame in frames]
+    return {title: create_chart_dataset("Frame", labels, [(region, [frame["regions"][region].get(key) for frame in frames])
+                                                         for region in report["regions"]], "bar")
+            for key, title in _MEASURES}
+
+
 class LF_RegionMeasure:
     @classmethod
     def INPUT_TYPES(cls):
@@ -92,7 +105,7 @@ class LF_RegionMeasure:
             },
             "optional": {
                 "mask": (Input.MASK, {"tooltip": "Optional mask, one shared or one per frame; it narrows every box."}),
-                "ui_widget": (Input.LF_MASONRY, {"default": {}}),
+                "ui_widget": (Input.LF_TAB_BAR_CHART, {"default": {}}),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -115,10 +128,7 @@ class LF_RegionMeasure:
     def on_exec(self, image=None, boxes="", labels="", mask=None, **kwargs):
         report, overlays = region_measure(image, boxes=normalize_list_to_value(boxes) or "",
                                           labels=normalize_list_to_value(labels) or "", mask=mask)
-        nodes = []
-        for index, (overlay, frame) in enumerate(zip(overlays, report["frames"])):
-            nodes.append(create_masonry_node(f"Frame {frame['label']}", cache_generated_preview(overlay).url, index))
-        payload = {"dataset": {"nodes": nodes}}
+        payload = {"datasets": measure_datasets(report)}
         safe_send_sync("regionmeasure", payload, normalize_list_to_value(kwargs.get("node_id")))
         batch_groups, overlay_list = normalize_output_image(overlays)
         return {"ui": {"lf_output": [payload]}, "result": (report, batch_groups[0], overlay_list)}

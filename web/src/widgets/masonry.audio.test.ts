@@ -294,4 +294,26 @@ describe('LF_SaveAudio preview', () => {
     expect(state.masonry.querySelectorAll('audio[src]')).toHaveLength(2);
     expect(state.audio).toEqual(files);
   });
+
+  it.each([NodeName.voiceCloneSpeech, NodeName.voiceConvert])(
+    '%s plays its generated preview under its label and restores it from history',
+    (comfyClass) => {
+      expect(NODE_WIDGET_MAP[comfyClass]).toEqual([CustomWidgetName.masonry]);
+      const { node, state } = render(comfyClass);
+      const preview = { filename: 'ab12.wav', subfolder: '_lf_external_previews/generated/v1/ab', type: 'input',
+        label: 'Say this.' };
+      node.onExecuted({ lf_output: [{ audio: [preview], receipt: {} }] });
+      expect(state.audio).toEqual([preview]);
+      expect(state.masonry.lfColumns).toBe(1);
+      const audio = state.masonry.querySelector('audio');
+      const url = new URL(audio.src, window.location.href);
+      expect([...url.searchParams.keys()]).toEqual(['filename', 'subfolder', 'type']);
+      expect(url.searchParams.get('type')).toBe('input');
+      expect(audio.previousElementSibling?.textContent).toBe('Say this.');
+    },
+  );
+
+  it('registers the tree for the speech match reading', () => {
+    expect(NODE_WIDGET_MAP[NodeName.speechMatch]).toEqual([CustomWidgetName.tree]);
+  });
 });

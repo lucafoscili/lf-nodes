@@ -3,7 +3,9 @@
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.speech import models
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.speech.audio import mono, seconds, to_audio
+from ...utils.helpers.ui import cache_generated_audio
 
 RECEIPT_SCHEMA = "lf.voice_convert.receipt.v1"
 
@@ -21,6 +23,8 @@ class LF_VoiceConvert:
                 "revision": (Input.STRING, {"default": models.CONVERTERS[converters[0]],
                                             "tooltip": "The model repository's commit, fetched once into the Hugging Face cache."}),
             },
+            "optional": {"ui_widget": (Input.LF_MASONRY, {"default": {}})},
+            "hidden": {"node_id": "UNIQUE_ID"},
         }
 
     CATEGORY = CATEGORY
@@ -43,7 +47,10 @@ class LF_VoiceConvert:
             "source_seconds": seconds(source, source_rate), "target_seconds": seconds(target, target_rate),
             "seconds": seconds(audio["waveform"], rate), **details,
         }
-        return (audio, receipt)
+        payload = {"audio": [cache_generated_audio(audio, label=f"Converted, {receipt['seconds']:g} s")],
+                   "receipt": receipt}
+        safe_send_sync("voiceconvert", payload, kwargs.get("node_id"))
+        return {"ui": {"lf_output": [payload]}, "result": (audio, receipt)}
 
 
 NODE_CLASS_MAPPINGS = {"LF_VoiceConvert": LF_VoiceConvert}

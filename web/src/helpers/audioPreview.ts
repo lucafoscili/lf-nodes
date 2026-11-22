@@ -8,11 +8,12 @@ const normalizeAudioFiles = (value: unknown[]): MasonryAudioFile[] =>
       typeof file.filename !== 'string' ||
       !file.filename ||
       typeof file.subfolder !== 'string' ||
-      file.type !== 'output'
+      (file.type !== 'output' && file.type !== 'input')
     ) {
       return [];
     }
-    return [{ filename: file.filename, subfolder: file.subfolder, type: 'output' as const }];
+    const { filename, subfolder, type } = file;
+    return [{ filename, subfolder, type, ...(typeof file.label === 'string' && file.label ? { label: file.label } : {}) }];
   });
 
 export const releaseAudioPreview = (masonry: HTMLLfMasonryElement): void => {
@@ -43,8 +44,9 @@ export const setMasonryAudio = (state: MasonryState, value: unknown[]): void => 
   masonry.lfDataset = {
     nodes: files.map((file, index) => {
       const slotName = `lf-audio-${index}`;
-      const reference = [file.subfolder, file.filename].filter(Boolean).join('/');
-      const url = `/view?${new URLSearchParams({ ...file })}`;
+      const reference = file.label || [file.subfolder, file.filename].filter(Boolean).join('/');
+      const { filename, subfolder, type } = file;
+      const url = `/view?${new URLSearchParams({ filename, subfolder, type })}`;
       const slot = document.createElement('div');
       slot.slot = slotName;
       slot.classList.add(MasonryCSS.Slot);

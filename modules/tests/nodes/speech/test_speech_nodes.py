@@ -11,8 +11,14 @@ import pytest
 import torch
 
 from modules.nodes.speech import speech_match, voice_clone_speech, voice_convert
+from modules.utils.helpers.ui import generated_preview
 from modules.utils.helpers.speech import models, prosody
 from modules.utils.helpers.speech.text import word_error_rate, words
+
+
+@pytest.fixture(autouse=True)
+def preview_root(monkeypatch, tmp_path):
+    monkeypatch.setattr(generated_preview, "get_comfy_dir", lambda _kind: str(tmp_path / "input"))
 
 
 def tone(seconds=1.0, rate=16000, channels=1, batch=1):
@@ -26,16 +32,18 @@ def test_schemas_are_published_api():
     assert list(clone.INPUT_TYPES()["required"]) == [
         "text", "model", "revision", "language", "seed", "num_step", "guidance_scale", "speed"]
     assert list(clone.INPUT_TYPES()["optional"]) == [
-        "reference_audio", "reference_text", "voice_design", "t_shift"]
+        "reference_audio", "reference_text", "voice_design", "t_shift", "ui_widget"]
     assert (clone.RETURN_TYPES, clone.RETURN_NAMES) == (("AUDIO", "JSON"), ("audio", "receipt"))
     convert = voice_convert.LF_VoiceConvert
     assert list(convert.INPUT_TYPES()["required"]) == ["source_audio", "target_audio", "model", "revision"]
+    assert list(convert.INPUT_TYPES()["optional"]) == ["ui_widget"]
     assert (convert.RETURN_TYPES, convert.RETURN_NAMES) == (("AUDIO", "JSON"), ("audio", "receipt"))
     match = speech_match.LF_SpeechMatch
     assert list(match.INPUT_TYPES()["required"]) == [
         "audio", "reference_audio", "expected_text", "language", "speaker_model", "speaker_revision", "asr_model",
         "asr_revision"]
     assert match.RETURN_NAMES == ("speaker_similarity", "transcript", "word_error_rate", "receipt")
+    assert list(match.INPUT_TYPES()["optional"]) == ["ui_widget"]
     for node in (clone, convert, match):
         assert not getattr(node, "INPUT_IS_LIST", False)
         assert len(node.RETURN_TYPES) == len(node.OUTPUT_TOOLTIPS)
@@ -55,8 +63,11 @@ def spoken(monkeypatch):
 
 def test_clone_reads_the_reference_and_its_transcript(spoken):
     node = voice_clone_speech.LF_VoiceCloneSpeech()
-    audio, receipt = node.on_exec("Say this.", "k2-fsa/OmniVoice", "abc123", "English", 7, 32, 2.0, 0.0,
-                                  reference_audio=tone(2.0, channels=2), reference_text="What the clip says.")
+    out = node.on_exec("Say this.", "k2-fsa/OmniVoice", "abc123", "English", 7, 32, 2.0, 0.0,
+                       reference_audio=tone(2.0, channels=2), reference_text="What the clip says.", node_id="5")
+    audio, receipt = out["result"]
+    preview = out["ui"]["lf_output"][0]["audio"]
+    assert len(preview) == 1 and preview[0]["type"] == "input" and preview[0]["label"] == "Say this."
     assert audio["waveform"].shape == (1, 1, 2400) and audio["sample_rate"] == 24000
     text, options = spoken[0]
     assert text == "Say this." and options["reference_text"] == "What the clip says." and options["design"] == ""
@@ -70,14 +81,14 @@ def test_clone_reads_the_reference_and_its_transcript(spoken):
 def test_clone_decodes_on_the_shift_asked_and_says_so(spoken):
     node = voice_clone_speech.LF_VoiceCloneSpeech()
     _, receipt = node.on_exec("Say this.", "k2-fsa/OmniVoice", "abc123", "English", 7, 32, 2.0, 0.0,
-                              reference_audio=tone(), reference_text="Clip.", t_shift=0.5)
+                              reference_audio=tone(), reference_text="Clip.", t_shift=0.5)["result"]
     assert spoken[0][1]["t_shift"] == receipt["t_shift"] == 0.5
 
 
 def test_design_needs_no_reference(spoken):
     node = voice_clone_speech.LF_VoiceCloneSpeech()
     _, receipt = node.on_exec("Say this.", "k2-fsa/OmniVoice", "abc123", "", 0, 16, 1.5, 1.1,
-                              voice_design="female, low pitch")
+                              voice_design="female, low pitch")["result"]
     assert receipt["mode"] == "design" and receipt["voice_design"] == "female, low pitch"
     assert receipt["language"] is None and spoken[0][1]["reference"] is None
 
@@ -110,8 +121,9 @@ def test_convert_keeps_the_source_and_reads_the_target(monkeypatch):
                                                   "target_seconds_read": 3.0, "watermark": "perth-implicit"}
 
     monkeypatch.setattr(models, "chatterbox_convert", convert)
-    audio, receipt = voice_convert.LF_VoiceConvert().on_exec(tone(1.0), tone(3.0, rate=22050), "ResembleAI/chatterbox",
-                                                             "def456")
+    out = voice_convert.LF_VoiceConvert().on_exec(tone(1.0), tone(3.0, rate=22050), "ResembleAI/chatterbox", "def456")
+    audio, receipt = out["result"]
+    assert out["ui"]["lf_output"][0]["audio"][0]["type"] == "input"
     assert seen == dict(source=(16000,), target=(66150,), rates=(16000, 22050), revision="def456")
     assert audio["waveform"].shape == (1, 1, 4800)
     assert receipt["source_seconds"] == 1.0 and receipt["target_seconds"] == 3.0 and receipt["seconds"] == 0.2
@@ -121,9 +133,13 @@ def test_convert_keeps_the_source_and_reads_the_target(monkeypatch):
 def test_match_measures_voice_and_words(monkeypatch):
     monkeypatch.setattr(models, "speaker_similarity", lambda *args, **kwargs: (0.8123, {"seconds": 0.4}))
     monkeypatch.setattr(models, "transcribe", lambda *args, **kwargs: ("Anna, you're late.", {"seconds": 0.9}))
-    similarity, transcript, error_rate, receipt = speech_match.LF_SpeechMatch().on_exec(
+    out = speech_match.LF_SpeechMatch().on_exec(
         tone(), tone(2.0), "Anna, you are late!", "english", "microsoft/wavlm-base-plus-sv", "r1",
         "openai/whisper-large-v3-turbo", "r2")
+    similarity, transcript, error_rate, receipt = out["result"]
+    lines = [node["value"] for node in out["ui"]["lf_output"][0]["dataset"]["nodes"]]
+    assert lines[:3] == ["Speaker similarity: 0.8123", "Word error rate: 0.500", "Heard: Anna, you're late."]
+    assert any(line.startswith("Pitch median: 2") and line.endswith(" Hz") for line in lines)
     assert (similarity, transcript) == (0.8123, "Anna, you're late.")
     assert error_rate == 0.5  # "you're" for "you are": one substitution, one deletion of four words
     assert receipt["speaker_revision"] == "r1" and receipt["asr_revision"] == "r2" and receipt["reference_seconds"] == 2.0

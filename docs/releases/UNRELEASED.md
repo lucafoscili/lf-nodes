@@ -74,6 +74,11 @@ what ran (model, revision, settings, seconds of audio, load and run time):
   semitones, loudness range in decibels and voiced share, over the frames where
   a voice sounds; librosa's probabilistic YIN).
 
+Voice clone speech and Voice convert play their result in the Masonry widget
+(a restart-stable WAV preview under ComfyUI's input, labelled with its line),
+and Speech match shows its reading in a tree: both measures, what was heard and
+the delivery's numbers.
+
 Each run lets go of its model before the GPU's cache is emptied: the
 collector runs, and method caches that would keep the model (transformers'
 Higgs audio tokenizer caches one, which kept each OmniVoice run's decoder) are
@@ -97,7 +102,8 @@ spread) with a picture and the numbers behind it.
 - **Region measure** (`lf.region-measure.v1`) reads named pixel boxes across
   frames, optionally narrowed by a mask: per frame and box, Tone profile's
   numbers (luma mean, median, deciles, shade, sheen, detail, saturation) with
-  the RGB mean and median, and the frames with their boxes outlined.
+  the RGB mean and median, and the frames with their boxes outlined. Its widget
+  charts the numbers: a tab per measure, the frames along the axis, a bar per box.
 - **Plot chart** (`lf.plot-chart.v1`) draws any JSON report as a line, scatter,
   histogram or bar chart: each series is picked by a dotted path (`*` for every
   item, so `frames.*.regions.face.mean` follows a region across frames), and
@@ -106,7 +112,11 @@ spread) with a picture and the numbers behind it.
   its x path (`kinds.*.kind, kinds.*.count`): one bar per name, the name under
   it, and the names in the series' numbers. Names on a line, scatter or
   histogram, names mixed with numbers, and bar series on different names are
-  refused by name.
+  refused by name. A histogram's series share one set of bins. Its widget
+  draws the same series in LF's chart from the numbers (series on the same
+  categories share a tab, others take their own); that chart's axis is
+  categorical, so a numeric x reads as ordered steps, and the picture keeps the
+  true scale and any log axis.
 
 ## Changed nodes
 

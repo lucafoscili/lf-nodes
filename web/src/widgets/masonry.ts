@@ -12,7 +12,7 @@ import {
   MasonryNormalizeCallback,
   MasonryState,
 } from '../types/widgets/masonry';
-import { CustomWidgetName, NodeName, TagName } from '../types/widgets/widgets';
+import { AUDIO_RESULT_NODES, CustomWidgetName, NodeName, TagName } from '../types/widgets/widgets';
 import { createDOMWidget, isValidNumber, normalizeValue } from '../utils/common';
 
 const STATE = new WeakMap<HTMLDivElement, MasonryState>();
@@ -120,14 +120,12 @@ export const masonryFactory: MasonryFactory = {
     masonry.lfActions = true;
     masonry.lfColumns = 3;
 
-    switch (node.comfyClass) {
-      case NodeName.saveAudio:
-        masonry.lfActions = false;
-        masonry.lfColumns = 1;
-        break;
-      case NodeName.loadImages:
-        masonry.lfSelectable = true;
-        break;
+    const audioResult = AUDIO_RESULT_NODES.includes(node.comfyClass as NodeName);
+    if (audioResult) {
+      masonry.lfActions = false;
+      masonry.lfColumns = 1;
+    } else if (node.comfyClass === NodeName.loadImages) {
+      masonry.lfSelectable = true;
     }
 
     content.classList.add(MasonryCSS.Content);
@@ -139,7 +137,7 @@ export const masonryFactory: MasonryFactory = {
 
     STATE.set(wrapper, { masonry, node, selected: { index: NaN, name: '' }, wrapper });
 
-    if (node.comfyClass === NodeName.saveAudio) {
+    if (audioResult) {
       installAudioPreviewHistory(node, (audio) => options.setValue(JSON.stringify({ audio })));
       const onRemoved = node.onRemoved;
       node.onRemoved = function () {

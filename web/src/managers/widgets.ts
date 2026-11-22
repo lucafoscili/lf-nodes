@@ -10,6 +10,7 @@ import {
   CustomWidgetConstructor,
   CustomWidgetName,
   NodeName,
+  CHART_RESULT_NODES,
   READING_RESULT_NODES,
   TEXTURE_RESULT_NODES,
   WidgetFactory,
@@ -76,7 +77,9 @@ export class LFWidgets {
       NodeName.visionPatchEncode,
       ...TEXTURE_RESULT_NODES,
       ...READING_RESULT_NODES,
+      ...CHART_RESULT_NODES,
       NodeName.toneProfile,
+      NodeName.speechMatch,
     ].includes(nodeName);
     const rendered = this.#FACTORIES[name].render(node, ...args);
     if (regionResult) {

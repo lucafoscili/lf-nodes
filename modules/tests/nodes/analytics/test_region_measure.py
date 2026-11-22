@@ -72,4 +72,20 @@ def test_node_returns_report_and_overlays():
     report, overlay, overlay_list = out["result"]
     assert report["schema"] == "lf.region-measure.v1"
     assert overlay.shape == (1, 12, 16, 3) and len(overlay_list) == 1
-    assert out["ui"]["lf_output"][0]["dataset"]["nodes"]
+    assert out["ui"]["lf_output"][0]["datasets"]
+
+
+def test_node_charts_each_measure_across_frames_a_series_per_region():
+    left = _frame(0.2)
+    left[:, :, 8:, :] = 0.6
+    out = LF_RegionMeasure().on_exec(image=[left, _frame(0.4)], boxes=["left=0,0,8,12\nright=8,0,16,12"],
+                                     labels=["a,b"], node_id=["3"])
+    datasets = out["ui"]["lf_output"][0]["datasets"]
+    assert list(datasets)[:2] == ["Luma mean", "Luma median"] and "Pixels" in datasets
+    mean = datasets["Luma mean"]
+    assert mean["chart"] == {"axis": "x", "series": ["s0", "s1"], "types": ["bar", "bar"]}
+    assert [column["title"] for column in mean["columns"]] == ["Frame", "left", "right"]
+    assert [node["cells"]["x"]["value"] for node in mean["nodes"]] == ["a", "b"]
+    assert mean["nodes"][0]["cells"]["s1"]["value"] == pytest.approx(0.6)
+    assert mean["nodes"][1]["cells"]["s0"]["value"] == pytest.approx(0.4)
+    assert datasets["Pixels"]["nodes"][0]["cells"]["s0"]["value"] == 96

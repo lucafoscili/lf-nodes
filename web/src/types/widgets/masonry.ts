@@ -22,10 +22,12 @@ export type MasonryNormalizeCallback = NormalizeValueCallback<MasonryDeserialize
 //#endregion
 
 //#region Value
+/** A playable file: a saved output, or a node's generated preview under Comfy input with its label. */
 export interface MasonryAudioFile {
   filename: string;
   subfolder: string;
-  type: 'output';
+  type: 'input' | 'output';
+  label?: string;
 }
 export interface MasonryFileIdentity {
   directory: string;

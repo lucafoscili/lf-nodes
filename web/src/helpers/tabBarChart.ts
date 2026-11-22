@@ -5,7 +5,7 @@ import {
   LfTextfieldEventPayload,
 } from '@lf-widgets/foundations';
 import { LogSeverity } from '../types/manager/manager';
-import { TabBarChartState } from '../types/widgets/tabBarChart';
+import { TabBarChartDataset, TabBarChartState } from '../types/widgets/tabBarChart';
 import { NodeName } from '../types/widgets/widgets';
 import { getApiRoutes, getLfManager } from '../utils/common';
 
@@ -24,7 +24,7 @@ export const EV_HANDLERS = {
             chart.lfDataset = getLfManager().getCachedDatasets().usage[node.id];
             break;
           default:
-            chart.lfDataset = node.cells.lfChart.lfDataset;
+            applyChartDataset(chart, node.cells.lfChart.lfDataset);
             break;
         }
         break;
@@ -57,7 +57,7 @@ export const apiCall = async (state: TabBarChartState) => {
         if (r?.data && Object.entries(r.data).length > 0) {
           const firstKey = selected || Object.keys(r.data)[0];
           chart.lfDataset = r.data[firstKey];
-          tabbar.lfDataset = prepareTabbarDataset(r.data);
+          tabbar.lfDataset = prepareTabbarDataset(r.data, (filename) => filename.split('_')?.[0] || filename);
 
           requestAnimationFrame(async () => {
             if (directory !== (await textfield.getValue())) {
@@ -73,15 +73,31 @@ export const apiCall = async (state: TabBarChartState) => {
 };
 //#endregion
 
+//#region applyChartDataset
+/** Draw a dataset with its own layout when it carries one (lf-chart keeps the layout it loaded with otherwise). */
+export const applyChartDataset = (chart: HTMLLfChartElement, dataset: TabBarChartDataset) => {
+  const layout = dataset?.chart;
+  if (layout) {
+    chart.lfAxis = [layout.axis];
+    chart.lfSeries = layout.series;
+    chart.lfTypes = layout.types;
+  }
+  chart.lfDataset = dataset || {};
+};
+//#endregion
+
 //#region prepareTabbarDataset
-export const prepareTabbarDataset = (data: Record<string, LfDataDataset>) => {
+export const prepareTabbarDataset = (
+  data: Record<string, LfDataDataset>,
+  label: (key: string) => string = (key) => key,
+) => {
   const dataset: LfDataDataset = { nodes: [] };
-  for (const filename in data) {
-    if (Object.prototype.hasOwnProperty.call(data, filename)) {
+  for (const key in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
       const node: LfDataNode = {
-        cells: { lfChart: { lfDataset: data[filename], shape: 'chart', value: '' } },
-        id: filename,
-        value: filename.split('_')?.[0] || filename,
+        cells: { lfChart: { lfDataset: data[key], shape: 'chart', value: '' } },
+        id: key,
+        value: label(key),
       };
       dataset.nodes.push(node);
     }
