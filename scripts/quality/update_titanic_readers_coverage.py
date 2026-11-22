@@ -46,6 +46,16 @@ FACE_READS = "under_eyes / cheeks\nfolds / cheeks"
 LINE = "The morning train was late, so we walked along the river instead."
 TARGET_LINE = "A second voice reads a different line for the converter to aim at."
 GROUP_COLOR = "#3f789e"
+# Sections stack downward from here, right of every older specimen; the gap leaves room for the Vue renderer,
+# whose nodes can grow past their saved size to fit a widget.
+LEFT, TOP, SECTION_GAP, GAP = 19300, -4700, 480, 400
+# Roomy enough that each result widget reads at scale 1; the rest keep the specimen's default.
+COMPARE, CHART, TREE = (540, 780), (640, 700), (520, 560)
+SIZES = {
+    **dict.fromkeys((678, 679, 680, 689, 692, 693, 694, 698, 700, 701, 702), COMPARE),
+    681: (420, 480), 682: CHART, 683: (640, 860), 686: (420, 480), 688: (420, 360), 690: TREE, 691: TREE,
+    703: (480, 720), 704: (480, 720), 705: (480, 440), 706: (560, 700), 707: (480, 560),
+}
 
 IMAGES = (("image", "IMAGE", False), ("image_list", "IMAGE", True))
 REGION_SET = (("masks", "MASK", False), ("metadata", "JSON", False), ("mask_list", "MASK", True))
@@ -139,40 +149,41 @@ CASES = [
 
 def add_specimens(workflow):
     specimen = titanic.Specimen("Readers", START_NODE, START_LINK, ORDER)
-    node = specimen.node
+    def place(identifier, kind, *args, **kwargs):
+        """A node whose size and position the section's ``arrange`` sets."""
+        return specimen.node(identifier, kind, 0, 0, *args, **kwargs)
 
     def link(*pairs):
         for origin, output, target, name in pairs:
             specimen.connect(workflow, origin, output, target, name)
 
     # cpu.inspection: before (the example) against after (its graded square).
-    x0, y0 = 19300, -4700
-    node(678, "LF_ImageDiff", x0, y0,
+    place(678, "LF_ImageDiff",
          [("image_a", "IMAGE"), ("image_b", "IMAGE"), ("threshold", "FLOAT"), ("heat_max", "FLOAT"),
           ("box", "STRING"), ("labels", "STRING"), ("mask", "MASK"), ("ui_widget", "LF_COMPARE")],
          (("heat", "IMAGE", False), ("heat_list", "IMAGE", True), ("report", "JSON", False)),
          {"threshold": 2, "heat_max": 0, "box": "", "labels": "graded", "ui_widget": {}},
          "Where the grade changed the example · CPU")
-    node(679, "LF_GradeSplit", x0 + 400, y0,
+    place(679, "LF_GradeSplit",
          [("before", "IMAGE"), ("after", "IMAGE"), ("lut_size", "INT"), ("local_size", "INT"),
           ("local_sigma", "FLOAT"), ("fine_sigma", "FLOAT"), ("coarse_sigma", "FLOAT"), ("ui_widget", "LF_COMPARE")],
          (("report", "JSON", False), ("change", "IMAGE", False), ("left", "IMAGE", False)),
          {"lut_size": 32, "local_size": 16, "local_sigma": 1 / 60, "fine_sigma": 2, "coarse_sigma": 16,
           "ui_widget": {}}, "How much of the change a grade explains · CPU")
-    node(680, "LF_LumaRatioMap", x0 + 800, y0,
+    place(680, "LF_LumaRatioMap",
          [("before", "IMAGE"), ("after", "IMAGE"), ("sigma", "FLOAT"), ("floor", "FLOAT"), ("band_edges", "STRING"),
           ("stops", "FLOAT"), ("mask", "MASK"), ("ui_widget", "LF_COMPARE")],
          (("report", "JSON", False), ("ratio_map", "IMAGE", False)),
          {"sigma": 3, "floor": 0.03, "band_edges": "0.03,0.06,0.1,0.15,0.2,0.3,0.45,0.65,1.01", "stops": 1,
           "ui_widget": {}}, "Luma after over before inside the square · CPU")
-    node(681, "LF_ImageList", x0, y0 + 400, [("image_1", "IMAGE"), ("image_2", "IMAGE"), ("ui_widget", "LF_MASONRY")],
+    place(681, "LF_ImageList", [("image_1", "IMAGE"), ("image_2", "IMAGE"), ("ui_widget", "LF_MASONRY")],
          (("images", "IMAGE", True),), {"ui_widget": {}}, "Before, then after")
-    node(682, "LF_RegionMeasure", x0 + 400, y0 + 400,
+    place(682, "LF_RegionMeasure",
          [("image", "IMAGE"), ("boxes", "STRING"), ("labels", "STRING"), ("mask", "MASK"),
           ("ui_widget", "LF_TAB_BAR_CHART")],
          (("report", "JSON", False), ("overlay", "IMAGE", False), ("overlay_list", "IMAGE", True)),
          {"boxes": BOXES, "labels": "before,after", "ui_widget": {}}, "The square and the top band, measured · CPU")
-    node(683, "LF_PlotChart", x0 + 800, y0 + 400,
+    place(683, "LF_PlotChart",
          [("data", "JSON"), ("kind", "COMBO"), ("paths", "STRING"), ("title", "STRING"), ("x_label", "STRING"),
           ("y_label", "STRING"), ("width", "INT"), ("height", "INT"), ("bins", "INT"), ("log_y", "BOOLEAN"),
           ("ui_widget", "LF_TAB_BAR_CHART")],
@@ -186,31 +197,31 @@ def add_specimens(workflow):
          (EXAMPLE, 0, 679, "before"), (GRADED, 0, 679, "after"),
          (EXAMPLE, 0, 680, "before"), (GRADED, 0, 680, "after"), (SQUARE_MASK, 0, 680, "mask"),
          (EXAMPLE, 0, 681, "image_1"), (GRADED, 0, 681, "image_2"), (681, 0, 682, "image"), (682, 0, 683, "data"))
-    groups = [{"id": 27, "title": "Image diff, grade split, luma ratio, region measure and plot · CPU coverage",
-               "bounding": [x0 - 50, y0 - 200, 1250, 950], "color": GROUP_COLOR, "flags": {}}]
+    bottom = specimen.arrange(LEFT, TOP, [[678, 679, 680], [681, 682, 683]], SIZES, GAP)
+    groups = [specimen.group(27, "Image diff, grade split, luma ratio, region measure and plot · CPU coverage",
+                             range(678, 684), GROUP_COLOR)]
 
     # cpu.tone-readers: the square and the band as a named region set over the example.
-    x0, y0 = 19300, -3500
-    node(684, "MaskToImage", x0, y0, [("mask", "MASK")], (("IMAGE", "IMAGE", False),))
-    node(685, "MaskToImage", x0, y0 + 220, [("mask", "MASK")], (("IMAGE", "IMAGE", False),))
-    node(686, "LF_ImageList", x0 + 400, y0, [("image_1", "IMAGE"), ("image_2", "IMAGE"), ("ui_widget", "LF_MASONRY")],
+    place(684, "MaskToImage", [("mask", "MASK")], (("IMAGE", "IMAGE", False),))
+    place(685, "MaskToImage", [("mask", "MASK")], (("IMAGE", "IMAGE", False),))
+    place(686, "LF_ImageList", [("image_1", "IMAGE"), ("image_2", "IMAGE"), ("ui_widget", "LF_MASONRY")],
          (("images", "IMAGE", True),), {"ui_widget": {}}, "Region-major: the square, then the band")
-    node(687, "ImageToMask", x0 + 800, y0, [("image", "IMAGE"), ("channel", "COMBO")], (("MASK", "MASK", False),),
+    place(687, "ImageToMask", [("image", "IMAGE"), ("channel", "COMBO")], (("MASK", "MASK", False),),
          {"channel": "red"})
     regions = [{"id": "square", "prompt": "central square", "priority": 10},
                {"id": "band", "prompt": "top band", "priority": 0}]
-    node(688, "LF_WriteJSON", x0 + 400, y0 + 400, [("ui_widget", "LF_TEXTAREA")], (("json", "JSON", False),),
+    place(688, "LF_WriteJSON", [("ui_widget", "LF_TEXTAREA")], (("json", "JSON", False),),
          {"ui_widget": json.dumps(regions, separators=(",", ":"))}, "The square and the top band")
-    node(689, "LF_TextRegionMasks", x0 + 1200, y0,
+    place(689, "LF_TextRegionMasks",
          [("image", "IMAGE"), ("masks", "MASK"), ("regions", "JSON"), ("ui_widget", "LF_COMPARE")], REGION_SET,
          {"ui_widget": {}}, "The example's square and band as a region set · CPU")
     tone_in = [("image", "IMAGE"), ("min_pixels", "INT"), ("masks", "MASK"), ("metadata", "JSON"),
                ("reference", "JSON"), ("ui_widget", "LF_TREE")]
-    node(690, "LF_ToneProfile", x0 + 1600, y0, tone_in, (("profile", "JSON", False),),
+    place(690, "LF_ToneProfile", tone_in, (("profile", "JSON", False),),
          {"min_pixels": 200, "ui_widget": {}}, "Tone before the grade · CPU")
-    node(691, "LF_ToneProfile", x0 + 2000, y0, tone_in, (("profile", "JSON", False),),
+    place(691, "LF_ToneProfile", tone_in, (("profile", "JSON", False),),
          {"min_pixels": 200, "ui_widget": {}}, "Tone after the grade, against before · CPU")
-    node(692, "LF_RegionReads", x0 + 1600, y0 + 400, READS_IN, READS_OUT, {"reads": READS, **READS_SETTINGS},
+    place(692, "LF_RegionReads", READS_IN, READS_OUT, {"reads": READS, **READS_SETTINGS},
          "The graded square against the band · CPU")
     link((SQUARE_MASK, 0, 684, "mask"), (BAND_MASK, 0, 685, "mask"), (684, 0, 686, "image_1"),
          (685, 0, 686, "image_2"), (686, 0, 687, "image"),
@@ -218,42 +229,42 @@ def add_specimens(workflow):
          (EXAMPLE, 0, 690, "image"), (689, 0, 690, "masks"), (689, 1, 690, "metadata"),
          (GRADED, 0, 691, "image"), (689, 0, 691, "masks"), (689, 1, 691, "metadata"), (690, 0, 691, "reference"),
          (GRADED, 0, 692, "image"), (689, 0, 692, "masks"), (689, 1, 692, "metadata"))
-    groups.append({"id": 28, "title": "Tone profile and region reads of the square and the band · CPU coverage",
-                   "bounding": [x0 - 50, y0 - 200, 2450, 950], "color": GROUP_COLOR, "flags": {}})
+    bottom = specimen.arrange(LEFT, bottom + SECTION_GAP, [[684, 685, 686, 687, 688], [689, 690, 691, 692]], SIZES, GAP)
+    groups.append(specimen.group(28, "Tone profile and region reads of the square and the band · CPU coverage",
+                                 range(684, 693), GROUP_COLOR))
 
     # model.face-zones: both generated portraits, each zoned and read.
-    x0, y0 = 19300, -2300
-    node(693, "LF_FaceZones", x0, y0,
+    place(693, "LF_FaceZones",
          [("image", "IMAGE"), ("model_pack", "COMBO"), ("select", "COMBO"), ("det_size", "INT"),
           ("score_threshold", "FLOAT"), ("ui_widget", "LF_COMPARE")],
          (("masks", "MASK", False), ("metadata", "JSON", False), ("overlay", "IMAGE", False)),
          {"model_pack": "antelopev2", "select": "center", "det_size": 640, "score_threshold": 0.5, "ui_widget": {}},
          "Zone both portraits: installed InsightFace pack required")
-    node(694, "LF_RegionReads", x0 + 400, y0, READS_IN, READS_OUT, {"reads": FACE_READS, **READS_SETTINGS},
+    place(694, "LF_RegionReads", READS_IN, READS_OUT, {"reads": FACE_READS, **READS_SETTINGS},
          "Under-eyes and folds against the cheeks")
     link((PORTRAITS, 1, 693, "image"), (PORTRAITS, 1, 694, "image"), (693, 0, 694, "masks"),
          (693, 1, 694, "metadata"))
-    groups.append({"id": 29, "title": "Face zones and their reads on the generated portraits - model coverage",
-                   "bounding": [x0 - 50, y0 - 200, 850, 600], "color": GROUP_COLOR, "flags": {}})
+    bottom = specimen.arrange(LEFT, bottom + SECTION_GAP, [[693, 694]], SIZES, GAP)
+    groups.append(specimen.group(29, "Face zones and their reads on the generated portraits - model coverage",
+                                 (693, 694), GROUP_COLOR))
 
     # model.patch-probe: label 1 is the graded copy; the mirrored pair is the second group.
-    x0, y0 = 19300, -1500
     flip_in = [("image", "IMAGE"), ("flip_method", "COMBO")]
-    node(695, "ImageFlip", x0, y0, flip_in, (("IMAGE", "IMAGE", False),), {"flip_method": "y-axis: horizontally"})
-    node(696, "ImageFlip", x0, y0 + 220, flip_in, (("IMAGE", "IMAGE", False),),
+    place(695, "ImageFlip", flip_in, (("IMAGE", "IMAGE", False),), {"flip_method": "y-axis: horizontally"})
+    place(696, "ImageFlip", flip_in, (("IMAGE", "IMAGE", False),),
          {"flip_method": "y-axis: horizontally"})
     batch = lambda count: [(f"images.image{index}", "IMAGE") for index in range(count + 1)]
-    node(697, "BatchImagesNode", x0 + 400, y0, batch(4), (("IMAGE", "IMAGE", False),), None,
+    place(697, "BatchImagesNode", batch(4), (("IMAGE", "IMAGE", False),), None,
          "Teaching batch: example, graded, mirrored example, mirrored graded")
     encode_in = [("clip_vision", "CLIP_VISION"), ("image", "IMAGE"), ("crop", "COMBO"), ("ui_widget", "LF_COMPARE")]
     encoded = (("clip_vision_output", "CLIP_VISION_OUTPUT", False),)
-    node(698, "LF_VisionPatchEncode", x0 + 800, y0, encode_in, encoded, {"crop": "none", "ui_widget": {}},
+    place(698, "LF_VisionPatchEncode", encode_in, encoded, {"crop": "none", "ui_widget": {}},
          "DINOv3 tokens of the teaching batch")
-    node(699, "BatchImagesNode", x0 + 400, y0 + 400, batch(2), (("IMAGE", "IMAGE", False),), None,
+    place(699, "BatchImagesNode", batch(2), (("IMAGE", "IMAGE", False),), None,
          "Frames: the example, then its graded copy")
-    node(700, "LF_VisionPatchEncode", x0 + 800, y0 + 400, encode_in, encoded, {"crop": "none", "ui_widget": {}},
+    place(700, "LF_VisionPatchEncode", encode_in, encoded, {"crop": "none", "ui_widget": {}},
          "DINOv3 tokens of the frames")
-    node(701, "LF_PatchProbe", x0 + 1200, y0,
+    place(701, "LF_PatchProbe",
          [("teach", "CLIP_VISION_OUTPUT"), ("labels", "STRING"), ("groups", "STRING"), ("frames", "CLIP_VISION_OUTPUT"),
           ("frame_images", "IMAGE"), ("crop", "COMBO"), ("l2", "FLOAT"), ("frame_groups", "STRING"),
           ("frame_masks", "MASK"), ("names", "STRING"), ("ui_widget", "LF_COMPARE")],
@@ -267,12 +278,12 @@ def add_specimens(workflow):
          (DINO, 0, 700, "clip_vision"), (699, 0, 700, "image"),
          (698, 0, 701, "teach"), (700, 0, 701, "frames"), (699, 0, 701, "frame_images"),
          (SQUARE_MASK, 0, 701, "frame_masks"))
-    groups.append({"id": 30, "title": "DINOv3 patch probe on the stock example's grade - model + GPU coverage",
-                   "bounding": [x0 - 50, y0 - 200, 1650, 850], "color": GROUP_COLOR, "flags": {}})
+    bottom = specimen.arrange(LEFT, bottom + SECTION_GAP, [[695, 696, 697, 699], [698, 700, 701]], SIZES, GAP)
+    groups.append(specimen.group(30, "DINOv3 patch probe on the stock example's grade - model + GPU coverage",
+                                 range(695, 702), GROUP_COLOR))
 
     # model.intrinsic-layers.
-    x0, y0 = 19300, -400
-    node(702, "LF_IntrinsicLayers", x0, y0,
+    place(702, "LF_IntrinsicLayers",
          [("image", "IMAGE"), ("release", "COMBO"), ("resize_conf", "FLOAT"), ("base_size", "INT"),
           ("ui_widget", "LF_COMPARE")],
          tuple((name, "JSON" if name == "report" else "IMAGE", False) for name in (
@@ -280,31 +291,31 @@ def add_specimens(workflow):
          {"release": "v21", "resize_conf": 0, "base_size": 384, "ui_widget": {}},
          "Albedo, diffuse shading and residual: installed release required")
     link((EXAMPLE, 0, 702, "image"))
-    groups.append({"id": 31, "title": "Intrinsic layers of the stock example - model + GPU coverage",
-                   "bounding": [x0 - 50, y0 - 200, 450, 550], "color": GROUP_COLOR, "flags": {}})
+    bottom = specimen.arrange(LEFT, bottom + SECTION_GAP, [[702]], SIZES, GAP)
+    groups.append(specimen.group(31, "Intrinsic layers of the stock example - model + GPU coverage", (702,),
+                                 GROUP_COLOR))
 
     # model.speech: two designed voices, a conversion and its match.
-    x0, y0 = 19300, 400
     speak_in = [("text", "STRING"), ("model", "COMBO"), ("revision", "STRING"), ("language", "STRING"),
                 ("seed", "INT"), ("num_step", "INT"), ("guidance_scale", "FLOAT"), ("speed", "FLOAT"),
                 ("reference_audio", "AUDIO"), ("reference_text", "STRING"), ("voice_design", "STRING"),
                 ("t_shift", "FLOAT"), ("ui_widget", "LF_MASONRY")]
     speech = (("audio", "AUDIO", False), ("receipt", "JSON", False))
 
-    def speak(identifier, y, text, seed, design, title):
-        node(identifier, "LF_VoiceCloneSpeech", x0, y, speak_in, speech,
+    def speak(identifier, text, seed, design, title):
+        place(identifier, "LF_VoiceCloneSpeech", speak_in, speech,
              {"text": text, "model": SPEAKER[0], "revision": SPEAKER[1], "language": "English", "seed": seed,
               "control_after_generate": "fixed", "num_step": 32, "guidance_scale": 2, "speed": 0,
               "reference_text": "", "voice_design": design, "t_shift": 0.1, "ui_widget": {}}, title)
 
-    speak(703, y0, LINE, 7, "female, middle-aged, low pitch, british accent", "Designed voice: the line · GPU")
-    speak(704, y0 + 450, TARGET_LINE, 11, "male, young adult, high pitch, american accent",
+    speak(703, LINE, 7, "female, middle-aged, low pitch, british accent", "Designed voice: the line · GPU")
+    speak(704, TARGET_LINE, 11, "male, young adult, high pitch, american accent",
           "Designed voice: the converter's target · GPU")
-    node(705, "LF_VoiceConvert", x0 + 400, y0,
+    place(705, "LF_VoiceConvert",
          [("source_audio", "AUDIO"), ("target_audio", "AUDIO"), ("model", "COMBO"), ("revision", "STRING"),
           ("ui_widget", "LF_MASONRY")], speech,
          {"model": CONVERTER[0], "revision": CONVERTER[1], "ui_widget": {}}, "The line in the target's voice · GPU")
-    node(706, "LF_SpeechMatch", x0 + 800, y0,
+    place(706, "LF_SpeechMatch",
          [("audio", "AUDIO"), ("reference_audio", "AUDIO"), ("expected_text", "STRING"), ("language", "STRING"),
           ("speaker_model", "COMBO"), ("speaker_revision", "STRING"), ("asr_model", "COMBO"),
           ("asr_revision", "STRING"), ("ui_widget", "LF_TREE")],
@@ -313,12 +324,13 @@ def add_specimens(workflow):
          {"expected_text": LINE, "language": "english", "speaker_model": SPEAKER_ENCODER[0],
           "speaker_revision": SPEAKER_ENCODER[1], "asr_model": RECOGNIZER[0], "asr_revision": RECOGNIZER[1],
           "ui_widget": {}}, "Converted line against the target voice and the text · GPU")
-    node(707, "LF_DisplayJSON", x0 + 1200, y0, [("json_input", "JSON"), ("ui_widget", "LF_CODE")],
+    place(707, "LF_DisplayJSON", [("json_input", "JSON"), ("ui_widget", "LF_CODE")],
          (("json", "JSON", False),), {"ui_widget": ""}, "Speech match receipt")
     link((703, 0, 705, "source_audio"), (704, 0, 705, "target_audio"), (705, 0, 706, "audio"),
          (704, 0, 706, "reference_audio"), (706, 3, 707, "json_input"))
-    groups.append({"id": 32, "title": "Designed voices, conversion and speech match - model + GPU coverage",
-                   "bounding": [x0 - 50, y0 - 200, 1650, 1100], "color": GROUP_COLOR, "flags": {}})
+    specimen.arrange(LEFT, bottom + SECTION_GAP, [[703, 704, 705], [706, 707]], SIZES, GAP)
+    groups.append(specimen.group(32, "Designed voices, conversion and speech match - model + GPU coverage",
+                                 range(703, 708), GROUP_COLOR))
 
     return specimen.append(workflow, *groups)
 

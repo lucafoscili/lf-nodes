@@ -159,6 +159,24 @@ named in the manifest and stderr, and return a nonzero exit code. The manifest
 contains no UI payload, prompt or workflow document. This is visual evidence,
 not a replacement for the live case's execution result.
 
+### Node shots in both renderers
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.inspection --accept-warm-cache --renderer vue --shots output/titanic-shots/vue
+```
+
+`--renderer classic|vue` sets the front end's `Comfy.VueNodes.Enabled` before
+the page loads (Nodes 2.0 is the Vue renderer) and puts the value it found back
+when the run ends; a restore that fails fails the run. `--shots DIR`
+photographs each executed case's target and asserted nodes in the live front
+end, after their widgets have drawn, at scale 1 unless the node would not fit,
+as `<case>.<node>.<type>.png`. Each result's `shots` lists the files with the
+node's saved size and the size the renderer drew it at: Nodes 2.0 grows a node
+whose widget needs more room than it was saved with, where the classic renderer
+scrolls inside it. History can report a prompt's end before the page has
+handled its last websocket events, so each case gives the event recorder up to
+ten seconds to see the terminal event before reading it.
+
 ### Synthetic GLB, region and layer cases
 
 The six Studio-supporting public nodes have two dedicated CPU cases. With

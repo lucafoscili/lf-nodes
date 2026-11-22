@@ -23,6 +23,11 @@ def read_workflow() -> dict:
     return json.loads(WORKFLOW_PATH.read_text(encoding="utf-8"))
 
 
+# The frontend draws a node's title above its position, and a group's header inside its bounding.
+NODE_TITLE_HEIGHT = 30
+GROUP_HEADER_HEIGHT = 50
+
+
 class Specimen:
     """New nodes and links numbered from ``start_node`` and ``start_link``, appended once and checked after."""
 
@@ -60,6 +65,32 @@ class Specimen:
         self.links.append([identifier, origin, output, target, slot, source["outputs"][output]["type"]])
         destination["inputs"][slot]["link"] = identifier
         return identifier
+
+    def arrange(self, x0, top, rows, sizes=None, gap=60) -> int:
+        """Size the named nodes (``sizes`` by ID) and lay them out row by row from ``(x0, top)``, each row below the
+        tallest node of the one before; return the bottom of the last row."""
+        by_id = {n["id"]: n for n in self.nodes}
+        y = top
+        for row in rows:
+            x, tallest = x0, 0
+            for identifier in row:
+                node = by_id[identifier]
+                node["size"] = list((sizes or {}).get(identifier, node["size"]))
+                node["pos"] = [x, y]
+                x += node["size"][0] + gap
+                tallest = max(tallest, node["size"][1])
+            y += tallest + gap + NODE_TITLE_HEIGHT
+        return y - gap - NODE_TITLE_HEIGHT
+
+    def group(self, identifier, title, ids, color, margin=30) -> dict:
+        """A group around the named nodes, their titles and its own header included."""
+        nodes = [n for n in self.nodes if n["id"] in set(ids)]
+        left = min(n["pos"][0] for n in nodes) - margin
+        top = min(n["pos"][1] for n in nodes) - NODE_TITLE_HEIGHT - GROUP_HEADER_HEIGHT - margin
+        right = max(n["pos"][0] + n["size"][0] for n in nodes) + margin
+        bottom = max(n["pos"][1] + n["size"][1] for n in nodes) + margin
+        return {"id": identifier, "title": title, "bounding": [left, top, right - left, bottom - top], "color": color,
+                "flags": {}}
 
     def append(self, workflow, *groups: dict) -> dict:
         """Append the specimen and its groups at the graph's end, or check the appended one has not drifted."""

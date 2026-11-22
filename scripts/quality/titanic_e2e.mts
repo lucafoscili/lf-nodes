@@ -68,6 +68,8 @@ interface CliOptions {
   acceptWarmCache: boolean;
   resetCache: boolean;
   savePayloads: boolean;
+  renderer?: 'classic' | 'vue';
+  shotsDir?: string;
 }
 
 interface CaseResult {
@@ -88,7 +90,22 @@ interface CaseResult {
   downstreamArtifact?: JsonRecord;
   foreignWorkDetected?: boolean;
   liveWidgetChecks?: Array<{ nodeId: number; kind: string; found: boolean; hasElement: boolean; previewCount: number }>;
+  shots?: NodeShot[];
 }
+
+interface NodeShot {
+  nodeId: number;
+  nodeType: string;
+  file?: string;
+  // The node's saved size and the size the renderer drew it at, in graph units: the Vue renderer grows a node
+  // whose widgets need more room than it was saved with.
+  savedSize?: [number, number];
+  drawnSize?: [number, number];
+  error?: string;
+}
+
+// The front end's setting for its Vue node renderer ("Nodes 2.0"); off draws nodes on LiteGraph's canvas.
+const VUE_NODES_SETTING = 'Comfy.VueNodes.Enabled';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..', '..');
@@ -124,6 +141,8 @@ Execution authority is explicit:
   --accept-warm-cache      Allow full execution without Comfy --cache-none.
   --reset-cache            Clear executor caches before each case; unloads models.
   --save-payloads          Save required nodes' final history UI under output-dir/payloads.
+  --renderer <classic|vue> Load the graph in that node renderer (Comfy.VueNodes.Enabled), restored after.
+  --shots <dir>            Photograph each executed case's widget nodes in the live front end.
 
 Service lifecycle is deliberately out of scope: this command never starts,
 stops, restarts, or globally interrupts Comfy or LM Studio.
@@ -233,6 +252,19 @@ export const parseArgs = (argv: string[]): CliOptions => {
       case '--save-payloads':
         options.savePayloads = true;
         break;
+      case '--renderer': {
+        const renderer = takeValue(index, arg);
+        if (renderer !== 'classic' && renderer !== 'vue') {
+          throw new Error(`--renderer must be classic or vue, not ${renderer}`);
+        }
+        options.renderer = renderer;
+        index += 1;
+        break;
+      }
+      case '--shots':
+        options.shotsDir = resolve(takeValue(index, arg));
+        index += 1;
+        break;
       default:
         throw new Error(`unknown argument: ${arg}`);
     }
@@ -240,7 +272,84 @@ export const parseArgs = (argv: string[]): CliOptions => {
   if (options.caseIds.length > 0 && options.mode !== 'full') {
     throw new Error('--case is only valid with --full');
   }
+  if (options.shotsDir && options.mode !== 'full') {
+    throw new Error('--shots is only valid with --full');
+  }
   return options;
+};
+
+// Photographs each node at scale 1 (smaller when it would not fit), centred below the front end's floating top
+// bar, after its widget has drawn; the clip keeps the node's ID badge above its title.
+const captureNodeShots = async (
+  page: Page,
+  shotsDir: string,
+  caseId: string,
+  nodeIds: number[],
+): Promise<NodeShot[]> => {
+  await mkdir(shotsDir, { recursive: true });
+  const shots: NodeShot[] = [];
+  for (const nodeId of nodeIds) {
+    const framed = await page.evaluate(async (id) => {
+      const app = (window as any).comfyAPI.app.app;
+      const node = (app.rootGraph ?? app.graph).getNodeById(id);
+      if (!node) return { error: 'node is not in the graph' };
+      const canvas = app.canvas;
+      const element: HTMLCanvasElement = canvas.canvas;
+      const rect = element.getBoundingClientRect();
+      const bounds = node.getBounding();
+      const header = 120;
+      const room = rect.height - header - 40;
+      const scale = Math.min(1, (rect.width * 0.92) / bounds[2], room / bounds[3]);
+      canvas.ds.scale = scale;
+      canvas.ds.offset[0] = (rect.width / scale - bounds[2]) / 2 - bounds[0];
+      canvas.ds.offset[1] = (header + (room - bounds[3] * scale) / 2) / scale - bounds[1];
+      canvas.setDirty(true, true);
+      // Two frames to lay out the DOM widgets, then time for charts and images to draw.
+      for (let frame = 0; frame < 2; frame += 1) {
+        await new Promise((resolvePromise) => requestAnimationFrame(() => resolvePromise(null)));
+      }
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 1_500));
+      const vue = document.querySelector(`[data-node-id="${id}"]`)?.getBoundingClientRect();
+      const box = vue && vue.width > 0
+        ? { x: vue.left, y: vue.top, width: vue.width, height: vue.height }
+        : {
+          x: rect.left + (bounds[0] + canvas.ds.offset[0]) * scale,
+          y: rect.top + (bounds[1] + canvas.ds.offset[1]) * scale,
+          width: bounds[2] * scale,
+          height: bounds[3] * scale,
+        };
+      return {
+        nodeType: String(node.type),
+        box,
+        savedSize: [Math.round(node.size[0]), Math.round(node.size[1])] as [number, number],
+        drawnSize: [Math.round(box.width / scale), Math.round(box.height / scale)] as [number, number],
+      };
+    }, nodeId);
+    if ('error' in framed) {
+      shots.push({ nodeId, nodeType: '', error: framed.error });
+      continue;
+    }
+    const pad = 12;
+    const badge = 28;
+    const viewport = page.viewportSize() ?? { width: 1600, height: 1000 };
+    const x = Math.max(0, framed.box.x - pad);
+    const y = Math.max(0, framed.box.y - badge);
+    const clip = {
+      x,
+      y,
+      width: Math.min(viewport.width - x, framed.box.width + pad * 2),
+      height: Math.min(viewport.height - y, framed.box.height + badge + pad),
+    };
+    const file = `${caseId}.${nodeId}.${framed.nodeType}.png`;
+    const sizes = { savedSize: framed.savedSize, drawnSize: framed.drawnSize };
+    try {
+      await page.screenshot({ path: resolve(shotsDir, file), clip, animations: 'disabled' });
+      shots.push({ nodeId, nodeType: framed.nodeType, file, ...sizes });
+    } catch (error) {
+      shots.push({ nodeId, nodeType: framed.nodeType, ...sizes, error: String(error) });
+    }
+  }
+  return shots;
 };
 
 const sha256 = (value: string | Buffer): string =>
@@ -893,6 +1002,21 @@ const installExecutionRecorder = async (page: Page): Promise<string> => {
     globalRecorders[recorderToken] = recorder;
   }, token);
   return token;
+};
+
+// History can report a prompt's end before the page has handled its last websocket events (a busy main thread,
+// such as the Vue renderer laying out a large result), so the recorder is given a bounded moment to catch up; a
+// terminal event still missing after it is reported by the trace's own checks.
+const awaitRecordedTerminal = async (page: Page, token: string, promptId: string, timeoutMs = 10_000) => {
+  await page.waitForFunction(
+    ({ recorderToken, ownedPromptId }) => {
+      const recorder = (globalThis as any).__lfTitanicExecutionRecorders?.[recorderToken];
+      return !recorder || recorder.events.some((event: any) => event.promptId === ownedPromptId &&
+        ['execution_success', 'execution_error', 'execution_interrupted'].includes(event.type));
+    },
+    { recorderToken: token, ownedPromptId: promptId },
+    { timeout: timeoutMs, polling: 100 },
+  ).catch(() => undefined);
 };
 
 const stopExecutionRecorder = async (
@@ -2835,6 +2959,7 @@ const executeCase = async (
       promptId,
       manifestCase.timeoutSeconds,
     );
+    await awaitRecordedTerminal(page, recorderToken, promptId);
     if (interactionPromise) {
       try {
         interaction = await interactionPromise;
@@ -3010,6 +3135,12 @@ const executeCase = async (
       nodeId, expectation, live, collectPreviewUrls(terminal.entry.outputs?.[nodeId]),
     ));
   }
+  const shots = options.shotsDir
+    ? await captureNodeShots(page, options.shotsDir, manifestCase.id, liveWidgetNodeIds)
+    : undefined;
+  for (const shot of shots ?? []) {
+    if (shot.error) assertions.push(`node ${shot.nodeId} shot failed: ${shot.error}`);
+  }
   if (interaction?.error) assertions.push(`interaction failed: ${interaction.error}`);
   if (terminal.foreignIds?.length) {
     assertions.push(`foreign queue work appeared during the case: ${terminal.foreignIds.join(', ')}`);
@@ -3041,6 +3172,7 @@ const executeCase = async (
     downstreamArtifact: downstream.evidence ?? undefined,
     cacheReset,
     liveWidgetChecks: liveWidgets,
+    shots,
     foreignWorkDetected:
       foreignWorkDetected,
     assertions,
@@ -3091,11 +3223,15 @@ const main = async () => {
       lmStudioUrl: options.lmStudioUrl,
       browserChannel: options.browserChannel,
       headed: options.headed,
+      renderer: options.renderer ?? 'as-set',
     },
     savePayloads: options.savePayloads,
+    shotsDir: options.shotsDir,
     results,
   };
   let browser: Browser | undefined;
+  // The renderer setting as found, put back when the run ends.
+  let rendererBefore: { value: unknown } | undefined;
   let workflowBefore: Buffer | undefined;
   let executionProofNodesByCase = new Map<string, string[]>();
   const writeEvidence = async () => {
@@ -3256,8 +3392,14 @@ const main = async () => {
     summary.environment.comfyArgv = argv;
     summary.environment.coldCache = Boolean(argv?.includes('--cache-none'));
 
+    if (options.renderer) {
+      const settingUrl = `${options.comfyUrl}/api/settings/${VUE_NODES_SETTING}`;
+      rendererBefore = { value: await jsonFetch(settingUrl) };
+      await jsonFetch(settingUrl, { method: 'POST', body: JSON.stringify(options.renderer === 'vue') });
+    }
     browser = await launchBrowser(options);
-    const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } });
+    // Shots want the tallest result nodes whole at scale 1.
+    const context = await browser.newContext({ viewport: { width: 1600, height: options.shotsDir ? 1200 : 1000 } });
     const page = await context.newPage();
     const hydrated = await hydrateWorkflow(page, options.comfyUrl, workflow, objectInfo);
     const prompt = hydrated.promptBundle.output as JsonRecord;
@@ -3392,6 +3534,18 @@ const main = async () => {
     }
   } finally {
     await browser?.close().catch(() => {});
+    if (rendererBefore) {
+      try {
+        await jsonFetch(`${options.comfyUrl}/api/settings/${VUE_NODES_SETTING}`, {
+          method: 'POST',
+          body: JSON.stringify(rendererBefore.value ?? null),
+        });
+      } catch (error) {
+        summary.error = [summary.error, `${VUE_NODES_SETTING} was not restored to ` +
+          `${JSON.stringify(rendererBefore.value)}: ${String(error)}`].filter(Boolean).join('; ');
+        summary.outcome = 'FAIL';
+      }
+    }
     await writeEvidence();
   }
 

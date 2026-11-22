@@ -46,6 +46,15 @@ describe('Titanic E2E pure contracts', () => {
     expect(parseArgs(['--full', '--reset-cache'])).toMatchObject({ resetCache: true, acceptWarmCache: false });
   });
 
+  it('takes a node renderer and a shots folder only as named', () => {
+    expect(parseArgs([]).renderer).toBeUndefined();
+    expect(parseArgs(['--full', '--renderer', 'vue']).renderer).toBe('vue');
+    expect(parseArgs(['--renderer', 'classic']).renderer).toBe('classic');
+    expect(() => parseArgs(['--renderer', 'nodes2'])).toThrow('--renderer must be classic or vue');
+    expect(parseArgs(['--full', '--shots', 'out/shots']).shotsDir).toMatch(/out[\\/]shots$/);
+    expect(() => parseArgs(['--shots', 'out/shots'])).toThrow('--shots is only valid with --full');
+  });
+
   it.each([
     { cached: [false, true, false], succeeds: true },
     { cached: [false, true, true, false], succeeds: true },

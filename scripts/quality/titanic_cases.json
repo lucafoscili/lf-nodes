@@ -2,7 +2,7 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "3ab2e5f7241bfc90df4a7d0f73a673fb1e8e4c7a5a27e4f12013fb551d6a4649",
+    "expectedSha256": "52fe5c0073e60b7b218fd34c95e4712c67fe12a4b38f8f96f2e90418271e6e98",
     "expectedNodeCount": 468,
     "expectedLinkCount": 631
   },
