@@ -44,7 +44,10 @@ declare interface GitHubRelease {
 declare interface ComfyUI {
   api: {
     api: ComfyApi;
-    fetchApi(endpoint: string, options?: { body?: FormData; method?: string }): Promise<Response>;
+    fetchApi(
+      endpoint: string,
+      options?: { body?: FormData; method?: string; timeoutMs?: number | null },
+    ): Promise<Response>;
     register?: (ext: any) => void;
     event?: (name: string, cb: any) => void;
     [k: string]: any;

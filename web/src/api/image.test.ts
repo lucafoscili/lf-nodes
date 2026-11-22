@@ -54,4 +54,16 @@ describe('image editor processing authority', () => {
     expect(body.get('caller_client_id')).toBe('client-stateless');
     expect(body.has('context_id')).toBe(false);
   });
+
+  it('lifts the fetch timeout, since an inpaint can outlast the frontend abort', async () => {
+    mocks.fetchApi.mockResolvedValueOnce({
+      json: async () => ({ data: '/view?filename=result.png', status: 'success' }),
+      status: 200,
+    } as Response);
+
+    await IMAGE_API.process('/view?filename=source.png', 'inpaint', {} as never);
+
+    const [, options] = mocks.fetchApi.mock.calls[0];
+    expect(options.timeoutMs).toBeNull();
+  });
 });

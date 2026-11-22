@@ -138,6 +138,7 @@ const ANALYTICS_API = {
   }
   //#endregion
 };
+const UNBOUNDED_FETCH = { timeoutMs: null };
 const BACKUP_API = {
   //#region new
   new: async (backupType = "automatic") => {
@@ -150,6 +151,7 @@ const BACKUP_API = {
       const body = new FormData();
       body.append("backup_type", backupType);
       const response = await getComfyAPI().fetchApi(APIEndpoints.NewBackup, {
+        ...UNBOUNDED_FETCH,
         body,
         method: "POST"
       });
@@ -231,6 +233,7 @@ const BACKUP_API = {
       const body = new FormData();
       body.append("max_backups", String(_maxBackups));
       const response = await getComfyAPI().fetchApi(APIEndpoints.CleanOldBackups, {
+        ...UNBOUNDED_FETCH,
         body,
         method: "POST"
       });
@@ -491,6 +494,7 @@ const IMAGE_API = {
         body.append("caller_client_id", callerClientId);
       }
       const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
+        ...UNBOUNDED_FETCH,
         body,
         method: "POST"
       });

@@ -6,6 +6,7 @@ import {
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
 import { getComfyAPI, getLfManager } from '../utils/common';
+import { UNBOUNDED_FETCH } from './fetchOptions';
 
 export const BACKUP_API: BackupAPIs = {
   //#region new
@@ -21,6 +22,7 @@ export const BACKUP_API: BackupAPIs = {
       const body = new FormData();
       body.append('backup_type', backupType);
       const response = await getComfyAPI().fetchApi(APIEndpoints.NewBackup, {
+        ...UNBOUNDED_FETCH,
         body,
         method: 'POST',
       });
@@ -114,6 +116,7 @@ export const BACKUP_API: BackupAPIs = {
       const body = new FormData();
       body.append('max_backups', String(_maxBackups));
       const response = await getComfyAPI().fetchApi(APIEndpoints.CleanOldBackups, {
+        ...UNBOUNDED_FETCH,
         body,
         method: 'POST',
       });

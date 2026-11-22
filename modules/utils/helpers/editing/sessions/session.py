@@ -14,7 +14,7 @@ from ...conversion import pil_to_tensor, tensor_to_pil
 from ...logic import normalize_output_image
 from ...temp_cache import TempFileCache
 from ...ui import create_masonry_node
-from ..context import clear_editing_context, register_editing_context
+from ..context import clear_editing_context, register_editing_context, resume_editing_context
 from ..dataset import normalize_editor_image_entries
 from ..file_lock import edit_dataset_lock
 from ..ownership import OWNER_CLIENT_ID_KEY, get_owner_client_id, normalize_client_id
@@ -156,12 +156,16 @@ class EditingSession:
 
             status_column = next((col for col in latest.get("columns", []) if col.get("id") == "status"), None)
             if status_column and status_column.get("title") == "completed":
+                resume_editing_context(json_file_path, poll_interval=poll_interval)
                 return latest
 
             time.sleep(poll_interval)
 
     def cleanup(self, dataset: Dict[str, Any]) -> None:
-        self.retire_owned_context(dataset.get("context_id"))
+        context_id = dataset.get("context_id")
+        if isinstance(context_id, str):
+            resume_editing_context(context_id)
+        self.retire_owned_context(context_id)
 
     def retire_owned_context(
         self,

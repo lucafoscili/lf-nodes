@@ -41,7 +41,7 @@ This document walks through the moving parts behind the interactive image editor
    - `context_id`: absolute dataset path, used as the lookup key.
 4. `register_editing_context` stores every reusable input (model, clip, vae, sampler, scheduler, cfg, seed, prompts, conditioning).
 5. A prompt-server event (`lf-imageseditingbreakpoint`) opens the editor UI.
-6. Execution blocks until the UI writes `status = completed` to the dataset.
+6. Execution blocks until the UI writes `status = completed` to the dataset, then until every `/process-image` call still running on the session has returned (`resume_editing_context`). ComfyUI's prompt worker resets shared model and GPU state after each node, so an inpaint left running on the endpoint's thread while the graph moves on would have its buffers taken from under it. From that moment the session refuses new calls with `409`.
 7. The node collects edited outputs from disk, converts them back to tensors, and returns them alongside original inputs for downstream comparison.
 
 ### 1b. Node execution (`LF_LoadAndEditImages`)
@@ -58,7 +58,7 @@ This document walks through the moving parts behind the interactive image editor
 
 1. The widget loads the dataset JSON, renders a masonry grid, and pre-fills settings with `defaults`.
 2. Canvas interactions capture mask strokes into base64 payloads.
-3. As the user tweaks settings or paints masks, the widget submits debounced multipart forms to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`.
+3. As the user tweaks settings or paints masks, the widget submits debounced multipart forms to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`. The call passes `timeoutMs: null` to the frontend's `fetchApi`, which otherwise aborts any request after 60 s (frontend 1.59 and later), and a cold inpaint can take longer.
    - For **canvas filters** (`brush`, `line`, `inpaint`), backend calls are only triggered when an actual stroke is applied. Slider/textfield/toggle changes (including the inpaint advanced accordion) update the stored defaults and canvas brush parameters, but do not call the API until the user paints.
    - For **regular filters**, debounced slider/textfield changes do trigger backend calls as soon as settings are valid.
 4. Responses update the dataset (`nodes`, history snapshots, status) so the node can resume once the user is satisfied.
@@ -67,7 +67,7 @@ This document walks through the moving parts behind the interactive image editor
 
 1. Resolves the URL back to a real file with `resolve_url`.
 2. Loads the tensor, builds a settings dict, and looks up the editing context with `context_id`.
-3. Dispatches to the registered filter function (e.g., `apply_inpaint_filter`).
+3. Dispatches to the registered filter function (e.g., `apply_inpaint_filter`) on a worker thread, holding the session busy (`editing_context_work`) until it returns; a session whose graph has resumed answers `409`.
 4. Saves outputs/masks via `resolve_filepath`, builds response metadata, and returns JSON so the UI can refresh history.
 
 ---

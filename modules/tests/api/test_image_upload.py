@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import importlib
 import json
 import sys
@@ -100,6 +101,8 @@ def image_api(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     editing_helpers.CALLER_CLIENT_ID_FIELD = "client_id"
     editing_helpers.caller_owns_context = lambda *args, **kwargs: True
     editing_helpers.get_editing_context = lambda *args, **kwargs: None
+    editing_helpers.EditingContextResumedError = RuntimeError
+    editing_helpers.editing_context_work = lambda *_args, **_kwargs: contextlib.nullcontext()
     logic_helpers = types.ModuleType("modules.utils.helpers.logic")
     logic_helpers.sanitize_filename = lambda value: value or None
     ui_helpers = types.ModuleType("modules.utils.helpers.ui")

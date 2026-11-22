@@ -10,6 +10,7 @@ import {
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
 import { getComfyAPI, getComfyClientId, getLfManager } from '../utils/common';
+import { UNBOUNDED_FETCH } from './fetchOptions';
 
 export const IMAGE_API: ImageAPIs = {
   //#region get
@@ -151,6 +152,7 @@ export const IMAGE_API: ImageAPIs = {
       }
 
       const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
+        ...UNBOUNDED_FETCH,
         body,
         method: 'POST',
       });

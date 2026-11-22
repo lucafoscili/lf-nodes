@@ -25,7 +25,9 @@ from ..utils.helpers.comfy import (
 from ..utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ..utils.helpers.editing import (
     CALLER_CLIENT_ID_FIELD,
+    EditingContextResumedError,
     caller_owns_context,
+    editing_context_work,
     get_editing_context,
 )
 from ..utils.helpers.logic import sanitize_filename
@@ -219,16 +221,19 @@ async def process_image(request):
 
         img_tensor = _load_image_tensor(images_dir)
 
+        def run_filter():
+            # The context stays busy until the filter returns, so its paused graph cannot resume
+            # beside it (see editing_context_work).
+            with editing_context_work(context_id):
+                return process_filter(filter_type, img_tensor, settings)
+
         try:
             # Offload so event loop remains responsive for WebSocket progress events.
-            processed_tensor, extra_payload = await asyncio.to_thread(
-                process_filter,
-                filter_type,
-                img_tensor,
-                settings,
-            )
+            processed_tensor, extra_payload = await asyncio.to_thread(run_filter)
         except UnknownFilterError as exc:
             return web.Response(status=400, text=str(exc))
+        except EditingContextResumedError as exc:
+            return web.Response(status=409, text=str(exc))
 
         save_type: str = str(settings.get("resource_type") or settings.get("output_type") or "temp")
         base_output_path = get_comfy_dir(save_type)

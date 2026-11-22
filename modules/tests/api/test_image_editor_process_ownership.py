@@ -4,6 +4,7 @@ import asyncio
 import importlib
 import json
 import sys
+import threading
 import types
 from pathlib import Path
 from types import SimpleNamespace
@@ -233,3 +234,106 @@ def test_image_loader_preserves_rgba_alpha(image_api, tmp_path: Path) -> None:
         tensor[..., 3],
         torch.full((1, 1, 2), 127 / 255.0),
     )
+
+
+def _completed_session_dataset(context_id: str) -> dict:
+    dataset = {
+        "context_id": context_id,
+        "nodes": [],
+        "columns": [{"id": "status", "title": "completed"}],
+    }
+    Path(context_id).write_text(json.dumps(dataset), encoding="utf-8")
+    return dataset
+
+
+def test_breakpoint_resume_waits_for_the_editor_filter_still_running(
+    image_api,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A paused graph resumes only once its editor's filter call has ended.
+
+    ComfyUI's prompt worker resets shared model and GPU state after every node, so an
+    inpaint left running on the endpoint's thread while the graph moves on has its
+    buffers taken from under it (a GPU fault, then a hung server).
+    """
+    context_id, _calls = _configure_success_path(
+        image_api,
+        tmp_path,
+        monkeypatch,
+        owner_client_id=None,
+    )
+    filter_started = threading.Event()
+    release_filter = threading.Event()
+
+    def slow_filter(_filter_type, image, _settings):
+        filter_started.set()
+        assert release_filter.wait(10), "the test never released the filter"
+        return image, {}
+
+    monkeypatch.setattr(image_api, "process_filter", slow_filter)
+    responses: list = []
+    request = threading.Thread(
+        target=lambda: responses.append(
+            asyncio.run(
+                image_api.process_image(
+                    _Request(_process_form(context_id, caller_client_id=None))
+                )
+            )
+        ),
+        daemon=True,
+    )
+    request.start()
+    assert filter_started.wait(10)
+
+    session_module = importlib.import_module(
+        "modules.utils.helpers.editing.sessions.session"
+    )
+    session = session_module.EditingSession(node_id="463")
+    dataset = _completed_session_dataset(context_id)
+    resumed = threading.Event()
+    waiter = threading.Thread(
+        target=lambda: (
+            session.wait_for_completion(dataset, poll_interval=0.01),
+            resumed.set(),
+        ),
+        daemon=True,
+    )
+    waiter.start()
+    try:
+        assert not resumed.wait(0.5), "the graph resumed while its filter still ran"
+    finally:
+        release_filter.set()
+    assert resumed.wait(10)
+    request.join(10)
+    assert responses and responses[0].status == 200
+
+
+def test_process_image_refuses_a_context_whose_graph_has_resumed(
+    image_api,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context_id, calls = _configure_success_path(
+        image_api,
+        tmp_path,
+        monkeypatch,
+        owner_client_id=None,
+    )
+    session_module = importlib.import_module(
+        "modules.utils.helpers.editing.sessions.session"
+    )
+    session = session_module.EditingSession(node_id="463")
+    session.wait_for_completion(
+        _completed_session_dataset(context_id), poll_interval=0.01
+    )
+
+    late = asyncio.run(
+        image_api.process_image(
+            _Request(_process_form(context_id, caller_client_id=None))
+        )
+    )
+
+    assert late.status == 409
+    assert "resumed" in late.text.lower()
+    assert calls == []
