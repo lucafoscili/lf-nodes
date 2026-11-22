@@ -15,6 +15,8 @@ WORKFLOW_PATHS = (
     ROOT / ".github" / "workflows" / "nodes-count.yaml",
     ROOT / ".github" / "workflows" / "publish.yml",
 )
+# Every test file under these roots is a node, helper or release contract, and runs in CI.
+CONTRACT_TEST_ROOTS = ("modules/tests", "tests")
 
 
 def _load_runner():
@@ -123,6 +125,21 @@ class CpuContractGateTests(unittest.TestCase):
         )
         self.assertEqual(executed_tests, all_tests)
 
+    def test_every_node_and_helper_test_file_runs_in_ci(self) -> None:
+        runner = _load_runner()
+        listed = set(runner.all_behavior_tests())
+        present = sorted(
+            path.relative_to(ROOT).as_posix()
+            for root in CONTRACT_TEST_ROOTS
+            for path in (ROOT / root).rglob("test_*.py")
+        )
+        missing = [path for path in present if path not in listed]
+        self.assertEqual(
+            missing,
+            [],
+            "test files CI never runs; add each to run_ci_contracts.py's manifest",
+        )
+
     def test_cpu_requirements_are_exactly_pinned(self) -> None:
         requirements = [
             line.strip()
@@ -145,6 +162,9 @@ class CpuContractGateTests(unittest.TestCase):
         self.assertIn("torchvision==0.22.0+cpu", requirements)
         self.assertIn("onnxruntime==1.22.0", requirements)
         self.assertIn("opencv-python-headless==4.8.0.76", requirements)
+        # Plot chart draws with matplotlib; Speech match reads prosody with librosa.
+        self.assertIn("matplotlib==3.10.9", requirements)
+        self.assertIn("librosa==0.11.0", requirements)
         self.assertNotIn("opencv-python==4.8.0.76", requirements)
 
     def test_release_workflows_reuse_the_same_cpu_gate(self) -> None:
@@ -159,6 +179,11 @@ class CpuContractGateTests(unittest.TestCase):
                 self.assertEqual(
                     workflow.count("python -I scripts/quality/run_ci_contracts.py"),
                     1,
+                )
+                # The Titanic append checks reproduce the sanitizer's bytes with Node.
+                self.assertLess(
+                    workflow.index("actions/setup-node@v4"),
+                    workflow.index("python -I scripts/quality/run_ci_contracts.py"),
                 )
 
 

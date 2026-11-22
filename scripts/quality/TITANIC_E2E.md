@@ -21,8 +21,12 @@ alone is insufficient. Declare the changed nodes in the case's
 `--full` remains an optional exhaustive diagnostic, not a release requirement.
 
 1. Run `python -I scripts/quality/run_ci_contracts.py` and
-   `corepack yarn check:release`. CI runs these offline contracts and the build;
-   it does not establish live hydration or execution.
+   `corepack yarn check:release`. CI runs these offline contracts and the build
+   on every push and pull request, and again before publishing; it does not
+   establish live hydration or execution. The contracts' manifest lists every
+   test file under `modules/tests` and `tests` (its own test refuses one left
+   out), on the pinned `requirements-ci-cpu.txt`, with Node set up first for
+   the Titanic append checks.
 2. With Comfy already running, idle and coordinated, run the hydration command
    below and the affected named cases with `--full --case <id>`. Use only the
    resource flags those cases require. `--accept-warm-cache` permits a warm

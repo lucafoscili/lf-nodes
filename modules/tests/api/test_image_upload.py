@@ -96,6 +96,10 @@ def image_api(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     conversion_helpers = types.ModuleType("modules.utils.helpers.conversion")
     conversion_helpers.pil_to_tensor = lambda *args, **kwargs: None
     conversion_helpers.tensor_to_pil = lambda *args, **kwargs: None
+    editing_helpers = types.ModuleType("modules.utils.helpers.editing")
+    editing_helpers.CALLER_CLIENT_ID_FIELD = "client_id"
+    editing_helpers.caller_owns_context = lambda *args, **kwargs: True
+    editing_helpers.get_editing_context = lambda *args, **kwargs: None
     logic_helpers = types.ModuleType("modules.utils.helpers.logic")
     logic_helpers.sanitize_filename = lambda value: value or None
     ui_helpers = types.ModuleType("modules.utils.helpers.ui")
@@ -113,6 +117,7 @@ def image_api(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         "modules.utils.helpers.api": api_helpers,
         "modules.utils.helpers.comfy": comfy_helpers,
         "modules.utils.helpers.conversion": conversion_helpers,
+        "modules.utils.helpers.editing": editing_helpers,
         "modules.utils.helpers.logic": logic_helpers,
         "modules.utils.helpers.ui": ui_helpers,
     }.items():

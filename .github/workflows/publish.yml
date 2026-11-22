@@ -31,12 +31,12 @@ jobs:
           cache-dependency-path: scripts/quality/requirements-ci-cpu.txt
       - name: Install pinned CPU contract dependencies
         run: python -m pip install --disable-pip-version-check -r scripts/quality/requirements-ci-cpu.txt
-      - name: Validate published node behavior
-        run: python -I scripts/quality/run_ci_contracts.py
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate published node behavior
+        run: python -I scripts/quality/run_ci_contracts.py
       - name: Enable Corepack
         run: corepack enable
       - name: Install locked frontend dependencies

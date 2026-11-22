@@ -194,3 +194,8 @@ since frontend 1.59 mounts a DOM widget only while its node is on screen and
 expanded. The scripts that append specimens share one helper
 (`titanic_append.py`), and a test runs each one's `--check`; the texture
 script's check had drifted since a later case consumed its square mask.
+
+CI's CPU contracts now run every test file under `modules/tests` and `tests`,
+the new nodes' among them (28 files were missing, the motion nodes' too), and a
+test refuses a file left out. Their pinned requirements gain matplotlib and
+librosa, and Node is set up before them for the Titanic append checks.
