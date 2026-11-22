@@ -3,12 +3,15 @@ import { describe, expect, it, vi } from 'vitest';
 import { parseArgs, resetExecutionCache } from '../titanic_e2e.mts';
 
 import {
+  audioPreviewUrl,
   classifyHistoryEntry,
   buildCasePayloads,
   buildCpuFixturePromptBindings,
   classifyPostCancellation,
   comfyArtifactKey,
+  countChartDatasets,
   countPreviewReferences,
+  collectAudioPreviews,
   collectPreviewUrls,
   collectReceiptSchemas,
   createJUnitXml,
@@ -237,6 +240,50 @@ describe('Titanic E2E pure contracts', () => {
       'node 647 exposed 1 preview references; expected at least 2',
     ]);
   });
+  it('counts drawn chart tabs from the payload and from the live widget', () => {
+    const tab = (values: number[]) => ({ columns: [{ id: 'x' }, { id: 's0', shape: 'number' }],
+      nodes: values.map((value, index) => ({ id: String(index), cells: { x: { value: String(index) }, s0: { value } } })) });
+    const history = { outputs: { '682': { lf_output: [{ datasets: { Mean: tab([0.4, 0.5]), Median: tab([0.3, 0.6]), Empty: tab([]) } }] } } };
+    const expectation = { minimumChartTabs: 2 };
+    const live = { nodeId: 682, kind: 'image' as const, found: true, hasElement: true, previewCount: 0, chartTabCount: 2 };
+    expect(countChartDatasets(history.outputs['682'])).toBe(2);
+    expect(validateCaseOutputs({ expect: { '682': expectation } } as any, history)).toEqual([]);
+    expect(validateCaseOutputs({ expect: { '682': { minimumChartTabs: 3 } } } as any, history)).toEqual([
+      'node 682 exposed 2 chart datasets; expected at least 3',
+    ]);
+    expect(validateLivePreviewWidget('682', expectation, live)).toEqual([]);
+    expect(validateLivePreviewWidget('682', expectation, { ...live, chartTabCount: 0 })).toEqual([
+      'node 682 live chart has 0 drawn tabs; expected at least 2',
+    ]);
+  });
+
+  it('requires audio previews in input storage, played live and served as WAVE', () => {
+    const file = { filename: 'ab.wav', subfolder: 'lf_generated/ab', type: 'input', label: 'A line' };
+    const history = { outputs: { '702': { lf_output: [{ audio: [file], receipt: { schema: 'x' } }] } } };
+    const expectation = { minimumAudioPreviewCount: 1, previewStorageType: 'input' as const };
+    expect(collectAudioPreviews(history.outputs['702'])).toEqual([
+      { filename: 'ab.wav', subfolder: 'lf_generated/ab', type: 'input' },
+    ]);
+    expect(audioPreviewUrl(file)).toBe('/view?filename=ab.wav&subfolder=lf_generated%2Fab&type=input');
+    expect(validateCaseOutputs({ expect: { '702': expectation } } as any, history)).toEqual([]);
+    const temp = { outputs: { '702': { lf_output: [{ audio: [{ ...file, type: 'temp' }] }] } } };
+    expect(validateCaseOutputs({ expect: { '702': expectation } } as any, temp)).toEqual([
+      'node 702 audio preview storage is not input: /view?filename=ab.wav&subfolder=lf_generated%2Fab&type=temp',
+    ]);
+    expect(validateCaseOutputs({ expect: { '702': expectation } } as any, { outputs: { '702': { lf_output: [{}] } } }))
+      .toEqual(['node 702 exposed 0 audio previews; expected at least 1']);
+    const live = { nodeId: 702, kind: 'image' as const, found: true, hasElement: true, previewCount: 0, audioCount: 1 };
+    expect(validateLivePreviewWidget('702', expectation, live)).toEqual([]);
+    expect(validateLivePreviewWidget('702', expectation, { ...live, audioCount: 0 })).toEqual([
+      'node 702 live widget plays 0 audio previews; expected at least 1',
+    ]);
+    const wave = new Uint8Array([...new TextEncoder().encode('RIFF'), 0, 0, 0, 0, ...new TextEncoder().encode('WAVEfmt ')]);
+    expect(validatePreviewAssetBytes('audio', 'audio/wav', wave)).toEqual([]);
+    expect(validatePreviewAssetBytes('audio', 'image/png', new Uint8Array([1, 2]))).toEqual([
+      'preview is not audio (image/png)', 'audio preview is not a RIFF WAVE file',
+    ]);
+  });
+
   it('binds reviewed CPU fixture inputs without changing the portable prompt', () => {
     const layers = { root: 'scripts/quality/fixtures/titanic-cpu', layers: [{ file: 'lower.png' }] };
     const prompt = {

@@ -86,6 +86,12 @@ serialization, and exhaustive classification of every active output node.
 Published-type reachability and exemptions are checked by the offline suites.
 The canonical `E2E.json` bytes are checked again before exit.
 
+The frontend mounts a DOM widget only while its node is on screen, expanded and
+at a legible zoom (frontend 1.59 culls the rest), so the mounting check brings
+each node whose widget is still detached into view at scale 1, expanding a
+collapsed node for the look, and records the widget as mounted once its
+element joins the document. The view and collapsed states are restored.
+
 ## Bounded CPU experience check
 
 ```powershell
@@ -303,6 +309,52 @@ checkout's absolute one at run time. `LF_SavePNG` (node 668) writes it back at
 type and depth, and the 16-bit RGB write. `update_titanic_png_coverage.py`
 appended them (`--check`), and `modules/tests/test_titanic_png_fixture.py`
 proves offline that the written file holds the example's values exactly.
+
+### Readers
+
+The reading nodes' six cases read the texture case's before and after: the
+pinned stock example (node 654) and Masked Lab grade 660's graded square
+(mask 657, the top band 659).
+
+```powershell
+corepack yarn test:titanic -- --full --case cpu.inspection --case cpu.tone-readers --accept-warm-cache --reset-cache
+corepack yarn test:titanic -- --full --case model.face-zones --allow-models --accept-warm-cache --reset-cache
+corepack yarn test:titanic -- --full --case model.patch-probe --case model.intrinsic-layers --case model.speech --allow-gpu --allow-models --accept-warm-cache --reset-cache
+```
+
+- `cpu.inspection` (678 to 683): Image diff, Grade split and Luma ratio map of
+  before against after, Region measure of both through a list (a box for the
+  square and one for the band), and Plot chart's bars of the square's and the
+  band's luma mean.
+- `cpu.tone-readers` (684 to 692): the square and the band as a Text region
+  masks set over the example, Tone profile before and after (after against
+  before as its reference), and Region reads of the square against the band.
+- `model.face-zones` (693, 694): Face zones of both generated portraits
+  (loader 676's list, `antelopev2` on CPU) and Region reads of their zones.
+- `model.patch-probe` (695 to 701): DINOv3 (loader 649) tokens of the example
+  and its graded copy, mirrored as a second group, teach a probe that reads the
+  same two frames and paints where they read as graded.
+- `model.intrinsic-layers` (702): the installed release (`v21` under
+  `models/intrinsic`) splits the example; nothing here fetches its weights.
+- `model.speech` (703 to 707): two voices designed from words, the first
+  converted onto the second, and Speech match of the converted line against
+  that voice and its text; the four models load from Hugging Face's cache at
+  their pinned revisions.
+
+Region measure and Plot chart assert `minimumChartTabs`: the history payload's
+chart datasets, and the live widget's tabs with a drawn chart. The speech
+nodes assert `minimumAudioPreviewCount`: the payload's `audio` previews, each
+fetched from `/view` and read as a RIFF WAVE file, and the audio controls the
+live Masonry renders. Trees count their records with `minimumLivePreviewCount`.
+`update_titanic_readers_coverage.py` appended the nodes and cases (`--check`),
+and `modules/tests/test_titanic_readers_fixture.py` runs the two CPU cases'
+settings through the real nodes offline.
+
+Every `update_titanic_*_coverage.py` builds on `titanic_append.py`: the nodes
+and links after the graph's last IDs, the drift check of an appended specimen
+(narrowing each output's links to the specimen's own, since a later case may
+consume them), the sanitizer's bytes and the manifest's lines.
+`modules/tests/test_titanic_append.py` runs each script's `--check`.
 
 ## Optional full active-workflow diagnostic
 

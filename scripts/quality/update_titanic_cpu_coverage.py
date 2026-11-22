@@ -11,14 +11,14 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import re
 import struct
-import subprocess
+import sys
 import zlib
 
-ROOT = Path(__file__).resolve().parents[2]
-QUALITY = ROOT / "scripts/quality"
-ASSETS = QUALITY / "fixtures/titanic-cpu"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import titanic_append as titanic  # noqa: E402
+
+ASSETS = titanic.QUALITY / "fixtures/titanic-cpu"
 START_NODE = 612
 START_LINK = 1230
 
@@ -98,34 +98,11 @@ def synthetic_assets():
 
 
 def add_specimen(workflow, assets):
-    nodes, links = [], []
-
-    def node(identifier, kind, x, y, inputs=(), outputs=(), widgets=None, title=None):
-        widgets = widgets or {}
-        value = {"id": identifier, "type": kind, "pos": [x, y], "size": [340, 280],
-                 "flags": {}, "order": 372 + identifier - START_NODE, "mode": 0,
-                 "inputs": [{"name": name, "type": typ, "link": None,
-                     **({"widget": {"name": name}} if name in widgets else {})}
-                     for name, typ in inputs],
-                 "outputs": [{"name": name, "type": typ, "links": None, "slot_index": i,
-                     **({"shape": 6} if is_list else {})}
-                     for i, (name, typ, is_list) in enumerate(outputs)],
-                 "properties": {"cnr_id": "lf-nodes" if kind.startswith("LF_") else "comfy-core",
-                                "Node name for S&R": kind},
-                 "widgets_values": list(widgets.values()), "widgets_values_named": widgets}
-        if title:
-            value["title"] = title
-        nodes.append(value)
+    specimen = titanic.Specimen("CPU", START_NODE, START_LINK, 372, size=(340, 280))
+    node = specimen.node
 
     def connect(origin, output, target, input_name):
-        source = next(n for n in nodes if n["id"] == origin)
-        destination = next(n for n in nodes if n["id"] == target)
-        slot = next(i for i, item in enumerate(destination["inputs"]) if item["name"] == input_name)
-        identifier = START_LINK + len(links)
-        typ = source["outputs"][output]["type"]
-        links.append([identifier, origin, output, target, slot, typ])
-        source["outputs"][output]["links"] = (source["outputs"][output]["links"] or []) + [identifier]
-        destination["inputs"][slot]["link"] = identifier
+        specimen.connect(workflow, origin, output, target, input_name)
 
     images = (("image", "IMAGE", False), ("image_list", "IMAGE", True))
     def write_json(identifier, x, y, value, title):
@@ -156,7 +133,7 @@ def add_specimen(workflow, assets):
          [("model_3d", "FILE_3D", False), ("model_3d_info", "LOAD_3D_MODEL_INFO", False),
           ("camera_info", "LOAD_3D_CAMERA", False), ("width", "INT", False), ("height", "INT", False)],
          {"viewport_state": {}, "width": 256, "height": 256}, "Textured animated quad at 75% · temp preview")
-    nodes[-1]["size"] = [500, 600]
+    specimen.nodes[-1]["size"] = [500, 600]
     regions = {"regions": [{"id": "left", "label": "Left panel", "rect": [0, 0, 32, 24]},
                            {"id": "right", "label": "Right panel", "rect": [32, 24, 32, 24]}]}
     write_json(616, 9700, -3700, regions, "Two non-overlapping base regions")
@@ -209,21 +186,8 @@ def add_specimen(workflow, assets):
     # Migrate the original short viewer allocation before checking specimen drift.
     if existing.get(615, {}).get("size") == [340, 280]:
         existing[615]["size"] = [500, 600]
-    if any(n["id"] in existing for n in nodes):
-        if any(existing.get(n["id"]) != n for n in nodes):
-            raise ValueError("CPU specimen nodes drifted; review the canonical graph before updating.")
-        if any(link not in workflow["links"] for link in links):
-            raise ValueError("CPU specimen links drifted.")
-        return workflow
-    if workflow["last_node_id"] != 611 or workflow["last_link_id"] != 1229:
-        raise ValueError("Unexpected Titanic append boundary; preserve and review existing IDs.")
-    workflow["nodes"].extend(nodes)
-    workflow["links"].extend(links)
-    workflow["last_node_id"] = 629
-    workflow["last_link_id"] = links[-1][0]
-    workflow["groups"].append({"id": 17, "title": "Synthetic GLB, regions and RGBA layers · CPU coverage",
+    return specimen.append(workflow, {"id": 17, "title": "Synthetic GLB, regions and RGBA layers · CPU coverage",
         "bounding": [9250, -4900, 2550, 2900], "color": "#3f789e", "flags": {}})
-    return workflow
 
 
 def main():
@@ -231,21 +195,12 @@ def main():
     parser.add_argument("--check", action="store_true")
     options = parser.parse_args()
     assets = synthetic_assets()
-    workflow_path = QUALITY / "fixtures/E2E.json"
-    workflow = add_specimen(json.loads(workflow_path.read_text(encoding="utf-8")), assets)
-    # Match the sanitizer's JSON.stringify byte format, including float spelling.
-    workflow_bytes = subprocess.run(
-        ["node", "-e", 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(0,"utf8")))+"\\n")'],
-        input=json.dumps(workflow, ensure_ascii=False).encode(), capture_output=True, check=True,
-    ).stdout
-    manifest_path = QUALITY / "titanic_cases.json"
-    manifest_source = manifest_path.read_text(encoding="utf-8")
-    manifest = json.loads(manifest_source)
-    manifest["workflow"].update(expectedSha256=hashlib.sha256(workflow_bytes).hexdigest(),
-        expectedNodeCount=len(workflow["nodes"]), expectedLinkCount=len(workflow["links"]))
-    other_fixtures = [row for row in manifest.get("fixtures", [])
+    workflow = add_specimen(titanic.read_workflow(), assets)
+    workflow_bytes = titanic.canonical_bytes(workflow)
+    manifest_source = titanic.MANIFEST_PATH.read_text(encoding="utf-8")
+    other_fixtures = [row for row in json.loads(manifest_source).get("fixtures", [])
                       if not row["path"].startswith("scripts/quality/fixtures/titanic-cpu/")]
-    manifest["fixtures"] = [{"path": f"scripts/quality/fixtures/titanic-cpu/{name}",
+    fixtures = [{"path": f"scripts/quality/fixtures/titanic-cpu/{name}",
         "expectedSha256": hashlib.sha256(data).hexdigest()} for name, data in assets.items()] + other_fixtures
     cases = [
         {"id": "cpu.glb-texture-scale", "title": "Pinned animated GLB texture replacement and joint scale",
@@ -261,38 +216,11 @@ def main():
          "expect": {str(identifier): {"minimumPreviewCount": count, "previewStorageType": "input"}
                     for identifier, count in ((621, 1), (626, 1), (627, 2), (628, 6))}},
     ]
-    for case in cases:
-        existing = next((c for c in manifest["coverageCases"] if c["id"] == case["id"]), None)
-        if existing is None:
-            manifest["coverageCases"].insert(0, case)
-        elif existing != case:
-            raise ValueError(f"Reviewed manifest case drifted: {case['id']}")
+    manifest_source = titanic.set_counts(manifest_source, workflow, workflow_bytes)
+    manifest_source = titanic.upsert_cases(titanic.replace_fixtures(manifest_source, fixtures), cases[::-1])
     outputs = {ASSETS / name: data for name, data in assets.items()}
-    outputs[workflow_path] = workflow_bytes
-    # Preserve the established compact case/ID arrays and every unrelated line.
-    for key in ("expectedSha256", "expectedNodeCount", "expectedLinkCount"):
-        manifest_source = re.sub(r'("' + key + r'": )("[^"]*"|[0-9]+)',
-            lambda match: match[1] + json.dumps(manifest["workflow"][key]), manifest_source, count=1)
-    fixture_block = "  \"fixtures\": " + json.dumps(manifest["fixtures"], indent=2).replace("\n", "\n  ") + ",\n"
-    if '"fixtures":' in manifest_source:
-        manifest_source = re.sub(r'  "fixtures": \[[\s\S]*?\n  \],\n',
-            lambda _: fixture_block, manifest_source, count=1)
-    else:
-        manifest_source = manifest_source.replace('  "smokeCases": [', fixture_block + '  "smokeCases": [', 1)
-    for case in cases:
-        if f'"id": "{case["id"]}"' not in manifest_source:
-            case_block = "    " + json.dumps(case, ensure_ascii=False, indent=2).replace("\n", "\n    ") + ",\n"
-            manifest_source = manifest_source.replace('  "coverageCases": [\n',
-                '  "coverageCases": [\n' + case_block, 1)
-    outputs[manifest_path] = manifest_source.encode()
-    if options.check:
-        drift = [str(p.relative_to(ROOT)) for p, data in outputs.items() if not p.is_file() or p.read_bytes() != data]
-        if drift:
-            raise SystemExit("CPU fixture drift: " + ", ".join(drift))
-    else:
-        for path, data in outputs.items():
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(data)
+    outputs.update({titanic.WORKFLOW_PATH: workflow_bytes, titanic.MANIFEST_PATH: manifest_source.encode()})
+    titanic.check_or_write(outputs, options.check, "CPU")
     print(f"CPU fixture {'checked' if options.check else 'updated'}: {len(workflow['nodes'])} nodes, "
           f"{len(workflow['links'])} links, {len(assets)} pinned synthetic assets")
 

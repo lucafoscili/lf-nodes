@@ -167,15 +167,30 @@ not Runner orchestras, so **no Titanic case runs Pose Shoot**; the motion pair
 stays disabled inventory, as in 5.1.0. Its offline tests stub only the model
 boundary.
 
-The six readers and Patch probe have offline tests on synthetic inputs and a
-Compare registration, but **no Titanic case and no place in the canonical E2E
-workflow yet**: they are not ready to release until they have both.
+The thirteen new nodes each have a place in the canonical E2E workflow and a
+Titanic case that executes them and checks their widgets live, on ComfyUI
+0.46.2 with frontend 1.59.6:
 
-Image diff, Region measure and Plot chart have offline tests on synthetic
-images and a widget registration (Compare, Masonry and Masonry), but **no
-Titanic case and no place in the canonical E2E workflow yet**: they are not
-ready to release until they have both.
+- `cpu.inspection`: Image diff, Grade split and Luma ratio map of the stock
+  example against its graded square, Region measure of both, and Plot chart's
+  bars of that measure (both charts' tabs drawn in the live widget).
+- `cpu.tone-readers`: the square and the top band as a region set, Tone profile
+  before and after the grade (after against before), and Region reads of the
+  square against the band.
+- `model.face-zones`: Face zones of both generated portraits and Region reads
+  of their zones (InsightFace's installed pack, on CPU).
+- `model.patch-probe`: a DINOv3 patch probe taught on the example and its
+  graded copy, mirrored for a second group, painting the graded square.
+- `model.intrinsic-layers`: the example split by the installed release.
+- `model.speech`: two designed voices, the first converted onto the second, and
+  the match of the converted line against that voice and its text.
 
-The three speech nodes have offline tests on synthetic tones with their models
-stubbed, but **no widget, no Titanic case and no place in the canonical E2E
-workflow yet**: they are not ready to release until they have all three.
+The two CPU cases' settings also run offline through the real nodes
+(`test_titanic_readers_fixture.py`). Titanic's cases can now require drawn
+chart tabs (`minimumChartTabs`) and played audio previews
+(`minimumAudioPreviewCount`, each fetched and read as a WAVE file), and its
+hydration brings each LF widget's node into view before judging its mount,
+since frontend 1.59 mounts a DOM widget only while its node is on screen and
+expanded. The scripts that append specimens share one helper
+(`titanic_append.py`), and a test runs each one's `--check`; the texture
+script's check had drifted since a later case consumed its square mask.

@@ -12,14 +12,12 @@ Load PNG and writes it back at 16 bits with Save PNG. No model is loaded.
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 from pathlib import Path
-import re
-import subprocess
+import sys
 
-ROOT = Path(__file__).resolve().parents[2]
-QUALITY = ROOT / "scripts/quality"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import titanic_append as titanic  # noqa: E402
+
 START_NODE = 667
 START_LINK = 1307
 GROUP_ID = 22
@@ -47,23 +45,8 @@ CASE = {
 
 
 def add_specimen(workflow):
-    nodes, links = [], []
-
-    def node(identifier, kind, x, y, inputs=(), outputs=(), widgets=None, title=None):
-        widgets = widgets or {}
-        value = {"id": identifier, "type": kind, "pos": [x, y], "size": [360, 320],
-                 "flags": {}, "order": ORDER + identifier - START_NODE, "mode": 0,
-                 "inputs": [{"name": name, "type": typ, "link": None,
-                     **({"widget": {"name": name}} if name in widgets else {})}
-                     for name, typ in inputs],
-                 "outputs": [{"name": name, "type": typ, "links": None, "slot_index": i,
-                     **({"shape": 6} if is_list else {})}
-                     for i, (name, typ, is_list) in enumerate(outputs)],
-                 "properties": {"cnr_id": "lf-nodes", "Node name for S&R": kind},
-                 "widgets_values": list(widgets.values()), "widgets_values_named": widgets}
-        if title:
-            value["title"] = title
-        nodes.append(value)
+    specimen = titanic.Specimen("PNG", START_NODE, START_LINK, ORDER)
+    node = specimen.node
 
     x0, y0 = 15400, -2600
     node(667, "LF_LoadPNG", x0, y0, [("image", "COMBO"), ("ui_widget", "LF_MASONRY")],
@@ -76,62 +59,21 @@ def add_specimen(workflow):
          (("file_names", "STRING", True), ("receipt", "JSON", False)),
          {"filename_prefix": "LF_Nodes/Titanic/stored_png", "bit_depth": 16, "compress_level": 4, "ui_widget": {}},
          "Written back at 16 bits, rounded, no metadata")
-    identifier = START_LINK
-    links.append([identifier, 667, 0, 668, 0, "IMAGE"])
-    nodes[0]["outputs"][0]["links"] = [identifier]
-    nodes[1]["inputs"][0]["link"] = identifier
-
-    by_id = {n["id"]: n for n in workflow["nodes"]}
-    if any(n["id"] in by_id for n in nodes):
-        if any(by_id.get(n["id"]) != n for n in nodes):
-            raise ValueError("PNG specimen nodes drifted; review the canonical graph before updating.")
-        if any(link not in workflow["links"] for link in links):
-            raise ValueError("PNG specimen links drifted.")
-        return workflow
-    if workflow["last_node_id"] != START_NODE - 1 or workflow["last_link_id"] != START_LINK - 1:
-        raise ValueError("Unexpected Titanic append boundary; preserve and review existing IDs.")
-    workflow["nodes"].extend(nodes)
-    workflow["links"].extend(links)
-    workflow["last_node_id"] = max(n["id"] for n in nodes)
-    workflow["last_link_id"] = links[-1][0]
-    workflow["groups"].append({"id": GROUP_ID, "title": "Stored-value PNG load and save · CPU coverage",
+    specimen.connect(workflow, 667, 0, 668, "image")
+    return specimen.append(workflow, {"id": GROUP_ID, "title": "Stored-value PNG load and save · CPU coverage",
         "bounding": [x0 - 50, y0 - 200, 850, 600], "color": "#3f789e", "flags": {}})
-    return workflow
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     options = parser.parse_args()
-    workflow_path = QUALITY / "fixtures/E2E.json"
-    workflow = add_specimen(json.loads(workflow_path.read_text(encoding="utf-8")))
-    # Match the sanitizer's JSON.stringify byte format, including float spelling.
-    workflow_bytes = subprocess.run(
-        ["node", "-e", 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(0,"utf8")))+"\\n")'],
-        input=json.dumps(workflow, ensure_ascii=False).encode(), capture_output=True, check=True,
-    ).stdout
-    manifest_path = QUALITY / "titanic_cases.json"
-    manifest_source = manifest_path.read_text(encoding="utf-8")
-    manifest = json.loads(manifest_source)
-    counts = {"expectedSha256": hashlib.sha256(workflow_bytes).hexdigest(),
-              "expectedNodeCount": len(workflow["nodes"]), "expectedLinkCount": len(workflow["links"])}
-    existing = next((c for c in manifest["coverageCases"] if c["id"] == CASE["id"]), None)
-    if existing is not None and existing != CASE:
-        raise ValueError(f"Reviewed manifest case drifted: {CASE['id']}")
-    for key, value in counts.items():
-        manifest_source = re.sub(r'("' + key + r'": )("[^"]*"|[0-9]+)',
-            lambda match: match[1] + json.dumps(value), manifest_source, count=1)
-    if existing is None:
-        case_block = "    " + json.dumps(CASE, ensure_ascii=False, indent=2).replace("\n", "\n    ") + ",\n"
-        manifest_source = manifest_source.replace('  "coverageCases": [\n', '  "coverageCases": [\n' + case_block, 1)
-    outputs = {workflow_path: workflow_bytes, manifest_path: manifest_source.encode()}
-    if options.check:
-        drift = [str(p.relative_to(ROOT)) for p, data in outputs.items() if not p.is_file() or p.read_bytes() != data]
-        if drift:
-            raise SystemExit("PNG fixture drift: " + ", ".join(drift))
-    else:
-        for path, data in outputs.items():
-            path.write_bytes(data)
+    workflow = add_specimen(titanic.read_workflow())
+    workflow_bytes = titanic.canonical_bytes(workflow)
+    manifest = titanic.MANIFEST_PATH.read_text(encoding="utf-8")
+    manifest = titanic.upsert_cases(titanic.set_counts(manifest, workflow, workflow_bytes), [CASE])
+    titanic.check_or_write({titanic.WORKFLOW_PATH: workflow_bytes, titanic.MANIFEST_PATH: manifest.encode()},
+                           options.check, "PNG")
     print(f"PNG fixture {'checked' if options.check else 'updated'}: {len(workflow['nodes'])} nodes, "
           f"{len(workflow['links'])} links")
 

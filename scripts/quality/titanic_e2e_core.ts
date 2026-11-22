@@ -44,6 +44,8 @@ export interface ManifestCase {
       minimumLivePreviewCount?: number;
       previewStorageType?: 'input' | 'output' | 'temp';
       previewKind?: 'image' | 'model-3d';
+      minimumChartTabs?: number;
+      minimumAudioPreviewCount?: number;
       forbidTopLevelJsonKeys?: string[];
       minimumStringLength?: number;
       forbiddenStringPrefixes?: string[];
@@ -722,10 +724,19 @@ const stockModelPreviewUrl = (record: Record<string, unknown>): string | null =>
 };
 
 export const validatePreviewAssetBytes = (
-  kind: 'image' | 'model-3d',
+  kind: 'image' | 'model-3d' | 'audio',
   contentType: string,
   bytes: Uint8Array,
 ): string[] => {
+  if (kind === 'audio') {
+    const riff = bytes.byteLength >= 12 &&
+      new TextDecoder().decode(bytes.subarray(0, 4)) === 'RIFF' &&
+      new TextDecoder().decode(bytes.subarray(8, 12)) === 'WAVE';
+    return [
+      ...(!contentType.startsWith('audio/') ? [`preview is not audio (${contentType || 'missing content-type'})`] : []),
+      ...(!riff ? ['audio preview is not a RIFF WAVE file'] : []),
+    ];
+  }
   if (kind === 'image') {
     return [
       ...(!contentType.startsWith('image/') ? [`preview is not an image (${contentType || 'missing content-type'})`] : []),
@@ -747,6 +758,10 @@ export interface LivePreviewWidget {
   found: boolean;
   hasElement: boolean;
   previewCount: number;
+  /** Tabs of a chart widget that drew a dataset (lf-chart beside its tab bar). */
+  chartTabCount?: number;
+  /** Audio controls a Masonry widget rendered with a source. */
+  audioCount?: number;
   modelLoaded?: boolean;
   modelUrl?: string;
 }
@@ -770,7 +785,46 @@ export const validateLivePreviewWidget = (
       live.previewCount < minimumLivePreviewCount) {
     return [`node ${nodeId} live widget has ${live.previewCount} previews; expected at least ${minimumLivePreviewCount}`];
   }
-  return [];
+  const errors: string[] = [];
+  if (expectation.minimumChartTabs !== undefined && (live.chartTabCount ?? 0) < expectation.minimumChartTabs) {
+    errors.push(`node ${nodeId} live chart has ${live.chartTabCount ?? 0} drawn tabs; expected at least ${expectation.minimumChartTabs}`);
+  }
+  if (expectation.minimumAudioPreviewCount !== undefined &&
+      (live.audioCount ?? 0) < expectation.minimumAudioPreviewCount) {
+    errors.push(`node ${nodeId} live widget plays ${live.audioCount ?? 0} audio previews; expected at least ${expectation.minimumAudioPreviewCount}`);
+  }
+  return errors;
+};
+
+/** Audio previews LF's Masonry plays: ``audio`` lists of ``{filename, subfolder, type}`` in an LF payload. */
+export const collectAudioPreviews = (value: unknown): Array<{ filename: string; subfolder: string; type: string }> => {
+  const files: Array<{ filename: string; subfolder: string; type: string }> = [];
+  visit(value, (record) => {
+    if (!Array.isArray(record.audio)) return;
+    for (const item of record.audio) {
+      const file = asRecord(item);
+      if (typeof file?.filename === 'string' && file.filename && typeof file.subfolder === 'string' &&
+          typeof file.type === 'string') {
+        files.push({ filename: file.filename, subfolder: file.subfolder, type: file.type });
+      }
+    }
+  });
+  return files;
+};
+
+export const audioPreviewUrl = (file: { filename: string; subfolder: string; type: string }): string =>
+  `/view?${new URLSearchParams({ filename: file.filename, subfolder: file.subfolder, type: file.type })}`;
+
+/** Chart datasets in an LF payload's ``datasets`` record (a tab each), counted when they hold nodes. */
+export const countChartDatasets = (value: unknown): number => {
+  let count = 0;
+  visit(value, (record) => {
+    const datasets = asRecord(record.datasets);
+    if (!datasets) return;
+    count += Object.values(datasets).filter((dataset) => Array.isArray(asRecord(dataset)?.nodes) &&
+      (asRecord(dataset)!.nodes as unknown[]).length > 0).length;
+  });
+  return count;
 };
 
 export const collectPreviewUrls = (value: unknown): string[] => {
@@ -880,6 +934,24 @@ export const validateCaseOutputs = (
             `node ${nodeId} preview storage is not ${expectedType}: ${url}`,
           );
         }
+      }
+    }
+    if (expectation.minimumChartTabs !== undefined) {
+      const tabs = countChartDatasets(output);
+      if (tabs < expectation.minimumChartTabs) {
+        errors.push(`node ${nodeId} exposed ${tabs} chart datasets; expected at least ${expectation.minimumChartTabs}`);
+      }
+    }
+    if (expectation.minimumAudioPreviewCount !== undefined) {
+      const files = collectAudioPreviews(output);
+      if (files.length < expectation.minimumAudioPreviewCount) {
+        errors.push(
+          `node ${nodeId} exposed ${files.length} audio previews; expected at least ${expectation.minimumAudioPreviewCount}`,
+        );
+      }
+      const expectedType = expectation.previewStorageType ?? 'input';
+      for (const file of files.filter((item) => item.type !== expectedType)) {
+        errors.push(`node ${nodeId} audio preview storage is not ${expectedType}: ${audioPreviewUrl(file)}`);
       }
     }
     if (expectation.forbidTopLevelJsonKeys?.length) {

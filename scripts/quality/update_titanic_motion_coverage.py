@@ -12,13 +12,14 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
-import re
 import struct
-import subprocess
+import sys
 
-ROOT = Path(__file__).resolve().parents[2]
-QUALITY = ROOT / "scripts/quality"
-ASSETS = QUALITY / "fixtures/titanic-motion"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import titanic_append as titanic  # noqa: E402
+
+ROOT = titanic.ROOT
+ASSETS = titanic.QUALITY / "fixtures/titanic-motion"
 NODE_ID = 677
 REASON = "generated motion, rig and map available; registered licensed SMPL-X model and local input paths required; inventory only"
 
@@ -123,42 +124,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     options = parser.parse_args()
-    workflow_path, manifest_path = QUALITY / "fixtures/E2E.json", QUALITY / "titanic_cases.json"
-    workflow = add_specimen(json.loads(workflow_path.read_text(encoding="utf-8")))
-    workflow_bytes = subprocess.run(
-        ["node", "-e", 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(0,"utf8")))+"\\n")'],
-        input=json.dumps(workflow, ensure_ascii=False).encode("utf-8"), capture_output=True, check=True,
-    ).stdout
+    workflow = add_specimen(titanic.read_workflow())
+    workflow_bytes = titanic.canonical_bytes(workflow)
     assets = synthetic_assets()
-    source = manifest_path.read_text(encoding="utf-8")
-    manifest = json.loads(source)
-    for key, value in {"expectedSha256": hashlib.sha256(workflow_bytes).hexdigest(),
-                       "expectedNodeCount": len(workflow["nodes"]), "expectedLinkCount": len(workflow["links"])}.items():
-        source = re.sub(r'("' + key + r'": )("[^"]*"|[0-9]+)',
-                        lambda match: match[1] + json.dumps(value), source, count=1)
-    fixtures = [row for row in manifest["fixtures"] if not row["path"].startswith("scripts/quality/fixtures/titanic-motion/")]
+    source = titanic.MANIFEST_PATH.read_text(encoding="utf-8")
+    fixtures = [row for row in json.loads(source)["fixtures"]
+                if not row["path"].startswith("scripts/quality/fixtures/titanic-motion/")]
     fixtures.extend({"path": f"scripts/quality/fixtures/titanic-motion/{name}",
                      "expectedSha256": hashlib.sha256(data).hexdigest()} for name, data in assets.items())
-    source = re.sub(r'  "fixtures": \[[\s\S]*?\n  \],\n',
-                    lambda _: '  "fixtures": ' + json.dumps(fixtures, indent=2).replace("\n", "\n  ") + ",\n",
-                    source, count=1)
-    disabled = {"id": NODE_ID, "type": "LF_RetargetMotion", "reason": REASON}
-    existing = next((row for row in manifest["disabledNodes"] if row["id"] == NODE_ID), None)
-    if existing and existing != disabled:
-        raise ValueError("Motion specimen disabled policy drifted.")
-    if not existing:
-        source = source.replace('  "disabledNodes": [\n', '  "disabledNodes": [\n    ' + json.dumps(disabled) + ",\n", 1)
+    source = titanic.replace_fixtures(titanic.set_counts(source, workflow, workflow_bytes), fixtures)
+    source = titanic.upsert_disabled(source, [{"id": NODE_ID, "type": "LF_RetargetMotion", "reason": REASON}])
     outputs = {ASSETS / name: data for name, data in assets.items()}
-    outputs.update({workflow_path: workflow_bytes, manifest_path: source.encode("utf-8")})
-    if options.check:
-        drift = [str(path.relative_to(ROOT)) for path, data in outputs.items()
-                 if not path.is_file() or path.read_bytes() != data]
-        if drift:
-            raise SystemExit("Motion fixture drift: " + ", ".join(drift))
-    else:
-        for path, data in outputs.items():
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(data)
+    outputs.update({titanic.WORKFLOW_PATH: workflow_bytes, titanic.MANIFEST_PATH: source.encode("utf-8")})
+    titanic.check_or_write(outputs, options.check, "Motion")
     print(f"Motion fixture {'checked' if options.check else 'updated'}: {len(workflow['nodes'])} nodes; inventory only")
 
 

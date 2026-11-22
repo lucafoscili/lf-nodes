@@ -2,9 +2,9 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "89d33f39a338d7be9d4da6ee65010bdde2dbf3a4c47b16a09c3f45ff1e410c6e",
-    "expectedNodeCount": 438,
-    "expectedLinkCount": 576
+    "expectedSha256": "3ab2e5f7241bfc90df4a7d0f73a673fb1e8e4c7a5a27e4f12013fb551d6a4649",
+    "expectedNodeCount": 468,
+    "expectedLinkCount": 631
   },
   "fixtures": [
     {
@@ -95,6 +95,339 @@
     }
   ],
   "coverageCases": [
+    {
+      "id": "cpu.inspection",
+      "title": "Image diff, grade split, luma ratio, region measure and plot chart of the stock example's grade",
+      "resourceClass": "cpu",
+      "targets": [
+        678,
+        679,
+        680,
+        681,
+        682,
+        683
+      ],
+      "timeoutSeconds": 300,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          678,
+          679,
+          680,
+          682,
+          683
+        ],
+        "forbiddenCachedNodeIds": [
+          678,
+          679,
+          680,
+          682,
+          683
+        ]
+      },
+      "expect": {
+        "678": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.image-diff.v1",
+            "label": "graded",
+            "pixels": 589824
+          }
+        },
+        "679": {
+          "minimumPreviewCount": 4,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.grade-split.v1"
+          }
+        },
+        "680": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.luma-ratio-map.v1"
+          }
+        },
+        "682": {
+          "minimumChartTabs": 10,
+          "requiredNamedValues": {
+            "title": "square",
+            "value": "before"
+          }
+        },
+        "683": {
+          "minimumChartTabs": 1,
+          "requiredNamedValues": {
+            "title": "band",
+            "value": "after"
+          }
+        }
+      }
+    },
+    {
+      "id": "cpu.tone-readers",
+      "title": "Tone profile and region reads of the stock example's square and top band, before and after the grade",
+      "resourceClass": "cpu",
+      "targets": [
+        686,
+        688,
+        690,
+        691,
+        692
+      ],
+      "timeoutSeconds": 300,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          689,
+          690,
+          691,
+          692
+        ],
+        "forbiddenCachedNodeIds": [
+          689,
+          690,
+          691,
+          692
+        ]
+      },
+      "expect": {
+        "689": {
+          "minimumPreviewCount": 4,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.text-region-masks.v1",
+            "empty": false
+          }
+        },
+        "690": {
+          "minimumLivePreviewCount": 3,
+          "requiredNamedValues": {
+            "value": "square: mean 0.780 | shade 0.651 | fill 0.791 | R/B 1.00 | sat 0.48"
+          }
+        },
+        "691": {
+          "minimumLivePreviewCount": 3,
+          "requiredNamedValues": {
+            "value": "square: mean 0.717 | shade 0.573 | fill 0.716 | R/B 0.75 | sat 0.42"
+          }
+        },
+        "692": {
+          "minimumPreviewCount": 4,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.region-reads.v1",
+            "name": "square / band"
+          }
+        }
+      }
+    },
+    {
+      "id": "model.face-zones",
+      "title": "Face zones of both generated portraits and region reads of their zones",
+      "resourceClass": "model-cpu",
+      "targets": [
+        694
+      ],
+      "timeoutSeconds": 300,
+      "bindings": {
+        "fixtureFaceSourceNodeIds": [
+          676
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          693,
+          694
+        ],
+        "forbiddenCachedNodeIds": [
+          693,
+          694
+        ]
+      },
+      "expect": {
+        "693": {
+          "minimumPreviewCount": 12,
+          "minimumLivePreviewCount": 6,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.face-zones.v1",
+            "model_pack": "antelopev2",
+            "id": "under_eyes"
+          }
+        },
+        "694": {
+          "minimumPreviewCount": 4,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.region-reads.v1",
+            "name": "under_eyes / cheeks"
+          }
+        }
+      }
+    },
+    {
+      "id": "model.patch-probe",
+      "title": "DINOv3 patch probe taught on the stock example and its graded copy, painting the graded square",
+      "resourceClass": "gpu",
+      "targets": [
+        701
+      ],
+      "timeoutSeconds": 900,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          698,
+          700,
+          701
+        ],
+        "forbiddenCachedNodeIds": [
+          698,
+          700,
+          701
+        ]
+      },
+      "expect": {
+        "698": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.vision-patch-encode.v1",
+            "crop": "none",
+            "image_count": 4
+          }
+        },
+        "700": {
+          "minimumPreviewCount": 2,
+          "minimumLivePreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.vision-patch-encode.v1",
+            "crop": "none",
+            "image_count": 2
+          }
+        },
+        "701": {
+          "minimumPreviewCount": 4,
+          "minimumLivePreviewCount": 2,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.patch-probe.v1",
+            "crop": "none"
+          }
+        }
+      }
+    },
+    {
+      "id": "model.intrinsic-layers",
+      "title": "Intrinsic layers of the stock example: albedo, diffuse shading and residual",
+      "resourceClass": "gpu",
+      "targets": [
+        702
+      ],
+      "timeoutSeconds": 900,
+      "bindings": {
+        "fixtureImageSourceNodeIds": [
+          654
+        ]
+      },
+      "execution": {
+        "requiredNodeIds": [
+          702
+        ],
+        "forbiddenCachedNodeIds": [
+          702
+        ]
+      },
+      "expect": {
+        "702": {
+          "minimumPreviewCount": 6,
+          "minimumLivePreviewCount": 3,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.intrinsic-layers.v1",
+            "release": "v21"
+          }
+        }
+      }
+    },
+    {
+      "id": "model.speech",
+      "title": "Two designed voices, the first converted onto the second, matched against that voice and its text",
+      "resourceClass": "gpu",
+      "targets": [
+        707
+      ],
+      "timeoutSeconds": 1200,
+      "execution": {
+        "requiredNodeIds": [
+          703,
+          704,
+          705,
+          706
+        ],
+        "forbiddenCachedNodeIds": [
+          703,
+          704,
+          705,
+          706
+        ]
+      },
+      "expect": {
+        "703": {
+          "minimumAudioPreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.voice_clone_speech.receipt.v1",
+            "mode": "design",
+            "text": "The morning train was late, so we walked along the river instead."
+          }
+        },
+        "704": {
+          "minimumAudioPreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.voice_clone_speech.receipt.v1",
+            "mode": "design",
+            "text": "A second voice reads a different line for the converter to aim at."
+          }
+        },
+        "705": {
+          "minimumAudioPreviewCount": 1,
+          "previewStorageType": "input",
+          "requiredNamedValues": {
+            "schema": "lf.voice_convert.receipt.v1"
+          }
+        },
+        "706": {
+          "minimumLivePreviewCount": 4,
+          "requiredNamedValues": {
+            "schema": "lf.speech_match.receipt.v1",
+            "expected_text": "The morning train was late, so we walked along the river instead."
+          }
+        }
+      }
+    },
     {
       "id": "model.face-align-identity",
       "title": "Align two generated portraits and compare their face identity",

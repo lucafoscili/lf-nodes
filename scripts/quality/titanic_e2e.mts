@@ -11,6 +11,8 @@ import {
   buildCasePayloads,
   buildCpuFixturePromptBindings,
   classifyPostCancellation,
+  audioPreviewUrl,
+  collectAudioPreviews,
   collectPreviewUrls,
   comfyArtifactKey,
   createJUnitXml,
@@ -271,8 +273,13 @@ const validatePreviewAssets = async (
   const errors: string[] = [];
   const outputs = historyEntry.outputs ?? {};
   for (const [nodeId, expectation] of Object.entries(manifestCase.expect ?? {})) {
-    if (expectation.minimumPreviewCount === undefined) continue;
-    for (const previewUrl of collectPreviewUrls(outputs[nodeId])) {
+    const previews: Array<[string, 'image' | 'model-3d' | 'audio']> = [
+      ...(expectation.minimumPreviewCount === undefined ? [] : collectPreviewUrls(outputs[nodeId])
+        .map((url): [string, 'image' | 'model-3d'] => [url, expectation.previewKind ?? 'image'])),
+      ...(expectation.minimumAudioPreviewCount === undefined ? [] : collectAudioPreviews(outputs[nodeId])
+        .map((file): [string, 'audio'] => [audioPreviewUrl(file), 'audio'])),
+    ];
+    for (const [previewUrl, previewKind] of previews) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10_000);
       try {
@@ -287,9 +294,7 @@ const validatePreviewAssets = async (
         }
         const contentType = response.headers.get('content-type') ?? '';
         const bytes = await response.arrayBuffer();
-        for (const error of validatePreviewAssetBytes(
-          expectation.previewKind ?? 'image', contentType, new Uint8Array(bytes),
-        )) {
+        for (const error of validatePreviewAssetBytes(previewKind, contentType, new Uint8Array(bytes))) {
           errors.push(`node ${nodeId} ${error}: ${previewUrl}`);
         }
       } catch (error) {
@@ -465,6 +470,8 @@ const hydrateWorkflow = async (
           })),
       );
 
+      // Widgets whose element was seen in the document while their node was in view.
+      const seenConnected = new Set<string>();
       const inspectWidgets = () =>
         customWidgetInputs.map((expected: any) => {
           const loadedNode: any = byId.get(expected.nodeId);
@@ -480,7 +487,7 @@ const hydrateWorkflow = async (
             ...expected,
             found: Boolean(widget),
             hasElement: Boolean(element),
-            connected: Boolean(element?.isConnected),
+            connected: Boolean(element?.isConnected) || seenConnected.has(`${expected.nodeId}:${expected.name}`),
             customElementTag: customElement?.tagName?.toLowerCase?.() ?? null,
           };
         });
@@ -498,6 +505,37 @@ const hydrateWorkflow = async (
         performance.now() < widgetDeadline
       ) {
         await new Promise((resolvePromise) => setTimeout(resolvePromise, 100));
+        widgetChecks = inspectWidgets();
+      }
+      // The frontend mounts a DOM widget only while its node is on screen, expanded, at a legible zoom (1.59
+      // culls the others), so each node whose widget is still detached is brought into view and judged there;
+      // a collapsed node is expanded for the look and collapsed again.
+      if (!hasStructuralWidgetFailure() && app.canvas?.ds) {
+        const view = { scale: app.canvas.ds.scale, offset: [...app.canvas.ds.offset] };
+        for (const nodeId of new Set(widgetChecks.filter((widget: any) => !widget.connected)
+          .map((widget: any) => widget.nodeId))) {
+          const node: any = byId.get(nodeId);
+          if (!node) continue;
+          const collapsed = Boolean(node.flags?.collapsed);
+          if (collapsed) node.collapse(true);
+          app.canvas.ds.scale = 1;
+          app.canvas.centerOnNode(node);
+          app.canvas.setDirty(true, true);
+          const pending = customWidgetInputs.filter((expected: any) => expected.nodeId === nodeId);
+          const deadline = performance.now() + 2_000;
+          do {
+            await new Promise((resolvePromise) => requestAnimationFrame(() => resolvePromise(null)));
+            for (const expected of pending) {
+              const widget = node.widgets?.find((candidate: any) => candidate.name === expected.name);
+              if (widget?.element?.isConnected) seenConnected.add(`${expected.nodeId}:${expected.name}`);
+            }
+          } while (pending.some((expected: any) => !seenConnected.has(`${expected.nodeId}:${expected.name}`)) &&
+            performance.now() < deadline);
+          if (collapsed) node.collapse(true);
+        }
+        app.canvas.ds.scale = view.scale;
+        app.canvas.ds.offset = view.offset;
+        app.canvas.setDirty(true, true);
         widgetChecks = inspectWidgets();
       }
 
@@ -1058,6 +1096,10 @@ const readLiveWidgets = async (page: Page, nodeIds: number[]) =>
       }
       const value = widget?.value;
       const dataset = value?.dataset ?? value;
+      // LF's chart widget keeps its datasets on its elements, not in its serialized value.
+      const chartState = widget?.options?.getState?.();
+      const tabs = chartState?.elements?.tabbar?.lfDataset?.nodes;
+      const drawn = chartState?.elements?.chart?.lfDataset?.nodes;
       checks.push({
         nodeId,
         kind: native3d ? 'model-3d' as const : 'image' as const,
@@ -1066,6 +1108,8 @@ const readLiveWidgets = async (page: Page, nodeIds: number[]) =>
           ? nativeVisible
           : Boolean(widget?.element),
         previewCount: Array.isArray(dataset?.nodes) ? dataset.nodes.length : 0,
+        chartTabCount: Array.isArray(tabs) && Array.isArray(drawn) && drawn.length > 0 ? tabs.length : 0,
+        audioCount: widget?.element?.querySelectorAll?.('audio[src]').length ?? 0,
         ...(native3d ? {
           modelLoaded: Boolean(renderer?.hasLoadedModel && renderer.getCurrentModel()),
           modelUrl: renderer?.getModelManager().originalURL ?? '',
